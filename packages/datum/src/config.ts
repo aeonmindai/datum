@@ -107,8 +107,9 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     );
   }
 
+  // 0 is allowed and means "any free port", which is the normal idiom for a throwaway instance.
   const port = Number.parseInt(env.PORT ?? "8080", 10);
-  if (!Number.isInteger(port) || port <= 0 || port > 65535) {
+  if (!Number.isInteger(port) || port < 0 || port > 65535) {
     throw new ConfigError(`PORT must be a valid TCP port (got ${JSON.stringify(env.PORT)}).`);
   }
 

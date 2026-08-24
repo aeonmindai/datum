@@ -1,0 +1,302 @@
+{
+  "org": "acme",
+  "note": "A small synthetic seed for a fresh install: one three-row supersession chain, one cross-tier contested pair, a dead end with its falsifier, a target, a mission whose second gate reads null, and the same predicate held at two scopes to show nearest-scope-wins.",
+  "scopes": [
+    { "path": "org/acme", "kind": "org", "label": "Acme" },
+    { "path": "org/acme/proj/checkout", "kind": "proj", "label": "Checkout" }
+  ],
+  "assertions": [
+    {
+      "scope": "org/acme",
+      "subject": "api",
+      "predicate": "error_budget_pct",
+      "object": { "value": 1.0, "unit": "percent of requests per 30-day window" },
+      "claim": "Every Acme service may burn up to 1.0 percent of requests in a 30-day window before the error budget freezes releases.",
+      "kind": "rule",
+      "binding": true,
+      "confidence": "confirmed-by-human",
+      "evidence": {
+        "source": "reliability policy v3, org-wide, ratified at the 2026-01-15 platform review",
+        "human": "Dana Whitfield"
+      },
+      "valid_from": "2026-01-15T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "org-error-budget"
+    },
+    {
+      "scope": "org/acme/proj/checkout",
+      "subject": "api",
+      "predicate": "error_budget_pct",
+      "object": { "value": 0.5, "unit": "percent of requests per 30-day window" },
+      "claim": "Checkout runs on a tighter error budget than the rest of Acme: 0.5 percent per 30-day window, because a failed checkout is a lost order rather than a retried page view.",
+      "kind": "rule",
+      "binding": true,
+      "confidence": "confirmed-by-human",
+      "evidence": {
+        "source": "checkout reliability addendum, agreed at the 2026-03-02 checkout review; tightens the org-wide 1.0 percent for this project only",
+        "human": "Dana Whitfield"
+      },
+      "valid_from": "2026-03-02T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "checkout-error-budget"
+    },
+
+    {
+      "scope": "org/acme/proj/checkout",
+      "subject": "api",
+      "predicate": "p99_latency_ms",
+      "object": { "value": 820, "unit": "ms" },
+      "claim": "Checkout API p99 latency is 820 ms under the standard load profile.",
+      "kind": "measured",
+      "binding": false,
+      "confidence": "unverified",
+      "evidence": {
+        "source": "load-test report loadtest-2026-04-11.json",
+        "repo": "acme/checkout",
+        "commit": "1f0c9a4e7b6d2c58a1e3f9b0d7c4a2e6f8b1c3d5",
+        "contained_in": ["main"],
+        "instrument": "k6",
+        "protocol": "30 minutes at 400 requests/second, p99 over produced responses, one region"
+      },
+      "valid_from": "2026-04-11T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "p99-v1"
+    },
+    {
+      "scope": "org/acme/proj/checkout",
+      "subject": "api",
+      "predicate": "p99_latency_ms",
+      "object": { "value": 410, "unit": "ms" },
+      "claim": "Checkout API p99 latency is 410 ms after the payment-provider calls were moved off the request path.",
+      "kind": "measured",
+      "binding": false,
+      "confidence": "unverified",
+      "evidence": {
+        "source": "load-test report loadtest-2026-05-19.json",
+        "repo": "acme/checkout",
+        "commit": "9b3d5e1a2c7f4086b5d9e2a7c1f3b6d8e0a4c2f9",
+        "contained_in": ["main"],
+        "instrument": "k6",
+        "protocol": "30 minutes at 400 requests/second, p99 over produced responses, one region"
+      },
+      "valid_from": "2026-05-19T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": "p99-v1",
+      "ref": "p99-v2"
+    },
+    {
+      "scope": "org/acme/proj/checkout",
+      "subject": "api",
+      "predicate": "p99_latency_ms",
+      "object": { "value": 180, "unit": "ms" },
+      "claim": "Checkout API p99 latency is 180 ms after the cart-total cache landed. This is the live figure; 410 ms and 820 ms are its history.",
+      "kind": "measured",
+      "binding": false,
+      "confidence": "unverified",
+      "evidence": {
+        "source": "load-test report loadtest-2026-07-02.json",
+        "repo": "acme/checkout",
+        "commit": "4c8f2b6d0e9a1537c4b8d1e6a9f2c5b7d3e0a8f1",
+        "contained_in": ["main"],
+        "instrument": "k6",
+        "protocol": "30 minutes at 400 requests/second, p99 over produced responses, one region"
+      },
+      "valid_from": "2026-07-02T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": "p99-v2",
+      "ref": "p99-v3"
+    },
+    {
+      "scope": "org/acme/proj/checkout",
+      "subject": "api",
+      "predicate": "target_p99_latency_ms",
+      "object": {
+        "value": 150,
+        "op": "<=",
+        "requires_confidence": "measured",
+        "unit": "ms",
+        "gates": "api/p99_latency_ms"
+      },
+      "claim": "Target: checkout API p99 latency at or below 150 ms, closable only by a measured figure.",
+      "kind": "target",
+      "binding": true,
+      "confidence": "confirmed-by-human",
+      "evidence": {
+        "source": "checkout quarterly objective, set at the 2026-07-06 planning session",
+        "human": "Priya Raghavan"
+      },
+      "valid_from": "2026-07-06T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "target-p99"
+    },
+
+    {
+      "scope": "org/acme/proj/checkout",
+      "subject": "checkout",
+      "predicate": "conversion_rate_pct",
+      "object": { "value": 2.4, "unit": "percent of sessions completing an order" },
+      "claim": "Checkout conversion is 2.4 percent of sessions, measured over the July analytics window with bot traffic excluded.",
+      "kind": "measured",
+      "binding": false,
+      "confidence": "unverified",
+      "evidence": {
+        "source": "analytics warehouse export analytics-2026-07.parquet",
+        "instrument": "warehouse query rev 41",
+        "protocol": "sessions reaching /checkout divided by completed orders, July 2026, bot traffic excluded"
+      },
+      "valid_from": "2026-07-01T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "conversion-instrument"
+    },
+    {
+      "scope": "org/acme/proj/checkout",
+      "subject": "checkout",
+      "predicate": "conversion_rate_pct",
+      "object": { "value": 3.1, "unit": "percent of sessions completing an order" },
+      "claim": "Conversion is 3.1 percent, not 2.4: the warehouse export drops guest sessions that complete on a second device, so the instrument undercounts.",
+      "kind": "measured",
+      "binding": false,
+      "confidence": "confirmed-by-human",
+      "evidence": {
+        "source": "product review notes 2026-07-30, reconciling the warehouse export against payment-processor settlements",
+        "human": "Dana Whitfield",
+        "protocol": "settled orders from the payment processor over the same July window, divided by warehouse session count"
+      },
+      "valid_from": "2026-07-01T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "conversion-human"
+    },
+
+    {
+      "scope": "org/acme/proj/checkout",
+      "subject": "checkout",
+      "predicate": "refund_rate_pct",
+      "object": { "value": 1.2, "unit": "percent of settled orders refunded within 30 days" },
+      "claim": "Refund rate is about 1.2 percent of settled orders within 30 days, read off the finance dashboard by hand. No instrumented figure exists yet.",
+      "kind": "measured",
+      "binding": false,
+      "confidence": "confirmed-by-human",
+      "evidence": {
+        "source": "finance dashboard, read during the 2026-07-30 product review; no query or export was captured",
+        "human": "Priya Raghavan"
+      },
+      "valid_from": "2026-07-30T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "refund-human"
+    },
+    {
+      "scope": "org/acme/proj/checkout",
+      "subject": "payment:wallet-redirect",
+      "predicate": "checkout_completion_delta_pct",
+      "object": { "value": -18, "unit": "percent change in completed checkouts", "arm": "wallet redirect vs inline card form" },
+      "claim": "Dead end: redirecting to the wallet provider cost 18 percent of completed checkouts against the inline card form.",
+      "kind": "failed",
+      "binding": false,
+      "confidence": "unverified",
+      "evidence": {
+        "source": "A/B experiment exp-2026-06-wallet-redirect, 41,882 sessions per arm",
+        "repo": "acme/checkout",
+        "commit": "7e1a4d9c3b5f2086a1c7e4b9d2f5a8c0b3e6d1f4",
+        "contained_in": ["main"],
+        "instrument": "experiment platform",
+        "protocol": "two-arm split at 50/50 for 14 days, primary metric completed checkouts per session"
+      },
+      "valid_from": "2026-06-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": "The redirect drops the customer on the wallet provider's own domain, and 18 percent of them never come back. The loss is concentrated in the first-time-buyer segment, which is the segment the redirect was supposed to help.",
+      "reopen_if": "the wallet provider ships an inline SDK that keeps the customer on acme.com, or a re-run shows first-time-buyer completion within 2 percent of the inline card form.",
+      "supersedes_ref": null,
+      "ref": "failed-wallet-redirect"
+    }
+  ],
+  "missions": [
+    {
+      "scope": "org/acme/proj/checkout",
+      "statement": "Get checkout p99 under 150 ms without letting refunds drift above 1.5 percent.",
+      "state": "active",
+      "gates": [
+        {
+          "subject": "api",
+          "predicate": "p99_latency_ms",
+          "op": "<=",
+          "target": 150,
+          "requires_confidence": "measured",
+          "note": "The live figure is 180 ms; 410 ms and 820 ms are superseded and must never be read back as current."
+        },
+        {
+          "subject": "checkout",
+          "predicate": "refund_rate_pct",
+          "op": "<=",
+          "target": 1.5,
+          "requires_confidence": "measured",
+          "note": "A human read 1.2 percent off a dashboard, but testimony cannot satisfy a gate that demands a measurement - so this gate reads null, not true. Instrument the refund query to close it."
+        }
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "kind": "human",
+      "scope": "org/acme",
+      "label": "Dana Whitfield",
+      "role": "authority",
+      "meta": { "note": "Named human behind the conversion and error-budget testimony in this seed." }
+    },
+    {
+      "kind": "human",
+      "scope": "org/acme/proj/checkout",
+      "label": "Priya Raghavan",
+      "role": "authority",
+      "meta": { "note": "Named human behind the checkout target and the refund-rate reading." }
+    },
+    {
+      "kind": "repo",
+      "scope": "org/acme/proj/checkout",
+      "label": "acme/checkout",
+      "role": "source",
+      "meta": { "host": "github", "default_branch": "main" }
+    },
+    {
+      "kind": "branch",
+      "scope": "org/acme/proj/checkout",
+      "label": "main",
+      "role": "trunk",
+      "meta": { "commit": "4c8f2b6d0e9a1537c4b8d1e6a9f2c5b7d3e0a8f1" }
+    }
+  ]
+}

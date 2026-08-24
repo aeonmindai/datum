@@ -1,0 +1,62 @@
+# Datum — the API app. Verified against Fly's fly.toml reference on 2026-08-24.
+#
+# Two apps, on purpose: this one (stateless, replaceable) and `datum-db` (one Machine, one
+# volume, see fly.postgres.toml). The database is reachable only over Fly's private 6PN
+# network at datum-db.internal:5432 and is never publicly routable.
+#
+# Fly app names are GLOBALLY unique. If `datum` is taken, run
+# `fly apps create --name <your-name>` and change the line below — nothing else in the repo
+# refers to it.
+app = "datum"
+primary_region = "sjc"
+
+[build]
+  dockerfile = "Dockerfile"
+
+# Secrets. Set these three by NAME; the values never appear in this repo, in this file, or
+# in a migration. This repo is public.
+#
+#   fly secrets set -a datum DATABASE_URL=...
+#   fly secrets set -a datum DATUM_ADMIN_PASSWORD_HASH=...   # from: datum hash-password '...'
+#   fly secrets set -a datum DATUM_SESSION_SECRET=...        # from: openssl rand -hex 32
+#
+# scripts/pg-machine-init.sh prints the exact DATABASE_URL command for you, without ever
+# echoing the password.
+[env]
+  # Configuration, not code. The scope root is org/<DATUM_ORG>; a fork changes this one line.
+  DATUM_ORG = "aeonmind"
+  DATUM_PUBLIC_URL = "https://datum.aeonmind.ai"
+  PORT = "8080"
+  HOST = "0.0.0.0"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+
+  # NEVER scale this app to zero. A cold start is hundreds of milliseconds to seconds; the
+  # read path is specified at p99 < 10 ms. Scale-to-zero would not degrade the SLO, it would
+  # delete it — and it is the same trap the research flagged for serverless Postgres.
+  #
+  # "off" is the current spelling of what older docs wrote as `auto_stop_machines = false`:
+  # the proxy never stops a Machine for idleness.
+  auto_stop_machines = "off"
+  # Deliberate deviation from Fly's "both on or both off" guidance: with auto-stop off this
+  # is inert during normal operation, and it is the recovery path if a Machine is ever
+  # stopped by hand or by a host event.
+  auto_start_machines = true
+  # Belt and braces. `auto_stop_machines = "off"` is what actually guarantees always-on;
+  # this is the floor that survives someone flipping auto-stop back on.
+  min_machines_running = 1
+
+  [[http_service.checks]]
+    grace_period = "20s"
+    interval = "15s"
+    method = "get"
+    timeout = "5s"
+    path = "/healthz"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  cpu_kind = "shared"
+  cpus = 1
+  memory = "512mb"

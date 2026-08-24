@@ -35,6 +35,12 @@ CREATE TABLE IF NOT EXISTS datum.nodes (
   CONSTRAINT node_scope_shape CHECK (scope ~ '^[A-Za-z0-9_.-]+(/[A-Za-z0-9_.-]+)*$')
 );
 CREATE INDEX IF NOT EXISTS nodes_by_scope ON datum.nodes (scope, kind) WHERE retired_at IS NULL;
+
+-- A node's identity is what it *is*, not a random id: one repo, one worktree path, one branch
+-- name per scope. Without this, re-running `datum link` in 141 worktrees would produce 282 rows
+-- and the registry would be less legible than the thing it replaced.
+CREATE UNIQUE INDEX IF NOT EXISTS nodes_identity
+  ON datum.nodes (kind, scope, label) WHERE retired_at IS NULL;
 CREATE INDEX IF NOT EXISTS nodes_live ON datum.nodes (last_seen DESC NULLS LAST);
 
 CREATE TABLE IF NOT EXISTS datum.api_keys (

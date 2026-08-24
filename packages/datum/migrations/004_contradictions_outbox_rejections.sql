@@ -155,6 +155,10 @@ END
 $$;
 
 GRANT SELECT ON datum.contradictions TO datum_app;
+-- Column-level on purpose. The disagreement itself is derived from the assertions and is not
+-- editable: which two rows conflict, in what scope, over what predicate, is a fact. Only the
+-- human resolution is mutable state, so only those four columns are grantable.
+GRANT UPDATE (status, resolution, resolved_by, resolved_at) ON datum.contradictions TO datum_app;
 GRANT SELECT, INSERT ON datum.rejections TO datum_app;
 GRANT SELECT, INSERT ON datum.outbox TO datum_app;
 GRANT USAGE, SELECT ON SEQUENCE datum.outbox_seq_seq TO datum_app;

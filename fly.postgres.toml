@@ -1,0 +1,79 @@
+# Datum — the database app. Deploy with:
+#
+#   ./scripts/pg-machine-init.sh          # idempotent; creates app, volume, secret, Machine
+#   # or, once those exist:
+#   fly deploy -c fly.postgres.toml -a datum-db --ha=false
+#
+# Postgres runs as OUR OWN Machine on the latest major, not Fly Managed Postgres. MPG is
+# pinned to Postgres 16, lists "security patches and version upgrades" under what is not
+# there yet, and starts at a $38/mo floor. A plain `postgres:18` image on a Machine with an
+# attached volume gives any version we want at a fraction of that.
+#
+# The schema does not follow the version up: invariant 3 stays an `EXCLUDE USING gist`
+# constraint that runs on any Postgres from 13, so the host remains a swappable decision.
+# Run the latest Postgres because it is free to do so; do not become dependent on it.
+#
+# Fly app names are GLOBALLY unique — change this if `datum-db` is taken.
+app = "datum-db"
+primary_region = "sjc"
+
+[build]
+  # No Dockerfile. Deploy the upstream image unmodified; there is nothing of ours to add.
+  image = "postgres:18"
+
+[env]
+  POSTGRES_USER = "datum"
+  POSTGRES_DB = "datum"
+  # postgres:18 defaults PGDATA to /var/lib/postgresql/18/docker and declares its VOLUME at
+  # /var/lib/postgresql. The Fly volume mounts at /var/lib/postgresql/data, so PGDATA is
+  # overridden into a SUBDIRECTORY of the mount — never the mount root, because initdb
+  # refuses a directory that already contains anything (a fresh ext4 volume has lost+found).
+  PGDATA = "/var/lib/postgresql/data/pgdata"
+  # POSTGRES_PASSWORD is a secret: `fly secrets set -a datum-db POSTGRES_PASSWORD=...`.
+  # It is never written here.
+
+[mounts]
+  source = "pgdata"
+  destination = "/var/lib/postgresql/data"
+  # Volumes are single-region and unreplicated. Snapshots are a convenience, not the backup
+  # of record — scripts/backup.sh puts an encrypted dump outside the Fly organisation, and
+  # scripts/restore-drill.sh proves it restores.
+  snapshot_retention = 14
+  scheduled_snapshots = true
+
+# ---- why there is no [[services]] block ------------------------------------------------
+#
+# 6PN needs no Fly Proxy service. Every Machine in the organisation can already dial
+# datum-db.internal:5432 directly over the private WireGuard mesh; a service definition only
+# tells the *proxy* how to route, and the proxy is exactly the thing we do not want in front
+# of this port.
+#
+# Two verified reasons this is the right shape, not laziness:
+#
+#  1. `fly deploy` allocates a public Anycast address for an app whose service declares
+#     ports. With no service at all there is nothing to allocate and nothing to publish, so
+#     "never publicly routable" is a property of the configuration rather than a promise
+#     about an IP nobody re-checks. Confirm after deploying: `fly ips list -a datum-db` must
+#     print no addresses.
+#  2. `fly config validate` warns that "validation for services without ports will hard
+#     fail" — a `[[services]]` block with the ports deliberately omitted is a deprecated
+#     shape and a future deploy-time landmine.
+#
+# The always-on guarantee comes for free here: auto-stop is a Fly Proxy behaviour, and there
+# is no proxy in this path. Deploy with `--ha=false` for exactly one Machine (only one can
+# attach the volume anyway) and it stays running until something stops it.
+
+# An independent TCP check, because this app has no public-facing HTTP service.
+[checks]
+  [checks.pg_tcp]
+    type = "tcp"
+    port = 5432
+    grace_period = "30s"
+    interval = "15s"
+    timeout = "5s"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  cpu_kind = "shared"
+  cpus = 1
+  memory = "1024mb"

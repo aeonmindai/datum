@@ -1,0 +1,74 @@
+# Datum, locally or on any box with Docker. This is the path that must never break, because
+# it is the one that survives any vendor's pricing change.
+#
+# Bootstrap — two commands, then you have a running instance:
+#
+#   printf 'DATUM_ADMIN_PASSWORD=%s\nDATUM_SESSION_SECRET=%s\n' "$(openssl rand -base64 18)" "$(openssl rand -hex 32)" > .env
+#   docker compose up
+#
+# Compose reads `.env` from this directory automatically, and `.env` is gitignored.
+#
+# There is deliberately no default admin password and no default session secret in this
+# file. A shipped default credential is a CVE, not a convenience: every install would share
+# it, most would never change it, and the ones that did would have already been scanned. The
+# `:?` syntax below makes compose refuse to start until you have supplied your own.
+#
+# Prefer a hash to a plaintext password once you are past first boot:
+#
+#   docker compose run --rm datum node packages/datum/dist/cli/index.js hash-password 'your-password'
+#   # put the printed $argon2id$... string in .env as DATUM_ADMIN_PASSWORD_HASH and delete
+#   # DATUM_ADMIN_PASSWORD
+
+services:
+  postgres:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: datum
+      POSTGRES_DB: datum
+      # A container-local database password on a private compose network. Postgres is not
+      # published to the host (no `ports:` below), so nothing outside this compose project
+      # can reach it. This is not an operator credential and it is not the admin password.
+      POSTGRES_PASSWORD: datum
+    volumes:
+      # postgres:18 changed its layout: PGDATA defaults to /var/lib/postgresql/18/docker and
+      # the image's declared VOLUME moved to /var/lib/postgresql. Mounting the parent is the
+      # upstream-correct shape for 18+, and it means no PGDATA override is needed here.
+      - datum_pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U datum -d datum"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+    restart: unless-stopped
+
+  datum:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      DATABASE_URL: postgres://datum:datum@postgres:5432/datum
+      # The scope root is configuration: DATUM_ORG=acme yields org/acme.
+      DATUM_ORG: ${DATUM_ORG:-local}
+      DATUM_PUBLIC_URL: ${DATUM_PUBLIC_URL:-http://localhost:8080}
+      # Required. No defaults, on purpose — see the bootstrap block at the top of this file.
+      DATUM_ADMIN_PASSWORD: ${DATUM_ADMIN_PASSWORD:?not set. Run the two-command bootstrap at the top of docker-compose.yml to write a .env, then retry}
+      DATUM_SESSION_SECRET: ${DATUM_SESSION_SECRET:?not set. Run the two-command bootstrap at the top of docker-compose.yml to write a .env, then retry}
+      # Optional. Set DATUM_ADMIN_PASSWORD_HASH in .env and the plaintext above is ignored.
+      DATUM_ADMIN_PASSWORD_HASH: ${DATUM_ADMIN_PASSWORD_HASH:-}
+      DATUM_SESSION_TTL_SECONDS: ${DATUM_SESSION_TTL_SECONDS:-43200}
+      DATUM_VERIFY_INTERVAL_MS: ${DATUM_VERIFY_INTERVAL_MS:-15000}
+      DATUM_VERIFY_BATCH_SIZE: ${DATUM_VERIFY_BATCH_SIZE:-25}
+      # Optional, verification only. Leave empty and verification uses local mirrors, or
+      # nothing at all — rows simply stay `unverified`, which is a normal state.
+      DATUM_GIT_MIRRORS: ${DATUM_GIT_MIRRORS:-}
+      DATUM_GITHUB_TOKEN: ${DATUM_GITHUB_TOKEN:-}
+    restart: unless-stopped
+
+volumes:
+  datum_pgdata:

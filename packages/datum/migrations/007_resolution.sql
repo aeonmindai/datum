@@ -38,6 +38,14 @@ CREATE OR REPLACE FUNCTION datum.take(
        AND (p_subject   IS NULL OR a.subject   = p_subject)
        AND (p_predicate IS NULL OR a.predicate = p_predicate)
        AND (p_kind      IS NULL OR a.kind      = p_kind)
+       -- `kind = 'dead'` is excluded unless it is asked for by name. A retired number is not a
+       -- fact about the world; it is a record that a claim is refused. Arc's corpus carried 449
+       -- in-place retraction markers across 21,619 lines, and at 500k context retrieval returned
+       -- the most *emphatic* match rather than the most recent, so dead headline numbers won
+       -- every time and the live target appeared nowhere. Labelling them was not enough; they
+       -- have to be absent from the default read, and reachable with kind='dead' when someone
+       -- wants to audit exactly what the store refuses to surface.
+       AND (p_kind = 'dead' OR a.kind <> 'dead')
   )
   SELECT to_jsonb(x) - 'ord' - 'best_ord' - 'claim_fts'
     FROM (

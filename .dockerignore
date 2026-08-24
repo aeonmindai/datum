@@ -1,0 +1,49 @@
+# Keep the build context small and the image reproducible.
+#
+# Two rules that matter more than size: never ship a local node_modules (it may hold a
+# different platform's prebuilds), and never ship a `.env`. A public repo plus a build
+# context that sweeps up dotfiles is how credentials end up in a published layer.
+
+.git
+.gitignore
+.github
+
+# Installed and generated trees — the image builds its own.
+node_modules
+**/node_modules
+dist
+**/dist
+packages/datum/public
+*.tsbuildinfo
+**/*.tsbuildinfo
+
+# Secrets and local state. `.env.example` is documentation, and still not needed in the image.
+.env
+.env.*
+.datum.toml
+*.db
+*.sqlite
+
+# Tests do not run in the image; the test harness starts its own Postgres container.
+packages/datum/test
+**/vitest.config.ts
+
+# Prose. The research corpus alone is ~400 KB of markdown.
+research
+reports
+docs
+**/*.md
+
+# Deployment descriptors and operator scripts run outside the container.
+Dockerfile
+.dockerignore
+docker-compose.yml
+fly.toml
+fly.postgres.toml
+railway.json
+scripts
+
+# Editor and OS noise.
+.DS_Store
+.idea
+.vscode

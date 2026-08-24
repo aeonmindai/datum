@@ -1,0 +1,139 @@
+import { existsSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import cookie from "@fastify/cookie";
+import fastifyStatic from "@fastify/static";
+import Fastify, { type FastifyInstance } from "fastify";
+import type { Config } from "../config.js";
+import { Db } from "../db/pool.js";
+import { migrate } from "../db/migrate.js";
+import { startVerificationWorker, type WorkerHandle } from "../worker/verify.js";
+import { initInstance } from "../ops/init.js";
+import { registerAdmin } from "./admin.js";
+import { registerMcp } from "./mcp.js";
+import { registerV1 } from "./v1.js";
+import { resolveAdminHash } from "./auth.js";
+
+/**
+ * One Fly app, one domain, everything under it:
+ *
+ *   /mcp        the facade, streamable HTTP POST
+ *   /v1/*       the real interface
+ *   /admin      the panel
+ *   /healthz    liveness, unauthenticated
+ *   /.well-known/oauth-protected-resource
+ */
+
+const DEFAULT_ADMIN_DIST = fileURLToPath(new URL("../../public/admin", import.meta.url));
+
+export interface Server {
+  app: FastifyInstance;
+  db: Db;
+  worker: WorkerHandle | null;
+  close(): Promise<void>;
+}
+
+export async function buildServer(
+  config: Config,
+  opts: { runMigrations?: boolean; startWorker?: boolean; log?: boolean } = {},
+): Promise<Server> {
+  const db = new Db(config.databaseUrl);
+
+  // Migrate on boot, idempotently, because one-click platforms have no reliable pre-deploy
+  // hook and a README that tells a stranger to apply SQL files in order is how self-hosted
+  // installs end up on undocumented schema drift.
+  if (opts.runMigrations !== false) await migrate(db);
+  const bootstrap = opts.runMigrations !== false ? await initInstance(db, config) : null;
+
+  const app = Fastify({
+    logger: opts.log === false ? false : { level: process.env.LOG_LEVEL ?? "info" },
+    trustProxy: true,
+    bodyLimit: 1_048_576,
+  });
+
+  await app.register(cookie);
+
+  const adminHash = await resolveAdminHash(config);
+  const mirrorCount = Object.keys(config.gitMirrors).length;
+  const verification = {
+    configured: mirrorCount > 0 || config.githubToken !== null,
+    method: (mirrorCount > 0
+      ? "local-mirror"
+      : config.githubToken
+        ? "github-api"
+        : "none") as "local-mirror" | "github-api" | "none",
+  };
+
+  app.get("/healthz", async (_request, reply) => {
+    try {
+      await db.query("app", "SELECT 1");
+      // `datum link` reads scope_root from here, unauthenticated, so a fresh clone can derive
+      // its project scope without already holding a key.
+      return reply.send({ ok: true, org: config.org, scope_root: config.orgScope });
+    } catch (err) {
+      return reply.code(503).send({ ok: false, error: (err as Error).message });
+    }
+  });
+
+  registerV1(app, { db, config });
+  registerMcp(app, { db, config });
+  registerAdmin(app, { db, config, adminHash, verification });
+
+  const adminDist = config.adminDistDir ?? DEFAULT_ADMIN_DIST;
+  if (existsSync(adminDist)) {
+    await app.register(fastifyStatic, { root: adminDist, prefix: "/admin/", wildcard: false });
+    // The panel is hash-routed, so one index.html serves every deep link.
+    app.get("/admin", async (_request, reply) => reply.redirect("/admin/", 302));
+    app.setNotFoundHandler(async (request, reply) => {
+      if (request.method === "GET" && request.url.startsWith("/admin")) {
+        return reply.sendFile("index.html");
+      }
+      return reply.code(404).send({ ok: false, reason: "not_found", message: "No such route." });
+    });
+  } else {
+    app.get("/admin", async (_request, reply) =>
+      reply.code(503).type("text/plain").send(
+        "The admin panel bundle is not present in this build.\n" +
+          `Expected it at ${adminDist}.\n` +
+          "Build it with: npm run build --workspace @aeonmind/datum-admin\n",
+      ),
+    );
+  }
+
+  const worker = opts.startWorker === false ? null : startVerificationWorker(db, config);
+  if (worker && !verification.configured) {
+    console.warn(
+      "[verify] no DATUM_GIT_MIRRORS and no DATUM_GITHUB_TOKEN: no claim can be promoted to " +
+        "`measured` on this instance. That is correct behaviour, not a bug — confidence is earned.",
+    );
+  }
+  if (bootstrap?.firstKeySecret) {
+    console.log(
+      [
+        "",
+        "  ┌───────────────────────────────────────────────────────────────────────────┐",
+        "  │  COPY THIS NOW — it is shown once and is not recoverable.                 │",
+        "  └───────────────────────────────────────────────────────────────────────────┘",
+        `  first API key: ${bootstrap.firstKeySecret}`,
+        `  scope:         ${config.orgScope}`,
+        "",
+      ].join("\n"),
+    );
+  }
+
+  return {
+    app,
+    db,
+    worker,
+    async close(): Promise<void> {
+      worker?.stop();
+      await app.close();
+      await db.close();
+    },
+  };
+}
+
+export async function serve(config: Config): Promise<Server> {
+  const server = await buildServer(config);
+  await server.app.listen({ port: config.port, host: config.host });
+  return server;
+}
