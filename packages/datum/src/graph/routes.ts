@@ -91,10 +91,15 @@ export function registerGraphRoutes(app: FastifyInstance, deps: { db: Db; config
       const index = await resolveIndex(db, { repo: query.repo, commitSha: query.commit });
       requireScope(key, index.scope);
 
+      // The resolved commit is passed down rather than the caller's (possibly absent) one. Without
+      // it an unqualified request would resolve "newest completed index" twice, and an ingest
+      // landing between the two calls would mean the scope that was authorised is not the scope
+      // that answered — a re-ingest under a different scope would then be readable by a key that
+      // was never granted it.
       const result = await impact(db, {
         repo: query.repo,
         symbol: query.symbol,
-        commitSha: query.commit,
+        commitSha: index.commit_sha,
         depth: query.depth,
         kinds,
       });
@@ -129,7 +134,8 @@ export function registerGraphRoutes(app: FastifyInstance, deps: { db: Db; config
       const found = await searchSymbols(db, {
         repo: query.repo,
         q: query.q,
-        commitSha: query.commit,
+        // Pinned for the same reason as above.
+        commitSha: index.commit_sha,
         limit: query.limit,
       });
       return reply.send({

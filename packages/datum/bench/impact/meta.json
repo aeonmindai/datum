@@ -1,0 +1,74 @@
+{
+  "benchmark": "impact-analysis-vs-grep",
+  "spec": "docs/superpowers/specs/2026-08-24-knowledgebase-design.md, acceptance criterion 1",
+  "corpus": {
+    "repo": "/Users/jish/Documents/GitHub/arc",
+    "head_commit": "526c909986de48b13d4ae33964baf0451fb79270",
+    "secondary_commit": "4033b8f4b94c351cd3349532d110e5b599752b88",
+    "secondary_commit_is_ancestor_of_head": false,
+    "note": "The corpus is READ-ONLY. Every question except I40 is pinned to head_commit; I40 is pinned to secondary_commit and is the bitemporal case."
+  },
+  "scope": {
+    "rationale": "Agreed with CodeIndexer so the indexed file set and the ground-truth file set are identical. Arc carries near-complete copies of itself under .claude/worktrees; walking them would duplicate almost every symbol and collapse unique-name resolution into ambiguous-name everywhere, erasing the benchmark's signal.",
+    "exclude_dir_names": [
+      ".git",
+      ".claude",
+      "node_modules",
+      "target",
+      "dist",
+      "build",
+      ".venv",
+      "venv",
+      "__pycache__",
+      ".pytest_cache",
+      ".mypy_cache",
+      ".cargo",
+      ".idea",
+      ".vscode"
+    ],
+    "exclude_dir_match": "directory basename, at any depth, checked before descending",
+    "follow_symlinks": false,
+    "max_file_bytes": 2097152,
+    "extensions": [
+      ".rs",
+      ".py",
+      ".pyi",
+      ".c",
+      ".h",
+      ".cc",
+      ".cpp",
+      ".cxx",
+      ".hpp",
+      ".hh",
+      ".hxx",
+      ".cu",
+      ".cuh"
+    ],
+    "path_form": "repo-relative, forward slashes, no leading ./"
+  },
+  "ground_truth": {
+    "method": "Established by hand with ripgrep plus reading the source. No indexer output was consulted at any point: using the system under test as its own oracle would make the benchmark circular.",
+    "semantics": "For target T, expect_symbols is the set of function-like symbols that hold a direct static reference to T at depth 1, restricted to the scoped file set. For a trait method declaration, an implementation of that method is a referrer (an `implements` edge) as well as any body that calls it.",
+    "excluded_from_the_answer_universe": [
+      "module-level use / pub use re-exports",
+      "doc comments and line comments that name the symbol",
+      "string literals that contain the symbol name",
+      "prose files (.md, .json, .html, .sh, .toml) — outside the extension list",
+      "a second extern declaration of the same C symbol"
+    ],
+    "independent_corroboration": "mistralrs-core/tests/capability_reachability.rs carries a human-maintained DEAD_SYMBOL_BASELINE cross-checked against rustc's own dead_code pass. Four of the ten zero-callers questions (I27, I30, I31, I32, I33) coincide with entries there. That list was used as a place to look, never as the answer: every line was re-verified at HEAD, and two of its comments were found to have drifted (see the note fields on I23 and I27)."
+  },
+  "counts": {
+    "questions": 40,
+    "by_difficulty": {
+      "easy": 17,
+      "ambiguous": 5,
+      "trait": 5,
+      "test-only": 3,
+      "zero-callers": 10
+    },
+    "expect_symbols_total": 85,
+    "expect_none_questions": 10,
+    "grep_hits_code_total": 367
+  }
+}

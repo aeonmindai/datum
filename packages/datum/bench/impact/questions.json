@@ -1,0 +1,1595 @@
+[
+  {
+    "id": "I01",
+    "target": "headroom_from_env",
+    "target_fqn": "headroom_from_env",
+    "bare_name_is_ambiguous": false,
+    "target_path": "mistralrs-quant/src/utils/bake_budget.rs",
+    "target_line": 186,
+    "target_kind": "function",
+    "commit": "526c909986de48b13d4ae33964baf0451fb79270",
+    "question": "If I change the signature of `headroom_from_env` (mistralrs-quant/src/utils/bake_budget.rs:186), what else must I care about?",
+    "depth": 1,
+    "edge_kinds": [
+      "calls",
+      "implements",
+      "references"
+    ],
+    "expect_symbols": [
+      {
+        "name": "arm_bake_budget",
+        "path": "mistralrs-quant/src/utils/bake_budget.rs",
+        "line": 199,
+        "kind": "function"
+      }
+    ],
+    "expect_none": false,
+    "difficulty": "easy",
+    "line_disambiguation_required": false,
+    "grep_hits_all": 2,
+    "grep_hits_code": 2,
+    "grep_files_code": 1,
+    "verified_by": "rg -w headroom_from_env over the scoped tree returns 2 lines: the definition (bake_budget.rs:186) and one call (bake_budget.rs:200). Read bake_budget.rs:186-205; the call at :200 sits inside `pub fn arm_bake_budget` opening at :199, confirmed by reading that line."
+  },
+  {
+    "id": "I02",
+    "target": "evict_before",
+    "target_fqn": "SingleCache::evict_before",
+    "bare_name_is_ambiguous": false,
+    "target_path": "mistralrs-core/src/kv_cache/single_cache.rs",
+    "target_line": 187,
+    "target_kind": "function",
+    "commit": "526c909986de48b13d4ae33964baf0451fb79270",
+    "question": "If I change the signature of `SingleCache::evict_before` (mistralrs-core/src/kv_cache/single_cache.rs:187), what else must I care about?",
+    "depth": 1,
+    "edge_kinds": [
+      "calls",
+      "implements",
+      "references"
+    ],
+    "expect_symbols": [
+      {
+        "name": "append",
+        "path": "mistralrs-core/src/kv_cache/single_cache.rs",
+        "line": 406,
+        "kind": "method"
+      }
+    ],
+    "expect_none": false,
+    "difficulty": "easy",
+    "line_disambiguation_required": false,
+    "grep_hits_all": 2,
+    "grep_hits_code": 2,
+    "grep_files_code": 1,
+    "verified_by": "rg -w evict_before returns exactly 2 lines: the definition at :187 (inside `impl SingleCache`) and `self.evict_before(target, retain)?` at :418. Read :406-420; the enclosing item is `pub fn append(&mut self, src: &Tensor)` at :406.",
+    "note": "Private helper with a single caller. The floor case for the metric: any system that cannot get this right is broken."
+  },
+  {
+    "id": "I03",
+    "target": "should_propagate_api_error",
+    "target_fqn": "should_propagate_api_error",
+    "bare_name_is_ambiguous": false,
+    "target_path": "mistralrs-core/src/pipeline/hf.rs",
+    "target_line": 159,
+    "target_kind": "function",
+    "commit": "526c909986de48b13d4ae33964baf0451fb79270",
+    "question": "If I change the signature of `should_propagate_api_error` (mistralrs-core/src/pipeline/hf.rs:159), what else must I care about?",
+    "depth": 1,
+    "edge_kinds": [
+      "calls",
+      "implements",
+      "references"
+    ],
+    "expect_symbols": [
+      {
+        "name": "list_repo_files",
+        "path": "mistralrs-core/src/pipeline/hf.rs",
+        "line": 233,
+        "kind": "function"
+      }
+    ],
+    "expect_none": false,
+    "difficulty": "easy",
+    "line_disambiguation_required": false,
+    "grep_hits_all": 2,
+    "grep_hits_code": 2,
+    "grep_files_code": 1,
+    "verified_by": "rg -w should_propagate_api_error returns 2 lines: definition at :159 and the guard at :274. Read hf.rs:233 to confirm the enclosing item is `pub(crate) fn list_repo_files(`."
+  },
+  {
+    "id": "I04",
+    "target": "extract_last_boxed",
+    "target_fqn": "extract_last_boxed",
+    "bare_name_is_ambiguous": false,
+    "target_path": "mistralrs-core/src/arc_boost.rs",
+    "target_line": 234,
+    "target_kind": "function",
+    "commit": "526c909986de48b13d4ae33964baf0451fb79270",
+    "question": "If I change the signature of `extract_last_boxed` (mistralrs-core/src/arc_boost.rs:234), what else must I care about?",
+    "depth": 1,
+    "edge_kinds": [
+      "calls",
+      "implements",
+      "references"
+    ],
+    "expect_symbols": [
+      {
+        "name": "extract_answer",
+        "path": "mistralrs-core/src/arc_boost.rs",
+        "line": 275,
+        "kind": "function"
+      }
+    ],
+    "expect_none": false,
+    "difficulty": "easy",
+    "line_disambiguation_required": false,
+    "grep_hits_all": 2,
+    "grep_hits_code": 2,
+    "grep_files_code": 1,
+    "verified_by": "rg -w extract_last_boxed returns 2 lines: definition at :234 and the call at :288. Read arc_boost.rs:275 to confirm the enclosing item is `pub fn extract_answer(text: &str, custom: Option<&Regex>)`."
+  },
+  {
+    "id": "I05",
+    "target": "disk_usage_for",
+    "target_fqn": "disk_usage_for",
+    "bare_name_is_ambiguous": false,
+    "target_path": "mistralrs-core/src/diagnostics.rs",
+    "target_line": 350,
+    "target_kind": "function",
+    "commit": "526c909986de48b13d4ae33964baf0451fb79270",
+    "question": "If I change the signature of `disk_usage_for` (mistralrs-core/src/diagnostics.rs:350), what else must I care about?",
+    "depth": 1,
+    "edge_kinds": [
+      "calls",
+      "implements",
+      "references"
+    ],
+    "expect_symbols": [
+      {
+        "name": "run_doctor",
+        "path": "mistralrs-core/src/diagnostics.rs",
+        "line": 367,
+        "kind": "function"
+      }
+    ],
+    "expect_none": false,
+    "difficulty": "easy",
+    "line_disambiguation_required": false,
+    "grep_hits_all": 2,
+    "grep_hits_code": 2,
+    "grep_files_code": 1,
+    "verified_by": "rg -w disk_usage_for returns 2 lines: definition at :350 and the call at :606. Read diagnostics.rs:367 to confirm the enclosing item is `pub fn run_doctor() -> DoctorReport`; there is no intervening `fn` between :367 and :606."
+  },
+  {
+    "id": "I06",
+    "target": "sort_running_by_priority_fcfs",
+    "target_fqn": "PagedAttentionScheduler::sort_running_by_priority_fcfs",
+    "bare_name_is_ambiguous": false,
+    "target_path": "mistralrs-core/src/paged_attention/scheduler.rs",
+    "target_line": 558,
+    "target_kind": "function",
+    "commit": "526c909986de48b13d4ae33964baf0451fb79270",
+    "question": "If I change the signature of `PagedAttentionScheduler::sort_running_by_priority_fcfs` (mistralrs-core/src/paged_attention/scheduler.rs:558), what else must I care about?",
+    "depth": 1,
+    "edge_kinds": [
+      "calls",
+      "implements",
+      "references"
+    ],
+    "expect_symbols": [
+      {
+        "name": "schedule",
+        "path": "mistralrs-core/src/paged_attention/scheduler.rs",
+        "line": 216,
+        "kind": "method"
+      }
+    ],
+    "expect_none": false,
+    "difficulty": "easy",
+    "line_disambiguation_required": false,
+    "grep_hits_all": 2,
+    "grep_hits_code": 2,
+    "grep_files_code": 1,
+    "verified_by": "rg -w sort_running_by_priority_fcfs returns 2 lines: the call at :387 and the definition at :558 (the definition comes AFTER the call in the file, which is why a naive first-hit-wins reader mislabels this). Read scheduler.rs:216 to confirm the caller is `pub fn schedule(&mut self, logger: &IntervalLogger)`.",
+    "note": "Definition appears below its only call site. A reader that assumes definition-before-use gets this backwards."
+  },
+  {
+    "id": "I07",
+    "target": "finalize_tool_calls",
+    "target_fqn": "HarmonyContext::finalize_tool_calls",
+    "bare_name_is_ambiguous": false,
+    "target_path": "mistralrs-core/src/harmony.rs",
+    "target_line": 375,
+    "target_kind": "function",
+    "commit": "526c909986de48b13d4ae33964baf0451fb79270",
+    "question": "If I change the signature of `HarmonyContext::finalize_tool_calls` (mistralrs-core/src/harmony.rs:375), what else must I care about?",
+    "depth": 1,
+    "edge_kinds": [
+      "calls",
+      "implements",
+      "references"
+    ],
+    "expect_symbols": [
+      {
+        "name": "get_harmony_tool_calls",
+        "path": "mistralrs-core/src/sequence.rs",
+        "line": 1447,
+        "kind": "method"
+      }
+    ],
+    "expect_none": false,
+    "difficulty": "easy",
+    "line_disambiguation_required": false,
+    "grep_hits_all": 2,
+    "grep_hits_code": 2,
+    "grep_files_code": 2,
+    "verified_by": "rg -w finalize_tool_calls returns 2 lines: definition at harmony.rs:375 and `.map(|ctx| ctx.finalize_tool_calls())` at sequence.rs:1450. Read sequence.rs:1447 to confirm the enclosing item is `pub fn get_harmony_tool_calls(&mut self)` in `impl Sequence`.",
+    "note": "Cross-file, cross-module, and reached through a closure inside `.map(...)` — the resolution is on a `HarmonyContext` receiver, not a free function."
+  },
+  {
+    "id": "I08",
+    "target": "prefill_admission_cap",
+    "target_fqn": "prefill_admission_cap",
+    "bare_name_is_ambiguous": false,
+    "target_path": "mistralrs-core/src/scheduler/default_scheduler.rs",
+    "target_line": 110,
+    "target_kind": "function",
+    "commit": "526c909986de48b13d4ae33964baf0451fb79270",
+    "question": "If I change the signature of `prefill_admission_cap` (mistralrs-core/src/scheduler/default_scheduler.rs:110), what else must I care about?",
+    "depth": 1,
+    "edge_kinds": [
+      "calls",
+      "implements",
+      "references"
+    ],
+    "expect_symbols": [
+      {
+        "name": "schedule",
+        "path": "mistralrs-core/src/scheduler/default_scheduler.rs",
+        "line": 470,
+        "kind": "method"
+      }
+    ],
+    "expect_none": false,
+    "difficulty": "easy",
+    "line_disambiguation_required": false,
+    "grep_hits_all": 4,
+    "grep_hits_code": 4,
+    "grep_files_code": 2,
+    "verified_by": "rg -w prefill_admission_cap returns 4 lines: capability_reachability.rs:144 (a string literal in the capability registry, not a reference), the definition at default_scheduler.rs:110, and two calls at :531 and :574. Read :470 to confirm both calls sit inside the same item, `pub fn schedule(&mut self, logger: &IntervalLogger)` in `impl DefaultScheduler<Backer>`.",
+    "note": "Two call sites, ONE symbol. This is the question that forces the metric to be a set of symbols rather than a count of occurrences, and it carries a string-literal decoy in the capability test."
+  },
+  {
+    "id": "I09",
+    "target": "strip_pending_lead_pad",
+    "target_fqn": "strip_pending_lead_pad",
+    "bare_name_is_ambiguous": false,
+    "target_path": "mistralrs-core/src/kv_cache/mod.rs",
+    "target_line": 1231,
+    "target_kind": "function",
+    "commit": "526c909986de48b13d4ae33964baf0451fb79270",
+    "question": "If I change the signature of `strip_pending_lead_pad` (mistralrs-core/src/kv_cache/mod.rs:1231), what else must I care about?",
+    "depth": 1,
+    "edge_kinds": [
+      "calls",
+      "implements",
+      "references"
+    ],
+    "expect_symbols": [
+      {
+        "name": "store",
+        "path": "mistralrs-core/src/prefix_cacher.rs",
+        "line": 239,
+        "kind": "method"
+      },
+      {
+        "name": "clone_in_cache",
+        "path": "mistralrs-core/src/kv_cache/mod.rs",
+        "line": 1616,
+        "kind": "method"
+      }
+    ],
+    "expect_none": false,
+    "difficulty": "easy",
+    "line_disambiguation_required": false,
+    "grep_hits_all": 8,
+    "grep_hits_code": 4,
+    "grep_files_code": 2,
+    "verified_by": "rg -w strip_pending_lead_pad returns 8 lines. Four are prose in memory/BACKLOG.md (:304, :318, :327, :356) and one is a doc comment in prefix_cacher.rs:205 — none of those is a reference. The real ones are the definition at kv_cache/mod.rs:1231 and two calls: prefix_cacher.rs:293 (inside `fn store(` at :239, `impl PrefixCacheManagerV2`) and kv_cache/mod.rs:1657 (inside `fn clone_in_cache(` at :1616, `impl CacheManager<T> for NormalCacheManager`). Both enclosing lines read directly.",
+    "note": "8 textual hits, 2 true referrers. Five of the six non-answers are prose or doc comments — the failure mode a text-search baseline cannot avoid."
+  },
+  {
+    "id": "I10",
+    "target": "require_normal_kv_slot",
+    "target_fqn": "require_normal_kv_slot",
+    "bare_name_is_ambiguous": false,
+    "target_path": "mistralrs-core/src/models/deepseek4.rs",
+    "target_line": 2906,
+    "target_kind": "function",
+    "commit": "526c909986de48b13d4ae33964baf0451fb79270",
+    "question": "If I change the signature of `require_normal_kv_slot` (mistralrs-core/src/models/deepseek4.rs:2906), what else must I care about?",
+    "depth": 1,
+    "edge_kinds": [
+      "calls",
+      "implements",
+      "references"
+    ],
+    "expect_symbols": [
+      {
+        "name": "append_kv_mqa",
+        "path": "mistralrs-core/src/models/deepseek4.rs",
+        "line": 3032,
+        "kind": "function"
+      },
+      {
+        "name": "append_graph_kv_mqa",
+        "path": "mistralrs-core/src/models/deepseek4.rs",
+        "line": 3115,
+        "kind": "function"
+      }
+    ],
+    "expect_none": false,
+    "difficulty": "easy",
+    "line_disambiguation_required": false,
+    "grep_hits_all": 9,
+    "grep_hits_code": 6,
+    "grep_files_code": 2,
+    "verified_by": "rg -w require_normal_kv_slot returns 9 lines. Three are prose (memory/BACKLOG.md:874, memory/mission/wave33-BK-attention-kv.md:113, memory/mission/wave61-CL-turboquant-every-model.md:180) and three are doc/line comments naming the function (deepseek4.rs:4651, kv_cache/mod.rs:173, kv_cache/mod.rs:585). The definition is deepseek4.rs:2906; the only two references are `require_normal_kv_slot(kv_cache)?;` at :3038 and :3121, whose enclosing items I read as `fn append_kv_mqa(` at :3032 and `fn append_graph_kv_mqa(` at :3115.",
+    "note": "9 textual hits, 2 true referrers, and two of the decoys live in a different crate module (kv_cache) than the answer."
+  },
+  {
+    "id": "I11",
+    "target": "batch_can_be_ragged",
+    "target_fqn": "batch_can_be_ragged",
+    "bare_name_is_ambiguous": false,
+    "target_path": "mistralrs-core/src/kv_cache/mod.rs",
+    "target_line": 1273,
+    "target_kind": "function",
+    "commit": "526c909986de48b13d4ae33964baf0451fb79270",
+    "question": "If I change the signature of `batch_can_be_ragged` (mistralrs-core/src/kv_cache/mod.rs:1273), what else must I care about?",
+    "depth": 1,
+    "edge_kinds": [
+      "calls",
+      "implements",
+      "references"
+    ],
+    "expect_symbols": [
+      {
+        "name": "clone_in_cache",
+        "path": "mistralrs-core/src/kv_cache/mod.rs",
+        "line": 1616,
+        "kind": "method"
+      },
+      {
+        "name": "the_capability_predicate_is_what_the_scheduler_reads",
+        "path": "mistralrs-core/src/kv_cache/mod.rs",
+        "line": 3608,
+        "kind": "test"
+      },
+      {
+        "name": "clone_in_cache_front_aligns_a_ragged_batch_it_can_carry",
+        "path": "mistralrs-core/src/kv_cache/mod.rs",
+        "line": 3719,
+        "kind": "test"
+      }
+    ],
+    "expect_none": false,
+    "difficulty": "easy",
+    "line_disambiguation_required": false,
+    "grep_hits_all": 18,
+    "grep_hits_code": 12,
+    "grep_files_code": 3,
+    "verified_by": "rg -w batch_can_be_ragged returns 18 lines. Six are prose (BACKLOG.md:323, FACTS.md:343, wave64-CP:57, 00_RESUME_HERE.md:217, _salvage:19 and :39), one is a doc comment in mistralrs_for_server_builder.rs:677, one is a string literal in the capability registry (capability_reachability.rs:108), and three are line/doc comments in kv_cache/mod.rs (:960, :1339, :3598). Definition at kv_cache/mod.rs:1273. True references: :1660 and the tracing field at :1678, both inside `fn clone_in_cache(` at :1616; :3618, :3631, :3637 inside `fn the_capability_predicate_is_what_the_scheduler_reads()` at :3608; :3747 inside `fn clone_in_cache_front_aligns_a_ragged_batch_it_can_carry()` at :3719. All three enclosing lines read directly.",
+    "note": "18 textual hits, 3 true referrers. Note the memory/mission prose cites this symbol at three DIFFERENT stale line numbers (1204, 1227) — the corpus disagrees with itself, and the code does not."
+  },
+  {
+    "id": "I12",
+    "target": "xs_per_sequence_enabled",
+    "target_fqn": "xs_per_sequence_enabled",
+    "bare_name_is_ambiguous": false,
+    "target_path": "mistralrs-core/src/kv_cache/xs_rolling.rs",
+    "target_line": 225,
+    "target_kind": "function",
+    "commit": "526c909986de48b13d4ae33964baf0451fb79270",
+    "question": "If I change the signature of `xs_per_sequence_enabled` (mistralrs-core/src/kv_cache/xs_rolling.rs:225), what else must I care about?",
+    "depth": 1,
+    "edge_kinds": [
+      "calls",
+      "implements",
+      "references"
+    ],
+    "expect_symbols": [
+      {
+        "name": "supports_per_sequence_len",
+        "path": "mistralrs-core/src/kv_cache/mod.rs",
+        "line": 152,
+        "kind": "method"
+      },
+      {
+        "name": "first_mismatched_cache_len",
+        "path": "mistralrs-core/src/kv_cache/mod.rs",
+        "line": 694,
+        "kind": "function"
+      },
+      {
+        "name": "front_pad_kv_cache",
+        "path": "mistralrs-core/src/kv_cache/mod.rs",
+        "line": 933,
+        "kind": "function"
+      },
+      {
+        "name": "front_align_would_succeed",
+        "path": "mistralrs-core/src/kv_cache/mod.rs",
+        "line": 1305,
+        "kind": "function"
+      },
+      {
+        "name": "clone_in_cache",
+        "path": "mistralrs-core/src/kv_cache/mod.rs",
+        "line": 1616,
+        "kind": "method"
+      },
+      {
+        "name": "per_sequence_xs_is_off_unless_requested",
+        "path": "mistralrs-core/src/kv_cache/xs_rolling.rs",
+        "line": 1680,
+        "kind": "test"
+      }
+    ],
+    "expect_none": false,
+    "difficulty": "easy",
+    "line_disambiguation_required": false,
+    "grep_hits_all": 20,
+    "grep_hits_code": 19,
+    "grep_files_code": 4,
+    "verified_by": "rg -w xs_per_sequence_enabled returns 20 lines. Excluded as non-referrers: one prose line (wave63-CO:79); a string literal in the capability registry (capability_reachability.rs:117); two doc comments and two string literals inside the capability test's own self-test fixture (:353, :1309, :1401, :1402); two module re-export lists (`lib.rs:156`, `kv_cache/mod.rs:31` — `use`/`pub use` items, not function-like symbols); three doc comments (xs_rolling.rs:145, :239, kv_cache/mod.rs:1129, :1566). True references: kv_cache/mod.rs:155 (`fn supports_per_sequence_len` at :152), :698 (`fn first_mismatched_cache_len(` at :694), :941 (`fn front_pad_kv_cache(` at :933), :1328 (`fn front_align_would_succeed(` at :1305), :1679 and :1713 (both `fn clone_in_cache(` at :1616), and xs_rolling.rs:1682 (test `per_sequence_xs_is_off_unless_requested` at :1680). Every enclosing line read directly.",
+    "note": "20 textual hits, 6 true referrers. The capability test at capability_reachability.rs:353 documents the exact trap in its own words: it must not 'count a doc-comment mention of xs_per_sequence_enabled as a call site'."
+  },
+  {
+    "id": "I13",
+    "target": "launch_qtip_fused_gemv_v2_k4_l16_f16",
+    "target_fqn": "launch_qtip_fused_gemv_v2_k4_l16_f16",
+    "bare_name_is_ambiguous": false,
+    "target_path": "mistralrs-quant/src/qtip/ffi.rs",
+    "target_line": 221,
+    "target_kind": "function",
+    "commit": "526c909986de48b13d4ae33964baf0451fb79270",
+    "question": "If I change the signature of `launch_qtip_fused_gemv_v2_k4_l16_f16` (mistralrs-quant/src/qtip/ffi.rs:221), what else must I care about?",
+    "depth": 1,
+    "edge_kinds": [
+      "calls",
+      "implements",
+      "references"
+    ],
+    "expect_symbols": [
+      {
+        "name": "fused_gemv_cuda",
+        "path": "mistralrs-quant/src/qtip/cuda_ops.rs",
+        "line": 202,
+        "kind": "function"
+      }
+    ],
+    "expect_none": false,
+    "difficulty": "easy",
+    "line_disambiguation_required": false,
+    "grep_hits_all": 3,
+    "grep_hits_code": 3,
+    "grep_files_code": 3,
+    "verified_by": "rg -w launch_qtip_fused_gemv_v2_k4_l16_f16 returns 3 lines: the C symbol emitted by the `QTIP_GEMV_LAUNCHER` macro at kernels/qtip/qtip_gemv.cu:294, the Rust `extern` declaration at src/qtip/ffi.rs:221, and one call at src/qtip/cuda_ops.rs:323. Read cuda_ops.rs:202 to confirm the enclosing item is `pub(crate) fn fused_gemv_cuda(`.",
+    "note": "Cross-language. The CUDA-side definition is produced by a macro expansion, so no parser will see a C function declaration there; the correct answer is still just the one Rust caller."
+  },
+  {
+    "id": "I14",
+    "target": "qtip_packed_bytes_per_row",
+    "target_fqn": "qtip_packed_bytes_per_row",
+    "bare_name_is_ambiguous": false,
+    "target_path": "mistralrs-quant/kernels/qtip/qtip_geom.cuh",
+    "target_line": 69,
+    "target_kind": "function",
+    "commit": "526c909986de48b13d4ae33964baf0451fb79270",
+    "question": "If I change the signature of `qtip_packed_bytes_per_row` (mistralrs-quant/kernels/qtip/qtip_geom.cuh:69), what else must I care about?",
+    "depth": 1,
+    "edge_kinds": [
+      "calls",
+      "implements",
+      "references"
+    ],
+    "expect_symbols": [
+      {
+        "name": "qtip_quantize_rows_beam_kernel",
+        "path": "mistralrs-quant/kernels/qtip/qtip_beam.cu",
+        "line": 277,
+        "kind": "kernel"
+      }
+    ],
+    "expect_none": false,
+    "difficulty": "easy",
+    "line_disambiguation_required": false,
+    "grep_hits_all": 2,
+    "grep_hits_code": 2,
+    "grep_files_code": 2,
+    "verified_by": "rg -w qtip_packed_bytes_per_row returns 2 lines: the `__device__ __forceinline__` definition at qtip_geom.cuh:69 and `qtip_packed_bytes_per_row<G>(num_symbols)` at qtip_beam.cu:328. Listed every top-level declarator in qtip_beam.cu above line 328: the nearest is the `__global__` kernel whose name sits on :277 (`template <class G, bool COMPUTED_CB>` on :275, `__global__ void __launch_bounds__(...)` on :276). Read those three lines directly.",
+    "note": "CUDA, and the callee is a template so the call text is `qtip_packed_bytes_per_row<G>(...)`. The kernel's name is on a different line from its `__global__` qualifier, which is where naive C parsers put the symbol."
+  },
+  {
+    "id": "I15",
+    "target": "_longest_cycle",
+    "target_fqn": "qlib._longest_cycle",
+    "bare_name_is_ambiguous": false,
+    "target_path": "arc-tools/quality/qlib.py",
+    "target_line": 241,
+    "target_kind": "function",
+    "commit": "526c909986de48b13d4ae33964baf0451fb79270",
+    "question": "If I change the signature of `_longest_cycle` (arc-tools/quality/qlib.py:241), what else must I care about?",
+    "depth": 1,
+    "edge_kinds": [
+      "calls",
+      "implements",
+      "references"
+    ],
+    "expect_symbols": [
+      {
+        "name": "degeneracy_report",
+        "path": "arc-tools/quality/qlib.py",
+        "line": 278,
+        "kind": "function"
+      }
+    ],
+    "expect_none": false,
+    "difficulty": "easy",
+    "line_disambiguation_required": false,
+    "grep_hits_all": 3,
+    "grep_hits_code": 3,
+    "grep_files_code": 1,
+    "verified_by": "rg -w _longest_cycle returns 3 lines, all in qlib.py: the definition at :241 and two calls at :289 and :296. Both calls are indented inside the function opening at :278 (`def degeneracy_report(text):`), verified by reading :278-300 and confirming no intervening `def` at column 0.",
+    "note": "Python. Two call sites, one symbol."
+  },
+  {
+    "id": "I16",
+    "target": "box_fingerprint",
+    "target_fqn": "s6_bin_cache.box_fingerprint",
+    "bare_name_is_ambiguous": false,
+    "target_path": "arc-tools/quality/s6_bin_cache.py",
+    "target_line": 110,
+    "target_kind": "function",
+    "commit": "526c909986de48b13d4ae33964baf0451fb79270",
+    "question": "If I change the signature of `box_fingerprint` (arc-tools/quality/s6_bin_cache.py:110), what else must I care about?",
+    "depth": 1,
+    "edge_kinds": [
+      "calls",
+      "implements",
+      "references"
+    ],
+    "expect_symbols": [
+      {
+        "name": "cmd_push",
+        "path": "arc-tools/quality/s6_bin_cache.py",
+        "line": 142,
+        "kind": "function"
+      },
+      {
+        "name": "cmd_pull",
+        "path": "arc-tools/quality/s6_bin_cache.py",
+        "line": 186,
+        "kind": "function"
+      },
+      {
+        "name": "cmd_fingerprint",
+        "path": "arc-tools/quality/s6_bin_cache.py",
+        "line": 230,
+        "kind": "function"
+      }
+    ],
+    "expect_none": false,
+    "difficulty": "easy",
+    "line_disambiguation_required": false,
+    "grep_hits_all": 4,
+    "grep_hits_code": 4,
+    "grep_files_code": 1,
+    "verified_by": "rg -w box_fingerprint returns 4 lines in s6_bin_cache.py: definition at :110, calls at :149, :192 and :231. Enclosing `def`s read from the file's def listing: `cmd_push` at :142, `cmd_pull` at :186, `cmd_fingerprint` at :230.",
+    "note": "Python, three distinct callers in one file."
+  },
+  {
+    "id": "I17",
+    "target": "from_env",
+    "target_fqn": "QtipCodebook::from_env",
+    "target_fqn_verified_by": "read `impl QtipCodebook` header above qtip/mod.rs:616",
+    "bare_name_is_ambiguous": true,
+    "target_path": "mistralrs-quant/src/qtip/mod.rs",
+    "target_line": 616,
+    "target_kind": "function",
+    "commit": "526c909986de48b13d4ae33964baf0451fb79270",
+    "question": "If I change the signature of `QtipCodebook::from_env` (mistralrs-quant/src/qtip/mod.rs:616), what else must I care about?",
+    "depth": 1,
+    "edge_kinds": [
+      "calls",
+      "implements",
+      "references"
+    ],
+    "expect_symbols": [
+      {
+        "name": "get",
+        "path": "mistralrs-quant/src/qtip/mod.rs",
+        "line": 975,
+        "kind": "method"
+      }
+    ],
+    "expect_none": false,
+    "difficulty": "ambiguous",
+    "line_disambiguation_required": false,
+    "grep_hits_all": 26,
+    "grep_hits_code": 16,
+    "grep_files_code": 8,
+    "verified_by": "The bare name `from_env` has 21 hits across 6 files in the scoped tree and FOUR distinct Arc-owned definitions (QtipCodebook at qtip/mod.rs:616, TrellisSearch at qtip/viterbi.rs:147, KvQuantMode at dsv4_kv_fp8.rs:158, EpPlacementMode at deepseek4.rs:2603), plus two calls into third-party `from_env` constructors (hf-hub `Cache::from_env`/`ApiBuilder::from_env` at diagnostics.rs:285, :305, :539) and an unrelated `from_env_value` / `headroom_from_env` / `acceptance_log_from_env`. I resolved by receiver type: the only `QtipCodebook::from_env()` call is qtip/mod.rs:979, and reading :972-982 shows it inside `pub fn get() -> Result<Self>` at :975 in `impl QtipBakeConfig`.",
+    "note": "Name-only resolution is wrong here by construction: four same-named Arc definitions plus third-party ones. A system must disambiguate on the receiver type, or report the ambiguity rather than guess."
+  },
+  {
+    "id": "I18",
+    "target": "from_env",
+    "target_fqn": "TrellisSearch::from_env",
+    "target_fqn_verified_by": "read `impl TrellisSearch` header above viterbi.rs:147",
+    "bare_name_is_ambiguous": true,
+    "target_path": "mistralrs-quant/src/qtip/viterbi.rs",
+    "target_line": 147,
+    "target_kind": "function",
+    "commit": "526c909986de48b13d4ae33964baf0451fb79270",
+    "question": "If I change the signature of `TrellisSearch::from_env` (mistralrs-quant/src/qtip/viterbi.rs:147), what else must I care about?",
+    "depth": 1,
+    "edge_kinds": [
+      "calls",
+      "implements",
+      "references"
+    ],
+    "expect_symbols": [
+      {
+        "name": "get",
+        "path": "mistralrs-quant/src/qtip/mod.rs",
+        "line": 975,
+        "kind": "method"
+      },
+      {
+        "name": "env_search",
+        "path": "mistralrs-quant/src/qtip/bitshift.rs",
+        "line": 586,
+        "kind": "method"
+      }
+    ],
+    "expect_none": false,
+    "difficulty": "ambiguous",
+    "line_disambiguation_required": false,
+    "grep_hits_all": 26,
+    "grep_hits_code": 16,
+    "grep_files_code": 8,
+    "verified_by": "Same ambiguous name as I17, different definition, DIFFERENT answer — which is the point of the pair. `TrellisSearch::from_env()` is called at qtip/mod.rs:981 (inside `pub fn get()` at :975, read directly) and at qtip/bitshift.rs:587 (inside `fn env_search() -> TrellisSearch` at :586, read directly). Definition read at viterbi.rs:147 with its doc comment naming ARC_QTIP_BEAM, confirming it is a distinct function from the codebook one.",
+    "note": "Paired with I17 on purpose. A system that keys impact on the bare name `from_env` will return the same answer for both and be wrong on both."
+  },
+  {
+    "id": "I19",
+    "target": "from_env",
+    "target_fqn": "KvQuantMode::from_env",
+    "target_fqn_verified_by": "read `impl KvQuantMode` header above dsv4_kv_fp8.rs:158",
+    "bare_name_is_ambiguous": true,
+    "target_path": "mistralrs-core/src/models/dsv4_kv_fp8.rs",
+    "target_line": 158,
+    "target_kind": "function",
+    "commit": "526c909986de48b13d4ae33964baf0451fb79270",
+    "question": "If I change the signature of `KvQuantMode::from_env` (mistralrs-core/src/models/dsv4_kv_fp8.rs:158), what else must I care about?",
+    "depth": 1,
+    "edge_kinds": [
+      "calls",
+      "implements",
+      "references"
+    ],
+    "expect_symbols": [
+      {
+        "name": "dequant",
+        "path": "mistralrs-core/src/models/dsv4_kv_fp8.rs",
+        "line": 289,
+        "kind": "method"
+      },
+      {
+        "name": "forward",
+        "path": "mistralrs-core/src/models/deepseek4.rs",
+        "line": 1434,
+        "kind": "method"
+      }
+    ],
+    "expect_none": false,
+    "difficulty": "ambiguous",
+    "line_disambiguation_required": false,
+    "grep_hits_all": 26,
+    "grep_hits_code": 16,
+    "grep_files_code": 8,
+    "verified_by": "Third definition of the ambiguous `from_env` name, in a different crate from I17/I18. Calls: dsv4_kv_fp8.rs:290 inside `pub(crate) fn dequant(&self, out_dtype: DType)` at :289 (read directly), and deepseek4.rs:1757 written as `super::dsv4_kv_fp8::KvQuantMode::from_env()` inside `fn forward(` at :1434 in `impl Attention` (verified by reading :1428-1436 and listing `^impl` lines in deepseek4.rs, the last before :1434 being `impl Attention` at :950).",
+    "note": "The second caller is a ~320-line-deep reference inside `Attention::forward`, whose name `forward` is itself one of the most overloaded in the repo — so the ANSWER symbol is ambiguous too, not just the target."
+  },
+  {
+    "id": "I20",
+    "target": "from_env",
+    "target_fqn": "EpPlacementMode::from_env",
+    "target_fqn_verified_by": "read `impl EpPlacementMode` header above deepseek4.rs:2603",
+    "bare_name_is_ambiguous": true,
+    "target_path": "mistralrs-core/src/models/deepseek4.rs",
+    "target_line": 2603,
+    "target_kind": "function",
+    "commit": "526c909986de48b13d4ae33964baf0451fb79270",
+    "question": "If I change the signature of `EpPlacementMode::from_env` (mistralrs-core/src/models/deepseek4.rs:2603), what else must I care about?",
+    "depth": 1,
+    "edge_kinds": [
+      "calls",
+      "implements",
+      "references"
+    ],
+    "expect_symbols": [
+      {
+        "name": "build_expert_parallel_plan",
+        "path": "mistralrs-core/src/models/deepseek4.rs",
+        "line": 2647,
+        "kind": "function"
+      }
+    ],
+    "expect_none": false,
+    "difficulty": "ambiguous",
+    "line_disambiguation_required": false,
+    "grep_hits_all": 26,
+    "grep_hits_code": 16,
+    "grep_files_code": 8,
+    "verified_by": "Fourth Arc-owned `from_env`. Its single call is deepseek4.rs:2666, `match (EpPlacementMode::from_env(), tid2eid)`, inside `fn build_expert_parallel_plan(` at :2647 (read directly). Note the OTHER `from_env` in the same file at :2603 vs the KvQuantMode one imported via `super::dsv4_kv_fp8::` at :1757 — same file, two different `from_env` targets.",
+    "note": "Same file contains a reference to a DIFFERENT `from_env` (I19's), so a file-granular answer conflates the two."
+  },
+  {
+    "id": "I21",
+    "target": "health_or_die",
+    "target_fqn": "qlib.health_or_die",
+    "bare_name_is_ambiguous": false,
+    "target_path": "arc-tools/quality/qlib.py",
+    "target_line": 47,
+    "target_kind": "function",
+    "commit": "526c909986de48b13d4ae33964baf0451fb79270",
+    "question": "If I change the signature of `health_or_die` (arc-tools/quality/qlib.py:47), what else must I care about?",
+    "depth": 1,
+    "edge_kinds": [
+      "calls",
+      "implements",
+      "references"
+    ],
+    "expect_symbols": [
+      {
+        "name": "main",
+        "path": "arc-tools/quality/speed_probe.py",
+        "line": 26,
+        "kind": "function"
+      },
+      {
+        "name": "main",
+        "path": "arc-tools/quality/batch_load_probe.py",
+        "line": 596,
+        "kind": "function"
+      },
+      {
+        "name": "main",
+        "path": "arc-tools/quality/run_longctx.py",
+        "line": 77,
+        "kind": "function"
+      },
+      {
+        "name": "main",
+        "path": "arc-tools/quality/run_gsm8k.py",
+        "line": 340,
+        "kind": "function"
+      },
+      {
+        "name": "main",
+        "path": "arc-tools/quality/run_coherence.py",
+        "line": 114,
+        "kind": "function"
+      },
+      {
+        "name": "capture",
+        "path": "arc-tools/quality/run_sinkhorn_ab.py",
+        "line": 45,
+        "kind": "function"
+      }
+    ],
+    "expect_none": false,
+    "difficulty": "ambiguous",
+    "line_disambiguation_required": false,
+    "grep_hits_all": 7,
+    "grep_hits_code": 7,
+    "grep_files_code": 7,
+    "verified_by": "rg -w health_or_die returns 7 lines: the definition at qlib.py:47 and six `qlib.health_or_die()` calls. Enclosing `def` for each found by scanning up to the nearest column-0 `def` and reading it: speed_probe.py:26 `main`, batch_load_probe.py:596 `main`, run_longctx.py:77 `main`, run_gsm8k.py:340 `main`, run_coherence.py:114 `main`, run_sinkhorn_ab.py:45 `capture`.",
+    "note": "Five of the six answers are named `main`. This is the mirror image of I17-I20: the TARGET is unique but the ANSWER SET is name-ambiguous, so any system that keys results on bare symbol name collapses six correct answers into two and its recall silently caps at 33%."
+  },
+  {
+    "id": "I22",
+    "target": "gather_forward",
+    "target_fqn": "QuantMethod::gather_forward",
+    "target_fqn_verified_by": "`pub trait QuantMethod` opens at mistralrs-quant/src/lib.rs:1400",
+    "bare_name_is_ambiguous": true,
+    "target_path": "mistralrs-quant/src/lib.rs",
+    "target_line": 1441,
+    "target_kind": "function",
+    "commit": "526c909986de48b13d4ae33964baf0451fb79270",
+    "question": "If I change the signature of the trait method `QuantMethod::gather_forward` (mistralrs-quant/src/lib.rs:1441), which implementations must be updated?",
+    "depth": 1,
+    "edge_kinds": [
+      "implements"
+    ],
+    "expect_symbols": [
+      {
+        "name": "gather_forward",
+        "path": "mistralrs-quant/src/pending_layer.rs",
+        "line": 135,
+        "kind": "method"
+      },
+      {
+        "name": "gather_forward",
+        "path": "mistralrs-quant/src/mxfp4/mod.rs",
+        "line": 146,
+        "kind": "method"
+      },
+      {
+        "name": "gather_forward",
+        "path": "mistralrs-quant/src/unquantized/mod.rs",
+        "line": 255,
+        "kind": "method"
+      },
+      {
+        "name": "gather_forward",
+        "path": "mistralrs-quant/src/td_moe_factored/mod.rs",
+        "line": 430,
+        "kind": "method"
+      },
+      {
+        "name": "gather_forward",
+        "path": "mistralrs-quant/src/afq/mod.rs",
+        "line": 159,
+        "kind": "method"
+      },
+      {
+        "name": "gather_forward",
+        "path": "mistralrs-quant/src/blockwise_fp8/mod.rs",
+        "line": 153,
+        "kind": "method"
+      },
+      {
+        "name": "gather_forward",
+        "path": "mistralrs-quant/src/gguf/mod.rs",
+        "line": 77,
+        "kind": "method"
+      },
+      {
+        "name": "gather_forward",
+        "path": "mistralrs-quant/src/qtip/bitshift.rs",
+        "line": 1875,
+        "kind": "method"
+      },
+      {
+        "name": "gather_forward",
+        "path": "mistralrs-quant/src/qtip/mod.rs",
+        "line": 3608,
+        "kind": "method"
+      }
+    ],
+    "expect_none": false,
+    "difficulty": "trait",
+    "line_disambiguation_required": false,
+    "grep_hits_all": 188,
+    "grep_hits_code": 146,
+    "grep_files_code": 26,
+    "verified_by": "Established the trait's extent first: `rg '^\\s*(pub )?(trait|impl)' mistralrs-quant/src/lib.rs` shows `pub trait QuantMethod` opening at :1400 and the next item `impl Module for dyn QuantMethod` at :1530, so :1441 is a default method of that trait. Then took every `fn gather_forward(` definition line from rg and, for each, scanned upward to the enclosing `impl` header and read it: PendingIsqLayer, MXFP4Layer, UnquantLinear, TuckerFactoredLayer, AfqLayer, BlockwiseFP8Linear, GgufMatMul, Qtip2bLayer, QtipLayer — nine impls, all `impl QuantMethod for X`. Deliberately scoped to `implements` edges only so the answer set is exactly enumerable; the 137 other textual hits are call sites, error strings containing the word, doc comments and prose.",
+    "note": "188 textual hits across 26 code files, 9 correct answers. Note the trap: many hits are inside FUNCTIONS NAMED gather_forward that are not implementations of this trait method (`gather_forward_cpu`, `gather_forward_batched_cpu`, `gather_forward_impl`, `gather_forward_autocast`), and the error-message strings `\"QtipLayer::gather_forward: ...\"` mention the name from inside sibling helpers."
+  },
+  {
+    "id": "I23",
+    "target": "cuda_graph_runner_mut",
+    "target_fqn": "Pipeline::cuda_graph_runner_mut",
+    "target_fqn_verified_by": "`pub trait Pipeline:` opens at mistralrs-core/src/pipeline/mod.rs:597",
+    "bare_name_is_ambiguous": true,
+    "target_path": "mistralrs-core/src/pipeline/mod.rs",
+    "target_line": 615,
+    "target_kind": "function",
+    "commit": "526c909986de48b13d4ae33964baf0451fb79270",
+    "question": "If I change the signature of the trait method `Pipeline::cuda_graph_runner_mut` (mistralrs-core/src/pipeline/mod.rs:615), what else must I care about?",
+    "depth": 1,
+    "edge_kinds": [
+      "calls",
+      "implements",
+      "references"
+    ],
+    "expect_symbols": [
+      {
+        "name": "cuda_graph_runner_mut",
+        "path": "mistralrs-core/src/pipeline/embedding.rs",
+        "line": 814,
+        "kind": "method"
+      },
+      {
+        "name": "cuda_graph_runner_mut",
+        "path": "mistralrs-core/src/pipeline/speculative.rs",
+        "line": 990,
+        "kind": "method"
+      },
+      {
+        "name": "cuda_graph_runner_mut",
+        "path": "mistralrs-core/src/pipeline/normal.rs",
+        "line": 2858,
+        "kind": "method"
+      },
+      {
+        "name": "cuda_graph_runner_mut",
+        "path": "mistralrs-core/src/pipeline/amoe.rs",
+        "line": 287,
+        "kind": "method"
+      },
+      {
+        "name": "cuda_graph_runner_mut",
+        "path": "mistralrs-core/src/pipeline/vision.rs",
+        "line": 1153,
+        "kind": "method"
+      },
+      {
+        "name": "cuda_graph_runner_mut",
+        "path": "mistralrs-core/src/pipeline/diffusion.rs",
+        "line": 374,
+        "kind": "method"
+      },
+      {
+        "name": "cuda_graph_runner_mut",
+        "path": "mistralrs-core/src/pipeline/gguf.rs",
+        "line": 862,
+        "kind": "method"
+      },
+      {
+        "name": "cuda_graph_runner_mut",
+        "path": "mistralrs-core/src/pipeline/ggml.rs",
+        "line": 597,
+        "kind": "method"
+      },
+      {
+        "name": "cuda_graph_runner_mut",
+        "path": "mistralrs-core/src/pipeline/speech.rs",
+        "line": 455,
+        "kind": "method"
+      }
+    ],
+    "expect_none": false,
+    "difficulty": "trait",
+    "line_disambiguation_required": false,
+    "grep_hits_all": 12,
+    "grep_hits_code": 12,
+    "grep_files_code": 11,
+    "verified_by": "rg -w cuda_graph_runner_mut returns 12 lines. `pub trait Pipeline:` opens at pipeline/mod.rs:597 and the declaration with its `None` default body is at :615 (read :600-625). Nine `fn cuda_graph_runner_mut` definitions follow, each preceded by an `impl Pipeline for <X>` header which I read individually: EmbeddingPipeline, SpeculativePipeline, NormalPipeline, AnyMoePipeline, VisionPipeline, DiffusionPipeline, GGUFPipeline, GGMLPipeline, SpeechPipeline. The remaining two hits are in tests/capability_reachability.rs — a string literal at :300 inside DEAD_SYMBOL_BASELINE and a doc comment at :888 — neither is a reference. There are ZERO call sites; Arc's own capability test records this symbol as dead debt with the comment 'implemented by all eight pipelines and called by nobody'.",
+    "note": "A trait method with nine implementations and no callers. Independently corroborated: Arc's checked-in DEAD_SYMBOL_BASELINE lists (pipeline/mod.rs, cuda_graph_runner_mut) as unreachable, cross-checked there against rustc's own dead_code pass. Arc's comment says 'eight pipelines'; I counted nine impls at HEAD, so the comment is one stale — my number comes from reading each impl header.",
+    "bitemporal": {
+      "differs_from_head": false,
+      "compared_commit": "4033b8f4b94c351cd3349532d110e5b599752b88",
+      "finding": "At 4033b8f4b the same nine impls exist in the same nine files, but the trait declaration sits at pipeline/mod.rs:703 (not :615) and the NormalPipeline impl at normal.rs:3234 (not :2858). The answer set under name+path matching is IDENTICAL across the two commits while every line number moved. Verified with `git grep -n cuda_graph_runner_mut 4033b8f4b -- '*.rs'`.",
+      "implication": "This is the control for I40: it shows that a stable answer with unstable line numbers is a different thing from a genuinely changed answer, so line drift alone must not be scored as a bitemporal difference."
+    }
+  },
+  {
+    "id": "I24",
+    "target": "is_distributed",
+    "target_fqn": "QuantMethod::is_distributed",
+    "target_fqn_verified_by": "`pub trait QuantMethod` opens at mistralrs-quant/src/lib.rs:1400",
+    "bare_name_is_ambiguous": true,
+    "target_path": "mistralrs-quant/src/lib.rs",
+    "target_line": 1525,
+    "target_kind": "function",
+    "commit": "526c909986de48b13d4ae33964baf0451fb79270",
+    "question": "If I change the signature of the trait method `QuantMethod::is_distributed` (mistralrs-quant/src/lib.rs:1525), what else must I care about?",
+    "depth": 1,
+    "edge_kinds": [
+      "calls",
+      "implements",
+      "references"
+    ],
+    "expect_symbols": [
+      {
+        "name": "is_distributed",
+        "path": "mistralrs-quant/src/pending_layer.rs",
+        "line": 179,
+        "kind": "method"
+      },
+      {
+        "name": "is_distributed",
+        "path": "mistralrs-quant/src/distributed/layers.rs",
+        "line": 423,
+        "kind": "method"
+      },
+      {
+        "name": "is_distributed",
+        "path": "mistralrs-quant/src/distributed/layers.rs",
+        "line": 775,
+        "kind": "method"
+      },
+      {
+        "name": "is_distributed",
+        "path": "mistralrs-quant/src/distributed/layers.rs",
+        "line": 1096,
+        "kind": "method"
+      },
+      {
+        "name": "is_distributed",
+        "path": "mistralrs-quant/src/td_moe_factored/mod.rs",
+        "line": 464,
+        "kind": "method"
+      },
+      {
+        "name": "load_from_artifacts",
+        "path": "mistralrs-core/src/pipeline/isq.rs",
+        "line": 1293,
+        "kind": "function"
+      }
+    ],
+    "expect_none": false,
+    "difficulty": "trait",
+    "line_disambiguation_required": true,
+    "grep_hits_all": 9,
+    "grep_hits_code": 9,
+    "grep_files_code": 5,
+    "verified_by": "rg -w is_distributed returns 9 lines. :1525 is the trait default (inside `pub trait QuantMethod` :1400-1529, verified by reading :1515-1530). Five impls, each confirmed by reading its `impl QuantMethod for X` header: PendingIsqLayer (pending_layer.rs:179), RowParallelLayer (layers.rs:423), ColumnParallelLayer (layers.rs:775), ReplicatedLayer (layers.rs:1096), TuckerFactoredLayer (td_moe_factored/mod.rs:464). Callers: pending_layer.rs:180 is `self.resolve().ok()?.is_distributed()` INSIDE the impl at :179, so it contributes no new symbol; isq.rs:1420 and :1531 are both inside `fn load_from_artifacts(` at :1293 (read directly).",
+    "note": "Three of the six answers are `is_distributed` in the SAME file (distributed/layers.rs:423, :775, :1096). Under name+path matching alone they collapse to one, which is exactly why this question sets line_disambiguation_required."
+  },
+  {
+    "id": "I25",
+    "target": "end_calibration",
+    "target_fqn": "QuantMethod::end_calibration",
+    "target_fqn_verified_by": "`pub trait QuantMethod` opens at mistralrs-quant/src/lib.rs:1400",
+    "bare_name_is_ambiguous": true,
+    "target_path": "mistralrs-quant/src/lib.rs",
+    "target_line": 1521,
+    "target_kind": "function",
+    "commit": "526c909986de48b13d4ae33964baf0451fb79270",
+    "question": "If I change the signature of the trait method `QuantMethod::end_calibration` (mistralrs-quant/src/lib.rs:1521), what else must I care about?",
+    "depth": 1,
+    "edge_kinds": [
+      "calls",
+      "implements",
+      "references"
+    ],
+    "expect_symbols": [
+      {
+        "name": "end_calibration",
+        "path": "mistralrs-quant/src/unquantized/mod.rs",
+        "line": 626,
+        "kind": "method"
+      },
+      {
+        "name": "end_calibration",
+        "path": "mistralrs-quant/src/distributed/layers.rs",
+        "line": 385,
+        "kind": "method"
+      },
+      {
+        "name": "end_calibration",
+        "path": "mistralrs-quant/src/distributed/layers.rs",
+        "line": 741,
+        "kind": "method"
+      },
+      {
+        "name": "end_calibration",
+        "path": "mistralrs-quant/src/distributed/layers.rs",
+        "line": 1071,
+        "kind": "method"
+      },
+      {
+        "name": "extract_calibration_artifact",
+        "path": "mistralrs-core/src/pipeline/calibration.rs",
+        "line": 132,
+        "kind": "function"
+      }
+    ],
+    "expect_none": false,
+    "difficulty": "trait",
+    "line_disambiguation_required": true,
+    "grep_hits_all": 10,
+    "grep_hits_code": 9,
+    "grep_files_code": 4,
+    "verified_by": "rg -w end_calibration returns 10 lines. :1521 is the trait default (read :1515-1530, inside `pub trait QuantMethod` which closes at :1529). Four impls, each `impl QuantMethod for X` header read: UnquantLinear (unquantized/mod.rs:626), RowParallelLayer (layers.rs:385), ColumnParallelLayer (layers.rs:741), ReplicatedLayer (layers.rs:1071). Lines :386, :742 and :1072 are `self.<field>.end_calibration()` INSIDE those same impls — delegation, no new symbol. The one external caller is calibration.rs:149, inside `pub fn extract_calibration_artifact(` at :132 (read :128-152). The remaining hit is prose in memory/mission/wave13-AE-calibration.md:110.",
+    "note": "Same-file name collision again (three impls in distributed/layers.rs), plus self-delegating impl bodies that make a naive occurrence counter double-count."
+  },
+  {
+    "id": "I26",
+    "target": "residual_tensors_moe_experts_only",
+    "target_fqn": "IsqModel::residual_tensors_moe_experts_only",
+    "target_fqn_verified_by": "`pub trait IsqModel` — declaration read at mistralrs-core/src/pipeline/isq.rs:651",
+    "bare_name_is_ambiguous": true,
+    "target_path": "mistralrs-core/src/pipeline/isq.rs",
+    "target_line": 651,
+    "target_kind": "function",
+    "commit": "526c909986de48b13d4ae33964baf0451fb79270",
+    "question": "If I change the signature of the trait method `IsqModel::residual_tensors_moe_experts_only` (mistralrs-core/src/pipeline/isq.rs:651), what else must I care about?",
+    "depth": 1,
+    "edge_kinds": [
+      "calls",
+      "implements",
+      "references"
+    ],
+    "expect_symbols": [
+      {
+        "name": "residual_tensors_moe_experts_only",
+        "path": "mistralrs-core/src/models/glm4_moe_lite.rs",
+        "line": 1089,
+        "kind": "method"
+      },
+      {
+        "name": "residual_tensors_moe_experts_only",
+        "path": "mistralrs-core/src/models/deepseek4.rs",
+        "line": 5147,
+        "kind": "method"
+      },
+      {
+        "name": "residual_tensors_moe_experts_only",
+        "path": "mistralrs-core/src/models/deepseek2.rs",
+        "line": 1049,
+        "kind": "method"
+      },
+      {
+        "name": "residual_tensors_moe_experts_only",
+        "path": "mistralrs-core/src/models/deepseek3.rs",
+        "line": 1103,
+        "kind": "method"
+      },
+      {
+        "name": "residual_tensors_moe_experts_only",
+        "path": "mistralrs-core/src/models/glm4_moe.rs",
+        "line": 991,
+        "kind": "method"
+      },
+      {
+        "name": "residual_tensors_moe_experts_only",
+        "path": "mistralrs-core/src/models/phi3_5_moe.rs",
+        "line": 846,
+        "kind": "method"
+      },
+      {
+        "name": "quantize",
+        "path": "mistralrs-core/src/pipeline/isq.rs",
+        "line": 660,
+        "kind": "method"
+      }
+    ],
+    "expect_none": false,
+    "difficulty": "trait",
+    "line_disambiguation_required": false,
+    "grep_hits_all": 10,
+    "grep_hits_code": 8,
+    "grep_files_code": 7,
+    "verified_by": "rg -w residual_tensors_moe_experts_only returns 10 lines. Read isq.rs:645-665: :651 is a default method of the `IsqModel` trait, and `fn quantize(` at :660 is the trait's next default method. Six impls, each `impl IsqModel for X` header read: Glm4MoeLite, DeepSeekV4, DeepSeekV2, DeepSeekV3, Glm4Moe, and — note — `Model` in phi3_5_moe.rs:846. The one call is isq.rs:1144, inside `fn quantize(` at :660 (read :1140-1150; `quantize` is a ~540-line default body). Two prose hits (research/v4_audit.md:518, memory/mission/wave5-N-sinkhorn-mtp.md:61) are not references.",
+    "note": "The caller is another default method of the SAME trait, ~490 lines below its own signature, so the enclosing-symbol resolution has to survive a very long body. One impl is on a type merely called `Model`."
+  },
+  {
+    "id": "I27",
+    "target": "assign_row_lens",
+    "target_fqn": "XsRollingCache::assign_row_lens",
+    "bare_name_is_ambiguous": false,
+    "target_path": "mistralrs-core/src/kv_cache/xs_rolling.rs",
+    "target_line": 638,
+    "target_kind": "function",
+    "commit": "526c909986de48b13d4ae33964baf0451fb79270",
+    "question": "If I change the signature of `XsRollingCache::assign_row_lens` (mistralrs-core/src/kv_cache/xs_rolling.rs:638), what else must I care about?",
+    "depth": 1,
+    "edge_kinds": [
+      "calls",
+      "implements",
+      "references"
+    ],
+    "expect_symbols": [
+      {
+        "name": "reshaping_is_exact_while_uniform_and_refused_once_ragged",
+        "path": "mistralrs-core/src/kv_cache/xs_rolling.rs",
+        "line": 1550,
+        "kind": "test"
+      },
+      {
+        "name": "the_uniformity_check_exempts_xs_slots_and_nothing_else",
+        "path": "mistralrs-core/src/kv_cache/mod.rs",
+        "line": 3318,
+        "kind": "test"
+      }
+    ],
+    "expect_none": false,
+    "difficulty": "test-only",
+    "line_disambiguation_required": false,
+    "grep_hits_all": 6,
+    "grep_hits_code": 6,
+    "grep_files_code": 3,
+    "verified_by": "rg -w assign_row_lens returns 6 lines. Two are in tests/capability_reachability.rs — a doc comment at :239 and a string literal at :293 in DEAD_SYMBOL_BASELINE — neither a reference. Definition at xs_rolling.rs:638. References: :1552 and :1558, both inside `fn reshaping_is_exact_while_uniform_and_refused_once_ragged()` at :1550; and kv_cache/mod.rs:3327, inside `fn the_uniformity_check_exempts_xs_slots_and_nothing_else()` at :3318. Both enclosing lines read directly and both carry `#[test]`.",
+    "note": "Every referrer is a test, so the honest impact answer is 'nothing in production reaches this'. Independently corroborated: Arc's DEAD_SYMBOL_BASELINE lists this symbol and its comment says 'its only callers are tests', cross-checked there against rustc's dead_code pass. Arc's comment cites kv_cache/mod.rs:3127 for the second caller; at HEAD it is :3327 — the comment's line number has drifted, mine is read at HEAD."
+  },
+  {
+    "id": "I28",
+    "target": "fused_gemv_v4l12_cuda",
+    "target_fqn": "fused_gemv_v4l12_cuda",
+    "bare_name_is_ambiguous": false,
+    "target_path": "mistralrs-quant/src/qtip/cuda_ops.rs",
+    "target_line": 390,
+    "target_kind": "function",
+    "commit": "526c909986de48b13d4ae33964baf0451fb79270",
+    "question": "If I change the signature of `fused_gemv_v4l12_cuda` (mistralrs-quant/src/qtip/cuda_ops.rs:390), what else must I care about?",
+    "depth": 1,
+    "edge_kinds": [
+      "calls",
+      "implements",
+      "references"
+    ],
+    "expect_symbols": [
+      {
+        "name": "cuda_v4l12_gemv_matches_the_cpu_model_bit_for_bit",
+        "path": "mistralrs-quant/src/qtip/trellis_v4l12.rs",
+        "line": 2105,
+        "kind": "test"
+      },
+      {
+        "name": "cuda_v4l12_gemv_refuses_a_wrong_geometry_artifact",
+        "path": "mistralrs-quant/src/qtip/trellis_v4l12.rs",
+        "line": 2188,
+        "kind": "test"
+      }
+    ],
+    "expect_none": false,
+    "difficulty": "test-only",
+    "line_disambiguation_required": false,
+    "grep_hits_all": 6,
+    "grep_hits_code": 6,
+    "grep_files_code": 2,
+    "verified_by": "rg -w fused_gemv_v4l12_cuda returns 6 lines: the definition at cuda_ops.rs:390 and five `cuda_ops::fused_gemv_v4l12_cuda(` calls in trellis_v4l12.rs at :2149, :2216, :2228, :2243, :2258. Read the enclosing items: :2149 is inside `fn cuda_v4l12_gemv_matches_the_cpu_model_bit_for_bit()` at :2105, and the other four are inside `fn cuda_v4l12_gemv_refuses_a_wrong_geometry_artifact()` at :2188. Both are `#[test]`.",
+    "note": "Five call sites, two symbols, zero production reach — a shipped CUDA path exercised only by its own tests."
+  },
+  {
+    "id": "I29",
+    "target": "route_to_blocks",
+    "target_fqn": "route_to_blocks",
+    "bare_name_is_ambiguous": false,
+    "target_path": "arc-engine/src/moba.rs",
+    "target_line": 57,
+    "target_kind": "function",
+    "commit": "526c909986de48b13d4ae33964baf0451fb79270",
+    "question": "If I change the signature of `route_to_blocks` (arc-engine/src/moba.rs:57), what else must I care about?",
+    "depth": 1,
+    "edge_kinds": [
+      "calls",
+      "implements",
+      "references"
+    ],
+    "expect_symbols": [
+      {
+        "name": "routing_picks_top_k_by_descending_score",
+        "path": "arc-engine/src/moba.rs",
+        "line": 122,
+        "kind": "test"
+      },
+      {
+        "name": "routing_handles_k_larger_than_num_blocks",
+        "path": "arc-engine/src/moba.rs",
+        "line": 132,
+        "kind": "test"
+      }
+    ],
+    "expect_none": false,
+    "difficulty": "test-only",
+    "line_disambiguation_required": false,
+    "grep_hits_all": 4,
+    "grep_hits_code": 4,
+    "grep_files_code": 1,
+    "verified_by": "rg -w route_to_blocks returns 4 lines: a module doc comment at moba.rs:22 that names `route_to_blocks()` with parentheses (the most convincing possible decoy for a text search), the definition at :57, and two calls at :127 and :134 inside `fn routing_picks_top_k_by_descending_score()` at :122 and `fn routing_handles_k_larger_than_num_blocks()` at :132. Both read directly, both `#[test]`.",
+    "note": "The decoy at :22 is written as a call — `route_to_blocks()` — inside a `//!` module comment. Any line-based grep baseline must attribute it to something, and there is no enclosing function at all."
+  },
+  {
+    "id": "I30",
+    "target": "prefill_chunk_is_intermediate",
+    "target_fqn": "prefill_chunk_is_intermediate",
+    "bare_name_is_ambiguous": false,
+    "target_path": "mistralrs-core/src/pipeline/mod.rs",
+    "target_line": 422,
+    "target_kind": "function",
+    "commit": "526c909986de48b13d4ae33964baf0451fb79270",
+    "question": "If I change the signature of `prefill_chunk_is_intermediate` (mistralrs-core/src/pipeline/mod.rs:422), what else must I care about?",
+    "depth": 1,
+    "edge_kinds": [
+      "calls",
+      "implements",
+      "references"
+    ],
+    "expect_symbols": [],
+    "expect_none": true,
+    "difficulty": "zero-callers",
+    "line_disambiguation_required": false,
+    "grep_hits_all": 7,
+    "grep_hits_code": 7,
+    "grep_files_code": 2,
+    "verified_by": "rg -w prefill_chunk_is_intermediate returns 7 lines and NOT ONE is a reference. The definition is pipeline/mod.rs:422. The other six are all in tests/capability_reachability.rs: a line comment at :252, a string literal at :278 (the DEAD_SYMBOL_BASELINE entry), and four string literals at :1385, :1386, :1397, :1398 which are FIXTURE TEXT inside the test `a_definition_is_not_a_caller` — that test builds fake source strings containing `let x = prefill_chunk_is_intermediate();` to prove its own scanner does not mistake a definition for a call. Read all six lines.",
+    "note": "The strongest false-confidence trap in the set: the repo contains a synthetic call site, in quotes, written specifically to catch a scanner that counts text. Arc's own baseline records this as an incomplete feature — the flag is written at engine/mod.rs and never read — so the correct answer being empty is a live product defect, not an artefact."
+  },
+  {
+    "id": "I31",
+    "target": "arc_launch_gemv_bf16_silu_mul_down",
+    "target_fqn": "arc_launch_gemv_bf16_silu_mul_down",
+    "bare_name_is_ambiguous": true,
+    "target_path": "arc-cuda-graph/src/decode_forward.rs",
+    "target_line": 115,
+    "target_kind": "function",
+    "commit": "526c909986de48b13d4ae33964baf0451fb79270",
+    "question": "If I change the signature of `arc_launch_gemv_bf16_silu_mul_down` (arc-cuda-graph/src/decode_forward.rs:115), what else must I care about?",
+    "depth": 1,
+    "edge_kinds": [
+      "calls",
+      "implements",
+      "references"
+    ],
+    "expect_symbols": [],
+    "expect_none": true,
+    "difficulty": "zero-callers",
+    "line_disambiguation_required": false,
+    "grep_hits_all": 4,
+    "grep_hits_code": 4,
+    "grep_files_code": 4,
+    "verified_by": "rg -w arc_launch_gemv_bf16_silu_mul_down returns 4 lines: two Rust `extern` declarations of the same C symbol (gemv_ffi.rs:32 and decode_forward.rs:115), the actual `extern \"C\" void` definition in arc-cuda-graph/src/cuda/gemv_bf16.cu:530, and a string literal at tests/capability_reachability.rs:286 (the DEAD_SYMBOL_BASELINE entry). There is no call. Read all four lines.",
+    "note": "Cross-language dead code: a CUDA kernel launcher compiled into libarccudagraph.a on every CUDA build, declared TWICE on the Rust side and launched from neither. Arc's baseline comment says exactly that. A system must not report the sibling declaration in gemv_ffi.rs as an affected caller — it is a second declaration of the same symbol, not a referrer."
+  },
+  {
+    "id": "I32",
+    "target": "extend_draft_kv",
+    "target_fqn": "MtpSpeculativePipeline::extend_draft_kv",
+    "bare_name_is_ambiguous": false,
+    "target_path": "mistralrs-core/src/pipeline/mtp_pipeline.rs",
+    "target_line": 2061,
+    "target_kind": "function",
+    "commit": "526c909986de48b13d4ae33964baf0451fb79270",
+    "question": "If I change the signature of `MtpSpeculativePipeline::extend_draft_kv` (mistralrs-core/src/pipeline/mtp_pipeline.rs:2061), what else must I care about?",
+    "depth": 1,
+    "edge_kinds": [
+      "calls",
+      "implements",
+      "references"
+    ],
+    "expect_symbols": [],
+    "expect_none": true,
+    "difficulty": "zero-callers",
+    "line_disambiguation_required": false,
+    "grep_hits_all": 7,
+    "grep_hits_code": 4,
+    "grep_files_code": 2,
+    "verified_by": "rg -w extend_draft_kv returns 7 lines: two prose hits (memory/mission/wave12-AB-mtp.md:86, memory/mission/wave42-BT-mtp-working.md:102), one hit inside docs/engine-explainer.html:1668 where it is listed as a shipped capability, a doc comment and a string literal in tests/capability_reachability.rs (:239, :305), the definition at mtp_pipeline.rs:2061, and a `[`Self::extend_draft_kv`]` doc-link at :2070 which sits inside the definition itself. No call sites.",
+    "note": "The corpus asserts this is live — engine-explainer.html tags it `st:\"shipped\"` and wave42 cites line numbers 'off the prefill path' — while the code has no caller. That contradiction between prose and instrument is the whole reason the impact answer must come from the parser and not the documents."
+  },
+  {
+    "id": "I33",
+    "target": "run_target_forward",
+    "target_fqn": "run_target_forward",
+    "bare_name_is_ambiguous": false,
+    "target_path": "mistralrs-core/src/pipeline/mtp_pipeline.rs",
+    "target_line": 3073,
+    "target_kind": "function",
+    "commit": "526c909986de48b13d4ae33964baf0451fb79270",
+    "question": "If I change the signature of `run_target_forward` (mistralrs-core/src/pipeline/mtp_pipeline.rs:3073), what else must I care about?",
+    "depth": 1,
+    "edge_kinds": [
+      "calls",
+      "implements",
+      "references"
+    ],
+    "expect_symbols": [],
+    "expect_none": true,
+    "difficulty": "zero-callers",
+    "line_disambiguation_required": false,
+    "grep_hits_all": 4,
+    "grep_hits_code": 4,
+    "grep_files_code": 2,
+    "verified_by": "rg -w run_target_forward returns 4 lines: a doc comment and a string literal in tests/capability_reachability.rs (:239, :310), a doc-link `[`run_target_forward`]` at mtp_pipeline.rs:3027 inside the doc comment of a DIFFERENT function, and the definition at :3073. No calls.",
+    "note": "Hard case for a word-boundary search: the live function is `run_target_forward_batch` at :3034, whose name CONTAINS the target's name. Any non-word-boundary grep reports its 20-plus hits as impact; a word-boundary grep still picks up the doc-link at :3027 that sits inside `run_target_forward_batch`'s own doc comment, and would name the live function as an affected caller. It is not one."
+  },
+  {
+    "id": "I34",
+    "target": "print_banner",
+    "target_fqn": "print_banner",
+    "bare_name_is_ambiguous": false,
+    "target_path": "arc-engine/src/lib.rs",
+    "target_line": 96,
+    "target_kind": "function",
+    "commit": "526c909986de48b13d4ae33964baf0451fb79270",
+    "question": "If I change the signature of `print_banner` (arc-engine/src/lib.rs:96), what else must I care about?",
+    "depth": 1,
+    "edge_kinds": [
+      "calls",
+      "implements",
+      "references"
+    ],
+    "expect_symbols": [],
+    "expect_none": true,
+    "difficulty": "zero-callers",
+    "line_disambiguation_required": false,
+    "grep_hits_all": 3,
+    "grep_hits_code": 1,
+    "grep_files_code": 1,
+    "verified_by": "rg -w print_banner returns 3 lines: the definition at arc-engine/src/lib.rs:96 and two hits in install.sh (:28 the shell function definition, :252 the shell call). `.sh` is not an indexed extension and a shell function is a different symbol in a different language, so the Rust `pub fn print_banner` has no referrer anywhere in the indexed tree.",
+    "note": "A same-named function in another language, with a real call site, in the same repository. A language-blind text search reports install.sh:252 as a caller of the Rust function. It is not one."
+  },
+  {
+    "id": "I35",
+    "target": "graphs_captured",
+    "target_fqn": "CudaGraphRunner::graphs_captured",
+    "bare_name_is_ambiguous": false,
+    "target_path": "arc-cuda-graph/src/graph.rs",
+    "target_line": 234,
+    "target_kind": "function",
+    "commit": "526c909986de48b13d4ae33964baf0451fb79270",
+    "question": "If I change the signature of `CudaGraphRunner::graphs_captured` (arc-cuda-graph/src/graph.rs:234), what else must I care about?",
+    "depth": 1,
+    "edge_kinds": [
+      "calls",
+      "implements",
+      "references"
+    ],
+    "expect_symbols": [],
+    "expect_none": true,
+    "difficulty": "zero-callers",
+    "line_disambiguation_required": false,
+    "grep_hits_all": 1,
+    "grep_hits_code": 1,
+    "grep_files_code": 1,
+    "verified_by": "rg -w graphs_captured returns exactly 1 line in the whole scoped tree: the definition at arc-cuda-graph/src/graph.rs:234, `pub fn graphs_captured(&self) -> usize`, inside `impl CudaGraphRunner`. One occurrence and it is the definition, so the referrer set is provably empty."
+  },
+  {
+    "id": "I36",
+    "target": "unregister_decode_user",
+    "target_fqn": "ChunkedPrefillScheduler::unregister_decode_user",
+    "bare_name_is_ambiguous": false,
+    "target_path": "arc-engine/src/sarathi.rs",
+    "target_line": 95,
+    "target_kind": "function",
+    "commit": "526c909986de48b13d4ae33964baf0451fb79270",
+    "question": "If I change the signature of `ChunkedPrefillScheduler::unregister_decode_user` (arc-engine/src/sarathi.rs:95), what else must I care about?",
+    "depth": 1,
+    "edge_kinds": [
+      "calls",
+      "implements",
+      "references"
+    ],
+    "expect_symbols": [],
+    "expect_none": true,
+    "difficulty": "zero-callers",
+    "line_disambiguation_required": false,
+    "grep_hits_all": 1,
+    "grep_hits_code": 1,
+    "grep_files_code": 1,
+    "verified_by": "rg -w unregister_decode_user returns exactly 1 line: the definition at arc-engine/src/sarathi.rs:95, inside `impl ChunkedPrefillScheduler`. Its sibling `register_decode_user` at :89 IS called, which is what makes the asymmetry interesting rather than accidental.",
+    "note": "A register/unregister pair where only half is wired. Adjacent in the file, so any answer derived from file or block proximity gets this wrong."
+  },
+  {
+    "id": "I37",
+    "target": "supports_head_dim",
+    "target_fqn": "TurboQuantConfig::supports_head_dim",
+    "bare_name_is_ambiguous": false,
+    "target_path": "mistralrs-quant/src/turboquant/mod.rs",
+    "target_line": 172,
+    "target_kind": "function",
+    "commit": "526c909986de48b13d4ae33964baf0451fb79270",
+    "question": "If I change the signature of `TurboQuantConfig::supports_head_dim` (mistralrs-quant/src/turboquant/mod.rs:172), what else must I care about?",
+    "depth": 1,
+    "edge_kinds": [
+      "calls",
+      "implements",
+      "references"
+    ],
+    "expect_symbols": [],
+    "expect_none": true,
+    "difficulty": "zero-callers",
+    "line_disambiguation_required": false,
+    "grep_hits_all": 1,
+    "grep_hits_code": 1,
+    "grep_files_code": 1,
+    "verified_by": "rg -w supports_head_dim returns exactly 1 line: the definition at mistralrs-quant/src/turboquant/mod.rs:172, inside `impl TurboQuantConfig`. The public predicate a caller would be expected to consult before configuring TurboQuant is consulted by nobody."
+  },
+  {
+    "id": "I38",
+    "target": "clear_immediate_isq",
+    "target_fqn": "clear_immediate_isq",
+    "bare_name_is_ambiguous": false,
+    "target_path": "mistralrs-quant/src/lib.rs",
+    "target_line": 477,
+    "target_kind": "function",
+    "commit": "526c909986de48b13d4ae33964baf0451fb79270",
+    "question": "If I change the signature of `clear_immediate_isq` (mistralrs-quant/src/lib.rs:477), what else must I care about?",
+    "depth": 1,
+    "edge_kinds": [
+      "calls",
+      "implements",
+      "references"
+    ],
+    "expect_symbols": [],
+    "expect_none": true,
+    "difficulty": "zero-callers",
+    "line_disambiguation_required": false,
+    "grep_hits_all": 1,
+    "grep_hits_code": 1,
+    "grep_files_code": 1,
+    "verified_by": "rg -w clear_immediate_isq returns exactly 1 line: the definition at mistralrs-quant/src/lib.rs:477. Its neighbour `get_immediate_isq` at :473 is live; the clearer is not.",
+    "note": "A `pub fn` in a library crate root, so it is part of the public API surface and rustc's dead_code pass will not flag it. Only a cross-crate reverse-dependency query can tell you nothing in the workspace calls it."
+  },
+  {
+    "id": "I39",
+    "target": "syms_per_word",
+    "target_fqn": "Tcfrag2bLayout::syms_per_word",
+    "bare_name_is_ambiguous": false,
+    "target_path": "mistralrs-quant/src/qtip/tcfrag2b.rs",
+    "target_line": 223,
+    "target_kind": "function",
+    "commit": "526c909986de48b13d4ae33964baf0451fb79270",
+    "question": "If I change the signature of `Tcfrag2bLayout::syms_per_word` (mistralrs-quant/src/qtip/tcfrag2b.rs:223), what else must I care about?",
+    "depth": 1,
+    "edge_kinds": [
+      "calls",
+      "implements",
+      "references"
+    ],
+    "expect_symbols": [],
+    "expect_none": true,
+    "difficulty": "zero-callers",
+    "line_disambiguation_required": false,
+    "grep_hits_all": 1,
+    "grep_hits_code": 1,
+    "grep_files_code": 1,
+    "verified_by": "rg -w syms_per_word returns exactly 1 line: the definition at mistralrs-quant/src/qtip/tcfrag2b.rs:223, inside `impl Tcfrag2bLayout`."
+  },
+  {
+    "id": "I40",
+    "target": "require_k4v2l16",
+    "target_fqn": "QtipLayer::require_k4v2l16",
+    "bare_name_is_ambiguous": false,
+    "target_path": "mistralrs-quant/src/qtip/mod.rs",
+    "target_line": 4519,
+    "target_kind": "function",
+    "commit": "4033b8f4b94c351cd3349532d110e5b599752b88",
+    "question": "If I change the signature of `QtipLayer::require_k4v2l16` (mistralrs-quant/src/qtip/mod.rs:4519) as of commit 4033b8f4b, what else must I care about?",
+    "depth": 1,
+    "edge_kinds": [
+      "calls",
+      "implements",
+      "references"
+    ],
+    "expect_symbols": [
+      {
+        "name": "dequantize_weights",
+        "path": "mistralrs-quant/src/qtip/mod.rs",
+        "line": 2901,
+        "kind": "method"
+      },
+      {
+        "name": "forward",
+        "path": "mistralrs-quant/src/qtip/mod.rs",
+        "line": 4139,
+        "kind": "method"
+      },
+      {
+        "name": "gather_forward",
+        "path": "mistralrs-quant/src/qtip/mod.rs",
+        "line": 4188,
+        "kind": "method"
+      },
+      {
+        "name": "dequantize_expert",
+        "path": "mistralrs-quant/src/qtip/mod.rs",
+        "line": 4545,
+        "kind": "method"
+      }
+    ],
+    "expect_none": false,
+    "difficulty": "easy",
+    "line_disambiguation_required": false,
+    "grep_hits_all": 1,
+    "grep_hits_code": 0,
+    "grep_files_code": 0,
+    "verified_by": "This question is pinned to commit 4033b8f4b, NOT to HEAD. `git grep -n require_k4v2l16 4033b8f4b -- mistralrs-quant/src/qtip/mod.rs` returns 5 lines: the definition at :4519 and four `self.require_k4v2l16(...)` calls at :2922, :4144, :4189 and :4546. I extracted that revision of the file with `git show 4033b8f4b:mistralrs-quant/src/qtip/mod.rs` and read the enclosing item for each call directly out of that blob: `pub fn dequantize_weights(&self)` at :2901 (impl QtipLayer), `fn forward(&self, x: &Tensor)` at :4139 (impl QuantMethod for QtipLayer), `fn gather_forward(&self, a: &Tensor, indices: &Tensor)` at :4188 (impl QuantMethod for QtipLayer), and `pub fn dequantize_expert(&self, expert_idx: usize)` at :4545 (impl QtipLayer). At HEAD 526c9099 `rg -w require_k4v2l16` over the scoped tree returns ZERO hits in any source file — the symbol does not exist. `git merge-base --is-ancestor 4033b8f4b HEAD` exits non-zero, so that commit is not reachable from HEAD at all.",
+    "note": "THE BITEMPORAL TEST. The answer set at 4033b8f4b is four symbols; at HEAD the target does not exist. Any snapshot index (LSIF, SCIP, a plain ctags/grep pass over the working tree) can only ever produce one of those two answers and has no way to say which commit it is speaking about. A system that answers this question must name the commit it answered for. memory/STATE.json:183 cites mod.rs:4189 @4033b8f4b as live evidence; mod.rs:4189 at HEAD is an unrelated line inside a codebook-tag parser.",
+    "bitemporal": {
+      "differs_from_head": true,
+      "head_commit": "526c909986de48b13d4ae33964baf0451fb79270",
+      "at_head": "target absent: `require_k4v2l16` has zero occurrences in any source file at HEAD",
+      "head_is_ancestor_of_question_commit": false,
+      "note": "4033b8f4b is not an ancestor of HEAD; it is an abandoned line of work still cited as evidence in memory/STATE.json:183."
+    }
+  }
+]

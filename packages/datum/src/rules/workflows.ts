@@ -239,7 +239,7 @@ export function deriveWorkflowRules(dir: string, sink: RuleSink): WorkflowDeriva
           }
         }
 
-        for (const command of commandsIn(step, run?.value, rel, file)) {
+        for (const command of commandsIn(step, run?.value, rel)) {
           const escalation = classify(command, !continueOnError && !stepSkipsFailure);
           if (!escalation) continue;
           escalations.push(escalation);
@@ -285,12 +285,7 @@ function triggerNames(node: YamlNode): string[] {
  * the command is assembled from `with:`. `actions-rs/cargo` is handled explicitly because Arc's CI
  * expresses `cargo clippy -- -D warnings` that way, and a text scan of the YAML would never see it.
  */
-function commandsIn(
-  step: YamlMap,
-  run: YamlNode | undefined,
-  rel: string,
-  file: SourceFile,
-): Command[] {
+function commandsIn(step: YamlMap, run: YamlNode | undefined, rel: string): Command[] {
   const out: Command[] = [];
   if (run && run.kind === "scalar") {
     for (const [offset, line] of run.value.split("\n").entries()) {
@@ -333,7 +328,6 @@ function commandsIn(
 
   // Any other action: nothing is inferred. Guessing what a third-party action enforces from its
   // name is how a store starts publishing claims it cannot support.
-  void file;
   return out;
 }
 

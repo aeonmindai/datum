@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { readFile } from "node:fs/promises";
 import { parseArgs } from "node:util";
 import { resolve } from "node:path";
 import { ConfigError, loadConfig, type Config } from "../config.js";
@@ -9,6 +10,8 @@ import { loadSeed, SEEDS_DIR } from "../ops/seed.js";
 import { hashPassword } from "../http/auth.js";
 import { serve } from "../http/server.js";
 import { runVerificationPass } from "../worker/verify.js";
+import { impact, ingestGraph } from "../graph/index.js";
+import type { GraphArtifact } from "../graph/types.js";
 import { gitIdentity, readProjectFile, writeProjectFile } from "./project.js";
 
 /**
@@ -403,6 +406,80 @@ async function main(): Promise<void> {
         );
       });
       return;
+
+    case "ingest-graph": {
+      const file = rest[0];
+      if (!file) bail("usage: datum ingest-graph <graph.json> [--scope PATH]");
+      const { values } = parseArgs({ args: rest.slice(1), options: { scope: { type: "string" } } });
+      await withDbOnly(async (db) => {
+        const raw: unknown = JSON.parse(await readFile(resolve(process.cwd(), file), "utf8"));
+        const artifact = raw as GraphArtifact;
+        const t0 = Date.now();
+        const r = await ingestGraph(db, artifact, values.scope ? { scope: values.scope } : undefined);
+        process.stdout.write(
+          `indexed ${artifact.repo} @ ${artifact.commit_sha.slice(0, 9)}\n` +
+            `  index    ${r.indexId}\n` +
+            `  symbols  ${r.symbols}\n` +
+            `  edges    ${r.edges} rows\n` +
+            `  in       ${Date.now() - t0} ms\n`,
+        );
+      });
+      return;
+    }
+
+    case "impact": {
+      const symbol = rest[0];
+      if (!symbol) bail("usage: datum impact <symbol> [--repo R] [--depth N] [--commit SHA]");
+      const { values } = parseArgs({
+        args: rest.slice(1),
+        options: { repo: { type: "string" }, depth: { type: "string" }, commit: { type: "string" } },
+      });
+      const project = await readProjectFile();
+      const repo = values.repo ?? project?.repo;
+      if (!repo) bail("no repo. Pass --repo owner/name, or run `datum link` first.");
+      await withDbOnly(async (db) => {
+        const r = await impact(db, {
+          repo,
+          symbol,
+          ...(values.commit ? { commitSha: values.commit } : {}),
+          ...(values.depth ? { depth: Number.parseInt(values.depth, 10) } : {}),
+        });
+        const lines = [
+          `${r.target.name}  ${r.target.path}:${r.target.line_start}`,
+          `${r.repo} @ ${r.commit_sha.slice(0, 9)}  depth<=${r.max_depth}`,
+          "",
+        ];
+        if (r.reached_by.length === 0 && r.ambiguous.length === 0) {
+          // A real and useful answer: nothing reaches it, so changing it breaks nothing here.
+          lines.push("nothing reaches this symbol at this depth.");
+        }
+        for (const h of r.reached_by) {
+          lines.push(
+            `  d${h.depth} ${h.path_confidence.padEnd(10)} ${h.name}  ` +
+              `${h.path}:${h.line_start}  via ${h.via_kind}`,
+          );
+        }
+        if (r.ambiguous.length > 0) {
+          // Kept visually separate for the same reason the API keeps it structurally separate:
+          // "might break" and "will break" must not read alike.
+          lines.push("", "  reached only through an ambiguous edge — verify before trusting:");
+          for (const h of r.ambiguous) {
+            lines.push(`  d${h.depth} ${"ambiguous".padEnd(10)} ${h.name}  ${h.path}:${h.line_start}`);
+          }
+        }
+        if (r.covered_by_tests.length > 0) {
+          lines.push("", "  covered by tests:");
+          for (const t of r.covered_by_tests) lines.push(`    ${t.name}  ${t.path}:${t.line_start}`);
+        }
+        lines.push(
+          "",
+          `  measured=${r.counts.measured} derived=${r.counts.derived} unverified=${r.counts.unverified}`,
+          "",
+        );
+        process.stdout.write(lines.join("\n"));
+      });
+      return;
+    }
 
     case "hash-password": {
       const password = rest[0] ?? process.env.DATUM_ADMIN_PASSWORD;

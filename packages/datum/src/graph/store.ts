@@ -593,7 +593,7 @@ async function resolveTarget(db: Db, indexId: string, symbol: string): Promise<T
        FROM datum.code_symbols
       WHERE index_id = $1 AND (fqn = $2 OR name = $2)
       ORDER BY coalesce(fqn = $2, false) DESC, path, line_start
-      LIMIT 200`,
+      LIMIT 201`,
     [indexId, symbol],
   );
   if (rows.length === 0) {
@@ -607,13 +607,14 @@ async function resolveTarget(db: Db, indexId: string, symbol: string): Promise<T
 
   const exact = rows.filter((r) => r.exact_fqn);
   const tier = exact.length > 0 ? exact : rows;
-  const chosen = tier[0]!;
-  if (tier.length === 1) return chosen;
+  if (tier.length === 1) return tier[0]!;
 
   throw refuse(
-    `${JSON.stringify(symbol)} names ${tier.length} symbols in this index`,
+    `${JSON.stringify(symbol)} names ${tier.length > 200 ? "over 200" : String(tier.length)} symbols in this index`,
     {
       symbol,
+      // A handful is enough to disambiguate by eye; the count is what says how bad it is. The
+      // 201st row exists only so `capped` is measured rather than assumed.
       candidates: tier.slice(0, 25).map((r) => ({
         id: r.id,
         fqn: r.fqn,
@@ -621,7 +622,8 @@ async function resolveTarget(db: Db, indexId: string, symbol: string): Promise<T
         path: r.path,
         line_start: r.line_start,
       })),
-      candidate_count: tier.length,
+      candidate_count: Math.min(tier.length, 200),
+      capped: tier.length > 200,
     },
     "Pass the fully qualified name, or the id. Choosing one of these for you would report an impact closure for the wrong symbol.",
   );

@@ -70,3 +70,15 @@ export function feedbackSignature(input: {
   );
   return [...fields, sha256Hex(canonicalCorrection(input.correction))].join("|");
 }
+
+/**
+ * The signature a rejection counter-event is filed under: keyed to the exact preference row, and
+ * therefore never the signature of the preference being rejected.
+ *
+ * Filing a rejection under the rejected preference's own signature would make saying "no" *raise*
+ * that preference's occasion count — a human's objection strengthening the thing they objected to.
+ * Already normalised, so it survives `recordFeedback` unchanged whichever path writes it.
+ */
+export function rejectionSignature(preferenceId: string): string {
+  return normaliseFeedbackText(`rejected|${preferenceId}`);
+}

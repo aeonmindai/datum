@@ -9,6 +9,7 @@ import { Db } from "../db/pool.js";
 import { migrate } from "../db/migrate.js";
 import { startVerificationWorker, type WorkerHandle } from "../worker/verify.js";
 import { initInstance } from "../ops/init.js";
+import { registerGraphRoutes } from "../graph/index.js";
 import { registerAdmin } from "./admin.js";
 import { registerMcp } from "./mcp.js";
 import { registerV1 } from "./v1.js";
@@ -86,6 +87,9 @@ export async function buildServer(
   });
 
   registerV1(app, { db, config });
+  // The code graph is a read surface over the same store, so it registers alongside /v1 rather
+  // than behind its own prefix: `impact` is a question about the record, not a separate product.
+  registerGraphRoutes(app, { db, config });
   registerMcp(app, { db, config });
   registerAdmin(app, { db, config, adminHash, verification });
 

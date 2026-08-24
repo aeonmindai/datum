@@ -187,8 +187,7 @@ const DISQUALIFYING = [
   "obsolete",
   "deprecated",
   "no longer",
-  "was wrong",
-  "were wrong",
+  "wrong",
   "never ran",
   "never verified",
   "not verified",
@@ -203,8 +202,16 @@ const DISQUALIFYING = [
   "fixme",
 ];
 
-/** Subjects that name nothing. A claim about "it" is not a claim. */
-const EMPTY_SUBJECTS: Record<string, true> = {
+/**
+ * Pronouns and bare determiners.
+ *
+ * Two jobs, both learned from what this extractor got wrong on Arc's corpus. As a whole subject
+ * they name nothing — "Neither is a fix" is not a definition of "Neither". And at either *end* of
+ * a multi-word span they are the tell that the sentence boundary was mis-segmented: "Note it is
+ * 2× on the KERNEL" and "at our 2.09 bits it is 74 GB" both capture a fragment whose head is not
+ * what the measurement is about.
+ */
+const PRONOUNS: Record<string, true> = {
   it: true,
   this: true,
   that: true,
@@ -212,24 +219,100 @@ const EMPTY_SUBJECTS: Record<string, true> = {
   those: true,
   there: true,
   they: true,
+  them: true,
   we: true,
+  us: true,
   i: true,
   you: true,
   he: true,
   she: true,
-  one: true,
-  which: true,
-  what: true,
-  who: true,
   its: true,
   their: true,
   our: true,
-  and: true,
-  but: true,
-  so: true,
+  ours: true,
+  theirs: true,
+  mine: true,
+  yours: true,
+  his: true,
+  hers: true,
+  which: true,
+  what: true,
+  who: true,
+  whose: true,
+  neither: true,
+  either: true,
+  both: true,
+  each: true,
+  all: true,
+  none: true,
+  nothing: true,
+  everything: true,
+  anything: true,
+  something: true,
+};
+
+/** Never a subject on their own, though fine as part of one ("one W4A16 quant"). */
+const BARE_ONLY: Record<string, true> = {
   the: true,
   a: true,
   an: true,
+  and: true,
+  but: true,
+  so: true,
+  one: true,
+  then: true,
+  now: true,
+  here: true,
+  also: true,
+  only: true,
+  still: true,
+};
+
+/**
+ * Words whose presence proves the captured span is a clause, not a subject.
+ *
+ * "nsys says qtip_gather_gemv_warp_kernel is 1090.5 ms" has a true measurement in it and a
+ * useless subject: the fact is about the kernel, not about "nsys says qtip_...". Rather than try
+ * to re-segment, the candidate is dropped. A reviewer who has to rewrite the subject is doing the
+ * extractor's job, and a proposal that needs rewriting is worse than one that never appeared.
+ */
+const FRAGMENT_WORDS: Record<string, true> = {
+  said: true,
+  says: true,
+  say: true,
+  show: true,
+  shows: true,
+  showed: true,
+  found: true,
+  means: true,
+  meant: true,
+  gives: true,
+  gave: true,
+  took: true,
+  takes: true,
+  note: true,
+  notes: true,
+  claims: true,
+  claimed: true,
+  reports: true,
+  reported: true,
+  because: true,
+  since: true,
+  while: true,
+  when: true,
+  if: true,
+  however: true,
+  hence: true,
+  thus: true,
+  therefore: true,
+  though: true,
+  although: true,
+  unless: true,
+  until: true,
+  whereas: true,
+  supporting: true,
+  per: true,
+  via: true,
 };
 
 /** Keys that are document furniture rather than a predicate about anything. */
@@ -266,35 +349,55 @@ const NUMBER = String.raw`[+-]?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?(?:[eE][+-]?\
  * key and a colon and a number, and it is not a fact — it is the opening of a sentence. Requiring
  * the value to be consumed entirely by one number and at most one unit is what separates the two,
  * and it is why this family's yield is low and its precision is high.
+ *
+ * `/` is excluded from the key for one specific reason: without that, every `file.rs:1234` source
+ * reference in the corpus reads as the key `path/to/file.rs` with the measurement `1234`. On Arc
+ * that turned `cudarc-0.19.4/src/cublaslt/sys/mod.rs:747` into a proposal. A path is not a key.
  */
 const KV_LINE = new RegExp(
-  String.raw`^([A-Za-z][A-Za-z0-9_./+()-]*(?: [A-Za-z0-9_./+()-]+){0,4}) *: *(${NUMBER})(?: *(${UNIT_ALT}))? *$`,
+  String.raw`^([A-Za-z][A-Za-z0-9_.+()-]*(?: [A-Za-z0-9_.+()-]+){0,4}) *: *(${NUMBER})(?: *(${UNIT_ALT}))? *$`,
   "i",
 );
 
 /**
  * Family B. "<subject> is <number> <unit>", anchored to a sentence boundary.
  *
- * Two guards carry this one. The negative lookahead forbids a copula *inside* the subject, so
- * "X is 5 GB and Y is 3 GB" cannot capture "X is 5 GB and Y" as the subject. And the unit is
- * mandatory: a bare number in prose is usually enumeration ("there are 3 reasons"), so requiring
- * a unit from the closed lexicon is what keeps this family from being a noise generator.
+ * Three guards carry this one. The negative lookahead forbids a copula *inside* the subject, so
+ * "X is 5 GB and Y is 3 GB" cannot capture "X is 5 GB and Y" as the subject. The unit is
+ * mandatory, because a bare number in prose is usually enumeration ("there are 3 reasons"). And
+ * the trailing lookahead rejects a hyphen as well as a letter or digit, because `is 3 CPU-side +
+ * 2 CUDA tests` is not a count of three CPUs — a unit that turns out to be the head of a
+ * compound word was never a unit.
  */
 const IS_MEASUREMENT = new RegExp(
-  String.raw`(?:^|[.;!?]\s+)((?!(?:is|are|was|were)\b)[A-Za-z_"'][\w"'./:-]*(?:\s+(?!(?:is|are|was|were)\b)[\w"'./:%$-]+){0,4})\s+(?:is|are|was|were)\s+(?:now\s+|about\s+|approximately\s+|roughly\s+|~)?(${NUMBER})\s*(${UNIT_ALT})(?![A-Za-z0-9_/])`,
+  String.raw`(?:^|[.;!?]\s+)((?!(?:is|are|was|were)\b)[A-Za-z_"'][\w"'./:-]*(?:\s+(?!(?:is|are|was|were)\b)[\w"'./:%$-]+){0,4})\s+(?:is|are|was|were)\s+(?:now\s+|about\s+|approximately\s+|roughly\s+|~)?(${NUMBER})\s*(${UNIT_ALT})(?![A-Za-z0-9_/-])`,
   "gi",
 );
 
 /**
+ * `4096 × 2 B = 8,192 B` is arithmetic, not a factor. A `×` or `x` followed by another number is
+ * a multiplication sign, and reading it as "4096 times" produces a confident falsehood — the one
+ * outcome this project exists to prevent.
+ */
+const MULTIPLICATION = /^\s*\d/;
+
+/**
  * Family C. A one-word term, a copula, an article, and a definition that ends the line.
  *
- * Restricted to a single-token subject on purpose. "This is the reason the queue stalls." has the
- * same shape and defines nothing, and a multi-word subject is nearly always that sentence rather
- * than a definition.
+ * Restricted to a single token, and then restricted again to a token that *looks like a term*:
+ * it must carry a `_`, a `.`, a `/`, a `::`, interior capitalisation, or be an acronym. That
+ * second restriction is not fastidiousness, it is measured. Without it, this family's entire
+ * yield on Arc's `memory/` tree was fifteen candidates and roughly two real definitions —
+ * "profile is the cheap precursor", "launches are the MoE router", "exclusion is a rule stated in
+ * advance" all have a definition's shape and are mid-narrative prose. English "is a" is as often
+ * rhetoric as definition, so the only reliable signal available without a parser is that the
+ * thing being defined is spelled like a named thing.
  */
 const DEFINITION = new RegExp(
   String.raw`^([A-Za-z_][\w./:-]{1,50})\s+(?:is|are)\s+(?:a|an|the)\s+([^.!?;:]{4,120})\.$`,
 );
+
+const TERM_LIKE = /[_./]|::|^[A-Z][a-z0-9]*[A-Z]|^[A-Z]{2,}$/;
 
 const HEADING = /^ {0,3}(#{1,6})\s+(.+)$/;
 const FENCE = /^\s*(?:```|~~~)/;
@@ -331,12 +434,31 @@ function cleanSubject(text: string): string {
     .slice(0, MAX_SUBJECT_CHARS);
 }
 
+/**
+ * The last gate before a candidate becomes a row.
+ *
+ * Every clause here was added because the extractor produced a specific bad proposal from Arc's
+ * corpus, and the comments on `PRONOUNS` and `FRAGMENT_WORDS` name which one.
+ */
 function usable(subject: string, predicate: string): boolean {
-  const key = subject.toLowerCase();
-  if (subject.length < 2 || Object.hasOwn(EMPTY_SUBJECTS, key)) return false;
+  if (subject.length < 2) return false;
   if (/^[\d.,+-]+$/.test(subject)) return false;
+  // A colon inside a subject means the span crossed a label boundary: "Supporting: the gather's
+  // mma floor" is two things, and the measurement belongs to the second.
+  if (subject.includes(":")) return false;
+  // A full stop followed by a space means the span crossed a sentence boundary that the anchor
+  // could not see, because `.` is a legal character inside a word ("temps fine. Floor",
+  // "production toolchain. Production"). The head of such a span is the previous sentence's tail.
+  if (subject.includes(". ")) return false;
   if (predicate.length < 2 || Object.hasOwn(EMPTY_PREDICATES, predicate)) return false;
-  return true;
+
+  const words = subject.toLowerCase().split(" ");
+  const first = words[0];
+  const last = words[words.length - 1];
+  if (!first || !last) return false;
+  if (words.length === 1 && Object.hasOwn(BARE_ONLY, first)) return false;
+  if (Object.hasOwn(PRONOUNS, first) || Object.hasOwn(PRONOUNS, last)) return false;
+  return !words.some((word) => Object.hasOwn(FRAGMENT_WORDS, word));
 }
 
 interface ExtractableLine {
@@ -479,8 +601,9 @@ export function extractFromDocument(
 
     const definition = DEFINITION.exec(text);
     if (definition) {
-      const subject = cleanSubject(definition[1] ?? "");
-      if (usable(subject, "is_defined_as")) {
+      const term = definition[1] ?? "";
+      const subject = cleanSubject(term);
+      if (TERM_LIKE.test(term) && usable(subject, "is_defined_as")) {
         out.push({
           ...base,
           subject,
@@ -498,9 +621,13 @@ export function extractFromDocument(
     for (let m = IS_MEASUREMENT.exec(text); m !== null; m = IS_MEASUREMENT.exec(text)) {
       const subject = cleanSubject(m[1] ?? "");
       const value = m[2] ?? "";
-      const unit = (m[3] ?? "").toLowerCase();
+      const written = m[3] ?? "";
+      const unit = written.toLowerCase();
       const predicate = UNIT_PREDICATE[unit] ?? null;
       if (!predicate || !usable(subject, predicate)) continue;
+      if (predicate === "factor" && MULTIPLICATION.test(text.slice(m.index + m[0].length))) {
+        continue;
+      }
       out.push({
         ...base,
         subject,
@@ -508,7 +635,7 @@ export function extractFromDocument(
         object: {
           value: Number.parseFloat(value.replace(/,/g, "")),
           unit,
-          text: `${value} ${unit}`,
+          text: `${value} ${written}`,
         },
         kind: "measured",
         citation: { source, excerpt, family: "is-measurement", heading },
@@ -529,11 +656,19 @@ const INSERT_PROPOSAL = `
 /**
  * Write candidates, skipping anything `proposal_identity` already covers.
  *
- * One statement per row, outside any transaction, and that is the point: a unique violation
- * aborts only its own statement, so 999 good candidates are not lost to the 1000th duplicate.
- * The count of skips is therefore exact rather than inferred, which matters because "the
- * extractor produced nothing new" and "the extractor produced nothing" are different facts about
- * a corpus and a reviewer needs to tell them apart.
+ * One statement per row, outside any transaction, and there are two reasons rather than one.
+ *
+ * The first is forced. `proposal_identity` is `DEFERRABLE INITIALLY IMMEDIATE`, and Postgres
+ * refuses a deferrable constraint as an `ON CONFLICT` arbiter — verified, not assumed:
+ * `ERROR: ON CONFLICT does not support deferrable unique constraints/exclusion constraints as
+ * arbiters`. So the batch upsert this would obviously want does not exist, and catching 23505 is
+ * the only way to express "skip the ones already on file".
+ *
+ * The second is that it is the better shape anyway. A unique violation aborts only its own
+ * statement, so 999 good candidates are not lost to the 1000th duplicate, and the skip count is
+ * exact rather than inferred — which matters, because "the extractor produced nothing new" and
+ * "the extractor produced nothing" are different facts about a corpus and a reviewer draining a
+ * queue needs to tell them apart.
  *
  * Shared with the rules subsystem, which files unenforced-doctrine findings the same way.
  */
