@@ -9,10 +9,10 @@ is no research left in it.
 
 ## The kickoff prompt
 
-> Read `HANDOFF.md` in full, then build **v0 per §14**. Eight deliverables: schema + the five
+> Read `HANDOFF.md` in full, then build **v0 per §14**. Nine deliverables: schema + the five
 > invariants, verification worker, `/v1` HTTP API, `/mcp` facade, the `datum` CLI, the `/admin`
-> panel, the Arc seed, and backups with an executed restore drill. Deployed to fly.io on
-> `datum.aeonmind.ai`, with Postgres self-hosted on its own Machine.
+> panel, the Arc seed, backups with an executed restore drill, and **self-hostability by a
+> stranger** (§15). Deployed to fly.io on `datum.aeonmind.ai`, with Postgres on its own Machine.
 >
 > Start with #1 and do not move on until its six adversarial writes are each rejected **by the
 > database**, with a machine-readable reason, and every test is **mutation-checked both ways** with
@@ -87,7 +87,21 @@ human claim can never satisfy a gate requiring `measured`. The disagreement beco
 becoming load-bearing. Deliverable 1's test set therefore has **seven** cases: six rejections and
 one acceptance.
 
+## Scope of this repo
+
+**Single-tenant, internal-first, and self-hostable by any org** (§15, §17). Aeonmind's instance is
+one deployment of a general server, not a general server bent around aeonmind. So: `DATUM_ORG` is
+configuration, no query assumes the org root is the top of the tree, the server fails closed without
+its secrets, and nothing phones home.
+
+Multi-tenancy and enterprise features land later in a **separate private repo** that depends on this
+one. This repo therefore contains **no enterprise stubs, no paid-feature flags, and no `if (license)`
+branches** — a reader should never hit a wall advertising a product.
+
+Deliverable 9 has a falsifiable test: hand the README and an empty directory to a fresh agent
+session and watch where it stalls. If it stalls, the README is wrong, not the agent.
+
 ## Contributing
 
-Apache-2.0. Copyright stays with Aeonmind AI so the licence can change for future versions if the
-commercial shape changes.
+Apache-2.0. Copyright stays with Aeonmind AI so future versions can be dual- or re-licensed if the
+commercial shape changes — an option preserved by ownership, never by crippling the core.

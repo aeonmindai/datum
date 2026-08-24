@@ -608,6 +608,7 @@ are the database operator, so backups plus an executed restore drill are in scop
 | 6 | **Admin panel** `/admin` | §13 items 1–7, in `echos_app`'s design language |
 | 7 | **Seeded with Arc** | the ~30 real facts from `arc/memory/STATE.json`, including the ten `confirmed_by_jish` answers, and the retired numbers loaded as `kind: dead` so the store can prove it refuses to surface them |
 | 8 | **Backups + an executed restore drill** | `pg_dump` on a schedule to object storage outside the Fly org, volume snapshots on, and a restore into a fresh Machine that then **passes the deliverable-1 invariant tests**. Record the drill. A backup you have never restored is not a backup, and by this project's own doctrine an untested backup is an unverified claim. |
+| 9 | **Self-hostable by a stranger** | configurable `DATUM_ORG` with no hardcoded org anywhere; boot **fails closed** without `DATUM_ADMIN_PASSWORD_HASH` and `DATUM_SESSION_SECRET`, with an error naming the fix; `datum hash-password`, `datum migrate` (embedded), `datum init`, `datum seed --example`; both `fly launch` and `docker compose up` paths from the committed configs; no telemetry. Accept: a fresh agent session, given only the README and an empty directory, reaches a running instance with a minted key in <10 min (§15). |
 
 **Out of v0, deliberately:** projections to Discord and Linear, NATS (the outbox table is written but
 not consumed), registry heartbeats, embeddings, multi-tenant auth, OIDC token exchange, the
@@ -618,7 +619,70 @@ exist. Sequence is **v0 → M2 → decide → M3/M4**.
 
 ---
 
-## 15. After v0
+## 15. Self-hosting — anyone, any org
+
+**Decided: the public repo is a single-tenant server any organisation can run for itself.**
+Aeonmind's own instance is just one deployment of it. Enterprise and multi-tenant land later in a
+**private** repo. That decision has consequences that are cheap now and expensive to retrofit, so
+they are v0 requirements, not polish.
+
+### 1. Nothing about aeonmind is hardcoded
+
+The scope root is configuration: `DATUM_ORG=acme` yields `org/acme`. **No query may assume the org
+root is the top of the tree** — always resolve from the configured root. That single discipline is
+also what makes multi-tenancy additive later: a tenant dimension is inserted *above* the root
+without touching resolution logic. Get it wrong and multi-tenant becomes a rewrite of the one table
+we have promised never to mutate.
+
+### 2. Fail closed on secrets. A shipped default password is a CVE, not a convenience
+
+The server **refuses to boot** without `DATUM_ADMIN_PASSWORD_HASH` and `DATUM_SESSION_SECRET`, with
+an error that says exactly how to generate them. Ship `datum hash-password` so a self-hoster can
+produce an argon2id hash without knowing what argon2id is. Aeonmind's password is then simply our
+deployment's env value, set with `fly secrets set` — it has no special status in the code.
+
+### 3. Two deploy paths, one image
+
+- `fly launch` with the committed `fly.toml` — our path, and a reference for other Fly users.
+- `docker compose up` — Postgres plus the server, for everyone else. Same image, no Fly dependency.
+
+`datum migrate` runs migrations from an embedded set. **Never a README instructing a stranger to
+apply SQL files in order** — that is how self-hosted installs end up on undocumented schema drift.
+
+`datum init` then creates the org scope, the first admin, and the first API key, printing the key
+once.
+
+### 4. Nothing calls home
+
+No telemetry, no license check, no phone-home. If usage reporting is ever added it is opt-in and
+disclosed in one line in the README. An org running a **truth store** will read the network calls;
+there must be none to find.
+
+### 5. The seed is an example, not our data
+
+`datum seed --example` loads a small synthetic fixture that demonstrates a supersession, a
+contested pair and a mission with gates — enough to click through the panel on a fresh install.
+Aeonmind's Arc seed (v0 deliverable 7) is a separate local script and not the default.
+
+### 6. Acceptance test — and it is falsifiable
+
+**A competent stranger with no context follows the README on a clean machine and reaches a running
+instance with a minted API key in under 10 minutes, without reading `HANDOFF.md`.** Verify it by
+handing the README to a fresh agent session with an empty directory and watching where it stalls.
+If it stalls, the README is wrong — not the agent.
+
+### 7. The open-core seam, defined now so the split stays clean
+
+Public repo, Apache-2.0: the single-tenant core, complete and genuinely useful on its own. Private
+repo, later: multi-tenancy, SSO, audit export, whatever enterprise turns out to mean.
+
+The rule that keeps this honest: **the public repo contains no enterprise stubs, no paid-feature
+flags, and no `if (license)` branches.** The private repo *depends on* the public one and adds
+routes and capabilities on top. A reader of the open repo should never encounter a wall advertising
+a product. Copyright stays with Aeonmind AI, so future versions can be dual- or re-licensed if the
+commercial shape changes — that option is preserved by ownership, not by crippling the core.
+
+## 16. After v0
 
 - **M2 — the benchmark that decides whether this ships. Stop gate.** Replay the real Arc corpus:
   21,619 lines, 449 in-place retraction markers, the known-dead numbers, the two divergent
@@ -634,7 +698,7 @@ exist. Sequence is **v0 → M2 → decide → M3/M4**.
   50 rps global limit by coalescing. Remember Linear's `actor=app` cannot hold `admin` scope, so the
   app can never provision its own webhook.
 
-## 16. Decided, and still open
+## 17. Decided, and still open
 
 ### ✅ DECIDED 2026-08-24 — contradictions are ADVISORY across authority tiers
 
@@ -667,20 +731,35 @@ that knowledge; silent human-wins would have marked a target reached with no evi
 keeps both, and the pair tells the next agent exactly what to do — go find the box or commit where
 it happened.
 
+### ✅ DECIDED 2026-08-24 — internal, single-tenant, and self-hostable by anyone
+
+Jish's call. Three parts:
+
+- **Single-tenant now.** One org per deployment. The schema is single-tenant; the *scopes* are
+  multi-tenant-shaped, so the later migration is additive rather than a rewrite. The discipline that
+  buys this is in §15.1: never assume the org root is the top of the tree.
+- **Internal first.** Aeonmind's instance is the first user. No external customers in v0, so no
+  billing, no signup, no tenant isolation testing.
+- **Enterprise and multi-tenant later, in a private repo**, depending on the public one. The public
+  repo stays a complete, genuinely useful single-tenant server with **no enterprise stubs and no
+  paid-feature walls** (§15.7).
+
+And the requirement that follows from it, which is stronger than "internal": **any organisation can
+self-host this for itself.** Aeonmind's deployment is one instance of a general server, not a
+general server bent around aeonmind. That is v0 deliverable 9 and it is specified in §15.
+
 ### Still open
 
-1. **Multi-tenant from day one, or aeonmind-only first?** It changes the auth model materially.
-   Recommendation: single-tenant schema, multi-tenant-shaped scopes, so the migration is additive.
-2. **Does GSM8K 96% get an assertion?** Under these rules it is `confirmed-by-human` with no commit
+1. **Does GSM8K 96% get an assertion?** Under these rules it is `confirmed-by-human` with no commit
    and no protocol, so it is unpublishable until re-measured. That is correct behaviour and it is
    also a live example of the system telling you something you may not want to hear.
-3. **Product or internal?** If product: the wedge is the contradiction adjudicator plus the
-   evidence-class taxonomy, neither of which exists anywhere, and the moat is cross-project
-   inheritance.
+2. **What does "enterprise" actually mean** when the private repo starts? Likely multi-tenancy, SSO,
+   audit export, retention policy. Worth naming before the split so the seam is drawn in the right
+   place rather than discovered.
 
 ---
 
-## 17. Evidence
+## 18. Evidence
 
 `research/` — 523 KB, five slices, every claim URL-carrying:
 
