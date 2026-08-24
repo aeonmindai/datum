@@ -212,15 +212,21 @@ logged. Rejected. This is the entire product.
    16-processor Sequent that append-only is *why* concurrent writes are cheap — "because hypotheses
    are never deleted... only one lock is ever acquired at a time, deadlock is impossible" — reaching
    4.8× on 5 processors.
-3. **No two live contradicting assertions.** Postgres 18 shipped the application-time half of
-   SQL:2011: `WITHOUT OVERLAPS` on a unique constraint over
-   `(scope, subject, predicate, valid_period)` makes a contradiction **physically un-insertable**.
-   No bitemporal engine offers this. It is the strongest single argument for Postgres over
-   XTDB or Datomic, and it turns the field's hardest unsolved problem into a declarative constraint.
-4. **No unverifiable claim of landing.** Any evidence naming a repo and commit is re-verified
-   asynchronously: does the commit exist, is it contained in the named branch? The verification
-   outcome is itself an assertion. Precedent: GitHub Copilot Memory validates citations against the
-   current branch — the only shipped mechanism of this kind found anywhere.
+3. **No two live contradicting assertions.** An `EXCLUDE USING gist` constraint over
+   `(scope =, subject =, predicate =, valid_period &&) WHERE superseded_by IS NULL` makes a
+   contradiction **physically un-insertable**. Postgres 18's `WITHOUT OVERLAPS` expresses this more
+   elegantly, but **Fly Managed Postgres is PG16**, so the exclusion constraint is the shipping
+   form — and it works from PG13, which makes the host swappable. No bitemporal engine offers
+   either, and this turns the field's hardest unsolved problem into a declarative constraint.
+   See §10 for the exact DDL.
+4. **Confidence is earned, never claimed.** This is a correction to an earlier draft that made the
+   commit check a database constraint — Postgres cannot run git, so that was unimplementable.
+   The right design is stronger: **an agent cannot assert `measured`.** Every write lands as
+   `unverified`, and a verification worker *promotes* it to `measured` only after confirming the
+   commit resolves and is contained where the evidence claims. The verification outcome is itself
+   an assertion. Precedent: GitHub Copilot Memory validates citations against the current branch —
+   the only shipped mechanism of this kind found anywhere. This closes exactly the hole that let
+   "branch work quoted as shipped" survive three sessions on Arc.
 5. **No target without a machine-checkable gate.** See §6.
 
 ---
@@ -243,6 +249,42 @@ Cross-project edges are first-class: `applies_to`, `derived_from`, `contradicts`
 on H200 decode" is an org-level assertion every project inherits for free. **That inheritance is the
 compounding asset and the commercial wedge** — the more projects, the more valuable, which is the
 opposite of every competitor, where projects are billing-isolation units.
+
+### `datum link`, and the one toggle that matters
+
+A repo joins by running `datum link` inside it. That reads the git remote for identity, creates a
+`proj/<name>` scope if it does not exist, registers the repo as a node, and writes a local
+`.datum.toml` with the scope path and which key to use. Many worktrees of one repo are **one
+project with many nodes**, not many projects.
+
+Each project then has exactly one knowledge mode, flippable at any time:
+
+```
+datum mode global      # resolution path includes org/aeonmind - inherits global facts
+datum mode isolated    # resolution stops at proj/<name> - sees only its own
+datum status           # who am I, which scope, which mode, what is the mission
+```
+
+**Default is `global`,** because org-scope facts are curated by construction — someone deliberately
+asserted at org level — and inheritance is the entire compounding asset. "cudnn costs −62% on H200
+decode" should cost every future project zero effort to know.
+
+**Isolation is not about override.** Nearest-scope-wins already handles disagreement: a project
+asserting its own value for the same subject and predicate simply wins locally, and it does *not*
+raise a contradiction, because scope is part of the exclusion key (§4.3). So the org fact and the
+project fact coexist correctly, each authoritative in its own scope. Isolation exists for the
+narrower case where a project should not even *see* org knowledge — different hardware, a different
+tenant, a clean-room experiment, or an outside contributor.
+
+**The toggle is an assertion, not a setting.** Flipping it writes a new `kind: state` assertion that
+supersedes the previous mode, which buys three things: *"when did this project start reading global
+facts?"* is a query; an as-of read reconstructs what the project could see **at that time** rather
+than under today's mode; and nothing is rewritten when you flip it back.
+
+One edge case to handle rather than discover: a `derived` assertion in a project whose inputs came
+from org scope, where the project later goes `isolated`. Its inputs are no longer resolvable, so it
+must be **flagged as unresolvable**, never silently kept. Silently keeping it is precisely the class
+of stale-fact bug this system exists to prevent.
 
 ---
 
@@ -336,17 +378,53 @@ Requirement is millisecond, no guesses. Therefore:
 
 ---
 
-## 10. Recommended stack
+## 10. Stack — hosted on fly.io
+
+Verified against Fly's docs 2026-08-24. **One finding changes the design: Fly Managed Postgres is
+Postgres 16**, and "security patches and version upgrades" are listed under *what's not there yet*.
+So `WITHOUT OVERLAPS` (PG18), which §4.3 called the strongest argument for Postgres, **is not
+available on Fly.** Invariant 3 uses the exclusion-constraint route instead, which achieves the same
+physical impossibility on PG13+:
+
+```sql
+CREATE EXTENSION btree_gist;   -- trusted since PG13, ships in contrib
+ALTER TABLE assertions ADD CONSTRAINT no_two_live_contradictions
+  EXCLUDE USING gist (
+    scope           WITH =,
+    subject         WITH =,
+    predicate       WITH =,
+    valid_period    WITH &&
+  ) WHERE (superseded_by IS NULL);
+```
+
+This is strictly better for portability: the schema now runs on any Postgres from 13 up, so the host
+is a swappable decision rather than a dependency. Confirm `btree_gist` is creatable on MPG at first
+deploy — it is a trusted extension in the default PG16 contrib set, but MPG restricts third-party
+extensions to `pgvector` and `PostGIS`.
 
 | layer | choice | why |
 |---|---|---|
-| store | **Postgres 18** | `WITHOUT OVERLAPS` gives invariant 3 declaratively. `REVOKE UPDATE/DELETE` gives invariant 2. Boring, hostable anywhere. |
-| ordering | Postgres sequence as `asserted_at` | total order, no clock, no skew |
-| fanout | **NATS JetStream via transactional outbox** | **never `LISTEN/NOTIFY`** — it takes a global `AccessExclusiveLock` on commit and serialises the entire instance; three dated production outages in the research |
-| hot cache | per-worktree **SQLite**, content-addressed, read-through, offline outbox | immutable rows cache perfectly; no CRDT needed, because append-only with a server-assigned sequence has no merge conflict |
-| search | `tsvector` + partial live index | exact-first |
-| transport | HTTP + **an MCP server** + a small CLI | MCP is how any harness plugs in without an SDK |
-| hosting | Postgres (Neon or Supabase) + one small API service | Neon branching is for as-of debugging environments, **not** per-worktree: 10–25 branches/project practical, $1.50/branch-month, and scale-to-zero breaks the read SLO |
+| store | **Fly Managed Postgres**, Basic plan | HA, automatic backups, failover, connection pooling and encryption included; lives on the org's private network |
+| contradiction constraint | `EXCLUDE USING gist` + `btree_gist` | PG16-compatible; `WITHOUT OVERLAPS` needs PG18 which Fly does not offer |
+| immutability | `REVOKE UPDATE, DELETE` on the table | invariant 2, enforced by the grant system |
+| ordering | a Postgres sequence as `asserted_at` | total order, no clock, no skew |
+| API | one **Fly Machine**, `min_machines_running = 1` | never scale to zero: a cold start breaks the p99 <10 ms read SLO. This is the same trap the research flagged for Neon |
+| fanout | outbox **table** in v0; NATS JetStream when projections land | **never `LISTEN/NOTIFY`** — global `AccessExclusiveLock` on commit serialises the whole instance, three dated outages in the research |
+| hot cache | per-worktree **SQLite**, content-addressed, read-through | immutable rows cache perfectly; no CRDT, because append-only with a server-assigned sequence cannot conflict |
+| search | `tsvector` + partial index on live rows | exact-first |
+| transport | HTTP + **MCP server** + CLI | MCP is how any harness plugs in with no SDK |
+| private networking | Fly 6PN, `.internal` DNS | API↔DB never crosses the public internet |
+
+**Running cost, sourced.** MPG Basic is **$38.00/mo** (shared-2x, 1 GB) plus storage at **$0.28 per
+provisioned GB** for a 30-day month. One always-on `shared-cpu-1x` 256 MB Machine is **~$2.02/mo**
+(~$2.32 in `sjc`). Volumes, if any, are **$0.15/GB-mo** with the first 10 GB free, and are billed
+even while the attached Machine is stopped. So **v0 lands at roughly $41–45/mo.**
+
+If that is too much for a v0, the alternative is Postgres on a Fly Machine with a volume for
+~$4–8/mo — but then you are the operator: no backups, no failover, no upgrades. Recommendation is
+MPG, because the whole product is a claim about durable truth and running the database as a hobby
+contradicts it. Note MPG does not yet do version upgrades, so plan on PG16 for the foreseeable
+future; the exclusion constraint above means that costs nothing.
 
 **Rejected:** Datomic — Jepsen found intra-transaction operations execute as if concurrent, so two
 individually invariant-preserving transaction functions jointly produce a record that is both
@@ -359,19 +437,76 @@ cluster fails."
 
 ---
 
-## 11. Auth — the thing that has already cost us twice
+### Domain and routing
 
-Arc lost a running job twice to a **single-use refresh token raced by concurrent agents**. This is
-not a bug we hit; it is the specification working as designed. RFC 9700 §4.14.2 concedes the
-authorization server "cannot determine which party submitted the invalid refresh token", so the
-correct spec-compliant response is to revoke the entire token family — killing the whole fleet.
+One Fly app, one custom domain, everything under it.
 
-**Therefore: never issue refresh tokens to agents. Ever.** One org-level grant. Each agent presents
-a platform OIDC workload assertion and receives, via RFC 8693 token exchange, a **5–15 minute,
-single-audience, scope- and mission-bound access token**. Expiry replaces revocation. Concurrency
-becomes a non-event because there is nothing to rotate.
+```
+datum.aeonmind.ai
+  /mcp                              MCP facade (streamable HTTP, POST)
+  /v1/assert  /v1/supersede         writes
+  /v1/ask  /v1/state  /v1/nodes     reads
+  /v1/missions                      mission objects and gate status
+  /admin                            admin panel (see §13)
+  /healthz                          liveness, unauthenticated
+  /.well-known/oauth-protected-resource   RFC 9728, stub in v0 (see §11)
+```
 
----
+Setup is `fly certs add datum.aeonmind.ai`, then the DNS records Fly prints — a `CNAME` to
+`<app>.fly.dev` for the subdomain plus the `_acme-challenge` record it asks for. Shared IPv4 is
+free; a dedicated IPv4 is $2/mo and is not needed. Confirm the exact records from
+`fly certs show datum.aeonmind.ai` rather than from this document.
+
+**MCP is a facade, never the substrate.** `research/ac-protocols.md` is emphatic and it is worth
+reading §"What we should deliberately do differently" before wiring it. MCP `2026-07-28` deleted
+sessions, the `initialize` handshake, `ping`, the GET endpoint, and `Last-Event-ID` resumability, so
+a broken stream loses the in-flight request with no replay and no cursor. Notifications carry a URI
+and no version, making fan-out O(N) racy re-reads. Statelessness is now normative, so presence and
+heartbeats are *unrepresentable* in the protocol — which means the registry in §7 cannot live in
+MCP. Therefore: `/mcp` exposes tools for agent convenience and IDE compatibility; `/v1` is the real
+interface and the one the registry, cursors and projections are built on.
+
+## 11. Auth
+
+Three separate concerns. Do not collapse them.
+
+**1. Admin panel — password, for now.** A single shared password, by explicit decision, to be
+replaced before this is exposed to anyone outside the org.
+
+- The value lives **only** in a Fly secret: `fly secrets set DATUM_ADMIN_PASSWORD_HASH='<hash>'`.
+  **Never in this repo, never in `fly.toml`, never in a migration.** This repo is public.
+- Store an **argon2id hash**, not the password. The server compares a hash; it never holds the
+  plaintext. Use a constant-time comparison.
+- Session is an `HttpOnly`, `Secure`, `SameSite=Strict` cookie, 12-hour expiry, signed with a
+  separate `DATUM_SESSION_SECRET`. Rate-limit `/admin/login` to something like 5 attempts per
+  15 minutes per IP, and log every failure as an assertion in the store — the panel dogfoods the
+  product.
+- 🔴 **Rotate it once the panel is up.** The current value was transmitted over a chat session, so
+  treat it as already disclosed. Ship with it, then rotate.
+
+**2. Agent access — API keys minted by the panel.** An agent presents
+`Authorization: Bearer dtm_live_…`. Each key is stored as a hash with a prefix kept in clear for
+display, and carries: a label, a scope path it is bound to, a permission set (`read`, `assert`,
+`supersede`, `admin`), an optional expiry, `created_by`, `last_used_at`, and a revoked flag. Show
+the secret exactly once at creation. Keys are the v0 mechanism because they are simple and
+auditable.
+
+**3. What comes after keys, and why.** Arc lost a running job **twice** to a single-use refresh
+token raced by concurrent agents. That is not a bug we hit; it is the specification working as
+designed — RFC 9700 §4.14.2 concedes the authorization server "cannot determine which party
+submitted the invalid refresh token", so the correct response is revoking the whole token family,
+killing the fleet.
+
+**Therefore, when this outgrows keys: never issue refresh tokens to agents.** One org-level grant;
+each agent presents a platform OIDC workload assertion and receives, via RFC 8693 token exchange, a
+5–15 minute single-audience, scope- and mission-bound access token. Expiry replaces revocation, so
+concurrency becomes a non-event because there is nothing to rotate.
+
+Note the standards gap: MCP `2026-07-28` requires servers to implement RFC 9728 Protected Resource
+Metadata and clients to send RFC 8707 resource indicators, i.e. it expects an OAuth 2.1 resource
+server. Bearer API keys are a deliberate v0 shortcut. Serve a minimal
+`/.well-known/oauth-protected-resource` so spec-following clients get a coherent answer, and record
+the shortcut as a `kind: state` assertion in the store so it cannot be quietly forgotten.
 
 ## 12. Failure modes to design against
 
@@ -393,33 +528,89 @@ becomes a non-event because there is nothing to rotate.
 
 ---
 
-## 13. Milestones
+## 13. The admin panel
 
-Each has a falsifiable acceptance test. No milestone is "done" without it.
+A real product surface, not a debug page. It is also the only way a human sees the store, so it
+carries the load that Linear and Discord will carry later.
 
-- **M0 — schema + invariants (no service).** Postgres migrations; assertions table with
-  `REVOKE UPDATE/DELETE`; `WITHOUT OVERLAPS` constraint; scope resolution as a SQL function.
-  *Accept:* six adversarial writes are rejected — no evidence, mutation attempt, overlapping
-  contradiction, `failed` without `reopen_if`, unverifiable commit, superseding a superseded row.
-  Each rejection carries a machine-readable reason. Mutation-test every assertion both ways.
-- **M1 — API + CLI + MCP server.** `assert`, `supersede`, `ask`, `state`, `mission`, `nodes`,
-  `check`. *Accept:* p99 read <10 ms at 1M assertions; as-of query returns the belief state of an
-  arbitrary past sequence number; `check` re-verifies every commit-bearing assertion against git.
-- **M2 — the benchmark that decides whether this ships.** Replay the real Arc corpus: 21,619 lines,
-  449 retraction markers, the known-dead numbers, the two divergent `FACTS.md` copies. Baselines:
-  full-context, and file-plus-grep. *Accept:* **≥10 points over both**, plus 100% on a
-  stale-fact-resistance set where the correct answer requires honouring a supersession, plus zero
-  dead numbers surfaced in a default read. **If this fails, stop building.**
-- **M3 — registry + missions.** Nodes with heartbeats; missions with predicate gates;
-  `mission current` answers in one call from any machine. *Accept:* the Arc orphan audit
-  (155 branches → 11 disjoint / 29 safe / 115 hold) is reproduced as a registry query.
-- **M4 — projections.** Discord digest and a Linear bot, both write-only, both driven by the outbox,
-  with the causality id threaded through. *Accept:* an ingest storm produces no webhook recursion,
-  and Discord stays under 50 rps by coalescing.
+**Design direction is not freeform: read `echos_app` first.** Find it locally (there is an
+`echos-backend` under `~/Documents/GitHub/`, so locate its frontend sibling; ask if it is not
+there). Extract and reuse its actual design language — framework and version, styling approach,
+design tokens, spacing scale, typography, component patterns, motion, empty and error states — and
+match it. Do not invent a new visual system, and do not ship default component-library styling with
+the spacing left at zero thought. Write down in the PR which `echos_app` patterns you adopted, so
+the next person can tell inspiration from drift.
+
+What it must do in v0:
+
+1. **Login** — the single password from §11.
+2. **API keys** — list, create (label + scope + permissions + optional expiry), reveal-once,
+   revoke, and show `last_used_at`. This is the panel's reason to exist in v0.
+3. **Browse assertions** — filter by scope, subject, predicate, kind, confidence, live-only.
+   Every row shows its confidence class and its evidence. A superseded row is visibly *dead*, not
+   struck through — that distinction is the whole thesis, so make it visual and unmissable.
+4. **The supersession chain** — click a fact, see its full history, and an **as-of control** that
+   answers *"what did we believe on this date?"* This is the feature no competitor has; it should
+   be the thing a demo opens on.
+5. **Contradictions** — the queue of conflicts that were refused, with both sides, their evidence,
+   and a resolve action. If we ship one screen, this is it.
+6. **Missions** — statement, gates, target versus reached, and which evidence class each gate
+   demands.
+7. **Rejected writes** — a live log of what the store refused and why. This is the panel's most
+   persuasive screen for a sceptic, because it shows the invariants biting in real time.
+
+Things I would add beyond the brief, in priority order: a **scope tree** that visualises
+nearest-scope-wins resolution so inheritance is legible; a **provenance hover** that shows the
+commit, its containment, and whether verification has promoted the claim yet; a **diff view**
+between two as-of points; and per-key **usage sparklines**, since a key that stopped being used is
+usually an agent that died.
 
 ---
 
-## 14. Open questions for Jish
+## 14. v0 delivery — the build target
+
+Everything above is the design. This is what to actually ship, in one pass. Estimated 4–6 focused
+hours; there is no research left in it.
+
+**Deploy target:** one Fly app, Fly Managed Postgres (Basic), custom domain
+`datum.aeonmind.ai`, `min_machines_running = 1`. Roughly $41–45/mo (§10).
+
+| # | deliverable | done when |
+|---|---|---|
+| 1 | **Schema + the five invariants** | six adversarial writes are each rejected **by the database**, with a machine-readable reason: no evidence; `UPDATE`/`DELETE`; overlapping live contradiction; `kind='failed'` without `reopen_if`; asserting `measured` directly (see §4.4 — it must be earned); superseding an already-superseded row. Every test **mutation-checked both ways**, values reported in both directions. |
+| 2 | **Verification worker** | promotes `unverified` → `measured` only after confirming `evidence.commit` resolves and is contained where claimed; writes the outcome as its own assertion |
+| 3 | **HTTP API** `/v1` | `assert`, `supersede`, `ask`, `state`, `nodes`, `missions`; exact-first retrieval; superseded rows never in a default read; a working as-of query |
+| 4 | **MCP facade** `/mcp` | `state`, `ask`, `why`, `assert`, `supersede`, `nodes` — six tools, not thirty, because every tool definition is injected into every agent session. Responses **~200 bytes and provenance-dense, never 20 KB**; a chatty MCP server is a permanent context tax on everything that connects |
+| 5 | **CLI** `datum link` / `mode` / `status` | links a repo to its project scope, flips global vs isolated as a superseding assertion, reports scope and mission (§5) |
+| 6 | **Admin panel** `/admin` | §13 items 1–7, in `echos_app`'s design language |
+| 7 | **Seeded with Arc** | the ~30 real facts from `arc/memory/STATE.json`, including the ten `confirmed_by_jish` answers, and the retired numbers loaded as `kind: dead` so the store can prove it refuses to surface them |
+
+**Out of v0, deliberately:** projections to Discord and Linear, NATS (the outbox table is written but
+not consumed), registry heartbeats, embeddings, multi-tenant auth, OIDC token exchange, the
+contradiction *resolution* workflow beyond a queue and a resolve action.
+
+**The order matters.** v0 exists so M2 can be run — you cannot benchmark a store that does not
+exist. Sequence is **v0 → M2 → decide → M3/M4**.
+
+---
+
+## 15. After v0
+
+- **M2 — the benchmark that decides whether this ships. Stop gate.** Replay the real Arc corpus:
+  21,619 lines, 449 in-place retraction markers, the known-dead numbers, the two divergent
+  `FACTS.md` copies. Baselines: full-context, and plain-file-plus-`grep`. *Accept:* **≥10 points
+  over both**, 100% on a stale-fact set where the right answer requires honouring a supersession,
+  and zero dead numbers in a default read. **If this fails, stop building.** Do not soften it
+  because v0 went well — that is the failure mode.
+- **M3 — registry + missions at scale.** Nodes with heartbeats. *Accept:* the Arc orphan audit
+  reproduces as a registry query — 155 branches → 11 disjoint / 29 safe / 115 hold / 435 stranded
+  commits.
+- **M4 — projections.** Discord digest and Linear bot, write-only, outbox-driven, causality id
+  threaded. *Accept:* an ingest storm causes no webhook recursion and Discord stays under its
+  50 rps global limit by coalescing. Remember Linear's `actor=app` cannot hold `admin` scope, so the
+  app can never provision its own webhook.
+
+## 16. Open questions for Jish
 
 1. **Multi-tenant from day one, or aeonmind-only first?** It changes the auth model materially.
    Recommendation: single-tenant schema, multi-tenant-shaped scopes, so the migration is additive.
@@ -435,7 +626,7 @@ Each has a falsifiable acceptance test. No milestone is "done" without it.
 
 ---
 
-## 15. Evidence
+## 17. Evidence
 
 `research/` — 523 KB, five slices, every claim URL-carrying:
 

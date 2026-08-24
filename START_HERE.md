@@ -1,88 +1,82 @@
 # Start here
 
-Three things, in order. Total reading before you write code: about 15 minutes.
+Read **`HANDOFF.md`** once, top to bottom. It is written to be built from cold. `research/` is
+523 KB of sourced prior art — do not read it; open a file only to challenge a specific decision, and
+note that each report ends with what its author could **not** verify.
 
-1. **`HANDOFF.md`** — the whole design. Written to be built from cold. Read it once, top to bottom.
-2. **`research/`** — the evidence. Do not read it now. Open a file only when you want to challenge a
-   specific decision; each report ends with what its author could **not** verify.
-3. **This file** — how to begin.
+The build target is **`HANDOFF.md` §14 — v0 delivery**. One pass, roughly 4–6 focused hours. There
+is no research left in it.
 
 ## The kickoff prompt
 
-Paste this into a fresh agent session with the repo checked out. It is deliberately narrow.
-
-> Read `HANDOFF.md` in full, then implement **M0 only**: the Postgres schema and the five
-> invariants. No API, no CLI, no service.
+> Read `HANDOFF.md` in full, then build **v0 per §14**. Seven deliverables: schema + the five
+> invariants, verification worker, `/v1` HTTP API, `/mcp` facade, the `datum` CLI, the `/admin`
+> panel, and the Arc seed. Deployed to fly.io on `datum.aeonmind.ai`.
 >
-> M0 is done when six adversarial writes are each **rejected by the database or a constraint
-> function**, not by application code, and each rejection carries a machine-readable reason:
+> Start with #1 and do not move on until its six adversarial writes are each rejected **by the
+> database**, with a machine-readable reason, and every test is **mutation-checked both ways** with
+> the values reported in both directions. Real Postgres in a container; never stub it.
 >
-> 1. an assertion with no `evidence`
-> 2. an `UPDATE` or `DELETE` against the assertions table
-> 3. an assertion that overlaps an existing live assertion on
->    `(scope, subject, predicate, valid_period)`
-> 4. `kind = 'failed'` with no `reopen_if`
-> 5. `kind = 'measured'` whose `evidence.commit` does not resolve in the named repo
-> 6. an assertion superseding an already-superseded assertion
+> Before building the admin panel, read `echos_app` and adopt its actual design language — stack,
+> tokens, spacing, typography, component patterns, empty and error states. Say in the PR which
+> patterns you took. Do not invent a new visual system and do not ship unstyled component defaults.
 >
-> Write the tests first. **Mutation-check every assertion both ways** — prove each test fails when
-> the constraint is removed, and report the values in both directions. A test that passes while its
-> assertion is unreachable is worse than no test.
+> Constraints that are already decided, do not relitigate: Fly Managed Postgres is **PG16**, so the
+> contradiction constraint is `EXCLUDE USING gist` with `btree_gist`, not PG18 `WITHOUT OVERLAPS`.
+> `min_machines_running = 1` — never scale to zero, it breaks the read SLO. MCP is a **facade**, not
+> the substrate; `/v1` is the real interface. Confidence is **earned**: nothing may be asserted as
+> `measured`, the verification worker promotes it.
 >
-> Use real Postgres 18 in a container. Do not stub the database. Do not add features that are not on
-> this list, and do not start M1.
+> Deliver a branch and a PR. Report what you built, the six rejection messages verbatim, the
+> mutation-check values both ways, and what you did **not** do.
 
-## Why that shape
+## Secrets — read before you deploy
 
-M0 is only schema because the five invariants **are** the product. Everything above them is
-plumbing that can be rewritten in an afternoon; the invariants cannot be retrofitted. If a
-contradiction can reach the table once, every downstream guarantee is decoration.
+Nothing secret goes in this repo. It is public.
 
-The reason the checks must live in the database and not the application is in `HANDOFF.md` §1:
-Wikidata's provenance was optional and went from 1.3% coverage to 68% over a decade, quality
-0.58/1. Optional means absent. A constraint that application code can route around is optional.
+```
+fly secrets set DATUM_ADMIN_PASSWORD_HASH='<argon2id hash>'   # ask Jish for the password
+fly secrets set DATUM_SESSION_SECRET='<random 32 bytes>'
+fly secrets set DATABASE_URL='<from fly mpg>'
+```
+
+The admin password is a single shared password by explicit decision, for now. Store the **argon2id
+hash**, never the plaintext, and compare in constant time. It should be rotated once the panel is
+up — treat the current value as already disclosed.
 
 ## The stop gate — read this before you get attached
 
-**M2 can kill the project, and it comes before any feature work.**
+**M2 comes after v0 and it can kill the project.**
 
-A plain text file plus `grep` scores **74.0%** on LOCOMO. Mem0's graph variant scores 68.5%. If
-Datum cannot beat both full-context and file-plus-grep by **≥10 points** on real data, it should not
-exist and you should stop building. The corpus to test against is real and already available: the
-Arc mission record, 21,619 lines with 449 in-place retraction markers, known-dead numbers, and two
-divergent copies of the same `FACTS.md`.
+A plain text file plus `grep` scores **74.0%** on LOCOMO; Mem0's graph variant scores 68.5%;
+MemoryBench found no memory system consistently beats simply using all task context. If Datum cannot
+beat both full-context and file-plus-grep by **≥10 points** on real data, it should not exist.
 
-Do not soften this gate later because M0 and M1 went well. That is the failure mode.
+The corpus is real and already available: the Arc mission record, 21,619 lines, 449 in-place
+retraction markers, known-dead numbers, and two divergent copies of the same `FACTS.md`.
+
+Do not soften this because v0 went well. That is the failure mode.
 
 ## Guardrails
 
 - **Never extract facts from prose.** A human or a verified instrument asserts; Datum records. A
-  customer audit of 10,134 mem0 entries found 97.8% junk, including 808 copies of one hallucinated
-  preference manufactured by a recall→re-extraction loop. That is what extraction produces.
+  customer audit of 10,134 mem0 entries found **97.8% junk**, including 808 copies of one
+  hallucinated preference manufactured by a recall→re-extraction loop.
 - **Never rebuild Temporal.** Datum holds beliefs, not executions.
 - **Never redefine a predicate.** Add a new name. Rewriting stored events destroys the ability to
   reproduce belief as of the rewrite, which is the headline feature.
-- **Embeddings are never a fact.** Separate channel, labelled fuzzy, never returned as truth.
-- **No `LISTEN/NOTIFY`.** It takes a global `AccessExclusiveLock` on commit and serialises the whole
-  instance. Transactional outbox to NATS JetStream instead.
-
-## Milestones
-
-`HANDOFF.md` §13 has the full list with acceptance criteria. Tracked as issues:
-
-- **M0** schema + invariants — the six rejections above
-- **M1** API + CLI + MCP server — p99 read <10 ms at 1M assertions, working as-of query
-- **M2** the benchmark that decides whether this ships — **stop gate**
-- **M3** registry + missions — reproduce the Arc orphan audit as a query
-- **M4** projections — Discord digest and Linear bot, write-only, outbox-driven
+- **Embeddings are never a fact.** Separate channel, labelled fuzzy.
+- **No `LISTEN/NOTIFY`.** Global `AccessExclusiveLock` on commit serialises the instance. Outbox
+  table in v0; NATS when projections land.
+- **Six MCP tools, not thirty.** Every tool definition is injected into every agent session.
 
 ## Open decisions
 
-`HANDOFF.md` §14. The one that shapes M0 is: **is a contradiction blocking or advisory when the
-writer is a human?** A human contradicting an instrument is a real event and probably should be
-allowed, loudly, with both rows live and a resolution required. Decide before you write constraint 3.
+`HANDOFF.md` §16. The one that shapes the schema: **when a human contradicts an instrument, is that
+blocking or advisory?** My recommendation is advisory — allow it loudly, both rows stay live, a
+resolution is required. Decide before writing the exclusion constraint.
 
 ## Contributing
 
 Apache-2.0. Copyright stays with Aeonmind AI so the licence can change for future versions if the
-commercial shape changes — see `HANDOFF.md` §14.
+commercial shape changes.
