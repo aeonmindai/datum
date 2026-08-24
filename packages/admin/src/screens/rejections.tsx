@@ -95,10 +95,8 @@ export function RejectionsScreen() {
             <TableHeader sticky>
               <TableRow className="hover:bg-transparent">
                 <TableHead>time</TableHead>
-                <TableHead>reason</TableHead>
-                <TableHead>inv</TableHead>
-                <TableHead>actor</TableHead>
-                <TableHead>route</TableHead>
+                <TableHead>reason · invariant</TableHead>
+                <TableHead>actor · route</TableHead>
                 <TableHead>target</TableHead>
                 <TableHead>message</TableHead>
                 <TableHead />
@@ -150,37 +148,42 @@ function RejectionRow({ row }: { row: Rejection }) {
           </span>
         </TableCell>
         <TableCell>
-          <CodeBadge variant="danger">{row.reason}</CodeBadge>
+          <span className="flex items-center gap-1.5">
+            <CodeBadge variant="danger">{row.reason}</CodeBadge>
+            {invariant === null ? null : (
+              <Badge
+                className="datum-num"
+                title={`Invariant ${invariant}`}
+                variant="danger"
+              >
+                {invariant}
+              </Badge>
+            )}
+          </span>
         </TableCell>
-        <TableCell className="datum-num">
-          {invariant === null ? (
-            <span className="text-muted-foreground">—</span>
-          ) : (
-            <Badge title={`Invariant ${invariant}`} variant="danger">
-              {invariant}
-            </Badge>
-          )}
+        <TableCell className="max-w-[13rem]">
+          <div className="flex flex-col gap-0.5">
+            <Mono className="truncate text-[12px]" title={row.actor ?? ""}>
+              {row.actor ?? "—"}
+            </Mono>
+            <Mono
+              className="truncate text-[11px] text-muted-foreground"
+              title={row.route ?? ""}
+            >
+              {row.route ?? "—"}
+            </Mono>
+          </div>
         </TableCell>
-        <TableCell className="max-w-[12rem]">
-          <Mono className="truncate text-muted-foreground" title={row.actor ?? ""}>
-            {row.actor ?? "—"}
-          </Mono>
-        </TableCell>
-        <TableCell className="max-w-[12rem]">
-          <Mono className="truncate text-muted-foreground" title={row.route ?? ""}>
-            {row.route ?? "—"}
-          </Mono>
-        </TableCell>
-        <TableCell className="max-w-[16rem]">
+        <TableCell className="max-w-[11rem]">
           {target.length === 0 ? (
             <span className="text-muted-foreground text-sm">—</span>
           ) : (
-            <Mono className="truncate text-[12px]" title={target.join(" · ")}>
+            <Mono className="block truncate text-[12px]" title={target.join(" · ")}>
               {target.join(" · ")}
             </Mono>
           )}
         </TableCell>
-        <TableCell className="max-w-[24rem]">
+        <TableCell className="max-w-[19rem]">
           <span className="block truncate text-sm" title={row.message ?? ""}>
             {row.message ?? "—"}
           </span>
@@ -209,7 +212,10 @@ function RejectionRow({ row }: { row: Rejection }) {
       </TableRow>
       {open ? (
         <TableRow className="hover:bg-transparent">
-          <TableCell className="border-r-0 bg-muted/30 p-0" colSpan={8}>
+          <TableCell
+            className="whitespace-normal border-r-0 bg-muted/30 p-0"
+            colSpan={6}
+          >
             <div className="flex flex-col gap-3 px-5 py-4">
               <div className="flex flex-wrap items-center gap-2">
                 <CodeBadge variant="danger">{row.reason}</CodeBadge>

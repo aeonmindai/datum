@@ -1,4 +1,5 @@
 import { existsSync } from "node:fs";
+import { sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import cookie from "@fastify/cookie";
 import fastifyStatic from "@fastify/static";
@@ -80,7 +81,21 @@ export async function buildServer(
 
   const adminDist = config.adminDistDir ?? DEFAULT_ADMIN_DIST;
   if (existsSync(adminDist)) {
-    await app.register(fastifyStatic, { root: adminDist, prefix: "/admin/", wildcard: false });
+    await app.register(fastifyStatic, {
+      root: adminDist,
+      prefix: "/admin/",
+      wildcard: false,
+      // Vite emits content-hashed asset filenames, so those are immutable forever and cheap to
+      // cache hard. index.html is the opposite: it names this build's assets, so a cached copy
+      // after a deploy points at files that no longer exist and the panel silently white-screens.
+      setHeaders(res, path) {
+        if (path.includes(`${sep}assets${sep}`)) {
+          res.header("cache-control", "public, max-age=31536000, immutable");
+        } else {
+          res.header("cache-control", "no-store");
+        }
+      },
+    });
     // The panel is hash-routed, so one index.html serves every deep link.
     app.get("/admin", async (_request, reply) => reply.redirect("/admin/", 302));
     app.setNotFoundHandler(async (request, reply) => {

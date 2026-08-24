@@ -14,6 +14,17 @@ const exec = promisify(execFile);
  */
 
 export interface ContainmentCheck {
+  /**
+   * Could we see the repository at all?
+   *
+   * This is the difference between "we looked and the commit is not there" and "we were not
+   * allowed to look", and conflating them is how a truth store starts telling lies. GitHub
+   * answers 404 for a private repo you cannot read, which is byte-identical to 404 for a
+   * commit that does not exist — so a claim about a private repo would be marked `refuted`,
+   * i.e. actively false, when the honest answer is that we do not know. Only a check with
+   * `readable: true` may ever produce a refutation.
+   */
+  readable: boolean;
   /** Does the commit resolve to a commit object at all? */
   exists: boolean;
   /** For each ref the evidence claims contains it: does it actually? */
@@ -23,6 +34,7 @@ export interface ContainmentCheck {
 }
 
 export const UNRESOLVABLE: ContainmentCheck = {
+  readable: false,
   exists: false,
   contained: {},
   method: "none",
@@ -40,6 +52,27 @@ export async function checkViaLocalClone(
   containedIn: readonly string[],
 ): Promise<ContainmentCheck> {
   const git = (args: string[]) => exec("git", ["-C", dir, ...args], { timeout: 20_000 });
+
+  // A path that is missing, or is not a git repository, means we cannot see the repo — not that
+  // the commit is absent from it. Without this the worker would refute every claim about a repo
+  // whose mirror had simply been moved.
+  let readable = false;
+  try {
+    await git(["rev-parse", "--git-dir"]);
+    readable = true;
+  } catch {
+    return {
+      readable: false,
+      exists: false,
+      contained: {},
+      method: "local-mirror",
+      detail: {
+        dir,
+        reason: "mirror_unreadable",
+        says: `${dir} is not a readable git repository, so this claim cannot be checked here.`,
+      },
+    };
+  }
 
   let exists = false;
   try {
@@ -82,7 +115,13 @@ export async function checkViaLocalClone(
     }
   }
 
-  return { exists, contained, method: "local-mirror", detail: { dir, contained_via: containedVia } };
+  return {
+    readable,
+    exists,
+    contained,
+    method: "local-mirror",
+    detail: { dir, contained_via: containedVia },
+  };
 }
 
 /** GitHub's compare payload, narrowed to the two fields the containment answer needs. */
@@ -114,10 +153,33 @@ export async function checkViaGitHub(
     return { status: res.status, json };
   };
 
+  // Ask about the REPOSITORY first. GitHub returns 404 for a repository you are not allowed to
+  // see, which is byte-identical to 404 for a repository that does not exist — and a 404 on the
+  // commit inside an invisible repo would otherwise be read as "this commit is not real".
+  // Confirming we can read the repo is what earns the right to refute anything about it.
+  const repoProbe = await get(`/repos/${repo}`);
+  const readable = repoProbe.status === 200;
+  const detail: Record<string, unknown> = {
+    repo_status: repoProbe.status,
+    authenticated: token !== null,
+  };
+
+  if (!readable) {
+    detail.reason = "repo_unreadable";
+    detail.says =
+      repoProbe.status === 404
+        ? `GitHub returns 404 for ${repo}. That means either it does not exist or this instance ` +
+          `cannot see it, and those are indistinguishable over the API — so this is unresolvable, ` +
+          `not refuted.` +
+          (token ? "" : " No DATUM_GITHUB_TOKEN is set; a private repo needs one.")
+        : `GitHub answered ${repoProbe.status} for ${repo}, so the claim cannot be checked.`;
+    return { readable: false, exists: false, contained: {}, method: "github-api", detail };
+  }
+
   const head = await get(`/repos/${repo}/commits/${encodeURIComponent(commit)}`);
   const exists = head.status === 200;
   const contained: Record<string, boolean> = {};
-  const detail: Record<string, unknown> = { commit_status: head.status };
+  detail.commit_status = head.status;
 
   if (exists) {
     for (const ref of containedIn) {
@@ -138,5 +200,5 @@ export async function checkViaGitHub(
     }
   }
 
-  return { exists, contained, method: "github-api", detail };
+  return { readable, exists, contained, method: "github-api", detail };
 }

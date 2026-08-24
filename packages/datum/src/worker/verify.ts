@@ -80,6 +80,9 @@ async function check(config: Config, row: AssertionRow): Promise<ContainmentChec
 
   if (!commit) {
     return {
+      // Nothing was read and nothing was concluded: a claim with no commit is not false, it is
+      // simply unverifiable until someone asserts again with one.
+      readable: false,
       exists: false,
       contained: {},
       method: "none",
@@ -103,6 +106,16 @@ async function check(config: Config, row: AssertionRow): Promise<ContainmentChec
 
 function judge(c: ContainmentCheck): { outcome: Outcome; why: string } {
   if (c.method === "none") return { outcome: "unresolvable", why: String(c.detail.says ?? "") };
+  // Only a check that could actually read the repository is allowed to refute anything. "We
+  // were not allowed to look" and "we looked and it is not there" are different answers, and a
+  // store that reports the first as the second is doing exactly what it exists to prevent:
+  // publishing a confident claim it cannot support.
+  if (!c.readable) {
+    return {
+      outcome: "unresolvable",
+      why: String(c.detail.says ?? "the repository could not be read, so nothing was concluded"),
+    };
+  }
   if (!c.exists) {
     return { outcome: "refuted", why: "evidence.commit does not resolve to a commit object" };
   }

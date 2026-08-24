@@ -545,6 +545,28 @@ function AsOfCard({
   const max = Math.max(sequence, Number.isFinite(writtenAt) ? writtenAt : 1, 1);
   const [asOf, setAsOf] = useState(max);
   const [debounced, setDebounced] = useState(max);
+  /**
+   * The number field holds raw text so an operator can clear it and retype.
+   * Clamping on every keystroke made it impossible to type a smaller number:
+   * emptying the field produced NaN and silently kept the old sequence. The
+   * value is parsed and clamped on commit — blur or Enter — instead.
+   */
+  const [draft, setDraft] = useState(String(max));
+
+  const commitDraft = () => {
+    const parsed = Number.parseInt(draft, 10);
+    const next = Number.isFinite(parsed)
+      ? Math.min(Math.max(parsed, 1), max)
+      : asOf;
+    setAsOf(next);
+    setDraft(String(next));
+  };
+
+  const jumpTo = (next: number) => {
+    const clamped = Math.min(Math.max(next, 1), max);
+    setAsOf(clamped);
+    setDraft(String(clamped));
+  };
 
   useEffect(() => {
     const timer = window.setTimeout(() => setDebounced(asOf), 200);
@@ -587,24 +609,28 @@ function AsOfCard({
             <div className="grid flex-1 gap-2">
               <Label htmlFor="as-of-seq">As of sequence</Label>
               <Input
+                aria-describedby="as-of-hint"
                 className="font-mono"
                 id="as-of-seq"
+                inputMode="numeric"
                 max={max}
                 min={1}
-                onChange={(e) => {
-                  const next = Number.parseInt(e.target.value, 10);
-                  if (Number.isFinite(next)) {
-                    setAsOf(Math.min(Math.max(next, 1), max));
+                onBlur={commitDraft}
+                onChange={(e) => setDraft(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    commitDraft();
                   }
                 }}
                 type="number"
-                value={asOf}
+                value={draft}
               />
             </div>
             <Button
               className="shrink-0"
               disabled={atHead}
-              onClick={() => setAsOf(max)}
+              onClick={() => jumpTo(max)}
               variant="outline"
             >
               Now
@@ -617,7 +643,7 @@ function AsOfCard({
             className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-border accent-[var(--primary)] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
             max={max}
             min={1}
-            onChange={(e) => setAsOf(Number.parseInt(e.target.value, 10))}
+            onChange={(e) => jumpTo(Number.parseInt(e.target.value, 10))}
             step={1}
             type="range"
             value={asOf}
@@ -628,7 +654,7 @@ function AsOfCard({
             <button
               className="rounded-sm underline underline-offset-2 hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
               onClick={() => {
-                if (Number.isFinite(writtenAt)) setAsOf(writtenAt);
+                if (Number.isFinite(writtenAt)) jumpTo(writtenAt);
               }}
               type="button"
             >
@@ -636,6 +662,9 @@ function AsOfCard({
             </button>
             <span className="datum-num">{max}</span>
           </div>
+          <p className="text-muted-foreground text-xs" id="as-of-hint">
+            Type a sequence and press Enter, or drag the slider.
+          </p>
         </div>
 
         <div className="flex flex-col gap-3 border-border border-t pt-5">

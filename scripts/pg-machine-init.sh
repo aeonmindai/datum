@@ -138,9 +138,14 @@ if (( DRY_RUN == 1 )); then
 else
   log "waiting for the TCP check on 5432 to pass..."
   READY=0
+  # `fly checks list --json` returns an OBJECT KEYED BY MACHINE ID whose values are arrays of
+  # checks, not a flat array. Indexing it as an array fails, which made this loop time out
+  # while Postgres was in fact already passing — the worst kind of bug in a bootstrap script,
+  # because it tells a first-time operator the database is broken when it is healthy.
+  # `[.[][]]` flattens machine -> checks into one list before testing it.
   for _ in $(seq 1 60); do
     if fly checks list -a "$APP" --json 2>/dev/null \
-       | jq -e 'length > 0 and all(.[]; (.Status // .status) == "passing")' >/dev/null 2>&1; then
+       | jq -e '[.[][]] | length > 0 and all(.[]; (.status // .Status) == "passing")' >/dev/null 2>&1; then
       READY=1; break
     fi
     sleep 5

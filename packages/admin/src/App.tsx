@@ -1,10 +1,9 @@
 import { CompassIcon, ShieldCheckIcon } from "lucide-react";
 import { useEffect } from "react";
+import { ErrorBoundary } from "./app/error-boundary";
 import { SessionProvider, useSession } from "./app/session";
 import { MobileNav, Shell } from "./app/shell";
-import { useLocation } from "./lib/router";
-import type { Location } from "./lib/router";
-import { href } from "./lib/router";
+import { href, useLocation, type Location } from "./lib/router";
 import { AssertionDetailScreen } from "./screens/assertion-detail";
 import { AssertionsScreen, readFilters } from "./screens/assertions";
 import { ContradictionsScreen } from "./screens/contradictions";
@@ -181,10 +180,12 @@ function Routes() {
 
 export function App() {
   return (
-    <SessionProvider>
-      <ToastProvider>
-        <Routes />
-      </ToastProvider>
-    </SessionProvider>
+    <ErrorBoundary>
+      <SessionProvider>
+        <ToastProvider>
+          <Routes />
+        </ToastProvider>
+      </SessionProvider>
+    </ErrorBoundary>
   );
 }

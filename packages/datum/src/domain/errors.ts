@@ -68,15 +68,19 @@ export function asRejection(err: unknown): Rejection | null {
   const e = err as PgErrorish | null;
   if (!e || typeof e !== "object" || typeof e.code !== "string") return null;
 
+  // Every refusal Datum raises itself puts a JSON object in DETAIL, and that is what a caller
+  // should get. Postgres's own DETAIL for a CHECK violation is `Failing row contains (...)`:
+  // several hundred bytes echoing the whole tuple, including generated columns and the internal
+  // column order. It tells the caller nothing the named reason does not, so it is dropped
+  // rather than forwarded — an API answer should be readable, and a wire format that leaks
+  // table layout is a wire format nobody can change later.
   let detail: Record<string, unknown> = {};
   if (typeof e.detail === "string" && e.detail.startsWith("{")) {
     try {
       detail = JSON.parse(e.detail) as Record<string, unknown>;
     } catch {
-      detail = { detail: e.detail };
+      detail = {};
     }
-  } else if (typeof e.detail === "string" && e.detail.length > 0) {
-    detail = { detail: e.detail };
   }
 
   // Invariant 2 is enforced twice. This is the first layer: the runtime role was never

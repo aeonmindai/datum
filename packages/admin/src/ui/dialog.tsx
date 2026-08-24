@@ -116,7 +116,10 @@ export function Dialog({
         aria-labelledby={titleId}
         aria-modal="true"
         className={cn(
-          "datum-dialog fixed top-[50%] left-[50%] z-50 grid max-h-[calc(100dvh-2rem)] w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 overflow-y-auto rounded-2xl border-[0.5px] border-neutral-200 bg-white p-6 shadow-md backdrop-blur-sm outline-none",
+          // grid-cols-1 resolves to minmax(0,1fr), which stops a wide child —
+          // a long monospace secret, a JSON block — from blowing the panel out
+          // past max-w-lg. echos's Radix dialog relies on Radix for this.
+          "datum-dialog fixed top-[50%] left-[50%] z-50 grid grid-cols-1 max-h-[calc(100dvh-2rem)] w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 overflow-y-auto rounded-2xl border-[0.5px] border-neutral-200 bg-white p-6 shadow-md backdrop-blur-sm outline-none",
           size === "lg" ? "sm:max-w-3xl" : "sm:max-w-lg",
         )}
         data-slot="dialog-content"

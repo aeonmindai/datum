@@ -67,10 +67,21 @@ export function Tabs<T extends string>({
     };
   }, [update, value, items]);
 
+  /**
+   * Arrow keys move selection AND focus. With a roving tabindex the previously
+   * selected tab drops to tabIndex -1, so leaving focus on it would strand the
+   * focus ring on a tab that is no longer reachable by Tab.
+   */
   const move = (direction: 1 | -1) => {
     const at = items.findIndex((i) => i.value === value);
     const next = items[(at + direction + items.length) % items.length];
-    if (next) onValueChange(next.value);
+    if (!next) return;
+    onValueChange(next.value);
+    window.setTimeout(() => {
+      list.current
+        ?.querySelector<HTMLElement>('[role="tab"][aria-selected="true"]')
+        ?.focus();
+    }, 0);
   };
 
   return (

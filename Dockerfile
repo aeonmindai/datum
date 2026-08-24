@@ -54,6 +54,9 @@ RUN npm ci --omit=dev --no-audit --no-fund \
 COPY --from=build /app/packages/datum/dist       ./packages/datum/dist
 COPY --from=build /app/packages/datum/migrations ./packages/datum/migrations
 COPY --from=build /app/packages/datum/public     ./packages/datum/public
+# `datum seed --example` is a documented command and a v0 deliverable, so the fixtures have to
+# be in the image. Without this the README's "click through a fresh install" path is a lie.
+COPY --from=build /app/packages/datum/seeds      ./packages/datum/seeds
 COPY LICENSE NOTICE ./
 
 # Apache-2.0, and the image says so.

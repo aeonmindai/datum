@@ -157,7 +157,7 @@ function KeyRow({ row, onRevoke }: { row: ApiKey; onRevoke: () => void }) {
       <TableCell>
         <Mono title={row.id}>{row.prefix}</Mono>
       </TableCell>
-      <TableCell className="max-w-[16rem]">
+      <TableCell className="max-w-[13rem]">
         <div className="flex items-center gap-2">
           <span className="truncate font-medium">{row.label}</span>
           {revoked ? (
@@ -182,12 +182,12 @@ function KeyRow({ row, onRevoke }: { row: ApiKey; onRevoke: () => void }) {
           ) : null}
         </div>
       </TableCell>
-      <TableCell className="max-w-[18rem]">
-        <Mono className="text-muted-foreground" title={row.scope}>
+      <TableCell className="max-w-[12rem]">
+        <Mono className="block truncate text-muted-foreground" title={row.scope}>
           {row.scope}
         </Mono>
       </TableCell>
-      <TableCell>
+      <TableCell className="max-w-[11rem] whitespace-normal">
         <div className="flex flex-wrap gap-1">
           {row.permissions.length === 0 ? (
             <span className="text-muted-foreground text-sm">none</span>
@@ -300,13 +300,19 @@ function CreateKeyDialog({
       footer={
         <>
           <DialogFooterLeft>
-            {permsMissing ? "Pick at least one permission." : "Shown once after creation."}
+            {touched && blocked
+              ? "Fix the highlighted fields."
+              : "The secret is shown once, right after creation."}
           </DialogFooterLeft>
           <DialogFooterRight>
             <Button disabled={submitting} onClick={onClose} variant="outline">
               Cancel
             </Button>
-            <Button disabled={submitting || blocked} onClick={() => void submit()} variant="primary">
+            <Button
+              disabled={submitting}
+              onClick={() => void submit()}
+              variant="primary"
+            >
               {submitting ? "Creating…" : "Create key"}
             </Button>
           </DialogFooterRight>
@@ -468,8 +474,8 @@ function RevealDialog({
 
           <div className="flex flex-col gap-2">
             <span className="datum-microlabel">Secret</span>
-            <div className="flex items-center gap-2">
-              <code className="datum-scroll min-w-0 flex-1 overflow-x-auto rounded-md border-[0.5px] border-[#E5E5E5] bg-[#FAFAFA] px-3 py-2.5 font-mono text-[13px]">
+            <div className="flex items-start gap-2">
+              <code className="min-w-0 flex-1 break-all rounded-md border-[0.5px] border-[#E5E5E5] bg-[#FAFAFA] px-3 py-2.5 font-mono text-[13px] leading-relaxed">
                 {created.secret}
               </code>
               <CopyButton
@@ -552,11 +558,17 @@ function RevokeDialog({
             {target ? <Mono className="truncate">{target.prefix}</Mono> : null}
           </DialogFooterLeft>
           <DialogFooterRight>
-            <Button disabled={submitting} onClick={onClose} variant="outline">
+            {/* Autofocus the safe option: a stray Enter on a confirm dialog must
+                not revoke a live credential. */}
+            <Button
+              data-autofocus
+              disabled={submitting}
+              onClick={onClose}
+              variant="outline"
+            >
               Keep it
             </Button>
             <Button
-              data-autofocus
               disabled={submitting}
               onClick={() => void revoke()}
               variant="destructive"

@@ -451,6 +451,44 @@ describe("deliverable 2 — the verification worker", () => {
     expect(row.json().assertion.confidence).toBe("confirmed-by-human");
     expect(row.json().verification).toBeNull();
   });
+
+  it("says unresolvable, never refuted, when it cannot read the repo at all", async () => {
+    // The distinction this defends: "we looked and it is not there" versus "we were not allowed
+    // to look". GitHub answers 404 for a private repo exactly as it does for a missing one, so a
+    // worker that conflates them marks true claims about private repos as actively false — which
+    // is the store publishing a confident conclusion it cannot support.
+    const created = await post("/v1/assert", {
+      scope: PROJ,
+      subject: "private_repo_claim",
+      predicate: "throughput",
+      object: { value: 1234 },
+      kind: "measured",
+      evidence: {
+        ...EV,
+        repo: "aeonmindai/definitely-private",
+        commit: headCommit,
+        contained_in: ["main"],
+      },
+    });
+    const id = created.json().assertion.id;
+
+    const unreadable = loadConfig({
+      DATABASE_URL: pg.url("datum_e2e"),
+      DATUM_ORG: ORG,
+      DATUM_ADMIN_PASSWORD: "correct-horse-battery-staple",
+      DATUM_SESSION_SECRET: "0".repeat(64),
+      // A mirror path that is not a git repository at all.
+      DATUM_GIT_MIRRORS: `aeonmindai/definitely-private=${REPO_ROOT}/does-not-exist`,
+    });
+    const results = await runVerificationPass(db, unreadable, { recheckMs: 0, limit: 100 });
+    const outcome = results.find((r) => r.assertion_id === id);
+    expect(outcome?.outcome).toBe("unresolvable");
+    expect(outcome?.promoted_to).toBeNull();
+    expect(String(outcome?.detail.why)).toContain("not a readable git repository");
+
+    const row = await get(`/v1/why/${id}`);
+    expect(row.json().assertion.confidence).toBe("unverified");
+  });
 });
 
 describe("deliverable 3 — contradictions are advisory across tiers", () => {

@@ -5,18 +5,27 @@ const HOUR = 60 * MIN;
 const DAY = 24 * HOUR;
 export const SEVEN_DAYS = 7 * DAY;
 
-/** "4m ago", "3d ago", "just now". Returns null for a null/unparseable input. */
+/**
+ * "4m ago" for the past, "in 4mo" for the future. Expiry dates are routinely in
+ * the future, so a past-only formatter would render every live key's expiry as
+ * a useless placeholder. Returns null for a null or unparseable input.
+ */
 export function relativeTime(iso: string | null | undefined): string | null {
   if (!iso) return null;
   const then = Date.parse(iso);
   if (Number.isNaN(then)) return null;
   const delta = Date.now() - then;
-  if (delta < 0) return "in the future";
-  if (delta < 45_000) return "just now";
-  if (delta < HOUR) return `${Math.round(delta / MIN)}m ago`;
-  if (delta < DAY) return `${Math.round(delta / HOUR)}h ago`;
-  if (delta < 30 * DAY) return `${Math.round(delta / DAY)}d ago`;
-  return `${Math.round(delta / (30 * DAY))}mo ago`;
+  const magnitude = Math.abs(delta);
+  if (magnitude < 45_000) return "just now";
+  const span =
+    magnitude < HOUR
+      ? `${Math.round(magnitude / MIN)}m`
+      : magnitude < DAY
+        ? `${Math.round(magnitude / HOUR)}h`
+        : magnitude < 30 * DAY
+          ? `${Math.round(magnitude / DAY)}d`
+          : `${Math.round(magnitude / (30 * DAY))}mo`;
+  return delta >= 0 ? `${span} ago` : `in ${span}`;
 }
 
 export function ageMs(iso: string | null | undefined): number | null {

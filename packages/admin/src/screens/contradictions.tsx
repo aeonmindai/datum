@@ -438,7 +438,7 @@ function ResolveDialog({
               Cancel
             </Button>
             <Button
-              disabled={submitting || exit === null || tooShort}
+              disabled={submitting}
               onClick={() => void submit()}
               variant="primary"
             >
@@ -514,6 +514,11 @@ function ResolveDialog({
                 </label>
               );
             })}
+            {touched && exit === null ? (
+              <FieldError>
+                Pick the exit that describes what actually happened.
+              </FieldError>
+            ) : null}
           </fieldset>
 
           <Field>

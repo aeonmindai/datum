@@ -50,12 +50,15 @@ services:
       postgres:
         condition: service_healthy
     ports:
-      - "8080:8080"
+      # Overridable, because a stranger's 8080 is often already taken and "bind: address
+      # already in use" is a bad first impression of a product about durable truth:
+      #   DATUM_HOST_PORT=8099 docker compose up
+      - "${DATUM_HOST_PORT:-8080}:8080"
     environment:
       DATABASE_URL: postgres://datum:datum@postgres:5432/datum
       # The scope root is configuration: DATUM_ORG=acme yields org/acme.
       DATUM_ORG: ${DATUM_ORG:-local}
-      DATUM_PUBLIC_URL: ${DATUM_PUBLIC_URL:-http://localhost:8080}
+      DATUM_PUBLIC_URL: ${DATUM_PUBLIC_URL:-http://localhost:${DATUM_HOST_PORT:-8080}}
       # Required. No defaults, on purpose — see the bootstrap block at the top of this file.
       DATUM_ADMIN_PASSWORD: ${DATUM_ADMIN_PASSWORD:?not set. Run the two-command bootstrap at the top of docker-compose.yml to write a .env, then retry}
       DATUM_SESSION_SECRET: ${DATUM_SESSION_SECRET:?not set. Run the two-command bootstrap at the top of docker-compose.yml to write a .env, then retry}

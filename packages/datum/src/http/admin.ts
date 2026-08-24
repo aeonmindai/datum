@@ -382,7 +382,24 @@ export function registerAdmin(app: FastifyInstance, deps: AdminDeps): void {
     try {
       guard(request);
       const q = z.object({ scope: ScopeString.optional() }).parse(request.query);
-      return reply.send({ missions: await missions(db, q.scope ?? config.orgScope) });
+      // With a scope, resolve it the way an agent would: nearest-scope-wins up the chain.
+      // Without one, the panel means "every mission in the store". Defaulting to the org root's
+      // chain instead would render an empty screen on an instance whose missions all live in
+      // scopes the root does not walk into — a panel that says "All scopes" and shows none is
+      // worse than one that says nothing.
+      if (q.scope) return reply.send({ missions: await missions(db, q.scope) });
+
+      const scopes = await db.query<{ scope: string }>(
+        "app",
+        `SELECT DISTINCT scope FROM datum.missions WHERE superseded_by IS NULL ORDER BY scope`,
+      );
+      const all = [];
+      for (const row of scopes.rows) all.push(...(await missions(db, row.scope)));
+      // One mission can be reachable from several scopes in the chain; show each once.
+      const seen = new Set<string>();
+      return reply.send({
+        missions: all.filter((m) => (seen.has(m.id) ? false : (seen.add(m.id), true))),
+      });
     } catch (err) {
       return fail(reply, err);
     }
