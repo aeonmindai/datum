@@ -1,3 +1,4 @@
+import type pg from "pg";
 import type { Db, DbRole } from "../db/pool.js";
 import { assertionHash, newAssertionId, newId } from "./identity.js";
 import { asRejection, isDuplicateHash, Rejection } from "./errors.js";
@@ -32,7 +33,19 @@ export interface AssertResult {
 export async function assertFact(
   db: Db,
   input: AssertInput,
-  opts: { role?: DbRole } = {},
+  /**
+   * `client` lets a caller enlist this write in a transaction it already owns, so that asserting a
+   * fact and recording what it was promoted from either both land or neither does. Without it, a
+   * promote would have to commit the assertion first and stamp its source second, leaving an audit
+   * trail that can be a retry behind — convergent, but briefly wrong, and this store's whole claim
+   * is that the record is never briefly wrong.
+   *
+   * When `client` is supplied this function does NOT open or commit a transaction: BEGIN, COMMIT
+   * and ROLLBACK belong to the caller. A duplicate-hash violation therefore surfaces into the
+   * caller's transaction rather than being swallowed and retried here, because a failed statement
+   * has already poisoned that transaction and only the caller knows how it wants to recover.
+   */
+  opts: { role?: DbRole; client?: pg.PoolClient } = {},
 ): Promise<AssertResult> {
   const role: DbRole = opts.role ?? "app";
   const validFrom = input.valid_from ?? new Date().toISOString();
@@ -63,48 +76,54 @@ export async function assertFact(
   // idempotent one, so the database is always the thing that decides. Duplicate content is
   // then recognised by the unique violation on `hash`, which costs a round trip only when a
   // fact is genuinely re-asserted.
+  const write = async (client: pg.PoolClient): Promise<AssertResult> => {
+    const id = newAssertionId();
+    const inserted = await client.query<AssertionRow>(
+      `INSERT INTO datum.assertions (${INSERT_COLUMNS})
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20)
+       RETURNING ${RETURNING}`,
+      [
+        id,
+        hash,
+        body.scope,
+        body.subject,
+        body.predicate,
+        JSON.stringify(body.object),
+        input.claim ?? null,
+        body.kind,
+        body.binding,
+        body.confidence,
+        JSON.stringify(body.evidence ?? null),
+        body.valid_from,
+        body.valid_to,
+        input.asserted_by,
+        body.supersedes,
+        body.why,
+        body.reopen_if,
+        input.causality ?? null,
+        input.derived_from ?? [],
+        input.verification_id ?? null,
+      ],
+    );
+    const row = inserted.rows[0];
+    if (!row) throw new Error("insert returned no row");
+
+    // Outbox, not LISTEN/NOTIFY: NOTIFY takes a global AccessExclusiveLock at commit,
+    // which serialises the whole instance. Written in v0, consumed when projections land.
+    await client.query(
+      `INSERT INTO datum.outbox (topic, payload, causality) VALUES ($1, $2::jsonb, $3)`,
+      ["assertion.created", JSON.stringify({ id: row.id, scope: row.scope }), row.causality],
+    );
+    return { assertion: row, created: true };
+  };
+
+  // Enlisted in a caller's transaction: no BEGIN, no retry. A duplicate-hash violation has already
+  // poisoned the caller's transaction, so swallowing it here and issuing a SELECT would just fail
+  // again; only the caller knows whether "already on record" is success or conflict for it.
+  if (opts.client) return write(opts.client);
+
   try {
-    return await db.tx(role, async (client) => {
-
-      const id = newAssertionId();
-      const inserted = await client.query<AssertionRow>(
-        `INSERT INTO datum.assertions (${INSERT_COLUMNS})
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20)
-         RETURNING ${RETURNING}`,
-        [
-          id,
-          hash,
-          body.scope,
-          body.subject,
-          body.predicate,
-          JSON.stringify(body.object),
-          input.claim ?? null,
-          body.kind,
-          body.binding,
-          body.confidence,
-          JSON.stringify(body.evidence ?? null),
-          body.valid_from,
-          body.valid_to,
-          input.asserted_by,
-          body.supersedes,
-          body.why,
-          body.reopen_if,
-          input.causality ?? null,
-          input.derived_from ?? [],
-          input.verification_id ?? null,
-        ],
-      );
-      const row = inserted.rows[0];
-      if (!row) throw new Error("insert returned no row");
-
-      // Outbox, not LISTEN/NOTIFY: NOTIFY takes a global AccessExclusiveLock at commit,
-      // which serialises the whole instance. Written in v0, consumed when projections land.
-      await client.query(
-        `INSERT INTO datum.outbox (topic, payload, causality) VALUES ($1, $2::jsonb, $3)`,
-        ["assertion.created", JSON.stringify({ id: row.id, scope: row.scope }), row.causality],
-      );
-      return { assertion: row, created: true };
-    });
+    return await db.tx(role, write);
   } catch (err) {
     if (isDuplicateHash(err)) {
       // Already on record: either this exact datum was asserted before, or a concurrent writer
