@@ -10,7 +10,10 @@ import { cn } from "../lib/cn";
  * gives keyboard and screen-reader behaviour for free, which matters more on an
  * admin panel than a custom popover does.
  */
-export interface SelectProps extends React.ComponentProps<"select"> {
+export interface SelectProps
+  extends Omit<React.ComponentProps<"select">, "size"> {
+  /** Control height, matching echos's SelectTrigger sizes. Shadows the native
+   * `size` attribute (a visible-row count) which a styled select never uses. */
   size?: "sm" | "default";
   containerClassName?: string;
 }

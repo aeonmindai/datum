@@ -56,11 +56,14 @@ export async function attempt(fn: () => Promise<unknown>): Promise<Outcome> {
 }
 
 const EV = { source: "test/invariants.ts", instrument: "vitest" };
-const SCOPE = "org/acme/proj/arc";
 
-function base(over: Partial<AssertInput> = {}): AssertInput {
+/** The default scope the seven cases run in. Overridable so the same seven cases can be run
+ *  against a restored database that already holds unrelated data. */
+export const DEFAULT_CASE_SCOPE = "org/acme/proj/arc";
+
+function baseIn(scope: string, over: Partial<AssertInput> = {}): AssertInput {
   return {
-    scope: SCOPE,
+    scope,
     subject: "engine",
     predicate: "aggregate_tok_s_at_b256",
     object: { value: 757.5, unit: "tok/s" },
@@ -78,6 +81,7 @@ function base(over: Partial<AssertInput> = {}): AssertInput {
  */
 export async function promote(
   db: Db,
+  scope: string,
   over: Partial<AssertInput> = {},
 ): Promise<{ assertion: AssertionRow; verificationId: string }> {
   const verificationId = newId("v");
@@ -89,7 +93,7 @@ export async function promote(
   );
   const { assertion } = await assertFact(
     db,
-    base({ confidence: "measured", verification_id: verificationId, ...over }),
+    baseIn(scope, { confidence: "measured", verification_id: verificationId, ...over }),
     { role: "verifier" },
   );
   return { assertion, verificationId };
@@ -149,7 +153,15 @@ BEGIN
   RETURN NEW;
 END
 $mut$;`;
-export const CASES: CaseSpec[] = [
+export function makeCases(scope: string = DEFAULT_CASE_SCOPE): CaseSpec[] {
+  const base = (over: Partial<AssertInput> = {}): AssertInput => baseIn(scope, over);
+  const chain = (() => {
+    const labels = scope.split("/");
+    const out: string[] = [];
+    for (let i = labels.length; i >= 1; i--) out.push(labels.slice(0, i).join("/"));
+    return out;
+  })();
+  return [
   {
     id: "1",
     title: "no evidence",
@@ -269,9 +281,9 @@ export const CASES: CaseSpec[] = [
       },
     ],
     async run(db) {
-      await promote(db, { object: { value: 757.5, unit: "tok/s" } });
+      await promote(db, scope, { object: { value: 757.5, unit: "tok/s" } });
       const second = await attempt(() =>
-        promote(db, {
+        promote(db, scope, {
           object: { value: 16600, unit: "tok/s" },
           valid_from: "2026-08-21T12:00:00Z",
         }),
@@ -442,7 +454,7 @@ export const CASES: CaseSpec[] = [
       // card; Jish states it was reached once, before model confusion lost it. Blocking
       // would destroy that knowledge. Silent human-wins would mark a target reached with no
       // evidence. Advisory keeps both, and the pair tells the next agent what to do.
-      const measured = await promote(db, {
+      const measured = await promote(db, scope, {
         subject: "bake",
         predicate: "single_card_minutes",
         object: { value: 97.4, unit: "minutes" },
@@ -482,14 +494,14 @@ export const CASES: CaseSpec[] = [
       );
       const read = await db.query<{ take: { id: string; contested?: boolean } }>(
         "app",
-        `SELECT datum.take(ARRAY['org/acme/proj/arc','org/acme/proj','org/acme','org']::text[],
-                            'bake','single_card_minutes',NULL,NULL,50) AS take`,
+        `SELECT datum.take($1::text[], 'bake','single_card_minutes',NULL,NULL,50) AS take`,
+        [chain],
       );
 
       // The safety property: a gate demanding `measured` cannot be satisfied by testimony,
       // however confidently the testimony is written.
       await createMission(db, {
-        scope: "org/acme/proj/arc",
+        scope,
         statement: "Bake DeepSeek-V4-Flash into K=9/V=4/L=12 and serve it.",
         state: "active",
         gates: [
@@ -508,7 +520,8 @@ export const CASES: CaseSpec[] = [
         `SELECT datum.evaluate_gate(
                   '{"subject":"bake","predicate":"single_card_minutes","op":"<=","target":60,
                     "requires_confidence":"measured"}'::jsonb,
-                  ARRAY['org/acme/proj/arc','org/acme/proj','org/acme','org']::text[]) AS g`,
+                  $1::text[]) AS g`,
+        [chain],
       );
 
       return {
@@ -528,3 +541,7 @@ export const CASES: CaseSpec[] = [
     },
   },
 ];
+}
+
+/** The seven cases in the default scope. */
+export const CASES: CaseSpec[] = makeCases();

@@ -177,7 +177,7 @@ function FailurePanel({
   failure,
   cooldown,
 }: {
-  failure: Failure;
+  failure: Exclude<Failure, { kind: "rejected" }>;
   cooldown: number;
 }) {
   const shell =

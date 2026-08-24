@@ -251,7 +251,7 @@ export function EvidenceCell({ assertion }: { assertion: Assertion }) {
   return (
     <HoverCard
       trigger={
-        <span className="inline-flex max-w-[15rem] items-center gap-1.5">
+        <span className="inline-flex max-w-[9rem] items-center gap-1.5">
           {commit ? (
             <GitCommitHorizontalIcon
               aria-hidden

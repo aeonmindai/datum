@@ -361,23 +361,28 @@ if [[ -n "$SOURCE_URL" ]]; then
   fi
 fi
 
-# ---- 7. optional: the vitest invariant suite ---------------------------------------------
-# Read this before trusting it. The invariant harness deliberately starts its OWN Postgres
-# container and applies the migrations from disk, because the invariants it tests are
-# properties of the schema. It does not read DATUM_TEST_PG_URL, so running it here proves the
-# schema on disk is sound and proves NOTHING about this restore. The evidence for the restore
-# is the check block above. The variable is exported anyway so that a harness which grows
-# support for it works without touching this script.
-export DATUM_TEST_PG_URL="postgres://postgres@${HOST_PORT}/${DB}"
+# ---- 7. the seven adversarial writes, replayed against THIS restored database -------------
+# This is the check that makes the drill mean something. `test/restored.test.ts` runs the same
+# seven cases as deliverable 1 — no evidence, UPDATE/DELETE, two contradicting measurements,
+# kind=failed with no falsifier, a claimed `measured`, a double supersession, and the one that
+# must be ACCEPTED — against the database this script just restored, in a scope unique to the
+# run so it collides with nothing and leaves nothing behind that looks like a real fact.
+#
+# It is not the same thing as `npm run test:invariants`, which starts its own container and
+# therefore validates the schema on disk rather than this restore.
+# HOST_PORT already carries host:port from `docker port`. PGPW is the throwaway superuser
+# password generated above; it never leaves this process and dies with the container.
+export DATUM_RESTORED_URL="postgres://postgres:${PGPW}@${HOST_PORT}/${DB}"
 if (( RUN_SUITE == 1 )); then
-  echo "-- vitest invariant suite --------------------------------------------------"
-  echo "  NOTE  the harness starts its own container; this validates the schema on disk,"
-  echo "        not the restored database. DATUM_TEST_PG_URL is exported at ${DATUM_TEST_PG_URL}"
-  if ( cd "$REPO_ROOT" && npm run --silent test:invariants ); then
-    pass "invariant suite (schema on disk)" ""
+  echo "-- the seven adversarial writes, against the restored database ---------------"
+  if ( cd "$REPO_ROOT" && npx vitest run --root packages/datum test/restored.test.ts ); then
+    pass "seven invariant cases on the RESTORED database" ""
   else
-    fail "invariant suite (schema on disk)" "see output above"
+    fail "seven invariant cases on the RESTORED database" "see output above"
   fi
+else
+  echo "-- skipping the replayed invariant cases (pass --run-suite to include them) ---"
+  echo "   DATUM_RESTORED_URL=${DATUM_RESTORED_URL}"
 fi
 
 # ---- 8. verdict --------------------------------------------------------------------------

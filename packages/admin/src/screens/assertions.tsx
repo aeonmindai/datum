@@ -280,14 +280,12 @@ export function AssertionsScreen({ filters }: { filters: AssertionFilters }) {
             <Table>
               <TableHeader sticky>
                 <TableRow className="hover:bg-transparent">
-                  <TableHead>confidence</TableHead>
-                  <TableHead>kind</TableHead>
+                  <TableHead>confidence · kind</TableHead>
                   <TableHead>subject</TableHead>
                   <TableHead>predicate</TableHead>
                   <TableHead className="text-right">value</TableHead>
-                  <TableHead>asserted by</TableHead>
+                  <TableHead>asserted by · seq</TableHead>
                   <TableHead>evidence</TableHead>
-                  <TableHead>seq</TableHead>
                   <TableHead />
                 </TableRow>
               </TableHeader>
@@ -353,12 +351,12 @@ function AssertionRow({ row }: { row: Assertion }) {
   return (
     <TableRow className={assertionRowClass(row)}>
       <TableCell>
-        <ConfidenceBadge confidence={row.confidence} />
+        <div className="flex flex-col items-start gap-1">
+          <ConfidenceBadge confidence={row.confidence} />
+          <KindBadge kind={row.kind} />
+        </div>
       </TableCell>
-      <TableCell>
-        <KindBadge kind={row.kind} />
-      </TableCell>
-      <TableCell className="max-w-[14rem]">
+      <TableCell className="max-w-[11rem]">
         <div className="flex flex-col gap-0.5">
           <Mono className="truncate font-medium" title={row.subject}>
             {row.subject}
@@ -368,9 +366,9 @@ function AssertionRow({ row }: { row: Assertion }) {
           </Mono>
         </div>
       </TableCell>
-      <TableCell className="max-w-[14rem]">
-        <div className="flex flex-col gap-1">
-          <Mono className="truncate" title={row.predicate}>
+      <TableCell className="max-w-[13rem]">
+        <div className="flex flex-col items-start gap-1">
+          <Mono className="max-w-full truncate" title={row.predicate}>
             {row.predicate}
           </Mono>
           <LifecycleBadges assertion={row} />
@@ -386,31 +384,31 @@ function AssertionRow({ row }: { row: Assertion }) {
           ) : null}
         </div>
       </TableCell>
-      <TableCell className="max-w-[12rem] text-right">
-        <span className="inline-flex items-baseline justify-end gap-1">
+      <TableCell className="max-w-[9rem] text-right">
+        <span className="inline-flex max-w-full items-baseline justify-end gap-1">
           <Mono className="truncate font-medium" title={value}>
             {value}
           </Mono>
           {unit ? (
-            <span className="text-muted-foreground text-xs">{unit}</span>
+            <span className="shrink-0 text-muted-foreground text-xs">{unit}</span>
           ) : null}
         </span>
       </TableCell>
-      <TableCell className="max-w-[12rem]">
-        <Mono className="truncate text-muted-foreground" title={row.asserted_by}>
-          {row.asserted_by}
-        </Mono>
+      <TableCell className="max-w-[11rem]">
+        <div className="flex flex-col gap-0.5">
+          <Mono className="truncate text-muted-foreground" title={row.asserted_by}>
+            {row.asserted_by}
+          </Mono>
+          <Mono
+            className="text-[11px] text-muted-foreground"
+            title="Write sequence number — not a timestamp"
+          >
+            seq {row.asserted_at}
+          </Mono>
+        </div>
       </TableCell>
       <TableCell>
         <EvidenceCell assertion={row} />
-      </TableCell>
-      <TableCell>
-        <Mono
-          className="text-muted-foreground"
-          title="Write sequence number — not a timestamp"
-        >
-          {row.asserted_at}
-        </Mono>
       </TableCell>
       <TableCell className="text-right">
         <LinkButton href={href(`/assertions/${row.id}`)} size="sm" variant="outline">

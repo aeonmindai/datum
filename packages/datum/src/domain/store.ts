@@ -54,14 +54,17 @@ export async function assertFact(
   };
   const hash = assertionHash(body);
 
+  // The INSERT is attempted first, with no "does this hash already exist?" lookup in front of
+  // it. That ordering is deliberate and it is a correctness property, not an optimisation: a
+  // pre-check would return `created: false` for content that is already on record WITHOUT the
+  // row ever reaching the triggers, so an agent writing `confidence: measured` would be told
+  // its write succeeded whenever the verification worker had already recorded that exact fact.
+  // The claim "an agent cannot assert measured" has to be true on every path, including the
+  // idempotent one, so the database is always the thing that decides. Duplicate content is
+  // then recognised by the unique violation on `hash`, which costs a round trip only when a
+  // fact is genuinely re-asserted.
   try {
     return await db.tx(role, async (client) => {
-      const existing = await client.query<AssertionRow>(
-        `SELECT ${RETURNING} FROM datum.assertions WHERE hash = $1`,
-        [hash],
-      );
-      const found = existing.rows[0];
-      if (found) return { assertion: found, created: false };
 
       const id = newAssertionId();
       const inserted = await client.query<AssertionRow>(
@@ -104,7 +107,9 @@ export async function assertFact(
     });
   } catch (err) {
     if (isDuplicateHash(err)) {
-      // Lost a race with an identical write. The winner's row is the answer.
+      // Already on record: either this exact datum was asserted before, or a concurrent writer
+      // won the race. Either way the existing row is the answer, and it got there through the
+      // same triggers this write just went through.
       const row = await db.one<AssertionRow>(
         role,
         `SELECT ${RETURNING} FROM datum.assertions WHERE hash = $1`,

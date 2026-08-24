@@ -75,10 +75,10 @@ Expected without the guard: the evidence-free write lands. Observed: `true`.
 Expected without the guard: the privilege check no longer bites, so the trigger becomes the thing that refuses. Observed: `true`.
 - `update_reason` = `"assertions_are_immutable"`
 - `update_sqlstate` = `"23514"`
-- `update_message` = `"assertions are immutable: UPDATE may only stamp supersession (id=a_01M0T9Y7NP96YX75BBKAZZKGF1)"`
+- `update_message` = `"assertions are immutable: UPDATE may only stamp supersession (id=a_01M0TAHSE0DXAV0VWH3WXSJFCG)"`
 - `delete_reason` = `"assertions_are_append_only"`
 - `delete_sqlstate` = `"23514"`
-- `delete_message` = `"assertions are append-only: DELETE is never permitted (id=a_01M0T9Y7NP96YX75BBKAZZKGF1)"`
+- `delete_message` = `"assertions are append-only: DELETE is never permitted (id=a_01M0TAHSE0DXAV0VWH3WXSJFCG)"`
 - `rows_left` = `1`
 - `value_now` = `"757.5"`
 
@@ -181,7 +181,7 @@ Expected without the guard: an agent successfully claims `measured` for itself. 
 - message, verbatim:
 
   ```
-  assertion a_01M0T9Y7TZTJ7TS39FY9J204HN is already superseded by a_01M0T9Y7V16CYTN9V1W68NC7QY; supersede the head of the chain instead
+  assertion a_01M0TAHSK0W960D0V7FX1MGQ30 is already superseded by a_01M0TAHSK30RC3QQDCSWTVZFQH; supersede the head of the chain instead
   ```
 - observed:
   - `forks` = `1`
@@ -221,8 +221,8 @@ Expected without the guard: the chain forks: one row is superseded twice. Observ
   - `contested_on_read` = `true`
   - `rows_returned_on_read` = `2`
   - `gate_reached_with_measured_required` = `false`
-  - `gate_evidence` = `"a_01M0T9Y7WYE3MYDMHBPVG15HEX"`
-  - `measured_id` = `"a_01M0T9Y7WYE3MYDMHBPVG15HEX"`
+  - `gate_evidence` = `"a_01M0TAHSN27D8G2RWPFSJ5G89H"`
+  - `measured_id` = `"a_01M0TAHSN27D8G2RWPFSJ5G89H"`
 
 ### Mutation check
 
@@ -241,8 +241,8 @@ Expected without the guard: the human's claim is refused and the knowledge is de
 - `contested_on_read` = `false`
 - `rows_returned_on_read` = `1`
 - `gate_reached_with_measured_required` = `false`
-- `gate_evidence` = `"a_01M0T9Y7XVQ5QVD51X3X4RETHR"`
-- `measured_id` = `"a_01M0T9Y7XVQ5QVD51X3X4RETHR"`
+- `gate_evidence` = `"a_01M0TAHSP2DA2J5FV75VJRJKM1"`
+- `measured_id` = `"a_01M0TAHSP2DA2J5FV75VJRJKM1"`
 
 **Removed:** trigger trg_assertions_detect_contradictions
 
@@ -259,5 +259,5 @@ Expected without the guard: the write still lands, but the disagreement becomes 
 - `contested_on_read` = `false`
 - `rows_returned_on_read` = `2`
 - `gate_reached_with_measured_required` = `false`
-- `gate_evidence` = `"a_01M0T9Y7YNCGBRZPPZFJYWWJZX"`
-- `measured_id` = `"a_01M0T9Y7YNCGBRZPPZFJYWWJZX"`
+- `gate_evidence` = `"a_01M0TAHSPZ9NPZBNKA73R29A8N"`
+- `measured_id` = `"a_01M0TAHSPZ9NPZBNKA73R29A8N"`
