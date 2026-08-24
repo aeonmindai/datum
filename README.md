@@ -31,25 +31,28 @@ that any number of agents, worktrees, branches and humans can read and correct, 
 **Design complete, not yet implemented.** Start at [`START_HERE.md`](./START_HERE.md), then
 [`HANDOFF.md`](./HANDOFF.md) — written to be built from with no prior context.
 
-## Self-hosting
+## Self-host it
 
-One org per deployment, no tenant setup, nothing phoning home. Two paths, same image:
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/template/datum)
+
+One click, or one command:
 
 ```bash
+# fly.io
+fly launch --from https://github.com/aeonmindai/datum
+
 # anywhere
 docker compose up -d
-datum migrate && datum init
-
-# on fly.io
-fly launch && fly secrets set \
-  DATUM_ADMIN_PASSWORD_HASH="$(datum hash-password)" \
-  DATUM_SESSION_SECRET="$(openssl rand -hex 32)"
 ```
 
-`datum init` creates your org scope, the first admin and the first API key. Set `DATUM_ORG` to your
-own name — nothing about the authors is hardcoded. The server **refuses to boot** without an admin
-password hash and session secret, because a self-hostable product that ships a default password is
-a vulnerability, not a convenience.
+Migrations and first-run setup happen on boot. Your org scope, first admin and first API key are
+created automatically — **the key is printed once in the deploy logs, so copy it.**
+
+One org per deployment, no tenant setup, nothing phoning home. Set `DATUM_ORG` to your own name;
+nothing about the authors is hardcoded. Set `DATUM_ADMIN_PASSWORD` (or a pre-computed
+`DATUM_ADMIN_PASSWORD_HASH` — see `datum hash-password`) and the server **refuses to boot without
+one**, because a self-hostable product that ships a default password is a vulnerability, not a
+convenience.
 
 Then point an agent at it:
 

@@ -608,7 +608,7 @@ are the database operator, so backups plus an executed restore drill are in scop
 | 6 | **Admin panel** `/admin` | §13 items 1–7, in `echos_app`'s design language |
 | 7 | **Seeded with Arc** | the ~30 real facts from `arc/memory/STATE.json`, including the ten `confirmed_by_jish` answers, and the retired numbers loaded as `kind: dead` so the store can prove it refuses to surface them |
 | 8 | **Backups + an executed restore drill** | `pg_dump` on a schedule to object storage outside the Fly org, volume snapshots on, and a restore into a fresh Machine that then **passes the deliverable-1 invariant tests**. Record the drill. A backup you have never restored is not a backup, and by this project's own doctrine an untested backup is an unverified claim. |
-| 9 | **Self-hostable by a stranger** | configurable `DATUM_ORG` with no hardcoded org anywhere; boot **fails closed** without `DATUM_ADMIN_PASSWORD_HASH` and `DATUM_SESSION_SECRET`, with an error naming the fix; `datum hash-password`, `datum migrate` (embedded), `datum init`, `datum seed --example`; both `fly launch` and `docker compose up` paths from the committed configs; no telemetry. Accept: a fresh agent session, given only the README and an empty directory, reaches a running instance with a minted key in <10 min (§15). |
+| 9 | **Self-hostable in one click** | configurable `DATUM_ORG`, no hardcoded org anywhere; boot **fails closed** with no credential, but accepts plaintext `DATUM_ADMIN_PASSWORD` as well as a hash so a button deploy works (§15.2); `datum migrate` and `datum init` run on boot, idempotently; `datum hash-password`, `datum seed --example`; **README opens with a Railway deploy button and the Fly path**, plus `docker compose up`; no telemetry. Accept: a fresh agent session, given only the README and an empty directory, reaches a running instance with a minted key in <10 min — and separately, the Railway button reaches a working instance with no local tooling at all (§15). |
 
 **Out of v0, deliberately:** projections to Discord and Linear, NATS (the outbox table is written but
 not consumed), registry heartbeats, embeddings, multi-tenant auth, OIDC token exchange, the
@@ -636,21 +636,50 @@ we have promised never to mutate.
 
 ### 2. Fail closed on secrets. A shipped default password is a CVE, not a convenience
 
-The server **refuses to boot** without `DATUM_ADMIN_PASSWORD_HASH` and `DATUM_SESSION_SECRET`, with
-an error that says exactly how to generate them. Ship `datum hash-password` so a self-hoster can
-produce an argon2id hash without knowing what argon2id is. Aeonmind's password is then simply our
-deployment's env value, set with `fly secrets set` — it has no special status in the code.
+The server **refuses to boot** if it has no admin credential and no session secret, with an error
+that says exactly how to generate them. Ship `datum hash-password` so a self-hoster can produce an
+argon2id hash without knowing what argon2id is.
 
-### 3. Two deploy paths, one image
+**But fail-closed collides with one-click, and the collision has to be resolved deliberately.** A
+one-click deploy cannot run a hashing command before boot, and a one-click deploy that immediately
+crashes is a worse first impression than no button at all. The resolution:
 
-- `fly launch` with the committed `fly.toml` — our path, and a reference for other Fly users.
-- `docker compose up` — Postgres plus the server, for everyone else. Same image, no Fly dependency.
+- Accept **either** `DATUM_ADMIN_PASSWORD_HASH` **or** plaintext `DATUM_ADMIN_PASSWORD`.
+- Given plaintext, hash it at boot, hold only the hash in memory, and **never persist the
+  plaintext**. Log one warning telling the operator to switch to a hash and drop the plaintext var.
+- Refuse to boot if **neither** is set. That is what preserves "no default password ever ships".
 
-`datum migrate` runs migrations from an embedded set. **Never a README instructing a stranger to
-apply SQL files in order** — that is how self-hosted installs end up on undocumented schema drift.
+So the invariant survives — there is still no default credential anywhere in the image — while the
+button works. Aeonmind's own deployment sets the hash via `fly secrets set`; the password has no
+special status in the code.
 
-`datum init` then creates the org scope, the first admin, and the first API key, printing the key
-once.
+### 3. Deploy paths — one image, one click where the platform allows it
+
+**The README must open with buttons, not instructions.** A self-hostable product whose front door is
+a twelve-step setup is not self-hostable in practice.
+
+- **Railway** — a template plus a `[![Deploy on Railway]]` badge. Railway can provision Postgres as
+  a second service and generate secret values, so `DATUM_SESSION_SECRET` should be
+  template-generated and `DATUM_ADMIN_PASSWORD` a required user input.
+- **Fly.io** — ship a committed `fly.toml`. **Verify what Fly actually offers here rather than
+  trusting this document:** at the time of writing I could not confirm Fly has a true one-click
+  button equivalent to Railway's, and `fly launch --from <repo>` may be the closest thing. If no
+  button exists, ship the single command and say so plainly in the README. **Do not fake a button
+  that opens a docs page** — that is worse than an honest one-liner.
+- **`docker compose up`** — Postgres plus the server, for everyone else. Same image, no platform
+  dependency. This is the path that must never break, because it is the one that survives any
+  vendor's pricing change.
+
+Two consequences of supporting one-click, both easy to miss:
+
+1. **Migrate on boot, idempotently.** One-click platforms have no reliable pre-deploy or release
+   hook, so `datum migrate` must run at startup and be safe to run concurrently and repeatedly.
+   Never a README instructing a stranger to apply SQL files in order — that is how self-hosted
+   installs end up on undocumented schema drift.
+2. **`datum init` must be idempotent too**, and should run automatically on an empty database,
+   creating the org scope, the first admin and the first API key. Print the key once, in the deploy
+   logs, with a clear "copy this now" marker — on a one-click platform, the logs are the only
+   channel available for a one-time secret.
 
 ### 4. Nothing calls home
 
