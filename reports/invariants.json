@@ -1,0 +1,320 @@
+{
+  "postgres": "18.6 (Debian 18.6-1.pgdg13+2)",
+  "image": "postgres:latest",
+  "generated_at": "2026-08-24T16:10:26.523Z",
+  "cases": [
+    {
+      "case": "1",
+      "title": "no evidence",
+      "expect": "rejected",
+      "invariant": 1,
+      "pristine": {
+        "accepted": false,
+        "reason": "evidence_required",
+        "sqlstate": "23514",
+        "message": "new row for relation \"assertions\" violates check constraint \"evidence_required\"",
+        "extra": {
+          "evidence: null": "evidence_required",
+          "evidence: {}": "evidence_required",
+          "evidence: {source:'   '}": "evidence_required"
+        }
+      },
+      "mutations": [
+        {
+          "guard": "CHECK evidence_required",
+          "expect": "the evidence-free write lands",
+          "observed": {
+            "accepted": true,
+            "reason": null,
+            "sqlstate": null,
+            "message": null,
+            "extra": {
+              "evidence: null": "ACCEPTED",
+              "evidence: {}": "ACCEPTED",
+              "evidence: {source:'   '}": "ACCEPTED"
+            }
+          },
+          "flipped": true
+        }
+      ]
+    },
+    {
+      "case": "2",
+      "title": "UPDATE / DELETE",
+      "expect": "rejected",
+      "invariant": 2,
+      "pristine": {
+        "accepted": false,
+        "reason": "insufficient_privilege",
+        "sqlstate": "42501",
+        "message": "permission denied for table assertions",
+        "extra": {
+          "update_reason": "insufficient_privilege",
+          "update_sqlstate": "42501",
+          "update_message": "permission denied for table assertions",
+          "delete_reason": "insufficient_privilege",
+          "delete_sqlstate": "42501",
+          "delete_message": "permission denied for table assertions",
+          "rows_left": 1,
+          "value_now": "757.5"
+        }
+      },
+      "mutations": [
+        {
+          "guard": "the grant system (GRANT UPDATE, DELETE to the runtime role)",
+          "expect": "the privilege check no longer bites, so the trigger becomes the thing that refuses",
+          "observed": {
+            "accepted": false,
+            "reason": "assertions_are_immutable",
+            "sqlstate": "23514",
+            "message": "assertions are immutable: UPDATE may only stamp supersession (id=a_01M0T8K4JM013TN3GBSR5RZ9F8)",
+            "extra": {
+              "update_reason": "assertions_are_immutable",
+              "update_sqlstate": "23514",
+              "update_message": "assertions are immutable: UPDATE may only stamp supersession (id=a_01M0T8K4JM013TN3GBSR5RZ9F8)",
+              "delete_reason": "assertions_are_append_only",
+              "delete_sqlstate": "23514",
+              "delete_message": "assertions are append-only: DELETE is never permitted (id=a_01M0T8K4JM013TN3GBSR5RZ9F8)",
+              "rows_left": 1,
+              "value_now": "757.5"
+            }
+          },
+          "flipped": true
+        },
+        {
+          "guard": "the grant system AND trigger trg_assertions_no_mutate",
+          "expect": "the row is mutated and then deleted",
+          "observed": {
+            "accepted": true,
+            "reason": null,
+            "sqlstate": null,
+            "message": null,
+            "extra": {
+              "update_reason": "ACCEPTED",
+              "update_sqlstate": null,
+              "update_message": null,
+              "delete_reason": "ACCEPTED",
+              "delete_sqlstate": null,
+              "delete_message": null,
+              "rows_left": 0,
+              "value_now": null
+            }
+          },
+          "flipped": true
+        }
+      ]
+    },
+    {
+      "case": "3",
+      "title": "two `measured` rows contradicting on the same scope/subject/predicate/period",
+      "expect": "rejected",
+      "invariant": 3,
+      "pristine": {
+        "accepted": false,
+        "reason": "no_two_live_contradictions",
+        "sqlstate": "23P01",
+        "message": "conflicting key value violates exclusion constraint \"no_two_live_contradictions\"",
+        "extra": {
+          "live_rows": 1
+        }
+      },
+      "mutations": [
+        {
+          "guard": "EXCLUDE USING gist no_two_live_contradictions",
+          "expect": "two live measured rows disagree, and only an advisory record notices",
+          "observed": {
+            "accepted": true,
+            "reason": null,
+            "sqlstate": null,
+            "message": null,
+            "extra": {
+              "live_rows": 2
+            }
+          },
+          "flipped": true
+        }
+      ]
+    },
+    {
+      "case": "4",
+      "title": "kind='failed' without reopen_if",
+      "expect": "rejected",
+      "invariant": null,
+      "pristine": {
+        "accepted": false,
+        "reason": "failed_requires_reopen_if",
+        "sqlstate": "23514",
+        "message": "new row for relation \"assertions\" violates check constraint \"failed_requires_reopen_if\""
+      },
+      "mutations": [
+        {
+          "guard": "CHECK failed_requires_reopen_if",
+          "expect": "a dead end lands with no falsifier attached",
+          "observed": {
+            "accepted": true,
+            "reason": null,
+            "sqlstate": null,
+            "message": null
+          },
+          "flipped": true
+        }
+      ]
+    },
+    {
+      "case": "5",
+      "title": "asserting `measured` directly",
+      "expect": "rejected",
+      "invariant": 4,
+      "pristine": {
+        "accepted": false,
+        "reason": "confidence_is_earned",
+        "sqlstate": "23514",
+        "message": "confidence measured cannot be asserted; it is earned by verification",
+        "extra": {
+          "agent_role_outcome": "confidence_is_earned",
+          "verifier_role_outcome": "ACCEPTED"
+        }
+      },
+      "mutations": [
+        {
+          "guard": "trigger trg_assertions_confidence_is_earned",
+          "expect": "an agent successfully claims `measured` for itself",
+          "observed": {
+            "accepted": true,
+            "reason": null,
+            "sqlstate": null,
+            "message": null,
+            "extra": {
+              "agent_role_outcome": "ACCEPTED",
+              "verifier_role_outcome": "ACCEPTED"
+            }
+          },
+          "flipped": true
+        }
+      ]
+    },
+    {
+      "case": "6",
+      "title": "superseding an already-superseded row",
+      "expect": "rejected",
+      "invariant": null,
+      "pristine": {
+        "accepted": false,
+        "reason": "supersedes_target_already_superseded",
+        "sqlstate": "23514",
+        "message": "assertion a_01M0T8K4Q2Y53YDFQTR80YB67Y is already superseded by a_01M0T8K4Q441FMMXC34CE5N7WJ; supersede the head of the chain instead",
+        "extra": {
+          "forks": 1
+        }
+      },
+      "mutations": [
+        {
+          "guard": "the already-superseded branch of fn_apply_supersession (layer 1 only)",
+          "expect": "the write is still refused, but by the second layer — the re-stamp guard — with reason assertions_are_immutable",
+          "observed": {
+            "accepted": false,
+            "reason": "assertions_are_immutable",
+            "sqlstate": "23514",
+            "message": "assertion a_01M0T8K4QQRW6CHQR3S322MNAW is already superseded by a_01M0T8K4QTY6VWF7GKBFDQ4SG8",
+            "extra": {
+              "forks": 1
+            }
+          },
+          "flipped": true
+        },
+        {
+          "guard": "both layers: the fn_apply_supersession branch and the re-stamp guard",
+          "expect": "the chain forks: one row is superseded twice",
+          "observed": {
+            "accepted": true,
+            "reason": null,
+            "sqlstate": null,
+            "message": null,
+            "extra": {
+              "forks": 2
+            }
+          },
+          "flipped": true
+        }
+      ]
+    },
+    {
+      "case": "7",
+      "title": "ACCEPTED: a `confirmed-by-human` row contradicting a live `measured` row",
+      "expect": "accepted",
+      "invariant": 3,
+      "pristine": {
+        "accepted": true,
+        "reason": null,
+        "sqlstate": null,
+        "message": null,
+        "extra": {
+          "live_rows": 2,
+          "measured_still_live": true,
+          "contradictions": 1,
+          "contradiction_tiers": [
+            "measured",
+            "confirmed-by-human"
+          ],
+          "contested_on_read": true,
+          "rows_returned_on_read": 2,
+          "gate_reached_with_measured_required": false,
+          "gate_evidence": "a_01M0T8K4RXY24GWKBKXMSRX0SQ",
+          "measured_id": "a_01M0T8K4RXY24GWKBKXMSRX0SQ"
+        }
+      },
+      "mutations": [
+        {
+          "guard": "the confidence predicate on the exclusion constraint (making contradictions blocking across tiers)",
+          "expect": "the human's claim is refused and the knowledge is destroyed",
+          "observed": {
+            "accepted": false,
+            "reason": "no_two_live_contradictions",
+            "sqlstate": "23P01",
+            "message": "conflicting key value violates exclusion constraint \"no_two_live_contradictions\"",
+            "extra": {
+              "live_rows": 1,
+              "measured_still_live": true,
+              "contradictions": 0,
+              "contradiction_tiers": [
+                null,
+                null
+              ],
+              "contested_on_read": false,
+              "rows_returned_on_read": 1,
+              "gate_reached_with_measured_required": false,
+              "gate_evidence": "a_01M0T8K4SRV5RC5D46TZXGK0TK",
+              "measured_id": "a_01M0T8K4SRV5RC5D46TZXGK0TK"
+            }
+          },
+          "flipped": true
+        },
+        {
+          "guard": "trigger trg_assertions_detect_contradictions",
+          "expect": "the write still lands, but the disagreement becomes invisible",
+          "observed": {
+            "accepted": true,
+            "reason": null,
+            "sqlstate": null,
+            "message": null,
+            "extra": {
+              "live_rows": 2,
+              "measured_still_live": true,
+              "contradictions": 0,
+              "contradiction_tiers": [
+                null,
+                null
+              ],
+              "contested_on_read": false,
+              "rows_returned_on_read": 2,
+              "gate_reached_with_measured_required": false,
+              "gate_evidence": "a_01M0T8K4TH45R82Z7XXJ32BY8P",
+              "measured_id": "a_01M0T8K4TH45R82Z7XXJ32BY8P"
+            }
+          },
+          "flipped": true
+        }
+      ]
+    }
+  ]
+}
