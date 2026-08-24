@@ -577,19 +577,52 @@ interface TargetRow {
   exact_fqn: boolean;
 }
 
+/** `id:12169` — the one form that can always name exactly one symbol. */
+const SYMBOL_BY_ID = /^id:([0-9]+)$/;
+
 /**
- * Resolve a bare name or a fully qualified name to exactly one symbol.
+ * Resolve a symbol id, a fully qualified name, or a bare name to exactly one symbol.
  *
- * Exact-first, in tiers, mirroring `/v1/ask`: a qualified-name hit wins outright, and only if
- * nothing matches on `fqn` does a bare `name` count. If the winning tier holds more than one
- * symbol the query is refused with the candidate list. Picking one and answering anyway would
- * produce a confident impact report about the wrong function, which is worse than no answer.
+ * Exact-first, in tiers, mirroring `/v1/ask`: an `id:` reference is absolute, then a
+ * qualified-name hit wins outright, and only if nothing matches on `fqn` does a bare `name` count.
+ * If the winning tier holds more than one symbol the query is refused with the candidate list.
+ * Picking one and answering anyway would produce a confident impact report about the wrong
+ * function, which is worse than no answer.
+ *
+ * The `id:` form exists because on real code a qualified name is NOT always unique, so telling a
+ * caller to "qualify it" can be advice they cannot act on. Arc has seven distinct symbols whose
+ * fqn is all exactly `vllm::fma` — C and CUDA overloads in `dtype_float16.cuh` and friends — and
+ * without an absolute address there is no query that reaches any one of them, which would leave
+ * every overloaded kernel in a 132-file CUDA tree permanently unanswerable. The refusal below
+ * hands back the ids it found, so the next call is mechanical rather than a guess.
  */
 async function resolveTarget(db: Db, indexId: string, symbol: string): Promise<TargetRow> {
+  const columns = `id::text AS id, name, fqn, kind, path, line_start`;
+
+  const byId = SYMBOL_BY_ID.exec(symbol);
+  if (byId) {
+    // Scoped to the index: an id from another index must not resolve here, or a caller could
+    // silently ask one commit's question against another commit's graph.
+    const row = await db.one<TargetRow>(
+      "app",
+      `SELECT ${columns}, true AS exact_fqn FROM datum.code_symbols
+        WHERE index_id = $1 AND id = $2::bigint`,
+      [indexId, byId[1]!],
+    );
+    if (!row) {
+      throw new Rejection({
+        reason: "not_found",
+        message: `no symbol with id ${byId[1]} in this index`,
+        detail: { symbol, index_id: indexId },
+        hint: "Symbol ids belong to one index. Re-resolve against the commit you are querying.",
+      });
+    }
+    return row;
+  }
+
   const { rows } = await db.query<TargetRow>(
     "app",
-    `SELECT id::text AS id, name, fqn, kind, path, line_start,
-            coalesce(fqn = $2, false) AS exact_fqn
+    `SELECT ${columns}, coalesce(fqn = $2, false) AS exact_fqn
        FROM datum.code_symbols
       WHERE index_id = $1 AND (fqn = $2 OR name = $2)
       ORDER BY coalesce(fqn = $2, false) DESC, path, line_start
@@ -609,23 +642,30 @@ async function resolveTarget(db: Db, indexId: string, symbol: string): Promise<T
   const tier = exact.length > 0 ? exact : rows;
   if (tier.length === 1) return tier[0]!;
 
+  const candidates = tier.slice(0, 25).map((r) => ({
+    id: r.id,
+    fqn: r.fqn,
+    kind: r.kind,
+    path: r.path,
+    line_start: r.line_start,
+  }));
+  // When every candidate carries the same fqn, "qualify it" is not advice a caller can act on —
+  // the fqn is what they passed. Say the useful thing instead.
+  const fqnWouldNotHelp = exact.length > 1 || new Set(tier.map((r) => r.fqn)).size === 1;
   throw refuse(
     `${JSON.stringify(symbol)} names ${tier.length > 200 ? "over 200" : String(tier.length)} symbols in this index`,
     {
       symbol,
       // A handful is enough to disambiguate by eye; the count is what says how bad it is. The
       // 201st row exists only so `capped` is measured rather than assumed.
-      candidates: tier.slice(0, 25).map((r) => ({
-        id: r.id,
-        fqn: r.fqn,
-        kind: r.kind,
-        path: r.path,
-        line_start: r.line_start,
-      })),
+      candidates,
       candidate_count: Math.min(tier.length, 200),
       capped: tier.length > 200,
+      disambiguate_by: fqnWouldNotHelp ? "id" : "fqn",
     },
-    "Pass the fully qualified name, or the id. Choosing one of these for you would report an impact closure for the wrong symbol.",
+    fqnWouldNotHelp
+      ? `These share one qualified name, so qualifying further cannot separate them. Address one directly: symbol=id:${candidates[0]!.id}. Choosing one for you would report an impact closure for the wrong symbol.`
+      : `Pass the fully qualified name, or address one directly with symbol=id:${candidates[0]!.id}. Choosing one for you would report an impact closure for the wrong symbol.`,
   );
 }
 
@@ -675,9 +715,55 @@ export async function impact(
 
   const { rows } = await db.query<ImpactRow>(
     "app",
-    `SELECT symbol_id::text AS symbol_id, depth, path_confidence, via_kind,
+    `WITH direct AS (
+       SELECT * FROM datum.code_impact($1, $2::bigint, $3, $4::text[])
+     ),
+     -- Trait composition. An implements edge runs Type -> Trait, never method -> method: no
+     -- implements edge in a real corpus names a method symbol. So "what breaks if I change this
+     -- trait method" returned nothing, which reads exactly like "nothing implements this" — the
+     -- most dangerous answer this tool can give, and the reason this is a product fix and not a
+     -- benchmark workaround. What an engineer needs is the implementing methods, so the two hops
+     -- the graph does hold are composed: the target's enclosing trait, every type implementing
+     -- that trait, and that type's own method of the same name.
+     enclosing_trait AS (
+       SELECT t.id
+         FROM datum.code_symbols me
+         JOIN datum.code_symbols t
+           ON t.index_id = me.index_id AND t.kind = 'trait' AND t.path = me.path
+          AND me.line_start BETWEEN t.line_start AND t.line_end
+        WHERE me.index_id = $1 AND me.id = $2::bigint AND me.kind IN ('method','function')
+        -- Innermost enclosing trait, in case of nesting.
+        ORDER BY t.line_end - t.line_start ASC
+        LIMIT 1
+     ),
+     impl_methods AS (
+       SELECT m.id AS symbol_id, 1 AS depth, e.confidence AS path_confidence,
+              'implements'::text AS via_kind, m.name, m.fqn, m.kind, m.path AS file_path,
+              m.line_start
+         FROM enclosing_trait et
+         JOIN datum.code_edges e
+           ON e.index_id = $1 AND e.kind = 'implements' AND e.dst_id = et.id
+         JOIN datum.code_symbols ty ON ty.id = e.src_id
+         JOIN datum.code_symbols me ON me.index_id = $1 AND me.id = $2::bigint
+         JOIN datum.code_symbols m
+           ON m.index_id = $1 AND m.name = me.name AND m.kind IN ('method','function')
+          -- Match on qualified name, NOT on the type's declaration span. In Rust the implementing
+          -- method lives in an impl block that is nowhere near the struct it implements for, so a
+          -- span-containment join finds nothing: on Arc it returned 1 of 9 known implementors of
+          -- QuantMethod::gather_forward. The type's fqn plus the method name is the relation the
+          -- language actually expresses, and it is exact rather than positional.
+          AND (m.fqn = ty.fqn || '::' || me.name
+               OR (ty.fqn IS NULL AND m.path = ty.path
+                   AND m.line_start BETWEEN ty.line_start AND ty.line_end))
+        WHERE $4::text[] IS NULL OR 'implements' = ANY($4::text[])
+     )
+     SELECT DISTINCT ON (symbol_id)
+            symbol_id::text AS symbol_id, depth, path_confidence, via_kind,
             name, fqn, kind, file_path, line_start
-       FROM datum.code_impact($1, $2::bigint, $3, $4::text[])`,
+       FROM (SELECT * FROM direct UNION ALL SELECT * FROM impl_methods) u
+      -- Nearest and strongest hop wins per symbol, matching code_impact's own ordering.
+      ORDER BY symbol_id, depth ASC,
+               CASE path_confidence WHEN 'measured' THEN 0 WHEN 'derived' THEN 1 ELSE 2 END`,
     [index.id, target.id, depth, kinds],
   );
 

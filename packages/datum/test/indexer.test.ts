@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { indexRepo } from "../src/index/index.js";
@@ -108,11 +109,46 @@ describe("symbol extraction", () => {
 
   it("identifies CUDA kernels despite the grammar not knowing the qualifiers", () => {
     const kernels = artifact.symbols.filter((s) => s.kind === "kernel");
-    expect(kernels.map((s) => s.name).sort()).toEqual(["pack_symbols", "packed_bytes_per_row"]);
+    expect(kernels.map((s) => s.name).sort()).toEqual([
+      "bounded_pack",
+      "pack_symbols",
+      "packed_bytes_per_row",
+      "to_float",
+      "to_float",
+    ]);
     expect(kernels.every((s) => s.language === "cuda")).toBe(true);
     // The C++ grammar parks `__global__` in an ERROR node; the file is still indexed, because the
     // recoverable parts of a partly-failed parse are still true.
     expect(artifact.stats?.files_with_syntax_errors).toBeGreaterThan(0);
+  });
+
+  it("recovers a name the grammar stranded inside an ERROR node", () => {
+    // `template <> __device__ __forceinline__ float to_float<int>(int v)` makes tree-sitter-cpp
+    // report `__forceinline__` as the declarator's name. Believing it mis-named 65 kernels on the
+    // Arc corpus, and a symbol called `__forceinline__` is worse than none: it claims coverage of
+    // something while making it uncallable.
+    expect(symbolsNamed("__forceinline__")).toEqual([]);
+    const specialisations = symbolsNamed("to_float");
+    expect(specialisations.length).toBe(2);
+    expect(specialisations.every((s) => s.kind === "kernel")).toBe(true);
+    // The primary template and its specialisation share a name and a namespace, so they are
+    // separated by signature: `<typename T>` against `<>`.
+    expect(new Set(specialisations.map((s) => s.signature_hash)).size).toBe(2);
+  });
+
+  it("finds a kernel behind __launch_bounds__, which the grammar swallows whole", () => {
+    // Not a stumble but a swallow: written on its own line, this attribute consumes the declarator,
+    // so the kernel vanishes from the index rather than arriving mis-named. On Arc that cost three
+    // real `__global__` kernels outright and misfiled a fourth as a plain `function`.
+    const bounded = symbolsNamed("bounded_pack");
+    expect(bounded.length).toBe(1);
+    expect(bounded[0]?.kind).toBe("kernel");
+    expect(symbolsNamed("__launch_bounds__")).toEqual([]);
+    // The blanking pass preserves length, so reported positions must still land on the real code.
+    // A plain deletion would shift every line after the attribute, and this is what would catch it.
+    const source = readFileSync(new URL("./fixtures/repo/kernels/pack.cu", import.meta.url), "utf8");
+    const span = source.split("\n").slice((bounded[0]?.line_start ?? 1) - 1, bounded[0]?.line_end);
+    expect(span.join("\n")).toContain("bounded_pack");
   });
 
   it("does not index function-local constants as symbols", () => {

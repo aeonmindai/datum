@@ -3,6 +3,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { startPostgres, type TestPostgres } from "./helpers/postgres.js";
 import { loadConfig, type Config } from "../src/config.js";
 import type { Db } from "../src/db/pool.js";
+import { Rejection } from "../src/domain/errors.js";
 import { mintKey } from "../src/http/auth.js";
 import { impact, ingestGraph, registerGraphRoutes, resolveIndex, searchSymbols } from "../src/graph/index.js";
 import type { GraphArtifact, GraphEdge, GraphSymbol } from "../src/graph/types.js";
@@ -36,6 +37,10 @@ function nextCommit(): string {
 }
 
 function sym(name: string, over: Partial<GraphSymbol> = {}): GraphSymbol {
+  // line_end is derived so that overriding only line_start cannot produce an inverted span. The
+  // database refuses one (`code_symbol_lines_ordered`), which is how this was caught, but a
+  // fixture that trips a real constraint is testing the fixture.
+  const lineStart = over.line_start ?? 1;
   return {
     key: `src/${name}.rs#1:function:${name}`,
     kind: "function",
@@ -43,8 +48,8 @@ function sym(name: string, over: Partial<GraphSymbol> = {}): GraphSymbol {
     fqn: `crate::${name}`,
     language: "rust",
     path: `src/${name}.rs`,
-    line_start: 1,
-    line_end: 10,
+    line_start: lineStart,
+    line_end: lineStart + 9,
     ...over,
   };
 }
@@ -78,6 +83,36 @@ function artifact(repo: string, symbols: GraphSymbol[], edges: GraphEdge[]): Gra
 const names = (hops: Array<{ name: string }>): string[] => hops.map((h) => h.name);
 const depths = (hops: Array<{ name: string; depth: number }>): Record<string, number> =>
   Object.fromEntries(hops.map((h) => [h.name, h.depth]));
+
+/** Narrow a caught value to a Rejection by checking, so a non-Rejection fails loudly here. */
+function asRejection(err: unknown): Rejection {
+  if (!(err instanceof Rejection)) {
+    throw new Error(`expected a Rejection, got ${String(err)}`);
+  }
+  return err;
+}
+
+/**
+ * Read the candidate list out of a refusal, validating it on the way.
+ *
+ * `Rejection.detail` is `Record<string, unknown>`, and asserting a shape onto it would assume the
+ * very thing these tests exist to check — that a disambiguation refusal really hands back ids a
+ * caller can use.
+ */
+function candidatesOf(rejection: Rejection): Array<{ id: string; path: string }> {
+  const raw = rejection.detail.candidates;
+  if (!Array.isArray(raw)) throw new Error("refusal carried no candidates array");
+  return raw.map((entry, i) => {
+    if (typeof entry !== "object" || entry === null || !("id" in entry) || !("path" in entry)) {
+      throw new Error(`candidate ${i} is missing id or path: ${JSON.stringify(entry)}`);
+    }
+    const { id, path } = entry;
+    if (typeof id !== "string" || typeof path !== "string") {
+      throw new Error(`candidate ${i} has a non-string id or path: ${JSON.stringify(entry)}`);
+    }
+    return { id, path };
+  });
+}
 
 beforeAll(async () => {
   pg = await startPostgres();
@@ -421,6 +456,163 @@ describe("impact — the reverse dependency closure", () => {
     // The kind filter reaches the closure function's own parameter.
     const onlyTests = await impact(db, { repo, symbol: "crate::covered", kinds: ["tests"] });
     expect(names(onlyTests.reached_by)).toEqual(["test_covered_works"]);
+  });
+
+  it("addresses one of several same-fqn overloads by id, because qualifying cannot", async () => {
+    // Taken from the real corpus: Arc has seven distinct symbols whose fqn is all exactly
+    // `vllm::fma` — C/CUDA overloads across dtype_float16.cuh and friends. A qualified name
+    // therefore does NOT always identify one symbol, so "qualify it" would be advice the caller
+    // cannot act on and every overloaded kernel would be permanently unanswerable.
+    const target = sym("fma", {
+      key: "k/f16.cuh#341:kernel:fma",
+      kind: "kernel",
+      fqn: "vllm::fma",
+      path: "k/f16.cuh",
+      line_start: 341,
+      language: "cuda",
+    });
+    const overload = sym("fma", {
+      key: "k/f32.cuh#132:kernel:fma",
+      kind: "kernel",
+      fqn: "vllm::fma",
+      path: "k/f32.cuh",
+      line_start: 132,
+      language: "cuda",
+    });
+    const caller = sym("launch_attn", { language: "cuda" });
+    const repo = "acme/overloads";
+    await ingestGraph(db, artifact(repo, [target, overload, caller], [edge(caller, target)]));
+
+    // The fqn is ambiguous, and the refusal says so in the one way that is actionable.
+    const refusal = await impact(db, { repo, symbol: "vllm::fma" }).catch((e: unknown) => e);
+    expect(refusal).toMatchObject({
+      name: "Rejection",
+      http: 400,
+      detail: {
+        candidate_count: 2,
+        disambiguate_by: "id",
+        candidates: [
+          { fqn: "vllm::fma", kind: "kernel", path: "k/f16.cuh", line_start: 341 },
+          { fqn: "vllm::fma", kind: "kernel", path: "k/f32.cuh", line_start: 132 },
+        ],
+      },
+    });
+    const rejection = asRejection(refusal);
+    expect(rejection.hint).toContain("qualifying further cannot separate them");
+
+    // And the ids it handed back resolve to exactly one symbol each. Read through a guard rather
+    // than an assertion: the point of the test is that the refusal really carries usable ids, and
+    // casting the body would assume exactly the thing under test.
+    const candidates = candidatesOf(rejection);
+    const chosen = candidates.find((c) => c.path === "k/f16.cuh")!;
+    const hit = await impact(db, { repo, symbol: `id:${chosen.id}` });
+    expect(hit.target).toMatchObject({ fqn: "vllm::fma", path: "k/f16.cuh", line_start: 341 });
+    expect(names(hit.reached_by)).toEqual(["launch_attn"]);
+
+    const missed = candidates.find((c) => c.path === "k/f32.cuh")!;
+    const empty = await impact(db, { repo, symbol: `id:${missed.id}` });
+    expect(empty.reached_by).toEqual([]);
+
+    // An id from another index must not resolve here: one commit's question must never be
+    // answered against another commit's graph.
+    const foreign = await db.one<{ id: string }>(
+      "app",
+      `SELECT id::text FROM datum.code_symbols WHERE index_id = datum.latest_index($1) LIMIT 1`,
+      ["acme/chain"],
+    );
+    await expect(impact(db, { repo, symbol: `id:${foreign!.id}` })).rejects.toMatchObject({
+      name: "Rejection",
+      http: 404,
+    });
+  });
+
+  it("reaches trait implementors through the trait, not just direct callers", async () => {
+    // `implements` edges run Type -> Trait, never method -> method, so a purely edge-following
+    // closure answers "nothing implements this" for a trait method — the most dangerous answer
+    // this tool can give. impact() composes the two hops the graph does hold: the method's
+    // enclosing trait, the types implementing it, and each type's method of the same name.
+    const trait = sym("Quant", {
+      key: "src/quant.rs#10:trait:Quant",
+      kind: "trait",
+      fqn: "crate::Quant",
+      path: "src/quant.rs",
+      line_start: 10,
+      line_end: 30,
+    });
+    const traitMethod = sym("forward", {
+      key: "src/quant.rs#15:method:forward",
+      kind: "method",
+      fqn: "crate::Quant::forward",
+      path: "src/quant.rs",
+      line_start: 15,
+      line_end: 20,
+    });
+    const implType = sym("GptqLayer", {
+      key: "src/gptq.rs#100:type:GptqLayer",
+      kind: "type",
+      fqn: "crate::GptqLayer",
+      path: "src/gptq.rs",
+      line_start: 100,
+      line_end: 200,
+    });
+    const implMethod = sym("forward", {
+      key: "src/gptq.rs#150:method:forward",
+      kind: "method",
+      fqn: "crate::GptqLayer::forward",
+      path: "src/gptq.rs",
+      line_start: 150,
+      line_end: 160,
+    });
+    // A type that implements nothing, whose same-named method must NOT be pulled in.
+    const unrelatedType = sym("Bystander", {
+      key: "src/bystander.rs#1:type:Bystander",
+      kind: "type",
+      fqn: "crate::Bystander",
+      path: "src/bystander.rs",
+      line_start: 1,
+      line_end: 50,
+    });
+    const unrelatedMethod = sym("forward", {
+      key: "src/bystander.rs#20:method:forward",
+      kind: "method",
+      fqn: "crate::Bystander::forward",
+      path: "src/bystander.rs",
+      line_start: 20,
+      line_end: 30,
+    });
+    const repo = "acme/traits";
+    await ingestGraph(
+      db,
+      artifact(
+        repo,
+        [trait, traitMethod, implType, implMethod, unrelatedType, unrelatedMethod],
+        [edge(implType, trait, { kind: "implements", resolution: "unique-name" })],
+      ),
+    );
+
+    const result = await impact(db, { repo, symbol: "crate::Quant::forward" });
+    expect(result.reached_by).toHaveLength(1);
+    expect(result.reached_by[0]).toMatchObject({
+      fqn: "crate::GptqLayer::forward",
+      depth: 1,
+      via_kind: "implements",
+      // The implements edge was unique-name, so the composed hop is derived, never measured.
+      path_confidence: "derived",
+      path: "src/gptq.rs",
+      line_start: 150,
+    });
+    // The unrelated type's identically-named method is not an implementor and must not appear.
+    expect(names(result.reached_by)).not.toContain("Bystander");
+    expect(result.counts).toEqual({ measured: 0, derived: 1, unverified: 0 });
+
+    // The kind filter still governs: asking only about calls must not smuggle in an implements hop.
+    const callsOnly = await impact(db, { repo, symbol: "crate::Quant::forward", kinds: ["calls"] });
+    expect(callsOnly.reached_by).toEqual([]);
+    expect(callsOnly.ambiguous).toEqual([]);
+
+    // And a plain function outside any trait is unaffected by the composition.
+    const plain = await impact(db, { repo, symbol: "crate::GptqLayer::forward" });
+    expect(plain.reached_by).toEqual([]);
   });
 
   it("refuses a symbol that is not in the index, and an out-of-range depth", async () => {

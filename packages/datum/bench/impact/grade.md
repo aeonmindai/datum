@@ -66,8 +66,16 @@ counts a preceding attribute or doc comment as part of the symbol. Three lines i
 that and far too little to reach the next same-named sibling, which in both questions is hundreds
 of lines away.
 
-Ground-truth `line` values are the `fn` / `def` line as read at `commit`. They are recorded for
-every entry, so a strict variant may be reported *in addition* to the primary numbers:
+Ground-truth `line` values are the **referring symbol's declaration line** — its `fn` / `def` /
+kernel-name line as read at `commit` — never the line of the call itself. `I17` is the worked
+example: the answer is `QtipBakeConfig::get`, whose declaration is `qtip/mod.rs:975`, and whose call
+to the target sits four lines down at `:979`. The fixture records 975. This matches what
+`/v1/impact` reports: a hop carries the symbol's `line_start`, not the call site. Confirmed against a
+real load of the Arc index, which returns 975 for that hop. A grader comparing against call-site
+lines would be comparing the wrong number, and no tolerance would save it.
+
+They are recorded for every entry, so a strict variant may be reported *in addition* to the primary
+numbers:
 
 - **primary** — match on `name` + `path`, with line disambiguation only where flagged;
 - **strict** — match on `name` + `path` + `|reported_line - e.line| <= 3`, on every question.
@@ -138,6 +146,43 @@ uncertain(q) = ambiguous  ∪ covered_by_tests.filter(h => h.path_confidence ===
 - HTTP 400 refusal whose `detail.candidates` contains the target → **abstain** for that question
 - HTTP 404 (unknown symbol / no completed index) → **abstain** for that question
 
+**The fourth thing an edge can be: `unresolved`.** A call whose name matches more than eight symbols
+is emitted `unresolved` — `dst` null, `dst_name` preserved — rather than ambiguous, on the ground
+that a three-hundred-element candidate list for "one of the things called `new`" carries no decision
+value. On Arc HEAD 9,123 edges are demoted this way. An unresolved edge produces **no hop in any of
+the three arrays**, so it is invisible to the answer set: it costs recall, it cannot appear in
+`certain`, and it therefore cannot produce a false-confidence event. That asymmetry is the correct
+behaviour and it must not be reported as if it were free. Every run must therefore also report the
+artifact's `stats.resolution_ambiguity_ceiling`, so a reader can see how much of any recall shortfall
+is a structural omission rather than a lookup failure. A missing recall point bought by silence is
+still a missing recall point, and a report that shows only `FCR` next to a high recall has hidden the
+trade rather than measured it.
+
+**Trait questions need two hops, and the runner must take both.** `implements` edges run
+**Type → Trait**, not type-method → trait-method: measured on the arc HEAD artifact, *zero*
+`implements` edges name a method symbol, and for `gather_forward` specifically 42 edges name it of
+which 41 are ceiling-demoted `unresolved`. So the nine implementations that are the correct answer to
+`I22` are simply not reachable by querying the method.
+
+The five questions `I22`–`I26` therefore carry `requires_trait_composition: true` together with
+`declaring_trait_fqn`, `declaring_trait_path`, `declaring_trait_line` and a `resolution_path` field
+spelling out the two hops. On those questions the runner MUST:
+
+1. query impact on `declaring_trait_fqn` to obtain the implementor types over `implements`;
+2. for each implementor type, select the symbol whose name equals the question's `target` and whose
+   definition lies inside that type;
+3. union that with the single-hop result on the method itself (which supplies the call-site answers,
+   such as `load_from_artifacts` in `I24` and `extract_calibration_artifact` in `I25`).
+
+A single-hop score on these five is **not** a valid result and must not be reported as one. It would
+measure a composition the query surface does not perform and label it a missing edge — the exact
+inversion of what this benchmark exists to detect. The edges are present: resolve `QuantMethod` and
+all nine implementors come back structurally, with no ceiling involved.
+
+If a runner cannot compose, the honest reporting is to mark `I22`–`I26` **not attempted**, exclude
+them from the macro means, and say so. That is a smaller and more useful claim than a recall figure
+built on a fixture the API was never asked the right question.
+
 The filter on `covered_by_tests` is load-bearing, not defensive. `covered_by_tests` spans **both**
 confidence classes by design, so a test reached only through an ambiguous hop appears in
 `covered_by_tests` carrying `path_confidence: "unverified"` *and* in `ambiguous[]`. Unioning the two
@@ -165,16 +210,37 @@ the definition anyway, because they are what makes the filter's load-bearing rol
 reads this next.
 
 **Resolving the target symbol.** Do **not** query `/v1/impact` with the `target_fqn` string from
-`questions.json`. The resolver does exact string equality against `code_symbols.fqn` (then `name`),
-so a query key hardcoded in this fixture desyncs the moment the indexer changes its `fqn` spelling.
-`target_fqn` is documentation. Resolve at run time instead: `GET /v1/graph/symbols?repo=&q=<target>`
-substring-matches name and fqn and returns each candidate's exact `fqn`, `kind`, `path` and
-`line_start`; select the candidate matching the question's `target_path` and `target_line` (same
-`<= 3` line tolerance as section 3) and feed its returned `fqn` into `/v1/impact`. Ten questions
-carry `bare_name_is_ambiguous: true` and would otherwise 400 — `I17`-`I20` all target `from_env`,
-which has four distinct Arc-owned definitions and four different correct answers. If the runner
-deliberately queries by bare name to exercise the refusal path, a 400 listing all four candidates is
-an **abstain**, and that is the correct behaviour, not a failure.
+`questions.json`, and do not feed back a returned `fqn` either. An fqn is not unique: loading Arc
+found seven distinct symbols sharing the exact fqn `vllm::fma` — CUDA overloads across
+`dtype_float16.cuh`, `dtype_bfloat16.cuh` and `dtype_float32.cuh` — so no fqn query can ever reach
+one specific overload. `target_fqn` is documentation only.
+
+Resolve by **symbol id**:
+
+1. `GET /v1/graph/symbols?repo=&q=<target>` — substring-matches name and fqn, returning each
+   candidate's `id`, `fqn`, `kind`, `path` and `line_start`;
+2. select the candidate whose `path` equals the question's `target_path` and whose `line_start` is
+   within the section 3 `<= 3` tolerance of `target_line`;
+3. query `/v1/impact` with `symbol=id:<that id>`, which resolves absolutely and scoped to the index
+   and cannot be ambiguous.
+
+This makes the question set independent of every naming convention, which is the property worth
+having. Ten questions carry `bare_name_is_ambiguous: true` and would 400 if queried by bare name —
+`I17`-`I20` all target `from_env`, which has four distinct Arc-owned definitions and four different
+correct answers, and a real load confirms the refusal lists exactly those four. If the runner
+deliberately queries by bare name to exercise the refusal path, that 400 is an **abstain** and is the
+correct behaviour, not a failure. The refusal body carries `detail.disambiguate_by: "id" | "fqn"`, so
+a runner can tell mechanically whether qualifying would help at all — where it reads `"id"`,
+qualifying by name cannot work and only the id path will resolve.
+
+**`measured` is zero on this corpus, and that is the correct answer.** The Arc HEAD index resolves to
+47,658 `derived` and 55,161 `unverified` edges and **zero** `measured`: tree-sitter is neither a
+compiler nor a language server, so the indexer refuses that label rather than inflating it. The
+entire `certain` set on Arc is therefore `derived` — sound but inferred, not observed. Nothing in this
+file depends on a `measured` hop existing, and `counts.measured === 0` must never be treated as a
+fault. It does bound what the run can claim: every true positive reported here rests on unique-name
+resolution, and a compiler or language-server pass over the same corpus would be the thing that
+turns those into facts. Say that in the report rather than letting `derived` read as `measured`.
 
 Then:
 

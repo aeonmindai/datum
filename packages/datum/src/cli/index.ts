@@ -411,11 +411,16 @@ async function main(): Promise<void> {
       const file = rest[0];
       if (!file) bail("usage: datum ingest-graph <graph.json> [--scope PATH]");
       const { values } = parseArgs({ args: rest.slice(1), options: { scope: { type: "string" } } });
-      await withDbOnly(async (db) => {
+      await withDbOnly(async (db, config) => {
         const raw: unknown = JSON.parse(await readFile(resolve(process.cwd(), file), "utf8"));
         const artifact = raw as GraphArtifact;
         const t0 = Date.now();
-        const r = await ingestGraph(db, artifact, values.scope ? { scope: values.scope } : undefined);
+        // Default the index into the org's scope tree. ingestGraph alone cannot know the org, so
+        // its own fallback is `code/<repo>` — which no project key can reach, making a freshly
+        // ingested graph unreadable by exactly the keys that should read it. The CLI does know.
+        const scope =
+          values.scope ?? `${config.orgScope}/proj/${artifact.repo.split("/").pop()}`;
+        const r = await ingestGraph(db, artifact, { scope });
         process.stdout.write(
           `indexed ${artifact.repo} @ ${artifact.commit_sha.slice(0, 9)}\n` +
             `  index    ${r.indexId}\n` +

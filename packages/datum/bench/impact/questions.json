@@ -2,7 +2,8 @@
   {
     "id": "I01",
     "target": "headroom_from_env",
-    "target_fqn": "headroom_from_env",
+    "target_fqn": "mistralrs_quant::utils::bake_budget::headroom_from_env",
+    "target_fqn_verified_by": "Rust fqn per the indexer's documented rendering: crate name from Cargo.toml with hyphens replaced by underscores, module path from the directory under src/ with mod.rs/lib.rs/main.rs collapsed into the parent, then no owner (free function), then the method name. Trait-impl and inherent methods render identically; a trait method DECLARATION is its own distinct symbol.",
     "bare_name_is_ambiguous": false,
     "target_path": "mistralrs-quant/src/utils/bake_budget.rs",
     "target_line": 186,
@@ -34,7 +35,8 @@
   {
     "id": "I02",
     "target": "evict_before",
-    "target_fqn": "SingleCache::evict_before",
+    "target_fqn": "mistralrs_core::kv_cache::single_cache::SingleCache::evict_before",
+    "target_fqn_verified_by": "Rust fqn per the indexer's documented rendering: crate name from Cargo.toml with hyphens replaced by underscores, module path from the directory under src/ with mod.rs/lib.rs/main.rs collapsed into the parent, then the owning type `SingleCache`, then the method name. Trait-impl and inherent methods render identically; a trait method DECLARATION is its own distinct symbol.",
     "bare_name_is_ambiguous": false,
     "target_path": "mistralrs-core/src/kv_cache/single_cache.rs",
     "target_line": 187,
@@ -67,7 +69,8 @@
   {
     "id": "I03",
     "target": "should_propagate_api_error",
-    "target_fqn": "should_propagate_api_error",
+    "target_fqn": "mistralrs_core::pipeline::hf::should_propagate_api_error",
+    "target_fqn_verified_by": "Rust fqn per the indexer's documented rendering: crate name from Cargo.toml with hyphens replaced by underscores, module path from the directory under src/ with mod.rs/lib.rs/main.rs collapsed into the parent, then no owner (free function), then the method name. Trait-impl and inherent methods render identically; a trait method DECLARATION is its own distinct symbol.",
     "bare_name_is_ambiguous": false,
     "target_path": "mistralrs-core/src/pipeline/hf.rs",
     "target_line": 159,
@@ -99,7 +102,8 @@
   {
     "id": "I04",
     "target": "extract_last_boxed",
-    "target_fqn": "extract_last_boxed",
+    "target_fqn": "mistralrs_core::arc_boost::extract_last_boxed",
+    "target_fqn_verified_by": "Rust fqn per the indexer's documented rendering: crate name from Cargo.toml with hyphens replaced by underscores, module path from the directory under src/ with mod.rs/lib.rs/main.rs collapsed into the parent, then no owner (free function), then the method name. Trait-impl and inherent methods render identically; a trait method DECLARATION is its own distinct symbol.",
     "bare_name_is_ambiguous": false,
     "target_path": "mistralrs-core/src/arc_boost.rs",
     "target_line": 234,
@@ -131,7 +135,8 @@
   {
     "id": "I05",
     "target": "disk_usage_for",
-    "target_fqn": "disk_usage_for",
+    "target_fqn": "mistralrs_core::diagnostics::disk_usage_for",
+    "target_fqn_verified_by": "Rust fqn per the indexer's documented rendering: crate name from Cargo.toml with hyphens replaced by underscores, module path from the directory under src/ with mod.rs/lib.rs/main.rs collapsed into the parent, then no owner (free function), then the method name. Trait-impl and inherent methods render identically; a trait method DECLARATION is its own distinct symbol.",
     "bare_name_is_ambiguous": false,
     "target_path": "mistralrs-core/src/diagnostics.rs",
     "target_line": 350,
@@ -163,7 +168,8 @@
   {
     "id": "I06",
     "target": "sort_running_by_priority_fcfs",
-    "target_fqn": "PagedAttentionScheduler::sort_running_by_priority_fcfs",
+    "target_fqn": "mistralrs_core::paged_attention::scheduler::PagedAttentionScheduler::sort_running_by_priority_fcfs",
+    "target_fqn_verified_by": "Rust fqn per the indexer's documented rendering: crate name from Cargo.toml with hyphens replaced by underscores, module path from the directory under src/ with mod.rs/lib.rs/main.rs collapsed into the parent, then the owning type `PagedAttentionScheduler`, then the method name. Trait-impl and inherent methods render identically; a trait method DECLARATION is its own distinct symbol.",
     "bare_name_is_ambiguous": false,
     "target_path": "mistralrs-core/src/paged_attention/scheduler.rs",
     "target_line": 558,
@@ -196,7 +202,8 @@
   {
     "id": "I07",
     "target": "finalize_tool_calls",
-    "target_fqn": "HarmonyContext::finalize_tool_calls",
+    "target_fqn": "mistralrs_core::harmony::HarmonyContext::finalize_tool_calls",
+    "target_fqn_verified_by": "Rust fqn per the indexer's documented rendering: crate name from Cargo.toml with hyphens replaced by underscores, module path from the directory under src/ with mod.rs/lib.rs/main.rs collapsed into the parent, then the owning type `HarmonyContext`, then the method name. Trait-impl and inherent methods render identically; a trait method DECLARATION is its own distinct symbol.",
     "bare_name_is_ambiguous": false,
     "target_path": "mistralrs-core/src/harmony.rs",
     "target_line": 375,
@@ -229,7 +236,8 @@
   {
     "id": "I08",
     "target": "prefill_admission_cap",
-    "target_fqn": "prefill_admission_cap",
+    "target_fqn": "mistralrs_core::scheduler::default_scheduler::prefill_admission_cap",
+    "target_fqn_verified_by": "Rust fqn per the indexer's documented rendering: crate name from Cargo.toml with hyphens replaced by underscores, module path from the directory under src/ with mod.rs/lib.rs/main.rs collapsed into the parent, then no owner (free function), then the method name. Trait-impl and inherent methods render identically; a trait method DECLARATION is its own distinct symbol.",
     "bare_name_is_ambiguous": false,
     "target_path": "mistralrs-core/src/scheduler/default_scheduler.rs",
     "target_line": 110,
@@ -262,7 +270,8 @@
   {
     "id": "I09",
     "target": "strip_pending_lead_pad",
-    "target_fqn": "strip_pending_lead_pad",
+    "target_fqn": "mistralrs_core::kv_cache::strip_pending_lead_pad",
+    "target_fqn_verified_by": "Rust fqn per the indexer's documented rendering: crate name from Cargo.toml with hyphens replaced by underscores, module path from the directory under src/ with mod.rs/lib.rs/main.rs collapsed into the parent, then no owner (free function), then the method name. Trait-impl and inherent methods render identically; a trait method DECLARATION is its own distinct symbol.",
     "bare_name_is_ambiguous": false,
     "target_path": "mistralrs-core/src/kv_cache/mod.rs",
     "target_line": 1231,
@@ -301,7 +310,8 @@
   {
     "id": "I10",
     "target": "require_normal_kv_slot",
-    "target_fqn": "require_normal_kv_slot",
+    "target_fqn": "mistralrs_core::models::deepseek4::require_normal_kv_slot",
+    "target_fqn_verified_by": "Rust fqn per the indexer's documented rendering: crate name from Cargo.toml with hyphens replaced by underscores, module path from the directory under src/ with mod.rs/lib.rs/main.rs collapsed into the parent, then no owner (free function), then the method name. Trait-impl and inherent methods render identically; a trait method DECLARATION is its own distinct symbol.",
     "bare_name_is_ambiguous": false,
     "target_path": "mistralrs-core/src/models/deepseek4.rs",
     "target_line": 2906,
@@ -340,7 +350,8 @@
   {
     "id": "I11",
     "target": "batch_can_be_ragged",
-    "target_fqn": "batch_can_be_ragged",
+    "target_fqn": "mistralrs_core::kv_cache::batch_can_be_ragged",
+    "target_fqn_verified_by": "Rust fqn per the indexer's documented rendering: crate name from Cargo.toml with hyphens replaced by underscores, module path from the directory under src/ with mod.rs/lib.rs/main.rs collapsed into the parent, then no owner (free function), then the method name. Trait-impl and inherent methods render identically; a trait method DECLARATION is its own distinct symbol.",
     "bare_name_is_ambiguous": false,
     "target_path": "mistralrs-core/src/kv_cache/mod.rs",
     "target_line": 1273,
@@ -385,7 +396,8 @@
   {
     "id": "I12",
     "target": "xs_per_sequence_enabled",
-    "target_fqn": "xs_per_sequence_enabled",
+    "target_fqn": "mistralrs_core::kv_cache::xs_rolling::xs_per_sequence_enabled",
+    "target_fqn_verified_by": "Rust fqn per the indexer's documented rendering: crate name from Cargo.toml with hyphens replaced by underscores, module path from the directory under src/ with mod.rs/lib.rs/main.rs collapsed into the parent, then no owner (free function), then the method name. Trait-impl and inherent methods render identically; a trait method DECLARATION is its own distinct symbol.",
     "bare_name_is_ambiguous": false,
     "target_path": "mistralrs-core/src/kv_cache/xs_rolling.rs",
     "target_line": 225,
@@ -448,7 +460,8 @@
   {
     "id": "I13",
     "target": "launch_qtip_fused_gemv_v2_k4_l16_f16",
-    "target_fqn": "launch_qtip_fused_gemv_v2_k4_l16_f16",
+    "target_fqn": "mistralrs_quant::qtip::ffi::launch_qtip_fused_gemv_v2_k4_l16_f16",
+    "target_fqn_verified_by": "Rust fqn per the indexer's documented rendering: crate name from Cargo.toml with hyphens replaced by underscores, module path from the directory under src/ with mod.rs/lib.rs/main.rs collapsed into the parent, then no owner (free function), then the method name. Trait-impl and inherent methods render identically; a trait method DECLARATION is its own distinct symbol.",
     "bare_name_is_ambiguous": false,
     "target_path": "mistralrs-quant/src/qtip/ffi.rs",
     "target_line": 221,
@@ -482,6 +495,7 @@
     "id": "I14",
     "target": "qtip_packed_bytes_per_row",
     "target_fqn": "qtip_packed_bytes_per_row",
+    "target_fqn_verified_by": "Free CUDA __device__ function in no namespace, so the indexer emits no namespace/class prefix. Resolve at run time via /v1/graph/symbols rather than trusting this string.",
     "bare_name_is_ambiguous": false,
     "target_path": "mistralrs-quant/kernels/qtip/qtip_geom.cuh",
     "target_line": 69,
@@ -515,6 +529,7 @@
     "id": "I15",
     "target": "_longest_cycle",
     "target_fqn": "qlib._longest_cycle",
+    "target_fqn_verified_by": "Python dotted form, root = first ancestor without __init__.py; arc-tools/ and arc-tools/quality/ have no __init__.py, so the root is the module file itself.",
     "bare_name_is_ambiguous": false,
     "target_path": "arc-tools/quality/qlib.py",
     "target_line": 241,
@@ -548,6 +563,7 @@
     "id": "I16",
     "target": "box_fingerprint",
     "target_fqn": "s6_bin_cache.box_fingerprint",
+    "target_fqn_verified_by": "Python dotted form, root = first ancestor without __init__.py; arc-tools/ and arc-tools/quality/ have no __init__.py, so the root is the module file itself.",
     "bare_name_is_ambiguous": false,
     "target_path": "arc-tools/quality/s6_bin_cache.py",
     "target_line": 110,
@@ -592,8 +608,8 @@
   {
     "id": "I17",
     "target": "from_env",
-    "target_fqn": "QtipCodebook::from_env",
-    "target_fqn_verified_by": "read `impl QtipCodebook` header above qtip/mod.rs:616",
+    "target_fqn": "mistralrs_quant::qtip::QtipCodebook::from_env",
+    "target_fqn_verified_by": "Rust fqn per the indexer's documented rendering: crate name from Cargo.toml with hyphens replaced by underscores, module path from the directory under src/ with mod.rs/lib.rs/main.rs collapsed into the parent, then the owning type `QtipCodebook`, then the method name. Trait-impl and inherent methods render identically; a trait method DECLARATION is its own distinct symbol.",
     "bare_name_is_ambiguous": true,
     "target_path": "mistralrs-quant/src/qtip/mod.rs",
     "target_line": 616,
@@ -626,8 +642,8 @@
   {
     "id": "I18",
     "target": "from_env",
-    "target_fqn": "TrellisSearch::from_env",
-    "target_fqn_verified_by": "read `impl TrellisSearch` header above viterbi.rs:147",
+    "target_fqn": "mistralrs_quant::qtip::viterbi::TrellisSearch::from_env",
+    "target_fqn_verified_by": "Rust fqn per the indexer's documented rendering: crate name from Cargo.toml with hyphens replaced by underscores, module path from the directory under src/ with mod.rs/lib.rs/main.rs collapsed into the parent, then the owning type `TrellisSearch`, then the method name. Trait-impl and inherent methods render identically; a trait method DECLARATION is its own distinct symbol.",
     "bare_name_is_ambiguous": true,
     "target_path": "mistralrs-quant/src/qtip/viterbi.rs",
     "target_line": 147,
@@ -666,8 +682,8 @@
   {
     "id": "I19",
     "target": "from_env",
-    "target_fqn": "KvQuantMode::from_env",
-    "target_fqn_verified_by": "read `impl KvQuantMode` header above dsv4_kv_fp8.rs:158",
+    "target_fqn": "mistralrs_core::models::dsv4_kv_fp8::KvQuantMode::from_env",
+    "target_fqn_verified_by": "Rust fqn per the indexer's documented rendering: crate name from Cargo.toml with hyphens replaced by underscores, module path from the directory under src/ with mod.rs/lib.rs/main.rs collapsed into the parent, then the owning type `KvQuantMode`, then the method name. Trait-impl and inherent methods render identically; a trait method DECLARATION is its own distinct symbol.",
     "bare_name_is_ambiguous": true,
     "target_path": "mistralrs-core/src/models/dsv4_kv_fp8.rs",
     "target_line": 158,
@@ -706,8 +722,8 @@
   {
     "id": "I20",
     "target": "from_env",
-    "target_fqn": "EpPlacementMode::from_env",
-    "target_fqn_verified_by": "read `impl EpPlacementMode` header above deepseek4.rs:2603",
+    "target_fqn": "mistralrs_core::models::deepseek4::EpPlacementMode::from_env",
+    "target_fqn_verified_by": "Rust fqn per the indexer's documented rendering: crate name from Cargo.toml with hyphens replaced by underscores, module path from the directory under src/ with mod.rs/lib.rs/main.rs collapsed into the parent, then the owning type `EpPlacementMode`, then the method name. Trait-impl and inherent methods render identically; a trait method DECLARATION is its own distinct symbol.",
     "bare_name_is_ambiguous": true,
     "target_path": "mistralrs-core/src/models/deepseek4.rs",
     "target_line": 2603,
@@ -741,6 +757,7 @@
     "id": "I21",
     "target": "health_or_die",
     "target_fqn": "qlib.health_or_die",
+    "target_fqn_verified_by": "Python dotted form, root = first ancestor without __init__.py; arc-tools/ and arc-tools/quality/ have no __init__.py, so the root is the module file itself.",
     "bare_name_is_ambiguous": false,
     "target_path": "arc-tools/quality/qlib.py",
     "target_line": 47,
@@ -803,8 +820,8 @@
   {
     "id": "I22",
     "target": "gather_forward",
-    "target_fqn": "QuantMethod::gather_forward",
-    "target_fqn_verified_by": "`pub trait QuantMethod` opens at mistralrs-quant/src/lib.rs:1400",
+    "target_fqn": "mistralrs_quant::QuantMethod::gather_forward",
+    "target_fqn_verified_by": "Rust fqn per the indexer's documented rendering: crate name from Cargo.toml with hyphens replaced by underscores, module path from the directory under src/ with mod.rs/lib.rs/main.rs collapsed into the parent, then the declaring trait `QuantMethod`, then the method name. Trait-impl and inherent methods render identically; a trait method DECLARATION is its own distinct symbol.",
     "bare_name_is_ambiguous": true,
     "target_path": "mistralrs-quant/src/lib.rs",
     "target_line": 1441,
@@ -813,8 +830,14 @@
     "question": "If I change the signature of the trait method `QuantMethod::gather_forward` (mistralrs-quant/src/lib.rs:1441), which implementations must be updated?",
     "depth": 1,
     "edge_kinds": [
-      "implements"
+      "implements",
+      "calls"
     ],
+    "requires_trait_composition": true,
+    "declaring_trait_fqn": "mistralrs_quant::QuantMethod",
+    "declaring_trait_path": "mistralrs-quant/src/lib.rs",
+    "declaring_trait_line": 1400,
+    "resolution_path": "The 9 implementation entries in expect_symbols are NOT reachable by querying the method alone. Measured by CodeIndexer on the arc HEAD artifact: `implements` edges run Type -> Trait, so no `implements` edge names a method symbol at all (for `gather_forward`, zero). The answer is reachable in two hops and the runner MUST take both: (1) impact on the declaring trait `mistralrs_quant::QuantMethod` yields its implementor types via `implements`; (2) for each implementor, select the symbol of the same name as the target defined inside that type. This is a composition the query surface does not do for you. Scoring the single-hop result alone would measure a gap in the query API and mislabel it as a missing edge, which is the opposite of what this benchmark is for.",
     "expect_symbols": [
       {
         "name": "gather_forward",
@@ -878,13 +901,13 @@
     "grep_hits_code": 146,
     "grep_files_code": 26,
     "verified_by": "Established the trait's extent first: `rg '^\\s*(pub )?(trait|impl)' mistralrs-quant/src/lib.rs` shows `pub trait QuantMethod` opening at :1400 and the next item `impl Module for dyn QuantMethod` at :1530, so :1441 is a default method of that trait. Then took every `fn gather_forward(` definition line from rg and, for each, scanned upward to the enclosing `impl` header and read it: PendingIsqLayer, MXFP4Layer, UnquantLinear, TuckerFactoredLayer, AfqLayer, BlockwiseFP8Linear, GgufMatMul, Qtip2bLayer, QtipLayer — nine impls, all `impl QuantMethod for X`. Deliberately scoped to `implements` edges only so the answer set is exactly enumerable; the 137 other textual hits are call sites, error strings containing the word, doc comments and prose.",
-    "note": "188 textual hits across 26 code files, 9 correct answers. Note the trap: many hits are inside FUNCTIONS NAMED gather_forward that are not implementations of this trait method (`gather_forward_cpu`, `gather_forward_batched_cpu`, `gather_forward_impl`, `gather_forward_autocast`), and the error-message strings `\"QtipLayer::gather_forward: ...\"` mention the name from inside sibling helpers."
+    "note": "188 textual hits across 26 code files, 9 correct answers. Note the trap: many hits are inside FUNCTIONS NAMED gather_forward that are not implementations of this trait method (`gather_forward_cpu`, `gather_forward_batched_cpu`, `gather_forward_impl`, `gather_forward_autocast`), and the error-message strings `\"QtipLayer::gather_forward: ...\"` mention the name from inside sibling helpers. Measured on the HEAD artifact: 42 edges name `gather_forward`, 41 of them ceiling-demoted to `unresolved` and 1 `unique-name`. A call-scored variant of this question would lose 41 hops to the ceiling, which is why it is scored on implementation structure instead."
   },
   {
     "id": "I23",
     "target": "cuda_graph_runner_mut",
-    "target_fqn": "Pipeline::cuda_graph_runner_mut",
-    "target_fqn_verified_by": "`pub trait Pipeline:` opens at mistralrs-core/src/pipeline/mod.rs:597",
+    "target_fqn": "mistralrs_core::pipeline::Pipeline::cuda_graph_runner_mut",
+    "target_fqn_verified_by": "Rust fqn per the indexer's documented rendering: crate name from Cargo.toml with hyphens replaced by underscores, module path from the directory under src/ with mod.rs/lib.rs/main.rs collapsed into the parent, then the declaring trait `Pipeline`, then the method name. Trait-impl and inherent methods render identically; a trait method DECLARATION is its own distinct symbol.",
     "bare_name_is_ambiguous": true,
     "target_path": "mistralrs-core/src/pipeline/mod.rs",
     "target_line": 615,
@@ -893,10 +916,14 @@
     "question": "If I change the signature of the trait method `Pipeline::cuda_graph_runner_mut` (mistralrs-core/src/pipeline/mod.rs:615), what else must I care about?",
     "depth": 1,
     "edge_kinds": [
-      "calls",
       "implements",
-      "references"
+      "calls"
     ],
+    "requires_trait_composition": true,
+    "declaring_trait_fqn": "mistralrs_core::pipeline::Pipeline",
+    "declaring_trait_path": "mistralrs-core/src/pipeline/mod.rs",
+    "declaring_trait_line": 597,
+    "resolution_path": "The 9 implementation entries in expect_symbols are NOT reachable by querying the method alone. Measured by CodeIndexer on the arc HEAD artifact: `implements` edges run Type -> Trait, so no `implements` edge names a method symbol at all (for `gather_forward`, zero). The answer is reachable in two hops and the runner MUST take both: (1) impact on the declaring trait `mistralrs_core::pipeline::Pipeline` yields its implementor types via `implements`; (2) for each implementor, select the symbol of the same name as the target defined inside that type. This is a composition the query surface does not do for you. Scoring the single-hop result alone would measure a gap in the query API and mislabel it as a missing edge, which is the opposite of what this benchmark is for.",
     "expect_symbols": [
       {
         "name": "cuda_graph_runner_mut",
@@ -960,7 +987,7 @@
     "grep_hits_code": 12,
     "grep_files_code": 11,
     "verified_by": "rg -w cuda_graph_runner_mut returns 12 lines. `pub trait Pipeline:` opens at pipeline/mod.rs:597 and the declaration with its `None` default body is at :615 (read :600-625). Nine `fn cuda_graph_runner_mut` definitions follow, each preceded by an `impl Pipeline for <X>` header which I read individually: EmbeddingPipeline, SpeculativePipeline, NormalPipeline, AnyMoePipeline, VisionPipeline, DiffusionPipeline, GGUFPipeline, GGMLPipeline, SpeechPipeline. The remaining two hits are in tests/capability_reachability.rs — a string literal at :300 inside DEAD_SYMBOL_BASELINE and a doc comment at :888 — neither is a reference. There are ZERO call sites; Arc's own capability test records this symbol as dead debt with the comment 'implemented by all eight pipelines and called by nobody'.",
-    "note": "A trait method with nine implementations and no callers. Independently corroborated: Arc's checked-in DEAD_SYMBOL_BASELINE lists (pipeline/mod.rs, cuda_graph_runner_mut) as unreachable, cross-checked there against rustc's own dead_code pass. Arc's comment says 'eight pipelines'; I counted nine impls at HEAD, so the comment is one stale — my number comes from reading each impl header.",
+    "note": "A trait method with nine implementations and no callers. Independently corroborated: Arc's checked-in DEAD_SYMBOL_BASELINE lists (pipeline/mod.rs, cuda_graph_runner_mut) as unreachable, cross-checked there against rustc's own dead_code pass. Arc's comment says 'eight pipelines'; I counted nine impls at HEAD, so the comment is one stale — my number comes from reading each impl header. Measured on the HEAD artifact: ZERO edges anywhere in the corpus name `cuda_graph_runner_mut`. The empty call set is empty on its own merits, not by ceiling demotion — so this question isolates implementation structure with no confounder.",
     "bitemporal": {
       "differs_from_head": false,
       "compared_commit": "4033b8f4b94c351cd3349532d110e5b599752b88",
@@ -971,8 +998,8 @@
   {
     "id": "I24",
     "target": "is_distributed",
-    "target_fqn": "QuantMethod::is_distributed",
-    "target_fqn_verified_by": "`pub trait QuantMethod` opens at mistralrs-quant/src/lib.rs:1400",
+    "target_fqn": "mistralrs_quant::QuantMethod::is_distributed",
+    "target_fqn_verified_by": "Rust fqn per the indexer's documented rendering: crate name from Cargo.toml with hyphens replaced by underscores, module path from the directory under src/ with mod.rs/lib.rs/main.rs collapsed into the parent, then the declaring trait `QuantMethod`, then the method name. Trait-impl and inherent methods render identically; a trait method DECLARATION is its own distinct symbol.",
     "bare_name_is_ambiguous": true,
     "target_path": "mistralrs-quant/src/lib.rs",
     "target_line": 1525,
@@ -981,10 +1008,14 @@
     "question": "If I change the signature of the trait method `QuantMethod::is_distributed` (mistralrs-quant/src/lib.rs:1525), what else must I care about?",
     "depth": 1,
     "edge_kinds": [
-      "calls",
       "implements",
-      "references"
+      "calls"
     ],
+    "requires_trait_composition": true,
+    "declaring_trait_fqn": "mistralrs_quant::QuantMethod",
+    "declaring_trait_path": "mistralrs-quant/src/lib.rs",
+    "declaring_trait_line": 1400,
+    "resolution_path": "The 5 implementation entries in expect_symbols are NOT reachable by querying the method alone. Measured by CodeIndexer on the arc HEAD artifact: `implements` edges run Type -> Trait, so no `implements` edge names a method symbol at all (for `gather_forward`, zero). The answer is reachable in two hops and the runner MUST take both: (1) impact on the declaring trait `mistralrs_quant::QuantMethod` yields its implementor types via `implements`; (2) for each implementor, select the symbol of the same name as the target defined inside that type. This is a composition the query surface does not do for you. Scoring the single-hop result alone would measure a gap in the query API and mislabel it as a missing edge, which is the opposite of what this benchmark is for.",
     "expect_symbols": [
       {
         "name": "is_distributed",
@@ -1035,8 +1066,8 @@
   {
     "id": "I25",
     "target": "end_calibration",
-    "target_fqn": "QuantMethod::end_calibration",
-    "target_fqn_verified_by": "`pub trait QuantMethod` opens at mistralrs-quant/src/lib.rs:1400",
+    "target_fqn": "mistralrs_quant::QuantMethod::end_calibration",
+    "target_fqn_verified_by": "Rust fqn per the indexer's documented rendering: crate name from Cargo.toml with hyphens replaced by underscores, module path from the directory under src/ with mod.rs/lib.rs/main.rs collapsed into the parent, then the declaring trait `QuantMethod`, then the method name. Trait-impl and inherent methods render identically; a trait method DECLARATION is its own distinct symbol.",
     "bare_name_is_ambiguous": true,
     "target_path": "mistralrs-quant/src/lib.rs",
     "target_line": 1521,
@@ -1045,10 +1076,14 @@
     "question": "If I change the signature of the trait method `QuantMethod::end_calibration` (mistralrs-quant/src/lib.rs:1521), what else must I care about?",
     "depth": 1,
     "edge_kinds": [
-      "calls",
       "implements",
-      "references"
+      "calls"
     ],
+    "requires_trait_composition": true,
+    "declaring_trait_fqn": "mistralrs_quant::QuantMethod",
+    "declaring_trait_path": "mistralrs-quant/src/lib.rs",
+    "declaring_trait_line": 1400,
+    "resolution_path": "The 4 implementation entries in expect_symbols are NOT reachable by querying the method alone. Measured by CodeIndexer on the arc HEAD artifact: `implements` edges run Type -> Trait, so no `implements` edge names a method symbol at all (for `gather_forward`, zero). The answer is reachable in two hops and the runner MUST take both: (1) impact on the declaring trait `mistralrs_quant::QuantMethod` yields its implementor types via `implements`; (2) for each implementor, select the symbol of the same name as the target defined inside that type. This is a composition the query surface does not do for you. Scoring the single-hop result alone would measure a gap in the query API and mislabel it as a missing edge, which is the opposite of what this benchmark is for.",
     "expect_symbols": [
       {
         "name": "end_calibration",
@@ -1093,8 +1128,8 @@
   {
     "id": "I26",
     "target": "residual_tensors_moe_experts_only",
-    "target_fqn": "IsqModel::residual_tensors_moe_experts_only",
-    "target_fqn_verified_by": "`pub trait IsqModel` — declaration read at mistralrs-core/src/pipeline/isq.rs:651",
+    "target_fqn": "mistralrs_core::pipeline::isq::IsqModel::residual_tensors_moe_experts_only",
+    "target_fqn_verified_by": "Rust fqn per the indexer's documented rendering: crate name from Cargo.toml with hyphens replaced by underscores, module path from the directory under src/ with mod.rs/lib.rs/main.rs collapsed into the parent, then the declaring trait `IsqModel`, then the method name. Trait-impl and inherent methods render identically; a trait method DECLARATION is its own distinct symbol.",
     "bare_name_is_ambiguous": true,
     "target_path": "mistralrs-core/src/pipeline/isq.rs",
     "target_line": 651,
@@ -1103,10 +1138,14 @@
     "question": "If I change the signature of the trait method `IsqModel::residual_tensors_moe_experts_only` (mistralrs-core/src/pipeline/isq.rs:651), what else must I care about?",
     "depth": 1,
     "edge_kinds": [
-      "calls",
       "implements",
-      "references"
+      "calls"
     ],
+    "requires_trait_composition": true,
+    "declaring_trait_fqn": "mistralrs_core::pipeline::isq::IsqModel",
+    "declaring_trait_path": "mistralrs-core/src/pipeline/isq.rs",
+    "declaring_trait_line": 501,
+    "resolution_path": "The 6 implementation entries in expect_symbols are NOT reachable by querying the method alone. Measured by CodeIndexer on the arc HEAD artifact: `implements` edges run Type -> Trait, so no `implements` edge names a method symbol at all (for `gather_forward`, zero). The answer is reachable in two hops and the runner MUST take both: (1) impact on the declaring trait `mistralrs_core::pipeline::isq::IsqModel` yields its implementor types via `implements`; (2) for each implementor, select the symbol of the same name as the target defined inside that type. This is a composition the query surface does not do for you. Scoring the single-hop result alone would measure a gap in the query API and mislabel it as a missing edge, which is the opposite of what this benchmark is for.",
     "expect_symbols": [
       {
         "name": "residual_tensors_moe_experts_only",
@@ -1163,7 +1202,8 @@
   {
     "id": "I27",
     "target": "assign_row_lens",
-    "target_fqn": "XsRollingCache::assign_row_lens",
+    "target_fqn": "mistralrs_core::kv_cache::xs_rolling::XsRollingCache::assign_row_lens",
+    "target_fqn_verified_by": "Rust fqn per the indexer's documented rendering: crate name from Cargo.toml with hyphens replaced by underscores, module path from the directory under src/ with mod.rs/lib.rs/main.rs collapsed into the parent, then the owning type `XsRollingCache`, then the method name. Trait-impl and inherent methods render identically; a trait method DECLARATION is its own distinct symbol.",
     "bare_name_is_ambiguous": false,
     "target_path": "mistralrs-core/src/kv_cache/xs_rolling.rs",
     "target_line": 638,
@@ -1202,7 +1242,8 @@
   {
     "id": "I28",
     "target": "fused_gemv_v4l12_cuda",
-    "target_fqn": "fused_gemv_v4l12_cuda",
+    "target_fqn": "mistralrs_quant::qtip::cuda_ops::fused_gemv_v4l12_cuda",
+    "target_fqn_verified_by": "Rust fqn per the indexer's documented rendering: crate name from Cargo.toml with hyphens replaced by underscores, module path from the directory under src/ with mod.rs/lib.rs/main.rs collapsed into the parent, then no owner (free function), then the method name. Trait-impl and inherent methods render identically; a trait method DECLARATION is its own distinct symbol.",
     "bare_name_is_ambiguous": false,
     "target_path": "mistralrs-quant/src/qtip/cuda_ops.rs",
     "target_line": 390,
@@ -1241,7 +1282,8 @@
   {
     "id": "I29",
     "target": "route_to_blocks",
-    "target_fqn": "route_to_blocks",
+    "target_fqn": "arc_engine::moba::route_to_blocks",
+    "target_fqn_verified_by": "Rust fqn per the indexer's documented rendering: crate name from Cargo.toml with hyphens replaced by underscores, module path from the directory under src/ with mod.rs/lib.rs/main.rs collapsed into the parent, then no owner (free function), then the method name. Trait-impl and inherent methods render identically; a trait method DECLARATION is its own distinct symbol.",
     "bare_name_is_ambiguous": false,
     "target_path": "arc-engine/src/moba.rs",
     "target_line": 57,
@@ -1280,7 +1322,8 @@
   {
     "id": "I30",
     "target": "prefill_chunk_is_intermediate",
-    "target_fqn": "prefill_chunk_is_intermediate",
+    "target_fqn": "mistralrs_core::pipeline::prefill_chunk_is_intermediate",
+    "target_fqn_verified_by": "Rust fqn per the indexer's documented rendering: crate name from Cargo.toml with hyphens replaced by underscores, module path from the directory under src/ with mod.rs/lib.rs/main.rs collapsed into the parent, then no owner (free function), then the method name. Trait-impl and inherent methods render identically; a trait method DECLARATION is its own distinct symbol.",
     "bare_name_is_ambiguous": false,
     "target_path": "mistralrs-core/src/pipeline/mod.rs",
     "target_line": 422,
@@ -1306,7 +1349,8 @@
   {
     "id": "I31",
     "target": "arc_launch_gemv_bf16_silu_mul_down",
-    "target_fqn": "arc_launch_gemv_bf16_silu_mul_down",
+    "target_fqn": "arc_cuda_graph::decode_forward::arc_launch_gemv_bf16_silu_mul_down",
+    "target_fqn_verified_by": "Rust fqn per the indexer's documented rendering: crate name from Cargo.toml with hyphens replaced by underscores, module path from the directory under src/ with mod.rs/lib.rs/main.rs collapsed into the parent, then no owner (free function), then the method name. Trait-impl and inherent methods render identically; a trait method DECLARATION is its own distinct symbol.",
     "bare_name_is_ambiguous": true,
     "target_path": "arc-cuda-graph/src/decode_forward.rs",
     "target_line": 115,
@@ -1332,7 +1376,8 @@
   {
     "id": "I32",
     "target": "extend_draft_kv",
-    "target_fqn": "MtpSpeculativePipeline::extend_draft_kv",
+    "target_fqn": "mistralrs_core::pipeline::mtp_pipeline::MtpSpeculativePipeline::extend_draft_kv",
+    "target_fqn_verified_by": "Rust fqn per the indexer's documented rendering: crate name from Cargo.toml with hyphens replaced by underscores, module path from the directory under src/ with mod.rs/lib.rs/main.rs collapsed into the parent, then the owning type `MtpSpeculativePipeline`, then the method name. Trait-impl and inherent methods render identically; a trait method DECLARATION is its own distinct symbol.",
     "bare_name_is_ambiguous": false,
     "target_path": "mistralrs-core/src/pipeline/mtp_pipeline.rs",
     "target_line": 2061,
@@ -1358,7 +1403,8 @@
   {
     "id": "I33",
     "target": "run_target_forward",
-    "target_fqn": "run_target_forward",
+    "target_fqn": "mistralrs_core::pipeline::mtp_pipeline::run_target_forward",
+    "target_fqn_verified_by": "Rust fqn per the indexer's documented rendering: crate name from Cargo.toml with hyphens replaced by underscores, module path from the directory under src/ with mod.rs/lib.rs/main.rs collapsed into the parent, then no owner (free function), then the method name. Trait-impl and inherent methods render identically; a trait method DECLARATION is its own distinct symbol.",
     "bare_name_is_ambiguous": false,
     "target_path": "mistralrs-core/src/pipeline/mtp_pipeline.rs",
     "target_line": 3073,
@@ -1384,7 +1430,8 @@
   {
     "id": "I34",
     "target": "print_banner",
-    "target_fqn": "print_banner",
+    "target_fqn": "arc_engine::print_banner",
+    "target_fqn_verified_by": "Rust fqn per the indexer's documented rendering: crate name from Cargo.toml with hyphens replaced by underscores, module path from the directory under src/ with mod.rs/lib.rs/main.rs collapsed into the parent, then no owner (free function), then the method name. Trait-impl and inherent methods render identically; a trait method DECLARATION is its own distinct symbol.",
     "bare_name_is_ambiguous": false,
     "target_path": "arc-engine/src/lib.rs",
     "target_line": 96,
@@ -1410,7 +1457,8 @@
   {
     "id": "I35",
     "target": "graphs_captured",
-    "target_fqn": "CudaGraphRunner::graphs_captured",
+    "target_fqn": "arc_cuda_graph::graph::CudaGraphRunner::graphs_captured",
+    "target_fqn_verified_by": "Rust fqn per the indexer's documented rendering: crate name from Cargo.toml with hyphens replaced by underscores, module path from the directory under src/ with mod.rs/lib.rs/main.rs collapsed into the parent, then the owning type `CudaGraphRunner`, then the method name. Trait-impl and inherent methods render identically; a trait method DECLARATION is its own distinct symbol.",
     "bare_name_is_ambiguous": false,
     "target_path": "arc-cuda-graph/src/graph.rs",
     "target_line": 234,
@@ -1435,7 +1483,8 @@
   {
     "id": "I36",
     "target": "unregister_decode_user",
-    "target_fqn": "ChunkedPrefillScheduler::unregister_decode_user",
+    "target_fqn": "arc_engine::sarathi::ChunkedPrefillScheduler::unregister_decode_user",
+    "target_fqn_verified_by": "Rust fqn per the indexer's documented rendering: crate name from Cargo.toml with hyphens replaced by underscores, module path from the directory under src/ with mod.rs/lib.rs/main.rs collapsed into the parent, then the owning type `ChunkedPrefillScheduler`, then the method name. Trait-impl and inherent methods render identically; a trait method DECLARATION is its own distinct symbol.",
     "bare_name_is_ambiguous": false,
     "target_path": "arc-engine/src/sarathi.rs",
     "target_line": 95,
@@ -1461,7 +1510,8 @@
   {
     "id": "I37",
     "target": "supports_head_dim",
-    "target_fqn": "TurboQuantConfig::supports_head_dim",
+    "target_fqn": "mistralrs_quant::turboquant::TurboQuantConfig::supports_head_dim",
+    "target_fqn_verified_by": "Rust fqn per the indexer's documented rendering: crate name from Cargo.toml with hyphens replaced by underscores, module path from the directory under src/ with mod.rs/lib.rs/main.rs collapsed into the parent, then the owning type `TurboQuantConfig`, then the method name. Trait-impl and inherent methods render identically; a trait method DECLARATION is its own distinct symbol.",
     "bare_name_is_ambiguous": false,
     "target_path": "mistralrs-quant/src/turboquant/mod.rs",
     "target_line": 172,
@@ -1486,7 +1536,8 @@
   {
     "id": "I38",
     "target": "clear_immediate_isq",
-    "target_fqn": "clear_immediate_isq",
+    "target_fqn": "mistralrs_quant::clear_immediate_isq",
+    "target_fqn_verified_by": "Rust fqn per the indexer's documented rendering: crate name from Cargo.toml with hyphens replaced by underscores, module path from the directory under src/ with mod.rs/lib.rs/main.rs collapsed into the parent, then no owner (free function), then the method name. Trait-impl and inherent methods render identically; a trait method DECLARATION is its own distinct symbol.",
     "bare_name_is_ambiguous": false,
     "target_path": "mistralrs-quant/src/lib.rs",
     "target_line": 477,
@@ -1512,7 +1563,8 @@
   {
     "id": "I39",
     "target": "syms_per_word",
-    "target_fqn": "Tcfrag2bLayout::syms_per_word",
+    "target_fqn": "mistralrs_quant::qtip::tcfrag2b::Tcfrag2bLayout::syms_per_word",
+    "target_fqn_verified_by": "Rust fqn per the indexer's documented rendering: crate name from Cargo.toml with hyphens replaced by underscores, module path from the directory under src/ with mod.rs/lib.rs/main.rs collapsed into the parent, then the owning type `Tcfrag2bLayout`, then the method name. Trait-impl and inherent methods render identically; a trait method DECLARATION is its own distinct symbol.",
     "bare_name_is_ambiguous": false,
     "target_path": "mistralrs-quant/src/qtip/tcfrag2b.rs",
     "target_line": 223,
@@ -1537,7 +1589,8 @@
   {
     "id": "I40",
     "target": "require_k4v2l16",
-    "target_fqn": "QtipLayer::require_k4v2l16",
+    "target_fqn": "mistralrs_quant::qtip::QtipLayer::require_k4v2l16",
+    "target_fqn_verified_by": "Rust fqn per the indexer's documented rendering: crate name from Cargo.toml with hyphens replaced by underscores, module path from the directory under src/ with mod.rs/lib.rs/main.rs collapsed into the parent, then the owning type `QtipLayer`, then the method name. Trait-impl and inherent methods render identically; a trait method DECLARATION is its own distinct symbol.",
     "bare_name_is_ambiguous": false,
     "target_path": "mistralrs-quant/src/qtip/mod.rs",
     "target_line": 4519,

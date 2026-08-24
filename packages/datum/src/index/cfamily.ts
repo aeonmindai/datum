@@ -56,6 +56,29 @@ const DECLARATOR_TYPES: ReadonlySet<string> = new Set([
 const STRIPPED_SPECIFIERS =
   /\b(?:__global__|__device__|__host__|__forceinline__|__inline__|__restrict__|__launch_bounds__\([^)]*\)|inline|static|extern|constexpr|consteval|virtual|explicit|friend|typename)\b/g;
 
+/** `__launch_bounds__(...)`, including one level of nested parentheses. */
+const LAUNCH_BOUNDS = /__launch_bounds__\s*\(([^()]|\([^()]*\))*\)/g;
+
+/**
+ * Blank out `__launch_bounds__(...)` before parsing, preserving the source's exact length.
+ *
+ * This is the one place the indexer rewrites source before handing it to the grammar, and it earns
+ * the exception. tree-sitter-cpp cannot parse the attribute at all: written the way CUDA actually
+ * writes it — on its own line above `__global__ void name(...)` — it does not merely produce an
+ * ERROR node beside a recoverable declarator, it consumes the declarator. Measured on Arc, three
+ * real `__global__` kernels were absent from the index entirely and a fourth was misfiled as a
+ * plain `function` because the stray ERROR also hid its `__global__`.
+ *
+ * Replacing the attribute with an equal run of spaces keeps every byte offset, line and column
+ * identical, so reported positions stay exact and `ctx.source` slices still line up. Length
+ * preservation is the whole reason this is safe; do not "simplify" it to a deletion.
+ */
+export function prepareCFamilySource(source: string): string {
+  // Fast path: the attribute is rare, and this runs on every C-family file.
+  if (!source.includes("__launch_bounds__")) return source;
+  return source.replace(LAUNCH_BOUNDS, (match) => " ".repeat(match.length));
+}
+
 export function extractCFamily(ctx: FileContext, out: Collector): void {
   const moduleSymbol = out.addSymbol({
     kind: "module",
@@ -313,7 +336,16 @@ function visitFunction(
     for (const child of node.namedChildren) emitCallsIn(child, scope, ctx, out);
     return;
   }
-  const named = nameOfDeclarator(declarator);
+  let named = nameOfDeclarator(declarator);
+  // The grammar sometimes hands back a storage specifier where the name should be. An explicit
+  // CUDA template specialisation is the case that matters — in
+  // `template <> __device__ __forceinline__ float hc_narrow<float>(float v)` the empty `<>` throws
+  // the parse off enough that `template_function`'s name field is `__forceinline__` and the real
+  // name is stranded inside an ERROR node. Measured on Arc, believing the grammar here mis-named
+  // 65 kernels, which makes every call into them unresolvable.
+  if (named !== null && isSpecifierWord(named.name)) {
+    named = recoverStrandedName(declarator);
+  }
   if (named === null) return;
 
   // Everything before the declarator is the return type plus its qualifiers, and it is the only
@@ -608,6 +640,66 @@ interface DeclaredName {
   name: string;
   /** The `Cls` of an out-of-line `void ns::Cls::m()`, or null for a plain name. */
   qualifier: string | null;
+}
+
+/**
+ * Words that are never a function's name. If one turns up where a name should be, the parse went
+ * wrong rather than the code being strange.
+ */
+const SPECIFIER_WORDS: ReadonlySet<string> = new Set([
+  "inline",
+  "static",
+  "constexpr",
+  "consteval",
+  "extern",
+  "virtual",
+  "explicit",
+  "friend",
+  "typename",
+  "const",
+  "volatile",
+  "unsigned",
+  "signed",
+  "void",
+  "bool",
+  "char",
+  "short",
+  "int",
+  "long",
+  "float",
+  "double",
+  "auto",
+  "struct",
+  "class",
+  "enum",
+  "union",
+  "template",
+]);
+
+/** `__device__`, `__forceinline__`, `__restrict__` and friends, plus the plain keywords. */
+function isSpecifierWord(name: string): boolean {
+  return SPECIFIER_WORDS.has(name) || /^__[A-Za-z0-9_]+__$/.test(name);
+}
+
+/**
+ * Pull the real name out of a declarator whose parse collapsed, by taking the last identifier that
+ * is neither a specifier nor a type keyword and that sits before the parameter list.
+ *
+ * Returning null is a valid outcome and better than the alternative: a symbol named
+ * `__forceinline__` is worse than no symbol, because it claims coverage of something while making
+ * it unreachable.
+ */
+function recoverStrandedName(declarator: TsNode): DeclaredName | null {
+  const params = declarator.childForFieldName("parameters");
+  const limit = params?.startIndex ?? declarator.endIndex;
+  let best: string | null = null;
+  for (const node of declarator.descendantsOfType(["identifier", "field_identifier"])) {
+    if (node.startIndex >= limit) break;
+    const text = node.text;
+    if (isSpecifierWord(text) || !/^[A-Za-z_][A-Za-z0-9_]*$/.test(text)) continue;
+    best = text;
+  }
+  return best === null ? null : { name: best, qualifier: null };
 }
 
 function nameOfDeclarator(declarator: TsNode): DeclaredName | null {

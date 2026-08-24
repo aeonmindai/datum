@@ -1,5 +1,5 @@
 import { readFile } from "node:fs/promises";
-import { extractCFamily } from "./cfamily.js";
+import { extractCFamily, prepareCFamilySource } from "./cfamily.js";
 import { extractPython } from "./python.js";
 import { extractRust } from "./rust.js";
 import { Collector, resolveEdges } from "./resolve.js";
@@ -72,6 +72,11 @@ export async function indexRepo(opts: IndexRepoOptions): Promise<GraphArtifact> 
     } catch {
       parseFailures.push(file.path);
       continue;
+    }
+    // The one source rewrite in the whole indexer, and it is length-preserving so every offset,
+    // line and column stays exact. See `prepareCFamilySource` for why the grammar leaves no choice.
+    if (file.language === "c" || file.language === "cpp" || file.language === "cuda") {
+      source = prepareCFamilySource(source);
     }
     let root;
     try {
