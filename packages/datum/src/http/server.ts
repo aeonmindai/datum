@@ -108,11 +108,54 @@ export async function buildServer(
     });
     // The panel is hash-routed, so one index.html serves every deep link.
     app.get("/admin", async (_request, reply) => reply.redirect("/admin/", 302));
+
+    // The bare domain is the front door. Typing the hostname and getting
+    // {"ok":false,"reason":"not_found"} is a machine answering a human: the only human surface
+    // this server has is the panel, so send them there.
+    app.get("/", async (_request, reply) => reply.redirect("/admin/", 302));
+
+    // Any page that is not the panel (an error body, the bare domain before the redirect)
+    // still gets an icon rather than a 404 in the network log.
+    app.get("/favicon.ico", async (_request, reply) =>
+      reply
+        .type("image/svg+xml")
+        .header("cache-control", "public, max-age=86400")
+        .send(
+          // A survey mark: the fixed reference point a measurement is taken from.
+          '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">' +
+            '<circle cx="16" cy="16" r="15" fill="#fff"/>' +
+            '<circle cx="16" cy="16" r="11" fill="none" stroke="#6028d9" stroke-width="2.5"/>' +
+            '<circle cx="16" cy="16" r="4" fill="#6028d9"/></svg>',
+        ),
+    );
+
     app.setNotFoundHandler(async (request, reply) => {
       if (request.method === "GET" && request.url.startsWith("/admin")) {
         return reply.sendFile("index.html");
       }
-      return reply.code(404).send({ ok: false, reason: "not_found", message: "No such route." });
+      // MCP is POST-only: the 2026-07-28 spec removed the GET endpoint along with sessions and
+      // resumability. Say that, rather than letting a developer conclude the route is missing.
+      if (request.url.split("?")[0] === "/mcp") {
+        return reply.code(405).header("allow", "POST").send({
+          ok: false,
+          reason: "malformed_request",
+          message:
+            "/mcp accepts POST only. MCP 2026-07-28 removed the GET endpoint, so there is no " +
+            "stream to open. Send a JSON-RPC request: {\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/list\"}.",
+        });
+      }
+      return reply.code(404).send({
+        ok: false,
+        reason: "not_found",
+        message: "No such route.",
+        // A 404 that names the surface costs nothing and saves a docs round trip.
+        routes: {
+          human: "/admin",
+          api: ["/v1/assert", "/v1/supersede", "/v1/ask", "/v1/why/:id", "/v1/state", "/v1/missions", "/v1/nodes", "/v1/mode", "/v1/contradictions"],
+          mcp: "POST /mcp",
+          liveness: "/healthz",
+        },
+      });
     });
   } else {
     app.get("/admin", async (_request, reply) =>

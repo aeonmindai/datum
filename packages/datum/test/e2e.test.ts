@@ -122,6 +122,30 @@ afterAll(async () => {
 });
 
 describe("deliverable 3 — /v1", () => {
+  it("gives the bare domain a front door instead of a JSON 404", async () => {
+    // Typing the hostname and getting {"ok":false,"reason":"not_found"} is a machine answering a
+    // human. The only human surface is the panel.
+    const root = await app.inject({ method: "GET", url: "/" });
+    expect(root.statusCode).toBe(302);
+    expect(root.headers.location).toBe("/admin/");
+
+    const favicon = await app.inject({ method: "GET", url: "/favicon.ico" });
+    expect(favicon.statusCode).toBe(200);
+    expect(favicon.headers["content-type"]).toContain("image/svg+xml");
+
+    // GET /mcp is not a missing route, it is the wrong verb, and the difference matters to
+    // whoever is wiring a client.
+    const mcpGet = await app.inject({ method: "GET", url: "/mcp" });
+    expect(mcpGet.statusCode).toBe(405);
+    expect(mcpGet.headers.allow).toBe("POST");
+    expect(mcpGet.json().message).toContain("POST only");
+
+    // A genuine 404 names the surface rather than just saying no.
+    const missing = await app.inject({ method: "GET", url: "/nope" });
+    expect(missing.statusCode).toBe(404);
+    expect(missing.json().routes.human).toBe("/admin");
+  });
+
   it("serves an unauthenticated /healthz carrying the scope root", async () => {
     const res = await app.inject({ method: "GET", url: "/healthz" });
     expect(res.statusCode).toBe(200);
