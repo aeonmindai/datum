@@ -64,9 +64,18 @@ export const LANGUAGE_BY_EXTENSION = {
  * language. No attempt is made to cover third-party ecosystems (numpy, torch, tokio) — a
  * project-local method that happens to share a name with one of those keeps its edge.
  *
- * The known cost: a project-local function genuinely named `len`, `get` or `find` loses its
- * incoming edges. That trade is worth taking because those names are std vocabulary two or three
- * orders of magnitude more often than they are local definitions.
+ * A name earns a place here only if a call written with that *bare* name is overwhelmingly a
+ * standard-library call. That bar was set by measurement, not taste. An earlier version of this
+ * list included `forward`, on the grounds that `std::forward` is a C++ idiom — and the Arc corpus
+ * turns out to define 542 methods named `forward`, so the filter was deleting every incoming edge
+ * to the single most important method in a neural-network codebase. `fill`, `reset`, `release`,
+ * `close`, `add`, `decode` and `encode` failed the same check and came out for the same reason.
+ * Qualified standard-library calls (`std::forward`, `std::fill`, `Vec::new`) are removed by
+ * `STD_QUALIFIERS` instead, which tests the qualifier and is therefore evidence rather than a guess.
+ *
+ * The remaining known cost: a project-local function genuinely named `len`, `get` or `find` loses
+ * its incoming edges. That trade is worth taking — on the same corpus those names are std
+ * vocabulary one to three orders of magnitude more often than they are local definitions.
  */
 const NON_CALL_TARGET_NAMES = [
   // Enum constructors in call position. `Ok(x)`, `Some(x)`, `Err(e)` are the three most frequent
@@ -253,7 +262,6 @@ const NON_CALL_TARGET_NAMES = [
   "swap",
   "swap_remove",
   "reverse",
-  "fill",
   "len",
   "is_empty",
   "capacity",
@@ -333,6 +341,42 @@ const NON_CALL_TARGET_NAMES = [
   "leading_zeros",
   "trailing_zeros",
   "count_ones",
+  "count_zeros",
+  "leading_ones",
+  "trailing_ones",
+  "rotate_left",
+  "rotate_right",
+  "swap_bytes",
+  "reverse_bits",
+  "to_bits",
+  "from_bits",
+  "to_be",
+  "to_le",
+  "to_be_bytes",
+  "to_le_bytes",
+  "to_ne_bytes",
+  "from_be_bytes",
+  "from_le_bytes",
+  "from_ne_bytes",
+  "rem_euclid",
+  "div_euclid",
+  "copysign",
+  "hypot",
+  "atan2",
+  "sin",
+  "cos",
+  "tan",
+  "asin",
+  "acos",
+  "atan",
+  "sinh",
+  "cosh",
+  "tanh",
+  "exp2",
+  "exp_m1",
+  "ln_1p",
+  "to_degrees",
+  "to_radians",
   "lock",
   "read",
   "write_all",
@@ -431,19 +475,15 @@ const NON_CALL_TARGET_NAMES = [
   "items",
   "update",
   "setdefault",
-  "add",
   "discard",
   "remove",
   "index",
   "copy",
-  "close",
   "readline",
   "readlines",
   "writelines",
   "seek",
   "tell",
-  "encode",
-  "decode",
   "lower",
   "upper",
   "strip",
@@ -512,14 +552,11 @@ const NON_CALL_TARGET_NAMES = [
   "make_pair",
   "make_tuple",
   "move",
-  "forward",
   "swap",
   "get",
   "value",
   "value_or",
   "has_value",
-  "reset",
-  "release",
   "lock_guard",
   "unique_lock",
   "sqrtf",

@@ -51,6 +51,15 @@ COPY packages/admin/package.json packages/admin/package.json
 RUN npm ci --omit=dev --no-audit --no-fund \
  && npm cache clean --force
 
+# Normalise modes after copying, because git does not track the read bit. A contributor whose umask
+# is 077 commits a migration that git records as 100644 and that is 0600 on disk; the image then
+# builds fine, boots as the non-root `node` user, and dies with EACCES reading its own migration.
+# The failure depends on the *builder's* umask, so it passes CI and breaks on a laptop, or the
+# reverse — which is the worst kind of bug to ship in a boot path.
+#
+# `a+rX` and not `--chmod=644`: COPY --chmod applies one mode to directories too, which strips
+# their traverse bit and breaks every file underneath. The capital X adds execute only to
+# directories and to files that already had it, which is exactly the distinction needed here.
 COPY --from=build /app/packages/datum/dist       ./packages/datum/dist
 COPY --from=build /app/packages/datum/migrations ./packages/datum/migrations
 COPY --from=build /app/packages/datum/public     ./packages/datum/public
@@ -58,6 +67,8 @@ COPY --from=build /app/packages/datum/public     ./packages/datum/public
 # be in the image. Without this the README's "click through a fresh install" path is a lie.
 COPY --from=build /app/packages/datum/seeds      ./packages/datum/seeds
 COPY LICENSE NOTICE ./
+RUN chmod -R a+rX ./packages/datum/dist ./packages/datum/migrations \
+                  ./packages/datum/public ./packages/datum/seeds ./LICENSE ./NOTICE
 
 # Apache-2.0, and the image says so.
 LABEL org.opencontainers.image.title="datum" \

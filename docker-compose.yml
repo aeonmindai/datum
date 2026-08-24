@@ -8,6 +8,16 @@
 #
 # Compose reads `.env` from this directory automatically, and `.env` is gitignored.
 #
+# One trap worth knowing, because it costs an hour to diagnose and looks like a broken password:
+# a variable already EXPORTED in your shell WINS over the same variable in `.env`. So if you have
+# DATUM_ADMIN_PASSWORD exported for any other reason, the container quietly uses that value and
+# your `.env` is ignored, and the only symptom is `{"reason":"unauthorized","message":"Wrong
+# password."}` while the file plainly says otherwise. Check with:
+#
+#   docker compose exec datum printenv DATUM_ADMIN_PASSWORD
+#
+# If it disagrees with `.env`, `unset` it in your shell and `docker compose up -d --force-recreate`.
+#
 # There is deliberately no default admin password and no default session secret in this
 # file. A shipped default credential is a CVE, not a convenience: every install would share
 # it, most would never change it, and the ones that did would have already been scanned. The

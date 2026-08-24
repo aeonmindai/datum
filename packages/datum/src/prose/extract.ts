@@ -171,7 +171,7 @@ const UNIT_PREDICATE: Record<string, string> = {
 };
 
 /**
- * Words that, present anywhere on the line, disqualify it.
+ * Words that, present on the line or in its nearest heading, disqualify it.
  *
  * This is not squeamishness, it is the corpus talking. Arc's `memory/DOCTRINE.md` retracts
  * numbers *in place*: the paragraph that claimed "2.6x at no quality cost" now reads
@@ -179,6 +179,11 @@ const UNIT_PREDICATE: Record<string, string> = {
  * page. An extractor that lifts a retracted number and files it as a candidate does worse than
  * nothing, because it spends a reviewer's attention arguing with a claim the document already
  * withdrew.
+ *
+ * The heading is checked too, and that clause was earned. `memory/mission/CAPTURE_LANE.md` has a
+ * section headed `## UNMEASURED — do not quote` whose body states a clean "31.69 ms" that the
+ * document is explicitly telling you not to cite. Line-local matching cannot see that; a
+ * section-scoped check can, for the price of one extra string test.
  */
 const DISQUALIFYING = [
   "retracted",
@@ -192,6 +197,8 @@ const DISQUALIFYING = [
   "never verified",
   "not verified",
   "unverified",
+  "unmeasured",
+  "do not quote",
   "estimate",
   "estimated",
   "guess",
@@ -251,7 +258,16 @@ const PRONOUNS: Record<string, true> = {
   something: true,
 };
 
-/** Never a subject on their own, though fine as part of one ("one W4A16 quant"). */
+/**
+ * Never a subject on their own, though perfectly fine inside one.
+ *
+ * The determiners are obvious. The generic nouns are the interesting half, and they are here
+ * because of a specific failure: `(reverse-chron; the file is 70 KB)` yields the subject "file",
+ * and a fact whose subject is "file" is not a fact about anything — the document means
+ * `STATUS.md`, which sits outside the captured span. "one W4A16 quant" and "decode step" keep
+ * working because the check applies only when the subject is a single word, which is also why
+ * genuine one-word domain terms like "prefill", "occupancy" and "xs" survive it.
+ */
 const BARE_ONLY: Record<string, true> = {
   the: true,
   a: true,
@@ -266,6 +282,28 @@ const BARE_ONLY: Record<string, true> = {
   also: true,
   only: true,
   still: true,
+  file: true,
+  thing: true,
+  result: true,
+  answer: true,
+  reason: true,
+  cost: true,
+  gap: true,
+  fix: true,
+  target: true,
+  step: true,
+  run: true,
+  number: true,
+  value: true,
+  rest: true,
+  point: true,
+  issue: true,
+  problem: true,
+  difference: true,
+  way: true,
+  case: true,
+  part: true,
+  total: true,
 };
 
 /**
@@ -560,7 +598,7 @@ export function extractFromDocument(
   const out: ProposalCandidate[] = [];
 
   for (const { line, text, heading } of extractableLines(lines)) {
-    if (disqualified(text)) continue;
+    if (disqualified(text) || (heading !== null && disqualified(heading))) continue;
     const excerpt =
       text.length > MAX_EXCERPT_CHARS ? `${text.slice(0, MAX_EXCERPT_CHARS)}…` : text;
     const source = `${path}:${line}`;

@@ -206,7 +206,9 @@ export function deriveWorkflowRules(dir: string, sink: RuleSink): WorkflowDeriva
         }
 
         const run = mapEntry(step, "run");
-        if (run && run.value.kind === "scalar" && run.value.block) {
+        // Both forms: a `run: |` block and a one-line `run: test -f x || exit 1`. For the inline
+        // form the scalar's line is the key's own line, so the arithmetic below still lands right.
+        if (run && run.value.kind === "scalar") {
           const scriptLines = run.value.value.split("\n");
           const errexit = scriptLines.some((l) => /^\s*set\s+-[a-z]*e/.test(l));
           for (const [offset, scriptLine] of scriptLines.entries()) {

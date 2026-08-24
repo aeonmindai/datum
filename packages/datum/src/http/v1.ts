@@ -19,6 +19,7 @@ import {
 } from "../domain/store.js";
 import { CONFIDENCE_CLASSES, KINDS, type AssertionRow } from "../domain/types.js";
 import { authenticateKey, requirePermission, requireScope, type AuthedKey } from "./auth.js";
+import { activePreferences } from "../preferences/index.js";
 
 /**
  * `/v1` is the real interface. MCP is a facade over it.
@@ -312,11 +313,16 @@ export function registerV1(app: FastifyInstance, deps: V1Deps): void {
       const key = await auth(request, "read");
       const query = parse(z.object({ scope: ScopeString }), request.query);
       requireScope(key, query.scope);
-      const [{ chain, mode, modeScope }, sequence, missionRows, open] = await Promise.all([
+      const [{ chain, mode, modeScope }, sequence, missionRows, open, prefs] = await Promise.all([
         resolveChain(db, query.scope),
         currentSequence(db),
         missions(db, query.scope),
         contradictions(db, { status: "open", limit: 500 }),
+        // Delivered without being asked for, and that is the entire mechanism. A preference an
+        // agent has to know to request is a preference it will not request, and the repetition it
+        // was learned from continues. `state` is what an agent reads before it starts work, so
+        // this is where a learned correction has to appear if it is ever going to stop recurring.
+        activePreferences(db, query.scope),
       ]);
       const counts = await db.query<{ confidence: string; n: string }>(
         "app",
@@ -346,6 +352,7 @@ export function registerV1(app: FastifyInstance, deps: V1Deps): void {
         binding_rules: Number(binding?.n ?? 0),
         open_contradictions: open.length,
         missions: missionRows,
+        preferences: prefs,
       });
     } catch (err) {
       return sendRejection(deps, request, reply, err, { actor: null });

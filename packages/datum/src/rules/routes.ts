@@ -197,6 +197,12 @@ export interface PersistUnenforcedResult {
  * sentence at the same line collides with `proposal_identity` and is skipped rather than duplicated.
  * That constraint is the one that makes 808 copies of a single claim impossible, so this code leans
  * on it instead of checking first and racing.
+ *
+ * It leans on it by catching the violation rather than by `ON CONFLICT`, because `proposal_identity`
+ * is declared `DEFERRABLE` and Postgres refuses a deferrable constraint as an `ON CONFLICT` arbiter
+ * ("does not support deferrable unique constraints as arbiters"). A `WHERE NOT EXISTS` pre-check
+ * would sidestep the error and reintroduce the race the constraint exists to close, so the insert is
+ * attempted and 23505 is read as "already recorded".
  */
 export async function persistUnenforced(
   db: Db,
@@ -206,43 +212,50 @@ export async function persistUnenforced(
 ): Promise<PersistUnenforcedResult> {
   let created = 0;
   for (const finding of findings) {
-    const { rowCount } = await db.query(
-      role,
-      `INSERT INTO datum.proposals
+    try {
+      await db.query(
+        role,
+        `INSERT INTO datum.proposals
          (id, scope, subject, predicate, object, claim, kind, citation, extractor, extractor_confidence)
-       VALUES ($1, $2, $3, $4, $5::jsonb, $6, $7, $8::jsonb, $9, $10)
-       ON CONFLICT ON CONSTRAINT proposal_identity DO NOTHING`,
-      [
-        newId("prop"),
-        opts.scope,
-        `doctrine/${finding.file}#L${finding.line}`,
-        "unenforced_rule",
-        JSON.stringify({
-          repo: opts.repo,
-          file: finding.file,
-          line: finding.line,
-          heading: finding.heading,
-          strength: finding.strength,
-          marker: finding.marker,
-          tokens: finding.tokens,
-        }),
-        finding.statement,
-        // A prohibition is a constraint on what may happen; an obligation is a rule about what must.
-        finding.strength === "obligation" ? "rule" : "constraint",
-        JSON.stringify({
-          source: finding.source,
-          statement: finding.statement,
-          heading: finding.heading,
-          strength: finding.strength,
-          marker: finding.marker,
-          tokens: finding.tokens,
-          why_unenforced: finding.why,
-        }),
-        DOCTRINE_EXTRACTOR,
-        SELF_CONFIDENCE[finding.strength] ?? 0.5,
-      ],
-    );
-    if ((rowCount ?? 0) > 0) created++;
+       VALUES ($1, $2, $3, $4, $5::jsonb, $6, $7, $8::jsonb, $9, $10)`,
+        [
+          newId("prop"),
+          opts.scope,
+          `doctrine/${finding.file}#L${finding.line}`,
+          "unenforced_rule",
+          JSON.stringify({
+            repo: opts.repo,
+            file: finding.file,
+            line: finding.line,
+            heading: finding.heading,
+            strength: finding.strength,
+            marker: finding.marker,
+            tokens: finding.tokens,
+          }),
+          finding.statement,
+          // A prohibition constrains what may happen; an obligation is a rule about what must.
+          finding.strength === "obligation" ? "rule" : "constraint",
+          JSON.stringify({
+            source: finding.source,
+            statement: finding.statement,
+            heading: finding.heading,
+            strength: finding.strength,
+            marker: finding.marker,
+            target: finding.target,
+            tokens: finding.tokens,
+            doctrinal: finding.doctrinal,
+            also_at: finding.also_at,
+            why_unenforced: finding.why,
+          }),
+          DOCTRINE_EXTRACTOR,
+          SELF_CONFIDENCE[finding.strength] ?? 0.5,
+        ],
+      );
+      created++;
+    } catch (err) {
+      // 23505 is the constraint doing its job. Anything else is a real failure and must surface.
+      if ((err as { code?: string }).code !== "23505") throw err;
+    }
   }
   return { created, skipped: findings.length - created };
 }

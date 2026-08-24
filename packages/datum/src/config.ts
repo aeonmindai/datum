@@ -29,6 +29,12 @@ export interface Config {
   readonly verifyIntervalMs: number;
   readonly verifyBatchSize: number;
   readonly adminDistDir: string | null;
+  /**
+   * Directories searched by the prose fallback. Nothing read from here is ever written to the
+   * store — it is retrieved live and returned under a separate `from_prose` key — so these are
+   * read paths, not a source of record.
+   */
+  readonly proseRoots: readonly string[];
 }
 
 export class ConfigError extends Error {
@@ -132,6 +138,11 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     verifyIntervalMs: Number.parseInt(env.DATUM_VERIFY_INTERVAL_MS ?? "15000", 10),
     verifyBatchSize: Number.parseInt(env.DATUM_VERIFY_BATCH_SIZE ?? "25", 10),
     adminDistDir: env.DATUM_ADMIN_DIST?.trim() || null,
+    // Colon- or comma-separated, so it survives both a shell PATH habit and a .env file.
+    proseRoots: (env.DATUM_PROSE_ROOTS ?? "")
+      .split(/[:,]/)
+      .map((r) => r.trim())
+      .filter((r) => r.length > 0),
   };
 }
 

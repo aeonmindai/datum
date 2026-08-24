@@ -18,12 +18,18 @@ function normalise(text: string): string {
       // Comments first: a doc comment inside a parameter list is not part of the contract.
       .replace(/\/\*[\s\S]*?\*\//g, " ")
       .replace(/\/\/[^\n]*/g, " ")
-      .replace(/#[^\n]*/g, " ")
+      // Python's `#` comment, but never Rust's `#[attr]` — swallowing the rest of the line there
+      // would let two genuinely different signatures hash the same.
+      .replace(/(^|\s)#(?!\[)[^\n]*/g, " ")
       .replace(/\s+/g, " ")
       // `Vec< u32 >` and `Vec<u32>` are the same type; a line break after a comma is the same
       // parameter list. Collapsing space adjacent to punctuation makes reflowing a long signature
       // a no-op, while a genuine token change still moves the hash.
       .replace(/\s*([(),<>&*:;=[\]{}])\s*/g, "$1")
+      // A trailing comma is what a formatter adds when it breaks a long parameter list across
+      // lines. It is the single most common way a signature's *text* changes while its contract
+      // does not, so it has to go, or the change detector cries wolf on every reflow.
+      .replace(/,(?=[)\]}>])/g, "")
       .trim()
   );
 }

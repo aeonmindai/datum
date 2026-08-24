@@ -64,7 +64,9 @@ function deriveCargo(dir: string, sink: RuleSink): void {
       if (entry.key === "rust-version" && typeof entry.value === "string") {
         touched = true;
         sink.add({
-          subject: `cargo/msrv${entry.table.startsWith("workspace") ? "" : `/${rel}`}`,
+          // The root manifest carries the repo's MSRV; a nested crate's own floor is a separate
+          // rule, so it is keyed by manifest rather than colliding with the root one.
+          subject: rel === "Cargo.toml" ? "cargo/msrv" : `cargo/msrv/${rel}`,
           predicate: "minimum_rust_version",
           object: { manifest: rel, version: entry.value, table: entry.table },
           claim: `the minimum supported Rust version is ${entry.value}`,

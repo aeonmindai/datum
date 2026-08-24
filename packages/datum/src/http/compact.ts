@@ -114,6 +114,14 @@ export function compactGate(g: GateStatus): string {
   return `${g.subject}.${g.predicate} ${g.op}${String(g.target)} actual=${actual} ${state}`;
 }
 
+export interface StatePreference {
+  tier: string;
+  statement: string;
+  occasions: number;
+  distinct_humans: number;
+  binding?: boolean;
+}
+
 export interface StateSummary {
   scope: string;
   mode: string;
@@ -123,6 +131,7 @@ export interface StateSummary {
   contested: number;
   missions: Array<{ statement: string; state: string; gates: GateStatus[] }>;
   bindingRules: number;
+  preferences?: StatePreference[];
 }
 
 export function compactState(s: StateSummary, budget = DEFAULT_BUDGET_BYTES): string {
@@ -130,18 +139,32 @@ export function compactState(s: StateSummary, budget = DEFAULT_BUDGET_BYTES): st
   const conf = Object.entries(s.byConfidence)
     .map(([k, v]) => `${k[0]}${v}`)
     .join(" ");
-  lines.push(
+  const header =
     `${s.scope} mode=${s.mode} s${s.sequence} | live=${s.live} (${conf}) | ` +
-      `contested=${s.contested} | binding-rules=${s.bindingRules}`,
-  );
+    `contested=${s.contested} | binding-rules=${s.bindingRules}`;
+
+  // A preference the org holds is mandatory, for the same reason a contested pair is: the whole
+  // point of learning it was to stop the human repeating themselves, and a line dropped to save
+  // bytes is a line that does not stop anything. An `org` preference has been independently
+  // asked for by three or more people, so it outranks any byte budget.
+  const mandatory: string[] = [header];
+  const optional: string[] = [];
+  for (const p of s.preferences ?? []) {
+    const line =
+      `prefers[${p.tier}] ${short(p.statement, 68)} ` +
+      `(${p.distinct_humans} human${p.distinct_humans === 1 ? "" : "s"}, ${p.occasions}x)`;
+    if (p.binding || p.tier === "org") mandatory.push(line);
+    else optional.push(line);
+  }
+
   for (const m of s.missions) {
     const reached = m.gates.filter((g) => g.reached === true).length;
     const noEvidence = m.gates.filter((g) => g.reached === null).length;
-    lines.push(
+    optional.push(
       `mission[${m.state}] ${short(m.statement, 60)} gates ${reached}/${m.gates.length} reached` +
         (noEvidence > 0 ? `, ${noEvidence} with no qualifying evidence` : ""),
     );
-    for (const g of m.gates) lines.push(`  ${compactGate(g)}`);
+    for (const g of m.gates) optional.push(`  ${compactGate(g)}`);
   }
-  return pack(lines, budget, `${s.scope}: nothing on datum yet`);
+  return pack(optional, budget, `${s.scope}: nothing on datum yet`, mandatory);
 }

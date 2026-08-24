@@ -10,6 +10,9 @@ import { migrate } from "../db/migrate.js";
 import { startVerificationWorker, type WorkerHandle } from "../worker/verify.js";
 import { initInstance } from "../ops/init.js";
 import { registerGraphRoutes } from "../graph/index.js";
+import { registerPreferenceRoutes, startPreferenceWorker } from "../preferences/index.js";
+import { registerProposalRoutes } from "../prose/index.js";
+import { registerRulesRoutes } from "../rules/index.js";
 import { registerAdmin } from "./admin.js";
 import { registerMcp } from "./mcp.js";
 import { registerV1 } from "./v1.js";
@@ -90,6 +93,9 @@ export async function buildServer(
   // The code graph is a read surface over the same store, so it registers alongside /v1 rather
   // than behind its own prefix: `impact` is a question about the record, not a separate product.
   registerGraphRoutes(app, { db, config });
+  registerPreferenceRoutes(app, { db, config });
+  registerProposalRoutes(app, { db, config });
+  registerRulesRoutes(app, { db, config });
   registerMcp(app, { db, config });
   registerAdmin(app, { db, config, adminHash, verification });
 
@@ -173,6 +179,11 @@ export async function buildServer(
 
   const worker = opts.startWorker === false ? null : startVerificationWorker(db, config);
   if (worker) console.log(`[verify] ${verification.note}`);
+  // The preference promoter is the second "confidence is earned" worker: the verification worker
+  // earns `measured` from a commit, this one earns a preference from corroboration. Same shape,
+  // same reason for existing — an agent cannot claim either for itself.
+  const preferenceWorker =
+    opts.startWorker === false ? null : startPreferenceWorker(db, config);
   if (bootstrap?.firstKeySecret) {
     console.log(
       [
@@ -193,6 +204,7 @@ export async function buildServer(
     worker,
     async close(): Promise<void> {
       worker?.stop();
+      preferenceWorker?.stop();
       await app.close();
       await db.close();
     },

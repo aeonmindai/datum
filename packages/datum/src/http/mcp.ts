@@ -18,6 +18,7 @@ import {
 } from "../domain/store.js";
 import { CONFIDENCE_CLASSES, KINDS } from "../domain/types.js";
 import { authenticateKey, requirePermission, requireScope } from "./auth.js";
+import { activePreferences } from "../preferences/index.js";
 import { compactAssertion, compactState, pack, DEFAULT_BUDGET_BYTES } from "./compact.js";
 
 /**
@@ -212,11 +213,12 @@ export function registerMcp(app: FastifyInstance, deps: { db: Db; config: Config
         const parsed = AskArgs.pick({ scope: true, max_bytes: true }).parse(args);
         requirePermission(key, "read");
         requireScope(key, parsed.scope);
-        const [{ chain, mode }, sequence, missionRows, open] = await Promise.all([
+        const [{ chain, mode }, sequence, missionRows, open, prefs] = await Promise.all([
           resolveChain(db, parsed.scope),
           currentSequence(db),
           missions(db, parsed.scope),
           contradictions(db, { status: "open", limit: 500 }),
+          activePreferences(db, parsed.scope),
         ]);
         const counts = await db.query<{ confidence: string; n: string }>(
           "app",
@@ -242,6 +244,13 @@ export function registerMcp(app: FastifyInstance, deps: { db: Db; config: Config
             contested: open.length,
             bindingRules: Number(binding?.n ?? 0),
             missions: missionRows,
+            preferences: prefs.map((p) => ({
+              tier: p.tier,
+              statement: p.statement,
+              occasions: p.occasions,
+              distinct_humans: p.distinct_humans,
+              binding: p.tier === "org",
+            })),
           },
           budget,
         );
