@@ -412,3 +412,46 @@ file to `.railway/railway.ts`, where services, variables and volumes *can* be de
 - **The image runs as a non-root user** and writes nothing to disk.
 - **Nothing about any one organisation is hardcoded.** `DATUM_ORG` is configuration; the
   scope root is `org/${DATUM_ORG}`.
+
+---
+
+## Appendix — behind Cloudflare's proxy
+
+Aeonmind's own deployment runs `datum.aeonmind.ai` **proxied** through Cloudflare (orange cloud),
+which changes three things. Any operator putting a CDN in front of Datum hits the same three.
+
+### 1. Fly cannot validate the certificate from A/AAAA records any more
+
+With the proxy on, `datum.aeonmind.ai` resolves to Cloudflare's IPs, so Fly's A/AAAA ownership
+check fails and no certificate is ever issued. Cloudflare then cannot complete a TLS handshake with
+the origin and serves **error 525**. Two records, both **DNS-only (grey cloud)**, break the deadlock:
+
+```
+TXT    _fly-ownership.datum.aeonmind.ai   ->  app-<your app suffix>
+CNAME  _acme-challenge.datum.aeonmind.ai  ->  datum.aeonmind.ai.<suffix>.flydns.net
+```
+
+Get the exact values from `fly certs setup <hostname> -a <app>`. The ownership TXT is what Fly
+documents for traffic behind a CDN; the ACME CNAME is what lets Let's Encrypt validate by DNS
+instead of by HTTP, which is necessary precisely because the A records point somewhere else. The
+`_acme-challenge` record must not be proxied or the challenge cannot be followed.
+
+### 2. Use Full (or Full strict), never Flexible
+
+`fly.toml` sets `force_https = true`. Under Cloudflare's **Flexible** mode Cloudflare speaks plain
+HTTP to the origin, the origin redirects to HTTPS, the browser comes back to Cloudflare, and you
+have an infinite redirect loop. Flexible also leaves the Cloudflare-to-origin hop unencrypted
+across the public internet, which is not a defensible posture for a store whose whole product is
+durable truth. Once the certificate above is issued, **Full (strict)** works end to end.
+
+### 3. The client IP arrives in a different header
+
+This one is a security property, not a convenience. Cloudflare and Fly both *append* to whatever
+`X-Forwarded-For` the client sent, so the leftmost entry is attacker-controlled. The `/admin/login`
+rate limit is keyed on the client IP, so trusting that entry would let anyone mint a fresh bucket
+per attempt and defeat the limit entirely — on a single shared admin password.
+
+`clientIp()` therefore believes only headers a trusted edge sets and strips from client input, in
+order: `CF-Connecting-IP`, then `Fly-Client-IP`, then the **rightmost** `X-Forwarded-For` entry,
+then the socket peer. If you front Datum with a different proxy, add its equivalent header there
+rather than loosening the rule.

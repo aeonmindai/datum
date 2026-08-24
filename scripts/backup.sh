@@ -123,10 +123,53 @@ if [[ "$DRY_RUN" == "1" ]]; then
   exit 0
 fi
 
+# Choose a pg_dump that the SERVER will accept. pg_dump refuses outright when it is older than
+# the server it is pointed at, and that is the normal case here rather than the exotic one: the
+# whole reason Datum self-hosts Postgres is to run the newest server, while a laptop or a distro
+# image usually carries an older client. Failing with "aborting because of server version
+# mismatch" at 03:00 on a schedule is not an acceptable way to learn this.
+#
+# So: ask the server its major version, and if the local client is behind, run pg_dump from the
+# matching official image instead. In the ops image described in docs/OPERATIONS.md the local
+# client already matches and this costs one extra query. `--network=host` keeps a DATABASE_URL
+# pointing at localhost or a 6PN address working unchanged inside the container.
 log "dumping..."
 START="$SECONDS"
+SERVER_MAJOR="$(PGCONNECT_TIMEOUT="${PGCONNECT_TIMEOUT:-15}" psql "$DATABASE_URL" -XqtAc 'SHOW server_version_num' 2>/dev/null | cut -c1-2 || true)"
+LOCAL_MAJOR="$(pg_dump --version | sed -E 's/[^0-9]*([0-9]+).*/\1/')"
+
+PG_DUMP=(pg_dump)
+DUMP_DSN="$DATABASE_URL"
+if [[ -n "$SERVER_MAJOR" ]] && (( SERVER_MAJOR > LOCAL_MAJOR )); then
+  if command -v docker >/dev/null 2>&1; then
+    log "local pg_dump is ${LOCAL_MAJOR}, server is ${SERVER_MAJOR}: using postgres:${SERVER_MAJOR} via docker"
+    # Two different networking situations, and getting this wrong looks like "connection
+    # refused" rather than like a configuration problem:
+    #
+    #   * a loopback DSN (a laptop, or a `fly proxy` tunnel) is NOT reachable from inside the
+    #     container on Docker Desktop, where --network=host does not share the host's loopback.
+    #     Rewrite the host to the gateway alias instead.
+    #   * anything else — notably a Fly 6PN `*.internal` address — needs host networking to
+    #     resolve and route at all.
+    if [[ "$DATABASE_URL" == *"@127.0.0.1"* || "$DATABASE_URL" == *"@localhost"* || "$DATABASE_URL" == *"@[::1]"* ]]; then
+      DUMP_DSN="${DATABASE_URL/@127.0.0.1/@host.docker.internal}"
+      DUMP_DSN="${DUMP_DSN/@localhost/@host.docker.internal}"
+      DUMP_DSN="${DUMP_DSN/@\[::1\]/@host.docker.internal}"
+      PG_DUMP=(docker run --rm -i --add-host=host.docker.internal:host-gateway
+               -e "PGCONNECT_TIMEOUT=${PGCONNECT_TIMEOUT:-15}" "postgres:${SERVER_MAJOR}" pg_dump)
+    else
+      PG_DUMP=(docker run --rm -i --network=host
+               -e "PGCONNECT_TIMEOUT=${PGCONNECT_TIMEOUT:-15}" "postgres:${SERVER_MAJOR}" pg_dump)
+    fi
+  else
+    die "pg_dump is version ${LOCAL_MAJOR} but the server is ${SERVER_MAJOR}, and pg_dump refuses
+  to dump a newer server. Install the matching client (postgresql-client-${SERVER_MAJOR}), or
+  make docker available so this script can borrow pg_dump from the postgres:${SERVER_MAJOR} image."
+  fi
+fi
+
 PGCONNECT_TIMEOUT="${PGCONNECT_TIMEOUT:-15}" \
-  pg_dump --dbname="$DATABASE_URL" \
+  "${PG_DUMP[@]}" --dbname="$DUMP_DSN" \
           --format=custom \
           --no-owner \
           --no-privileges \

@@ -38,10 +38,39 @@ export interface AdminDeps {
 
 const ScopeString = z.string().regex(/^[A-Za-z0-9_.-]+(\/[A-Za-z0-9_.-]+)*$/);
 
-function clientIp(request: FastifyRequest): string {
-  const forwarded = request.headers["x-forwarded-for"];
-  if (typeof forwarded === "string" && forwarded.length > 0) {
-    return forwarded.split(",")[0]!.trim();
+/**
+ * The client IP the login rate limit is keyed on.
+ *
+ * The first entry of `X-Forwarded-For` is caller-controlled: Cloudflare and Fly both *append*
+ * to whatever the client sent, so trusting `split(",")[0]` lets anyone send
+ * `X-Forwarded-For: 1.2.3.4` and get a fresh bucket on every attempt. That turns the §11 rate
+ * limit into decoration, which on a single shared admin password is the difference between a
+ * control and the appearance of one.
+ *
+ * So only headers a trusted edge sets and strips from client input are believed, most specific
+ * first, and `request.ip` — the actual socket peer — is the floor. `X-Forwarded-For` is used
+ * only as a last resort and then from the RIGHTMOST entry, which is the one the nearest trusted
+ * proxy appended rather than the one the client made up.
+ */
+export function clientIp(request: FastifyRequest): string {
+  const header = (name: string): string | null => {
+    const v = request.headers[name];
+    const raw = Array.isArray(v) ? v[0] : v;
+    return typeof raw === "string" && raw.trim() !== "" ? raw.trim() : null;
+  };
+
+  // Cloudflare sets this and removes any client-supplied copy.
+  const cf = header("cf-connecting-ip");
+  if (cf) return cf;
+  // Fly's own edge, same guarantee.
+  const fly = header("fly-client-ip");
+  if (fly) return fly;
+
+  const forwarded = header("x-forwarded-for");
+  if (forwarded) {
+    const hops = forwarded.split(",").map((h) => h.trim()).filter((h) => h !== "");
+    const nearest = hops[hops.length - 1];
+    if (nearest) return nearest;
   }
   return request.ip;
 }

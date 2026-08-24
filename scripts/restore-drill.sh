@@ -155,7 +155,14 @@ log "ready: Postgres $SERVER_VERSION on $HOST_PORT"
 # ---- 4. restore --------------------------------------------------------------------------
 # pg_restore runs INSIDE the container, so its version always matches the server and the host
 # needs no Postgres client at all.
+# `docker cp` preserves the host file's mode and lands it owned by root, while pg_restore and
+# psql below run as the unprivileged `postgres` user. A backup file created under a restrictive
+# umask — which is exactly what a careful operator does with an encrypted dump — is then
+# unreadable inside the container, and the failure reads "could not open input file: Permission
+# denied", which looks like a corrupt dump rather than a permissions problem. So make it
+# readable explicitly, as root, after the copy.
 docker cp "$DUMP_FILE" "$CONTAINER:/tmp/datum.dump" >/dev/null
+docker exec -u root "$CONTAINER" chmod 0644 /tmp/datum.dump
 
 log "restoring..."
 RESTORE_START="$SECONDS"
@@ -196,6 +203,7 @@ ACL_STATEMENTS="$(grep -cE '^(GRANT|REVOKE)' "$MIGRATIONS_DIR"/*.sql | awk -F: '
 (( ACL_STATEMENTS > 0 )) || die "found no GRANT/REVOKE statements in $MIGRATIONS_DIR — refusing to pretend the ACL layer was replayed"
 
 docker cp "$ACL_SQL" "$CONTAINER:/tmp/acl.sql" >/dev/null
+docker exec -u root "$CONTAINER" chmod 0644 /tmp/acl.sql
 ACL_RC=0
 docker exec -u postgres "$CONTAINER" \
   psql -X -q -v ON_ERROR_STOP=1 -d "$DB" -f /tmp/acl.sql \

@@ -57,14 +57,22 @@ export function compactAssertion(a: AssertionRow): string {
     (flags.length > 0 ? ` | ${flags.join(",")}` : "")
   );
 }
+const overflowNote = (n: number): string =>
+  `+${n} more — narrow by subject/predicate, or raise max_bytes`;
+
 /**
  * Pack lines into a byte budget, then say plainly how many were left out. Silently dropping the
  * tail would make the facade lie by omission.
  *
- * `mandatory` lines are never dropped, whatever the budget says. That exists for exactly one
- * reason and it is not an optimisation: a contested pair must be returned in full. Returning one
- * side of a disagreement because the other did not fit is the silent last-write-wins behaviour
- * this whole system exists to refuse, and no byte budget outranks that.
+ * The budget is a real ceiling on the whole response, note included. An earlier version appended
+ * the "+N more" line after the fill loop had already spent the budget, so a caller asking for 240
+ * bytes could receive 267 — a facade that exists to be cheap has no business overshooting the one
+ * number it is asked to respect.
+ *
+ * `mandatory` lines are the sole exception and are never dropped, whatever the budget says. That
+ * is not an optimisation: a contested pair must be returned in full. Returning one side of a
+ * disagreement because the other did not fit is the silent last-write-wins behaviour this whole
+ * system exists to refuse, and no byte budget outranks that.
  */
 export function pack(
   lines: string[],
@@ -73,19 +81,25 @@ export function pack(
   mandatory: string[] = [],
 ): string {
   if (lines.length === 0 && mandatory.length === 0) return emptyMessage;
-  const out: string[] = [...mandatory];
-  let used = mandatory.reduce((n, l) => n + Buffer.byteLength(l, "utf8") + 1, 0);
+
+  const cost = (s: string): number => Buffer.byteLength(s, "utf8") + 1;
+  const kept: string[] = [];
+  let used = mandatory.reduce((n, l) => n + cost(l), 0);
+
   for (const line of lines) {
-    const cost = Buffer.byteLength(line, "utf8") + 1;
-    if (out.length > 0 && used + cost > budget) break;
-    out.push(line);
-    used += cost;
+    if ((kept.length > 0 || mandatory.length > 0) && used + cost(line) > budget) break;
+    kept.push(line);
+    used += cost(line);
   }
-  const omitted = lines.length - (out.length - mandatory.length);
-  if (omitted > 0) {
-    out.push(`+${omitted} more — narrow by subject/predicate, or raise max_bytes`);
+
+  // Make room for the note itself, so the ceiling holds. Recomputed each round because dropping
+  // a line changes the count and therefore the note's own length.
+  while (kept.length > 0 && lines.length > kept.length && used + cost(overflowNote(lines.length - kept.length)) > budget) {
+    used -= cost(kept.pop()!);
   }
-  return out.join("\n");
+
+  const omitted = lines.length - kept.length;
+  return [...mandatory, ...kept, ...(omitted > 0 ? [overflowNote(omitted)] : [])].join("\n");
 }
 
 export function compactGate(g: GateStatus): string {
