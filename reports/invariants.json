@@ -1,7 +1,7 @@
 {
   "postgres": "18.6 (Debian 18.6-1.pgdg13+2)",
   "image": "postgres:latest",
-  "generated_at": "2026-08-24T20:21:41.284Z",
+  "generated_at": "2026-08-24T20:30:04.636Z",
   "cases": [
     {
       "case": "1",
@@ -67,14 +67,14 @@
             "accepted": false,
             "reason": "assertions_are_immutable",
             "sqlstate": "23514",
-            "message": "assertions are immutable: UPDATE may only stamp supersession (id=a_01M0TPZ5S0T6JVPXSYEKBJHG8Z)",
+            "message": "assertions are immutable: UPDATE may only stamp supersession (id=a_01M0TQEHEYEN1XCPZV1DEMP35S)",
             "extra": {
               "update_reason": "assertions_are_immutable",
               "update_sqlstate": "23514",
-              "update_message": "assertions are immutable: UPDATE may only stamp supersession (id=a_01M0TPZ5S0T6JVPXSYEKBJHG8Z)",
+              "update_message": "assertions are immutable: UPDATE may only stamp supersession (id=a_01M0TQEHEYEN1XCPZV1DEMP35S)",
               "delete_reason": "assertions_are_append_only",
               "delete_sqlstate": "23514",
-              "delete_message": "assertions are append-only: DELETE is never permitted (id=a_01M0TPZ5S0T6JVPXSYEKBJHG8Z)",
+              "delete_message": "assertions are append-only: DELETE is never permitted (id=a_01M0TQEHEYEN1XCPZV1DEMP35S)",
               "rows_left": 1,
               "value_now": "757.5"
             }
@@ -202,7 +202,7 @@
         "accepted": false,
         "reason": "supersedes_target_already_superseded",
         "sqlstate": "23514",
-        "message": "assertion a_01M0TPZ60NE5AFMVK51HWYX6YE is already superseded by a_01M0TPZ60S4MP453DE8KNG773D; supersede the head of the chain instead",
+        "message": "assertion a_01M0TQEHN8SB5NTGFZT2MB9ZAB is already superseded by a_01M0TQEHNBQW9SVV64ET1C1K4T; supersede the head of the chain instead",
         "extra": {
           "forks": 1
         }
@@ -215,7 +215,7 @@
             "accepted": false,
             "reason": "assertions_are_immutable",
             "sqlstate": "23514",
-            "message": "assertion a_01M0TPZ61RVZHYXRWKF53QCHF4 is already superseded by a_01M0TPZ61Y39FGMTXXJ50NP969",
+            "message": "assertion a_01M0TQEHP37FCNF5C47Q9D7D9P is already superseded by a_01M0TQEHP6E4MJQF3GMFKW5Z3H",
             "extra": {
               "forks": 1
             }
@@ -259,8 +259,8 @@
           "contested_on_read": true,
           "rows_returned_on_read": 2,
           "gate_reached_with_measured_required": false,
-          "gate_evidence": "a_01M0TPZ657KRWE6BYQ759XVCFG",
-          "measured_id": "a_01M0TPZ657KRWE6BYQ759XVCFG"
+          "gate_evidence": "a_01M0TQEHR6MM20JG9B4D5V2CAW",
+          "measured_id": "a_01M0TQEHR6MM20JG9B4D5V2CAW"
         }
       },
       "mutations": [
@@ -283,8 +283,8 @@
               "contested_on_read": false,
               "rows_returned_on_read": 1,
               "gate_reached_with_measured_required": false,
-              "gate_evidence": "a_01M0TPZ671JRT8MKV6CK03ERBV",
-              "measured_id": "a_01M0TPZ671JRT8MKV6CK03ERBV"
+              "gate_evidence": "a_01M0TQEHS9TFCH15MGKQJTZQ9V",
+              "measured_id": "a_01M0TQEHS9TFCH15MGKQJTZQ9V"
             }
           },
           "flipped": true
@@ -308,8 +308,8 @@
               "contested_on_read": false,
               "rows_returned_on_read": 2,
               "gate_reached_with_measured_required": false,
-              "gate_evidence": "a_01M0TPZ68MS19KT8PPKY31WAB1",
-              "measured_id": "a_01M0TPZ68MS19KT8PPKY31WAB1"
+              "gate_evidence": "a_01M0TQEHTCTDAVD18NM4ABT81K",
+              "measured_id": "a_01M0TQEHTCTDAVD18NM4ABT81K"
             }
           },
           "flipped": true

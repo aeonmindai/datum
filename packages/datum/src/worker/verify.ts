@@ -83,6 +83,9 @@ async function check(config: Config, row: AssertionRow): Promise<ContainmentChec
       // Nothing was read and nothing was concluded: a claim with no commit is not false, it is
       // simply unverifiable until someone asserts again with one.
       readable: false,
+      // Nothing was read, so nothing is known about where this landed either.
+      default_branch: null,
+      on_default_branch: null,
       exists: false,
       contained: {},
       method: "none",
@@ -175,7 +178,25 @@ export async function verifyOne(
         kind: row.kind,
         binding: row.binding,
         confidence: "measured",
-        evidence: { ...row.evidence, verified_by: verificationId, verified_via: containment.method },
+        // Containment is part of what the claim MEANS, so it is stamped onto the fact rather than
+        // left in a verification record nobody reads. "757.5 on release/openrouter-ready" and
+        // "757.5 on master" are different facts and only one describes the product; a promoted row
+        // that cannot tell you which is how branch work gets quoted as shipped.
+        evidence: {
+          ...row.evidence,
+          verified_by: verificationId,
+          verified_via: containment.method,
+          default_branch: containment.default_branch,
+          on_default_branch: containment.on_default_branch,
+          ...(containment.on_default_branch === false
+            ? {
+                branch_only: true,
+                says:
+                  `this measurement is real but has NOT landed on ${containment.default_branch}. ` +
+                  `It describes a branch, not the product. Do not quote it as shipped.`,
+              }
+            : {}),
+        },
         valid_from: row.valid_from,
         valid_to: row.valid_to,
         asserted_by: `worker:verification@${config.org}`,

@@ -1,0 +1,12 @@
+import { RuleSink } from "../packages/datum/src/rules/types.js";
+import { deriveWorkflowRules } from "../packages/datum/src/rules/workflows.js";
+const sink = new RuleSink();
+const d = deriveWorkflowRules("/Users/jish/Documents/GitHub/arc", sink);
+console.log("candidates:", sink.candidates.length, "dropped:", sink.dropped.length, "sources:", sink.sources.size);
+console.log("escalations:");
+for (const e of d.escalations) console.log(`  ${e.tool} ${e.mode} @${e.locator} scoped=${e.scoped.join(",")} :: ${e.command.slice(0,90)}`);
+console.log("gates:");
+for (const c of sink.candidates.filter(c=>c.predicate==="fails_when")) console.log(`  ${c.subject} ${c.object.mechanism} @${c.locator} :: ${c.enforcerText.slice(0,80)}`);
+console.log("by predicate:", Object.entries(sink.candidates.reduce((a:any,c)=>{a[c.predicate]=(a[c.predicate]||0)+1;return a;},{})));
+console.log("nonbinding:", sink.candidates.filter(c=>!c.binding).map(c=>`${c.subject}/${c.predicate}`));
+if (sink.dropped.length) console.log("dropped:", sink.dropped);

@@ -25,6 +25,21 @@ export interface ContainmentCheck {
    * `readable: true` may ever produce a refutation.
    */
   readable: boolean;
+  /**
+   * The repository's default branch, and whether the commit has actually landed on it.
+   *
+   * This exists because of a failure reproduced during this project's own construction. Arc's
+   * headline measurement — 757.5 tok/s — sits on a commit 21 ahead of `master` on an unmerged
+   * release branch. Datum verified it, promoted it to `measured`, and then read back
+   * indistinguishably from a number that had shipped. A brief written from that output quoted
+   * branch-only work as mainline, which is exactly the failure that cost Arc three sessions.
+   *
+   * The measurement is real, so refusing it would be wrong. What was missing is that a claim's
+   * containment is part of what the claim MEANS: "757.5 on release/openrouter-ready" and "757.5 on
+   * master" are different facts, and only one of them describes the product.
+   */
+  default_branch: string | null;
+  on_default_branch: boolean | null;
   /** Does the commit resolve to a commit object at all? */
   exists: boolean;
   /** For each ref the evidence claims contains it: does it actually? */
@@ -35,6 +50,8 @@ export interface ContainmentCheck {
 
 export const UNRESOLVABLE: ContainmentCheck = {
   readable: false,
+  default_branch: null,
+  on_default_branch: null,
   exists: false,
   contained: {},
   method: "none",
@@ -63,6 +80,8 @@ export async function checkViaLocalClone(
   } catch {
     return {
       readable: false,
+      default_branch: null,
+      on_default_branch: null,
       exists: false,
       contained: {},
       method: "local-mirror",
@@ -72,6 +91,24 @@ export async function checkViaLocalClone(
         says: `${dir} is not a readable git repository, so this claim cannot be checked here.`,
       },
     };
+  }
+
+  // The repo's own opinion of its default branch, not a guess. `origin/HEAD` is what the remote
+  // says; the fallbacks only run when nobody ever set it.
+  let defaultBranch: string | null = null;
+  try {
+    const { stdout } = await git(["symbolic-ref", "refs/remotes/origin/HEAD"]);
+    defaultBranch = stdout.trim().replace(/^refs\/remotes\/origin\//, "") || null;
+  } catch {
+    for (const guess of ["origin/main", "origin/master", "main", "master"]) {
+      try {
+        await git(["rev-parse", "--verify", "--quiet", guess]);
+        defaultBranch = guess.replace(/^origin\//, "");
+        break;
+      } catch {
+        // keep looking
+      }
+    }
   }
 
   let exists = false;
@@ -115,8 +152,27 @@ export async function checkViaLocalClone(
     }
   }
 
+  // Is it actually on the default branch? Asked separately from the claimed refs, because the
+  // evidence naming `release/openrouter-ready` is not the same statement as the work having landed.
+  let onDefault: boolean | null = null;
+  if (exists && defaultBranch) {
+    onDefault = false;
+    for (const candidate of [`refs/remotes/origin/${defaultBranch}`, `origin/${defaultBranch}`,
+                             `refs/heads/${defaultBranch}`, defaultBranch]) {
+      try {
+        await git(["merge-base", "--is-ancestor", commit, candidate]);
+        onDefault = true;
+        break;
+      } catch {
+        // keep trying spellings; a missing ref is not an answer
+      }
+    }
+  }
+
   return {
     readable,
+    default_branch: defaultBranch,
+    on_default_branch: onDefault,
     exists,
     contained,
     method: "local-mirror",
@@ -130,6 +186,9 @@ const CompareResponse = z.object({
   ahead_by: z.number().optional(),
   behind_by: z.number().optional(),
 });
+
+/** The repo probe is already being made to establish readability; the default branch comes free. */
+const RepoResponse = z.object({ default_branch: z.string().optional() });
 
 export async function checkViaGitHub(
   repo: string,
@@ -173,7 +232,15 @@ export async function checkViaGitHub(
           `not refuted.` +
           (token ? "" : " No DATUM_GITHUB_TOKEN is set; a private repo needs one.")
         : `GitHub answered ${repoProbe.status} for ${repo}, so the claim cannot be checked.`;
-    return { readable: false, exists: false, contained: {}, method: "github-api", detail };
+    return {
+      readable: false,
+      default_branch: null,
+      on_default_branch: null,
+      exists: false,
+      contained: {},
+      method: "github-api",
+      detail,
+    };
   }
 
   const head = await get(`/repos/${repo}/commits/${encodeURIComponent(commit)}`);
@@ -200,5 +267,33 @@ export async function checkViaGitHub(
     }
   }
 
-  return { readable, exists, contained, method: "github-api", detail };
+  // The claimed refs answer "is it where they said". This answers the different and more
+  // consequential question: has it actually landed on the branch that defines the product?
+  const repoMeta = RepoResponse.safeParse(repoProbe.json);
+  const defaultBranch = repoMeta.success ? (repoMeta.data.default_branch ?? null) : null;
+  let onDefault: boolean | null = null;
+  if (exists && defaultBranch) {
+    const cmp = await get(
+      `/repos/${repo}/compare/${encodeURIComponent(defaultBranch)}...${encodeURIComponent(commit)}`,
+    );
+    const rel = CompareResponse.safeParse(cmp.json);
+    const relation = rel.success ? rel.data : null;
+    onDefault =
+      cmp.status === 200 && (relation?.status === "behind" || relation?.status === "identical");
+    detail[`compare:${defaultBranch} (default)`] = {
+      http: cmp.status,
+      relation: relation?.status ?? null,
+      ahead_by: relation?.ahead_by ?? null,
+    };
+  }
+
+  return {
+    readable,
+    default_branch: defaultBranch,
+    on_default_branch: onDefault,
+    exists,
+    contained,
+    method: "github-api",
+    detail,
+  };
 }

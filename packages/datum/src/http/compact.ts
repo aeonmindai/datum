@@ -45,6 +45,11 @@ function value(a: AssertionRow): string {
 
 export function compactAssertion(a: AssertionRow): string {
   const flags: string[] = [];
+  // A verified measurement that never landed on the default branch describes a branch, not the
+  // product. Without this flag it reads identically to a shipped number, which is precisely how
+  // "branch work quoted as shipped" survived three sessions on Arc — and how it got into this
+  // project's own benchmark brief.
+  if (a.evidence?.on_default_branch === false) flags.push("BRANCH-ONLY");
   if (a.contested) flags.push("CONTESTED");
   if (a.inputs_unresolvable) flags.push("INPUTS-UNRESOLVABLE");
   if (a.superseded_by) flags.push("SUPERSEDED");

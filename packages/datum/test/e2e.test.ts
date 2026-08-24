@@ -8,7 +8,7 @@ import type { Db } from "../src/db/pool.js";
 import { buildServer, type Server } from "../src/http/server.js";
 import { runVerificationPass } from "../src/worker/verify.js";
 import { mintKey } from "../src/http/auth.js";
-import { DEFAULT_BUDGET_BYTES } from "../src/http/compact.js";
+import { compactAssertion, DEFAULT_BUDGET_BYTES } from "../src/http/compact.js";
 
 /**
  * Deliverables 2–5, end to end, against real Postgres and a real git repository.
@@ -498,6 +498,50 @@ describe("deliverable 2 — the verification worker", () => {
     // worker does not touch it.
     expect(row.json().assertion.confidence).toBe("confirmed-by-human");
     expect(row.json().verification).toBeNull();
+  });
+
+  it("flags a verified measurement that never landed on the default branch", async () => {
+    // The failure this defends against was reproduced during this project's own construction.
+    // Arc's headline number, 757.5 tok/s, sits on a commit 21 ahead of `master` on an unmerged
+    // release branch. Datum verified it, promoted it to `measured`, and it then read back
+    // indistinguishable from a number that had shipped — so a brief written from that output
+    // quoted branch-only work as mainline. The measurement is real; what was missing is that
+    // containment is part of what the claim means.
+    const branchTip = git(["rev-parse", currentBranch]);
+    const created = await post("/v1/assert", {
+      scope: PROJ,
+      subject: "engine",
+      predicate: "branch_only_probe",
+      object: { value: 757.5, unit: "tok/s" },
+      kind: "measured",
+      evidence: {
+        ...EV,
+        repo: "aeonmindai/datum",
+        commit: branchTip,
+        // Honest about the branch, and that is exactly the trap: the claim is true about the
+        // branch and says nothing about whether it shipped.
+        contained_in: [currentBranch],
+      },
+    });
+    const id = created.json().assertion.id;
+
+    const results = await runVerificationPass(db, config, { recheckMs: 0, limit: 100 });
+    const outcome = results.find((r) => r.assertion_id === id);
+    // It is confirmed: the commit resolves and is contained where claimed. Both true.
+    expect(outcome?.outcome).toBe("confirmed");
+
+    const read = await get(`/v1/ask?scope=${PROJ}&subject=engine&predicate=branch_only_probe`);
+    const row = read.json().assertions[0];
+    expect(row.confidence).toBe("measured");
+    // ...and the read cannot hide where it landed.
+    expect(row.evidence.default_branch).toBeTruthy();
+    expect(row.evidence.on_default_branch).toBe(false);
+    expect(row.evidence.branch_only).toBe(true);
+    expect(String(row.evidence.says)).toContain("NOT landed");
+
+    // The MCP line must carry it too, or an agent reading the cheap surface never learns it.
+    const mcpLine = compactAssertion(row);
+    expect(mcpLine).toContain("BRANCH-ONLY");
   });
 
   it("says unresolvable, never refuted, when it cannot read the repo at all", async () => {
