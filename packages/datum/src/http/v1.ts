@@ -155,6 +155,10 @@ export function registerV1(app: FastifyInstance, deps: V1Deps): void {
     permission: "read" | "assert" | "supersede" | "admin",
     scope?: string,
   ): Promise<AuthedKey> => {
+    // Order matters and it is a security property, not a style choice: authenticate BEFORE
+    // validating input. Parsing first lets an anonymous caller probe the request schema by
+    // reading 400s, and makes the same endpoint answer 400 to a stranger and 401 to a
+    // half-configured client, which is exactly backwards.
     const key = await authenticateKey(db, request.headers.authorization);
     requirePermission(key, permission);
     if (scope) requireScope(key, scope);
@@ -165,8 +169,9 @@ export function registerV1(app: FastifyInstance, deps: V1Deps): void {
     let actor: string | null = null;
     let body: z.output<typeof AssertBody> | null = null;
     try {
+      const key = await auth(request, "assert");
       body = parse(AssertBody, request.body);
-      const key = await auth(request, "assert", body.scope);
+      requireScope(key, body.scope);
       actor = key.label;
       const result = await assertFact(
         db,
@@ -201,8 +206,9 @@ export function registerV1(app: FastifyInstance, deps: V1Deps): void {
     let actor: string | null = null;
     let body: z.output<typeof SupersedeBody> | null = null;
     try {
+      const key = await auth(request, "supersede");
       body = parse(SupersedeBody, request.body);
-      const key = await auth(request, "supersede", body.scope);
+      requireScope(key, body.scope);
       actor = key.label;
       const result = await assertFact(
         db,
@@ -241,8 +247,9 @@ export function registerV1(app: FastifyInstance, deps: V1Deps): void {
 
   app.get("/v1/ask", async (request, reply) => {
     try {
+      const key = await auth(request, "read");
       const query = parse(AskQuery, request.query);
-      await auth(request, "read", query.scope);
+      requireScope(key, query.scope);
       // Exact-first: the structured filter is an index seek. Full text is second, and only
       // when asked for. Embeddings are third and not in v0 — and would never be returned as
       // a fact regardless.
@@ -266,10 +273,11 @@ export function registerV1(app: FastifyInstance, deps: V1Deps): void {
 
   app.get("/v1/why/:id", async (request, reply) => {
     try {
+      const key = await auth(request, "read");
       const params = parse(z.object({ id: z.string().min(1) }), request.params);
       const row = await byId(db, params.id);
       if (!row) throw new Rejection({ reason: "not_found", message: `no assertion ${params.id}` });
-      await auth(request, "read", row.scope);
+      requireScope(key, row.scope);
       const [chain, conflicts] = await Promise.all([
         lineage(db, params.id),
         db.query<{ id: string; a_id: string; b_id: string; status: string }>(
@@ -301,8 +309,9 @@ export function registerV1(app: FastifyInstance, deps: V1Deps): void {
 
   app.get("/v1/state", async (request, reply) => {
     try {
+      const key = await auth(request, "read");
       const query = parse(z.object({ scope: ScopeString }), request.query);
-      await auth(request, "read", query.scope);
+      requireScope(key, query.scope);
       const [{ chain, mode, modeScope }, sequence, missionRows, open] = await Promise.all([
         resolveChain(db, query.scope),
         currentSequence(db),
@@ -345,8 +354,9 @@ export function registerV1(app: FastifyInstance, deps: V1Deps): void {
 
   app.get("/v1/missions", async (request, reply) => {
     try {
+      const key = await auth(request, "read");
       const query = parse(z.object({ scope: ScopeString }), request.query);
-      await auth(request, "read", query.scope);
+      requireScope(key, query.scope);
       return reply.send({ ok: true, missions: await missions(db, query.scope) });
     } catch (err) {
       return sendRejection(deps, request, reply, err, { actor: null });
@@ -356,8 +366,9 @@ export function registerV1(app: FastifyInstance, deps: V1Deps): void {
   app.post("/v1/missions", async (request, reply) => {
     let body: z.output<typeof MissionBody> | null = null;
     try {
+      const key = await auth(request, "assert");
       body = parse(MissionBody, request.body);
-      const key = await auth(request, "assert", body.scope);
+      requireScope(key, body.scope);
       const mission = await createMission(db, {
         ...body,
         supersedes: body.supersedes ?? null,
@@ -371,12 +382,12 @@ export function registerV1(app: FastifyInstance, deps: V1Deps): void {
 
   app.get("/v1/nodes", async (request, reply) => {
     try {
+      const key = await authenticateKey(db, request.headers.authorization);
+      requirePermission(key, "read");
       const query = parse(
         z.object({ scope: ScopeString.optional(), kind: z.string().optional() }),
         request.query,
       );
-      const key = await authenticateKey(db, request.headers.authorization);
-      requirePermission(key, "read");
       const scope = query.scope ?? key.scope;
       requireScope(key, scope);
       const { rows } = await db.query(
@@ -397,8 +408,9 @@ export function registerV1(app: FastifyInstance, deps: V1Deps): void {
   app.post("/v1/nodes", async (request, reply) => {
     let body: z.output<typeof NodeBody> | null = null;
     try {
+      const key = await auth(request, "assert");
       body = parse(NodeBody, request.body);
-      await auth(request, "assert", body.scope);
+      requireScope(key, body.scope);
       const id = body.id ?? newId("n");
       // Registering a node in a scope is how a scope comes into existence: `datum link` creates
       // proj/<name> by registering the repo, rather than needing a separate route for it.
@@ -439,8 +451,9 @@ export function registerV1(app: FastifyInstance, deps: V1Deps): void {
   app.post("/v1/mode", async (request, reply) => {
     let body: z.output<typeof ModeBody> | null = null;
     try {
+      const key = await auth(request, "assert");
       body = parse(ModeBody, request.body);
-      const key = await auth(request, "assert", body.scope);
+      requireScope(key, body.scope);
       const current = await db.one<{ id: string }>(
         "app",
         `SELECT id FROM datum.assertions
@@ -472,11 +485,11 @@ export function registerV1(app: FastifyInstance, deps: V1Deps): void {
 
   app.get("/v1/contradictions", async (request, reply) => {
     try {
+      await auth(request, "read");
       const query = parse(
         z.object({ status: z.string().optional(), limit: z.coerce.number().optional() }),
         request.query,
       );
-      await auth(request, "read");
       const rows = await contradictions(db, {
         status: query.status === "all" ? undefined : (query.status ?? "open"),
         limit: query.limit ?? 100,

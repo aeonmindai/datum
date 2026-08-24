@@ -290,6 +290,30 @@ describe("deliverable 3 — /v1", () => {
     expect(res.json().reason).toBe("unauthorized");
   });
 
+  it("authenticates before validating input, so a stranger cannot probe the schema", async () => {
+    // A malformed request from an anonymous caller must answer 401, not 400. Answering 400 first
+    // leaks which parameters exist and makes the same endpoint reply differently to a stranger
+    // than to a half-configured client.
+    for (const url of ["/v1/state", "/v1/ask", "/v1/missions", "/v1/contradictions"]) {
+      const anon = await app.inject({ method: "GET", url });
+      expect(anon.statusCode, `${url} unauthenticated`).toBe(401);
+      expect(anon.json().reason).toBe("unauthorized");
+    }
+    for (const url of ["/v1/assert", "/v1/supersede", "/v1/missions", "/v1/nodes", "/v1/mode"]) {
+      const anon = await app.inject({
+        method: "POST",
+        url,
+        headers: { "content-type": "application/json" },
+        payload: { nonsense: true },
+      });
+      expect(anon.statusCode, `${url} unauthenticated`).toBe(401);
+    }
+    // With a valid key, the same malformed request is a 400 — the caller has earned that answer.
+    const bad = await get("/v1/state");
+    expect(bad.statusCode).toBe(400);
+    expect(bad.json().reason).toBe("malformed_request");
+  });
+
   it("resolves nearest-scope-wins, and isolates without rewriting", async () => {
     await post("/v1/assert", {
       scope: ROOT,
