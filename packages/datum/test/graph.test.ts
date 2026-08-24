@@ -248,6 +248,46 @@ describe("ingest", () => {
     expect(fineRow!.stats.loader.symbol_names_with_whitespace).toBe(0);
   });
 
+  it("names a declared language that produced no symbols, the one hole a query cannot reveal", async () => {
+    // An empty closure cannot distinguish "nothing calls this" from "the file holding the callers
+    // was never parsed". Under any grading scheme where an empty answer is a scoreable claim, a
+    // language that parsed to nothing therefore reads as a correct result with nothing anywhere to
+    // contradict it. This is the counter that contradicts it.
+    const art: GraphArtifact = {
+      ...artifact("acme/silent", [sym("only_rust")], []),
+      // The indexer declared four languages; only one produced a symbol.
+      languages: ["rust", "cuda", "python", "c"],
+    };
+    const loaded = await ingestGraph(db, art);
+    const row = await db.one<{ stats: Record<string, Record<string, unknown>> }>(
+      "app",
+      `SELECT stats FROM datum.code_index WHERE id = $1`,
+      [loaded.indexId],
+    );
+    const loader = row!.stats.loader;
+    expect(loader.symbols_by_language).toEqual({ rust: 1 });
+    expect(loader.languages_without_symbols).toEqual(["cuda", "python", "c"]);
+
+    // A healthy artifact reports an empty list, not a missing key: "audited, nothing found" and
+    // "never audited" must not look the same.
+    const healthy: GraphArtifact = {
+      ...artifact(
+        "acme/covered",
+        [sym("r"), sym("k", { language: "cuda", kind: "kernel" })],
+        [],
+      ),
+      languages: ["rust", "cuda"],
+    };
+    const ok = await ingestGraph(db, healthy);
+    const okRow = await db.one<{ stats: Record<string, Record<string, unknown>> }>(
+      "app",
+      `SELECT stats FROM datum.code_index WHERE id = $1`,
+      [ok.indexId],
+    );
+    expect(okRow!.stats.loader.symbols_by_language).toEqual({ rust: 1, cuda: 1 });
+    expect(okRow!.stats.loader.languages_without_symbols).toEqual([]);
+  });
+
   it("derives a scope from the repo slug when none is given", async () => {
     const a = sym("solo");
     const loaded = await ingestGraph(db, artifact("acme/scoped", [a], []));

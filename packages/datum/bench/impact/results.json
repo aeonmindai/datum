@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-24T20:58:16.364Z",
+  "generated_at": "2026-08-24T21:17:31.363Z",
   "corpus": {
     "repo": "/Users/jish/Documents/GitHub/arc",
     "head_commit": "526c909986de48b13d4ae33964baf0451fb79270",
@@ -8,7 +8,7 @@
     "note": "The corpus is READ-ONLY. Every question except I40 is pinned to head_commit; I40 is pinned to secondary_commit and is the bitemporal case."
   },
   "artifact_stats": {
-    "wall_ms": 3339,
+    "wall_ms": 3371,
     "bytes_parsed": 16588666,
     "files_discovered": 966,
     "files_indexed": 966,
@@ -27,30 +27,30 @@
     "files_with_syntax_errors": 130,
     "symbols_by_kind": {
       "module": 1237,
-      "function": 3728,
+      "function": 3591,
       "type": 2474,
-      "method": 7582,
+      "method": 7433,
       "constant": 1674,
       "trait": 102,
       "test": 1576,
-      "kernel": 822,
+      "kernel": 842,
       "macro": 248
     },
     "edges_by_kind": {
       "imports": 14401,
-      "calls": 63812,
-      "uses_type": 20546,
+      "calls": 63819,
+      "uses_type": 20215,
       "instantiates": 2676,
-      "implements": 1129,
+      "implements": 1128,
       "tests": 211
     },
     "max_file_bytes": 2097152,
     "resolutions": {
       "compiler": 0,
       "language-server": 0,
-      "unique-name": 47590,
-      "ambiguous-name": 11042,
-      "unresolved": 44143
+      "unique-name": 47564,
+      "ambiguous-name": 10863,
+      "unresolved": 44023
     },
     "resolutions_by_kind": {
       "imports": {
@@ -59,14 +59,14 @@
         "ambiguous-name": 646
       },
       "calls": {
-        "unique-name": 25243,
-        "unresolved": 29671,
-        "ambiguous-name": 8898
+        "unique-name": 25354,
+        "unresolved": 29761,
+        "ambiguous-name": 8704
       },
       "uses_type": {
-        "unique-name": 10966,
-        "unresolved": 8187,
-        "ambiguous-name": 1393
+        "unique-name": 10829,
+        "unresolved": 7978,
+        "ambiguous-name": 1408
       },
       "instantiates": {
         "unresolved": 701,
@@ -74,7 +74,7 @@
         "ambiguous-name": 87
       },
       "implements": {
-        "unresolved": 445,
+        "unresolved": 444,
         "ambiguous-name": 7,
         "unique-name": 677
       },
@@ -84,14 +84,14 @@
         "ambiguous-name": 11
       }
     },
-    "resolution_ambiguity_ceiling": 9136,
-    "declarations_shadowed": 46,
-    "edges_dropped_no_source": 94
+    "resolution_ambiguity_ceiling": 9413,
+    "declarations_shadowed": 135,
+    "edges_dropped_no_source": 125
   },
-  "resolution_ambiguity_ceiling": 9136,
+  "resolution_ambiguity_ceiling": 9413,
   "edge_confidence": {
-    "unverified": 55185,
-    "derived": 47590
+    "unverified": 54886,
+    "derived": 47564
   },
   "questions": 40,
   "arms": {
@@ -158,10 +158,10 @@
         "f1": 0.22079531516445403
       },
       "micro": {
-        "precision": 0.012406187777607597,
+        "precision": 0.01240998927531791,
         "recall": 0.9529411764705882
       },
-      "FCR": 0.9875938122223924,
+      "FCR": 0.9875900107246821,
       "FCQ": 0.825,
       "abstain_rate": 0,
       "uncertain_rate": 0,
@@ -2484,7 +2484,7 @@
           "r": 1,
           "f1": 0,
           "tp": 0,
-          "fp": 68,
+          "fp": 66,
           "fn": 0
         },
         "strict": {
@@ -2492,12 +2492,12 @@
           "r": 1,
           "f1": 0,
           "tp": 0,
-          "fp": 68,
+          "fp": 66,
           "fn": 0
         },
-        "certain": 68,
+        "certain": 66,
         "uncertain": 0,
-        "fce": 68
+        "fce": 66
       }
     },
     {

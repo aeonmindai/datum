@@ -188,9 +188,12 @@ export async function ingestGraph(
 
   const indexId = newId("cidx");
   const startedAt = Date.now();
-  const symbolsByKind: Record<string, number> = {};
-  const malformedNames: { count: number; sample: string[] } = { count: 0, sample: [] };
-  const tally: EdgeTally = {
+  const symbols: SymbolTally = {
+    byKind: {},
+    byLanguage: {},
+    malformedNames: { count: 0, sample: [] },
+  };
+  const edges: EdgeTally = {
     byResolution: {},
     byConfidence: { measured: 0, derived: 0, unverified: 0 },
     withoutTarget: 0,
@@ -244,32 +247,35 @@ export async function ingestGraph(
         ],
       );
 
-      const idByKey = await insertSymbols(
-        client,
-        indexId,
-        artifact,
-        symbolsByKind,
-        malformedNames,
+      const idByKey = await insertSymbols(client, indexId, artifact, symbols);
+      const edgeRows = await insertEdges(client, indexId, artifact, idByKey, edges);
+
+      // The audit this exists for: a language the artifact declares but produced no symbols under
+      // is a coverage hole, and it is the one kind of hole a closure query can never reveal —
+      // every query about that language's code returns an honest-looking empty answer.
+      const silentLanguages = (artifact.languages ?? []).filter(
+        (lang) => (symbols.byLanguage[lang] ?? 0) === 0,
       );
-      const edgeRows = await insertEdges(client, indexId, artifact, idByKey, tally);
 
       const stats = {
         ...(artifact.stats ?? {}),
         // Loader-authored counters win over an artifact key of the same name: these are measured
         // by the thing that actually wrote the rows.
         loader: {
-          symbols_by_kind: symbolsByKind,
+          symbols_by_kind: symbols.byKind,
+          symbols_by_language: symbols.byLanguage,
+          languages_without_symbols: silentLanguages,
           // A parser defect the loader can see but must not hide: see NAME_HAS_WHITESPACE.
-          symbol_names_with_whitespace: malformedNames.count,
-          symbol_names_with_whitespace_sample: malformedNames.sample,
+          symbol_names_with_whitespace: symbols.malformedNames.count,
+          symbol_names_with_whitespace_sample: symbols.malformedNames.sample,
           // Both numbers, because they differ: an ambiguous edge becomes one row per candidate.
           artifact_edges: artifact.edges.length,
           edge_rows: edgeRows,
-          ambiguous_edges: tally.ambiguousEdges,
-          ambiguous_edge_rows: tally.ambiguousRows,
-          edges_by_resolution: tally.byResolution,
-          edges_by_confidence: tally.byConfidence,
-          edges_without_target: tally.withoutTarget,
+          ambiguous_edges: edges.ambiguousEdges,
+          ambiguous_edge_rows: edges.ambiguousRows,
+          edges_by_resolution: edges.byResolution,
+          edges_by_confidence: edges.byConfidence,
+          edges_without_target: edges.withoutTarget,
           load_ms: Date.now() - startedAt,
         },
       };
@@ -318,12 +324,27 @@ export async function ingestGraph(
  */
 const NAME_HAS_WHITESPACE = /\s/;
 
+/**
+ * What the loader learns about the symbols while writing them, mirroring `EdgeTally`.
+ *
+ * `byLanguage` is the cheap half of a coverage audit. A closure query cannot distinguish "nothing
+ * calls this" from "the file holding the callers was never parsed" — both return an empty answer,
+ * and under any grading scheme where an empty closure is a scoreable claim, a silent coverage hole
+ * reads as a correct result with nothing anywhere to contradict it. A language declared on the
+ * index row with no symbols under it is exactly that hole, and this counter is what makes it
+ * visible from the index row alone.
+ */
+interface SymbolTally {
+  byKind: Record<string, number>;
+  byLanguage: Record<string, number>;
+  malformedNames: { count: number; sample: string[] };
+}
+
 async function insertSymbols(
   client: pg.PoolClient,
   indexId: string,
   artifact: GraphArtifact,
-  byKind: Record<string, number>,
-  malformed: { count: number; sample: string[] },
+  tally: SymbolTally,
 ): Promise<Map<string, string>> {
   const idByKey = new Map<string, string>();
   const columns = `(index_id, id, kind, name, fqn, language, path, line_start, line_end, visibility, signature, signature_hash)`;
@@ -357,12 +378,15 @@ async function insertSymbols(
         );
       }
       idByKey.set(sym.key, id);
-      byKind[sym.kind] = (byKind[sym.kind] ?? 0) + 1;
+      tally.byKind[sym.kind] = (tally.byKind[sym.kind] ?? 0) + 1;
+      tally.byLanguage[sym.language] = (tally.byLanguage[sym.language] ?? 0) + 1;
       if (NAME_HAS_WHITESPACE.test(sym.name)) {
-        malformed.count += 1;
+        tally.malformedNames.count += 1;
         // A handful is enough to find the pattern; the count is what says how bad it is.
-        if (malformed.sample.length < 10) {
-          malformed.sample.push(`${sym.path}:${sym.line_start} ${JSON.stringify(sym.name)}`);
+        if (tally.malformedNames.sample.length < 10) {
+          tally.malformedNames.sample.push(
+            `${sym.path}:${sym.line_start} ${JSON.stringify(sym.name)}`,
+          );
         }
       }
       params.push(

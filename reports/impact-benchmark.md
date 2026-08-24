@@ -4,7 +4,7 @@
 of 10. The prediction in the spec — *"grep loses badly; if it does not, the subsystem is not worth
 building"* — held.
 
-Corpus: the real Arc repository at HEAD `526c9099`, 966 files, 19,495 symbols, 128,156 edge rows.
+Corpus: the real Arc repository at HEAD `526c9099`, 966 files, 19,177 symbols, 126,897 edge rows (artifact sha256 289c30200af5b9b2).
 40 questions of the form *"if I change X, what else must I care about?"*, ground truth established
 by hand from source and independently revalidated (130 assertions, 0 failures) before any system was
 run. Grading is mechanical throughout, per `bench/impact/grade.md`.
@@ -81,7 +81,7 @@ inversion is where a cheap audit stops being optional.
 **So the ten were audited individually.** For each: the target's file was indexed, the symbol was
 found, its name is clean, and — the check that matters — **no edge names it even unresolved**
 (`dst_name` count 0 for all ten), so the ambiguity ceiling is not concealing a caller behind a
-demoted edge. 0 of 10 suspect. Symbols by language: rust 15,842 / cuda 2,618 / python 682 / c 35, so
+demoted edge. 0 of 10 suspect. Symbols by language: rust 15,842 / cuda 2,618 / python 682 / c 35 (summing exactly to `symbol_count`), so
 every declared language produced symbols and there is no unparsed-language hole in this artifact,
 and 0 symbols carry whitespace in their names.
 
@@ -95,15 +95,15 @@ shape a benchmark can have.
 
 Stated because the numbers above are strong enough to be worth distrusting.
 
-**Not one edge in this index is `measured`.** The confidence histogram over 102,775 edges is
-**47,590 derived / 55,185 unverified / 0 measured**. Tree-sitter is neither a compiler nor a
+**Not one edge in this index is `measured`.** The confidence histogram over 102,450 edges is
+**47,564 derived / 54,886 unverified / 0 measured**. Tree-sitter is neither a compiler nor a
 language server, so the indexer refuses to emit `compiler` or `language-server` resolutions at all.
 Every true positive here rests on unique-name resolution, not observation. `derived` is the correct
 label and it bounds the claim: no edge in the Arc graph can currently satisfy a mission gate that
 demands `measured`, and letting `derived` read as `measured` would be the single overclaim this
 benchmark exists to refuse.
 
-**9,136 edges were demoted to `unresolved` by the ambiguity ceiling**, and an unresolved edge
+**9,413 edges were demoted to `unresolved` by the ambiguity ceiling**, and an unresolved edge
 produces no hop in any array — invisible to the answer set. It costs recall, and because it cannot
 appear in the asserted set it also cannot produce a false-confidence event. That asymmetry favours
 Datum's FCR and must not be read as free. Concretely: 42 edges name `gather_forward` and 41 of them
@@ -126,6 +126,28 @@ the whole exercise circular — and independently revalidated, but it is not an 
 symbol boundaries rather than a scan-upward heuristic, which is strictly more accurate than what
 `rg` alone provides; and hits with no enclosing function are dropped rather than counted as false
 positives. The comparison is deliberately not a straw man.
+
+## A generation error in this report's own first publication
+
+Worth recording, because it is the exact failure this product exists to catch, committed by me in
+the report claiming to catch it.
+
+The first published run measured a database loaded from artifact **generation 2** (19,495 symbols,
+128,156 rows) while the audit of the empty-answer class read **generation 3** from disk (19,177 /
+126,897) — CodeIndexer rewrote the file at 22:08:15, between the ingest and the audit. So the
+sentence "the empty-answer scores are audited" was true of an artifact that was not the one scored.
+Generation 2 still contained six CUDA symbols with whitespace in their names; generation 3 fixed
+them. Nothing in either number was wrong, but the evidence and the claim came from different
+generations, which is precisely "branch work quoted as shipped" wearing different clothes.
+
+Both were re-run against generation 3, pinned by sha256 `289c30200af5b9b2`. **The scores are
+identical** — 0.975 / 0.815 / 0.221, margin +0.160 — so the result is robust across both
+generations. That is reassuring, and it is reassuring *because it was measured*; before the re-run
+it was an assumption that happened to hold.
+
+The artifact hash is now recorded in this report for the same reason `evidence.commit` is recorded
+on an assertion: a number without the identity of the thing it was measured on is not reproducible,
+however correct it happens to be.
 
 ## Four bugs found on the way to this number
 
