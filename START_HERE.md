@@ -75,11 +75,17 @@ Do not soften this because v0 went well. That is the failure mode.
   table in v0; NATS when projections land.
 - **Six MCP tools, not thirty.** Every tool definition is injected into every agent session.
 
-## Open decisions
+## Decided — do not reopen
 
-`HANDOFF.md` §16. The one that shapes the schema: **when a human contradicts an instrument, is that
-blocking or advisory?** My recommendation is advisory — allow it loudly, both rows stay live, a
-resolution is required. Decide before writing the exclusion constraint.
+**Contradictions are advisory across authority tiers** (`HANDOFF.md` §16, decided 2026-08-24). The
+exclusion constraint blocks only between `measured`/`derived` rows. A `confirmed-by-human` or
+`unverified` row contradicting a measurement **must be accepted**, both rows stay live, and a
+`contradiction` record is raised. Reads return both marked `contested`, never silently one.
+
+This is safe because a mission gate evaluates only rows of the confidence class it demands, so a
+human claim can never satisfy a gate requiring `measured`. The disagreement becomes visible without
+becoming load-bearing. Deliverable 1's test set therefore has **seven** cases: six rejections and
+one acceptance.
 
 ## Contributing
 

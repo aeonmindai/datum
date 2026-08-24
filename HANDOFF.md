@@ -212,14 +212,16 @@ logged. Rejected. This is the entire product.
    16-processor Sequent that append-only is *why* concurrent writes are cheap — "because hypotheses
    are never deleted... only one lock is ever acquired at a time, deadlock is impossible" — reaching
    4.8× on 5 processors.
-3. **No two live contradicting assertions.** An `EXCLUDE USING gist` constraint over
-   `(scope =, subject =, predicate =, valid_period &&) WHERE superseded_by IS NULL` makes a
-   contradiction **physically un-insertable**. Postgres 18's `WITHOUT OVERLAPS` says the same thing
-   more elegantly and we deliberately do not use it: the exclusion constraint gives the identical
-   guarantee, has been hardened since PG9.x, and runs on PG13+, which keeps the host swappable
-   instead of welding the core invariant to one vendor's newest feature. No bitemporal engine offers
-   either, and this turns the field's hardest unsolved problem into a declarative constraint.
-   Exact DDL in §10.
+3. **No two live contradicting assertions — within the machine tier.** An `EXCLUDE USING gist`
+   constraint over `(scope =, subject =, predicate =, valid_period &&)
+   WHERE superseded_by IS NULL AND confidence IN ('measured','derived')` makes a contradiction
+   between two reproducible facts **physically un-insertable**. `confirmed-by-human` and
+   `unverified` rows are exempt: they coexist and raise a `contradiction` record instead — see the
+   decision in §16, and note the safety property that a human claim can never satisfy a gate
+   demanding `measured`. Postgres 18's `WITHOUT OVERLAPS` says this more elegantly and we
+   deliberately do not use it: the exclusion constraint gives the identical guarantee, has been
+   hardened since PG9.x, and runs on PG13+, keeping the host swappable rather than welding the core
+   invariant to one vendor's newest feature. Exact DDL in §10.
 4. **Confidence is earned, never claimed.** This is a correction to an earlier draft that made the
    commit check a database constraint — Postgres cannot run git, so that was unimplementable.
    The right design is stronger: **an agent cannot assert `measured`.** Every write lands as
@@ -393,13 +395,17 @@ a fraction of the cost. That is the call.
 
 ```sql
 CREATE EXTENSION btree_gist;   -- trusted since PG13, ships in contrib
+
+-- Blocks contradictions between REPRODUCIBLE facts only. Human and unverified
+-- testimony is exempt by design and raises a contradiction record instead (§16).
 ALTER TABLE assertions ADD CONSTRAINT no_two_live_contradictions
   EXCLUDE USING gist (
     scope           WITH =,
     subject         WITH =,
     predicate       WITH =,
     valid_period    WITH &&
-  ) WHERE (superseded_by IS NULL);
+  ) WHERE (superseded_by IS NULL
+           AND confidence IN ('measured', 'derived'));
 ```
 
 Three reasons, and they outrank elegance. It achieves the **identical** physical impossibility, so
@@ -594,7 +600,7 @@ are the database operator, so backups plus an executed restore drill are in scop
 
 | # | deliverable | done when |
 |---|---|---|
-| 1 | **Schema + the five invariants** | six adversarial writes are each rejected **by the database**, with a machine-readable reason: no evidence; `UPDATE`/`DELETE`; overlapping live contradiction; `kind='failed'` without `reopen_if`; asserting `measured` directly (see §4.4 — it must be earned); superseding an already-superseded row. Every test **mutation-checked both ways**, values reported in both directions. |
+| 1 | **Schema + the five invariants** | **seven** adversarial writes handled correctly by the database, each with a machine-readable reason. Six rejected: no evidence; `UPDATE`/`DELETE`; two `measured` rows contradicting on the same scope/subject/predicate/period; `kind='failed'` without `reopen_if`; asserting `measured` directly (§4.4 — it must be earned); superseding an already-superseded row. **One accepted:** a `confirmed-by-human` row contradicting a live `measured` row — it must land, both stay live, and a `contradiction` record appears (§16). Every test **mutation-checked both ways**, values reported in both directions. |
 | 2 | **Verification worker** | promotes `unverified` → `measured` only after confirming `evidence.commit` resolves and is contained where claimed; writes the outcome as its own assertion |
 | 3 | **HTTP API** `/v1` | `assert`, `supersede`, `ask`, `state`, `nodes`, `missions`; exact-first retrieval; superseded rows never in a default read; a working as-of query |
 | 4 | **MCP facade** `/mcp` | `state`, `ask`, `why`, `assert`, `supersede`, `nodes` — six tools, not thirty, because every tool definition is injected into every agent session. Responses **~200 bytes and provenance-dense, never 20 KB**; a chatty MCP server is a permanent context tax on everything that connects |
@@ -628,17 +634,47 @@ exist. Sequence is **v0 → M2 → decide → M3/M4**.
   50 rps global limit by coalescing. Remember Linear's `actor=app` cannot hold `admin` scope, so the
   app can never provision its own webhook.
 
-## 16. Open questions for Jish
+## 16. Decided, and still open
+
+### ✅ DECIDED 2026-08-24 — contradictions are ADVISORY across authority tiers
+
+Jish's call. When a human contradicts an instrument, **both rows stay live**, the pair is flagged
+contested, and a resolution is required. Neither is silently dropped.
+
+The line, stated precisely so it can be implemented without guessing:
+
+- **The exclusion constraint blocks only within the machine tier** — `measured` and `derived`.
+  Two reproducible facts disagreeing about the same subject and period is a data defect; one of them
+  is wrong, so force an explicit supersession.
+- **`confirmed-by-human` and `unverified` never block.** They coexist with whatever is already there
+  and raise a `contradiction` record. Testimony is allowed to conflict; that is what the queue is
+  for.
+- **Reads return both, marked `contested: true`.** Never silently pick one. An agent receiving a
+  contested fact may not treat it as settled — it reports the conflict or resolves it.
+- **Resolution has three honest exits:** recover the missing ref so the human claim is promoted to
+  `measured`; re-measure and supersede one side; or mark it an unreproducible historical
+  observation — kept, labelled, never publishable.
+
+🔑 **Why advisory is safe rather than sloppy — the property that makes this work.** A mission gate
+declares `requires_confidence`, and it evaluates **only rows of that class** (§6). So a
+`confirmed-by-human` assertion **cannot satisfy a gate that demands `measured`**, no matter how
+confidently it is written. Allowing humans to contradict instruments therefore cannot make a target
+look reached. The disagreement becomes visible without ever becoming load-bearing.
+
+The live example is Arc's bake budget: the instrument has never observed ≤60 minutes on one card,
+and Jish states it was reached once before model confusion lost it. Blocking would have destroyed
+that knowledge; silent human-wins would have marked a target reached with no evidence. Advisory
+keeps both, and the pair tells the next agent exactly what to do — go find the box or commit where
+it happened.
+
+### Still open
 
 1. **Multi-tenant from day one, or aeonmind-only first?** It changes the auth model materially.
    Recommendation: single-tenant schema, multi-tenant-shaped scopes, so the migration is additive.
-2. **Is the contradiction object blocking or advisory** on a `confirmed-by-human` write? A human
-   contradicting an instrument is a real event and probably should be allowed, loudly, with both
-   rows live and a resolution required.
-3. **Does GSM8K 96% get an assertion?** Under these rules it is `confirmed-by-human` with no commit
+2. **Does GSM8K 96% get an assertion?** Under these rules it is `confirmed-by-human` with no commit
    and no protocol, so it is unpublishable until re-measured. That is correct behaviour and it is
    also a live example of the system telling you something you may not want to hear.
-4. **Product or internal?** If product: the wedge is the contradiction adjudicator plus the
+3. **Product or internal?** If product: the wedge is the contradiction adjudicator plus the
    evidence-class taxonomy, neither of which exists anywhere, and the moat is cross-project
    inheritance.
 
