@@ -69,8 +69,26 @@ export const LANGUAGE_BY_EXTENSION = {
  * orders of magnitude more often than they are local definitions.
  */
 const NON_CALL_TARGET_NAMES = [
-  // Control flow and keywords that the grammars can surface in call position, especially inside
-  // ERROR nodes where a construct did not parse cleanly.
+  // Enum constructors in call position. `Ok(x)`, `Some(x)`, `Err(e)` are the three most frequent
+  // "calls" in any Rust corpus by a wide margin and none of them is a function in this repository:
+  // measured on the Arc corpus they alone accounted for 7,679 unresolved edges, which is enough
+  // noise to hide everything else in the histogram.
+  "Ok",
+  "Err",
+  "Some",
+  "None",
+
+  // C++ casts are operators wearing call syntax.
+  "static_cast",
+  "reinterpret_cast",
+  "dynamic_cast",
+  "const_cast",
+  "bit_cast",
+  "launder",
+  "addressof",
+
+  // Control flow and keywords the grammars can surface in call position, especially inside ERROR
+  // nodes where a construct did not parse cleanly.
   "if",
   "else",
   "for",
@@ -562,9 +580,123 @@ const NON_CALL_TARGET_NAMES = [
   "cudaStreamSynchronize",
   "cudaFuncSetAttribute",
   "cudaGetDeviceProperties",
+  "cudaEventRecord",
+  "cudaEventSynchronize",
+  // Half and bfloat16 conversion intrinsics. Arc's kernels are saturated with these; measured, they
+  // were the largest source of unresolved edges in the `.cu` half of the corpus.
+  "__bfloat162float",
+  "__float2bfloat16",
+  "__float2bfloat162_rn",
+  "__bfloat1622float2",
+  "__float22bfloat162_rn",
+  "__halves2half2",
+  "__float2half2_rn",
+  "__half22float2",
+  "__low2float",
+  "__high2float",
+  "__low2half",
+  "__high2half",
+  "__hadd2",
+  "__hmul2",
+  "__hfma2",
+  "__hsub",
+  "__hsub2",
+  "__hdiv",
+  "__hneg",
+  "__hmax",
+  "__hmin",
+  "__heq",
+  "__hlt",
+  "__hgt",
+  "__hle",
+  "__hge",
+  "__int2float_rn",
+  "__float2int_rn",
+  "__float2int_rd",
+  "__float2uint_rn",
+  "__double2int_rn",
+  "__ldca",
+  "__ldcs",
+  "__ldcv",
+  "__stcs",
+  "__stwb",
+  "__stwt",
+  "__trap",
+  "__nanosleep",
+  "__cvta_generic_to_shared",
+  "__isShared",
+  "__isGlobal",
+  "__funnelshift_l",
+  "__funnelshift_r",
+  "__byte_perm",
+  "__mul24",
+  "__umul24",
+  "__mulhi",
+  "__umulhi",
+  "__dp4a",
 ] as const;
 
 export const NON_CALL_TARGETS: ReadonlySet<string> = new Set(NON_CALL_TARGET_NAMES);
+
+/**
+ * Leading path segments that mean "this call goes into the standard library".
+ *
+ * `Vec::new`, `Arc::new`, `Box::new`, `HashMap::new` and `String::from` are not calls into this
+ * repository, but their bare last segment (`new`, `from`) cannot be filtered — a local
+ * `Config::new` is a genuine and important edge. So the qualifier is what gets tested. On the Arc
+ * corpus this removed roughly 2,500 unresolved edges whose targets were all `std`.
+ *
+ * `Self`, `self`, `super` and `crate` are deliberately absent: they name *this* codebase, and
+ * filtering them would delete the most precisely resolved edges in the whole index.
+ */
+const STD_QUALIFIER_NAMES = [
+  "std",
+  "core",
+  "alloc",
+  "Vec",
+  "Box",
+  "Arc",
+  "Rc",
+  "String",
+  "HashMap",
+  "HashSet",
+  "BTreeMap",
+  "BTreeSet",
+  "VecDeque",
+  "BinaryHeap",
+  "Option",
+  "Result",
+  "Cow",
+  "Path",
+  "PathBuf",
+  "OsString",
+  "Mutex",
+  "RwLock",
+  "RefCell",
+  "Cell",
+  "Duration",
+  "Instant",
+  "Ordering",
+  "u8",
+  "u16",
+  "u32",
+  "u64",
+  "u128",
+  "usize",
+  "i8",
+  "i16",
+  "i32",
+  "i64",
+  "i128",
+  "isize",
+  "f32",
+  "f64",
+  "bool",
+  "char",
+  "str",
+] as const;
+
+export const STD_QUALIFIERS: ReadonlySet<string> = new Set(STD_QUALIFIER_NAMES);
 
 /**
  * Built-in types. Excluded from `uses_type` edges: a signature mentioning `u32` or `float` tells us

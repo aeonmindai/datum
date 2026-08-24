@@ -30,11 +30,19 @@ const ScopeString = z
   .min(1)
   .regex(/^[A-Za-z0-9_.-]+(\/[A-Za-z0-9_.-]+)*$/, "scope must be slash-separated labels");
 
+// Zod reports a missing field as "expected string, received undefined" unless the schema names its
+// own error. These sentences are the API's whole answer to "what did I do wrong", and they have to
+// read the same whether the field was absent or blank.
+const ACTOR_REQUIRED = "actor is required: a preference has to be attributable to a human";
+const OCCASION_REQUIRED = "occasion is required: it is the unit of repetition";
+const REASON_REQUIRED = "reason is required: a rejection has to say what was wrong";
+const REJECTER_REQUIRED = "actor is required: name the human rejecting this";
+
 const FeedbackBody = z.object({
   scope: ScopeString,
   // The human who gave the feedback, named. Distinct humans are what raise a personal quirk to an
   // org-wide rule, so this is the field the tier ladder is computed from and it is required.
-  actor: z.string().min(1, "actor is required: a preference has to be attributable to a human"),
+  actor: z.string({ error: ACTOR_REQUIRED }).min(1, ACTOR_REQUIRED),
   subject: z.string().min(1),
   predicate: z
     .string()
@@ -43,7 +51,7 @@ const FeedbackBody = z.object({
       message: `${REJECTION_PREDICATE} is reserved for rejections recorded by POST /v1/preferences/:id/reject`,
     }),
   correction: z.record(z.string(), z.unknown()),
-  occasion: z.string().min(1, "occasion is required: it is the unit of repetition"),
+  occasion: z.string({ error: OCCASION_REQUIRED }).min(1, OCCASION_REQUIRED),
   signature: z.string().min(1).optional(),
   raw: z.string().nullish(),
   citation: z.record(z.string(), z.unknown()).optional(),
@@ -52,8 +60,8 @@ const FeedbackBody = z.object({
 const RejectBody = z.object({
   // Required. A rejection with no stated reason is unreviewable, and it becomes the `why` on the
   // assertion that retires the preference — where `failure_requires_why` insists on it anyway.
-  reason: z.string().min(1, "reason is required: a rejection has to say what was wrong"),
-  actor: z.string().min(1, "actor is required: name the human rejecting this"),
+  reason: z.string({ error: REASON_REQUIRED }).min(1, REASON_REQUIRED),
+  actor: z.string({ error: REJECTER_REQUIRED }).min(1, REJECTER_REQUIRED),
 });
 
 export interface PreferenceDeps {

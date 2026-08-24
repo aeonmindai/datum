@@ -153,6 +153,17 @@ are unaffected: a test reaching its target over a resolved `tests` edge is alrea
 `counts.unverified === ambiguous.length`. If either fails the answer is malformed and must not be
 graded — record it as a run error, never as a score.
 
+Those two assertions are jointly sufficient to prove the partition is intact, and they cover the
+unions as well. Confirmed against `src/graph/store.ts`: one loop builds all three arrays, every hop
+goes into exactly one of `reached_by` or `ambiguous` (`if (path_confidence === "unverified")
+ambiguous.push(hop); else reached_by.push(hop);`) and then *additionally* into `covered_by_tests`
+when `kind === "test"`. So `covered_by_tests ⊆ (reached_by ∪ ambiguous)` always — it is a view over
+the same hops, never a source of hops that appear nowhere else — and the two unions above are
+provably no-ops on cardinality. Assert that too: if a dedup ever *changes* a count, that is a bug in
+the store, not a real extra hop, and the run must stop rather than score it. The unions are kept in
+the definition anyway, because they are what makes the filter's load-bearing role legible to whoever
+reads this next.
+
 **Resolving the target symbol.** Do **not** query `/v1/impact` with the `target_fqn` string from
 `questions.json`. The resolver does exact string equality against `code_symbols.fqn` (then `name`),
 so a query key hardcoded in this fixture desyncs the moment the indexer changes its `fqn` spelling.

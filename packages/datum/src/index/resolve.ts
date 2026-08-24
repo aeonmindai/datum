@@ -1,4 +1,4 @@
-import { AMBIGUITY_CEILING, NON_CALL_TARGETS } from "./filters.js";
+import { AMBIGUITY_CEILING, NON_CALL_TARGETS, STD_QUALIFIERS } from "./filters.js";
 import type { LanguageId } from "./parser.js";
 import type { EdgeKind, GraphEdge, GraphSymbol, Resolution, SymbolKind } from "../graph/types.js";
 
@@ -112,10 +112,17 @@ export class Collector {
   }
 
   addEdge(edge: RawEdge): void {
-    // The filter runs here, before resolution, so a std-vocabulary name never reaches the index and
-    // never appears in the histogram we judge quality by.
-    const bare = lastSegment(edge.target);
-    if (NON_CALL_TARGETS.has(bare) || bare === "") return;
+    // Both filters run here, before resolution, so a std-vocabulary name never reaches the index
+    // and never appears in the histogram we judge quality by.
+    const segments = canonical(edge.target).split("/");
+    const bare = segments.at(-1) ?? "";
+    if (bare === "" || NON_CALL_TARGETS.has(bare)) return;
+    // `imports` is exempt: `use std::collections::HashMap` records a real dependency of this file
+    // on the standard library, and knowing which files reach for `std::sync` is worth having. A
+    // *call* into std is not, because nothing in this repository is on the other end of it.
+    if (segments.length > 1 && edge.kind !== "imports" && STD_QUALIFIERS.has(segments[0] as string)) {
+      return;
+    }
     const fingerprint = `${edge.src ?? edge.srcLookup?.join("|") ?? ""}\u0000${edge.kind}\u0000${edge.target}\u0000${edge.path}\u0000${edge.line}`;
     if (this.seenEdges.has(fingerprint)) return;
     this.seenEdges.add(fingerprint);
@@ -143,10 +150,6 @@ export interface ResolutionOutcome {
  */
 function canonical(name: string): string {
   return name.replace(/::/g, "/").replace(/\./g, "/").replace(/\/+/g, "/").replace(/^\/|\/$/g, "");
-}
-
-function lastSegment(name: string): string {
-  return canonical(name).split("/").at(-1) ?? name;
 }
 
 class FamilyIndex {

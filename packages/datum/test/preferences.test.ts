@@ -9,7 +9,9 @@ import {
   promotePreferences,
   recordFeedback,
   registerPreferenceRoutes,
+  rejectionSignature,
   REJECTION_PREDICATE,
+  type FeedbackRecord,
   type PreferenceRow,
 } from "../src/preferences/index.js";
 import { startPostgres, type TestPostgres } from "./helpers/postgres.js";
@@ -148,7 +150,7 @@ describe("one occurrence is an event, not a pattern", () => {
 describe("the 808-duplicates test", () => {
   it("records ONE event when the same human says the same thing five times in one occasion", async () => {
     const subject = "engine/eight-oh-eight";
-    const results = [];
+    const results: FeedbackRecord[] = [];
     for (let i = 0; i < 5; i++) {
       results.push(await say({ actor: "human:alice", subject, occasion: "sess-repeat" }));
     }
@@ -436,18 +438,41 @@ describe("the escape hatch", () => {
     expect((await liveAssertions(signature))[0]?.kind).toBe("dead");
   });
 
-  it("does not promote the rejection counter-events either", async () => {
-    // Two humans rejecting the same thing would otherwise corroborate each other into a rule of
-    // their own, which is the same loop from the other side.
-    await post(`/v1/preferences/${preferenceId}/reject`, {
-      actor: "human:frank",
-      reason: "agreed, drop it",
-    });
+  it("never promotes the rejection counter-events, however many humans reject the same row", async () => {
+    // Several humans rejecting the same row is reachable: `UNIQUE (actor, signature, occasion)`
+    // separates them by actor, so a race between two reject calls lands both. Written directly
+    // rather than through the route because POST /v1/feedback refuses the reserved predicate —
+    // that refusal is the other half of this guard, tested separately. `human:jish` already wrote
+    // one of these by rejecting for real above, so these two make three.
+    for (const actor of ["human:frank", "human:gita"]) {
+      await recordFeedback(db, {
+        scope: PROJ,
+        actor,
+        subject,
+        predicate: REJECTION_PREDICATE,
+        signature: rejectionSignature(preferenceId),
+        correction: { rejected_preference: preferenceId, reason: "agreed, drop it" },
+        occasion: `reject:${preferenceId}`,
+      });
+    }
+
+    // Assert it really IS a candidate, so this test cannot pass vacuously. Three occasions from
+    // three distinct humans: under any other predicate this would be a BINDING ORG RULE.
+    const candidate = await db.one<{ occasions: number; distinct_humans: number; tier: string }>(
+      "app",
+      `SELECT occasions, distinct_humans, tier FROM datum.preference_candidates(2)
+        WHERE signature = $1`,
+      [rejectionSignature(preferenceId)],
+    );
+    expect(candidate).toMatchObject({ occasions: 3, distinct_humans: 3, tier: "org" });
+
+    // And the promoter refuses it anyway. Otherwise humans rejecting one wrong preference would
+    // corroborate each other into a rule of their own: the same loop, from the other side.
     await promotePreferences(db);
     const { rows } = await db.query<{ n: string }>(
       "app",
-      `SELECT count(*)::text AS n FROM datum.preferences WHERE predicate = $1`,
-      [REJECTION_PREDICATE],
+      `SELECT count(*)::text AS n FROM datum.preferences WHERE predicate = $1 OR signature = $2`,
+      [REJECTION_PREDICATE, rejectionSignature(preferenceId)],
     );
     expect(rows[0]?.n).toBe("0");
   });

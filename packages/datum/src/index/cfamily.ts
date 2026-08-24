@@ -31,10 +31,22 @@ interface Scope {
   /** The enclosing class or struct, so `this->m()` resolves to that class's method. */
   selfType: string | null;
   owner: string;
+  /** Inside a function body, where a `const` is a local rather than a declared constant. */
+  inFunctionBody: boolean;
 }
 
 /** Recognises `name<<<` at the head of a shift-operator chain: a CUDA kernel launch. */
 const KERNEL_LAUNCH = /^([A-Za-z_][A-Za-z0-9_]*(?:::[A-Za-z_][A-Za-z0-9_]*)*)\s*(?:<[^<>]*>\s*)?<<</;
+
+/** Declarator node types that can carry the declared name of a constant. */
+const DECLARATOR_TYPES: ReadonlySet<string> = new Set([
+  "identifier",
+  "field_identifier",
+  "pointer_declarator",
+  "array_declarator",
+  "reference_declarator",
+  "parenthesized_declarator",
+]);
 
 /**
  * Qualifiers stripped before a declaration's leading text is treated as a return type. They are
@@ -56,7 +68,7 @@ export function extractCFamily(ctx: FileContext, out: Collector): void {
     line_start: 1,
     line_end: endLineOf(ctx.root),
   });
-  const scope: Scope = { prefix: "", selfType: null, owner: moduleSymbol.key };
+  const scope: Scope = { prefix: "", selfType: null, owner: moduleSymbol.key, inFunctionBody: false };
   for (const child of ctx.root.namedChildren) visit(child, scope, ctx, out);
 }
 
@@ -81,7 +93,7 @@ function visit(node: TsNode, scope: Scope, ctx: FileContext, out: Collector): vo
         }).key;
       }
       if (body === null) return;
-      const inner: Scope = { prefix: fqn, selfType: scope.selfType, owner };
+      const inner: Scope = { prefix: fqn, selfType: scope.selfType, owner, inFunctionBody: false };
       for (const child of body.namedChildren) visit(child, inner, ctx, out);
       return;
     }
@@ -278,7 +290,7 @@ function visitRecord(
     }
   }
 
-  const inner: Scope = { prefix: fqn, selfType: fqn, owner: symbol.key };
+  const inner: Scope = { prefix: fqn, selfType: fqn, owner: symbol.key, inFunctionBody: false };
   for (const child of body.namedChildren) visit(child, inner, ctx, out);
 }
 
@@ -293,7 +305,12 @@ function visitFunction(
 ): void {
   const declarator = findFunctionDeclarator(node);
   if (declarator === null) {
-    emitCallsIn(node, scope, ctx, out);
+    // No name to attach anything to — a construct the grammar mangled badly enough that even the
+    // declarator is gone. Descend into the CHILDREN, never back into this node: `emitCallsIn`
+    // routes a `function_definition` to `visit`, which routes it straight back here, and on the
+    // four Arc headers that hit this path the result was an unbounded mutual recursion that
+    // surfaced as a bogus "parse failure".
+    for (const child of node.namedChildren) emitCallsIn(child, scope, ctx, out);
     return;
   }
   const named = nameOfDeclarator(declarator);
@@ -334,7 +351,7 @@ function visitFunction(
   const body = node.childForFieldName("body");
   if (body === null) return;
   const selfType = named.qualifier === null ? scope.selfType : joinFqn(scope.prefix, named.qualifier);
-  const inner: Scope = { prefix: fqn, selfType, owner: symbol.key };
+  const inner: Scope = { prefix: fqn, selfType, owner: symbol.key, inFunctionBody: true };
   for (const child of body.namedChildren) visit(child, inner, ctx, out);
 }
 
@@ -353,18 +370,33 @@ function visitDeclaration(
     visitFunction(node, scope, ctx, out, templateParams, lineStart, false);
     return;
   }
-
-  // `constexpr int N = 4;` is a constant in the language's own terms. A plain data member or local
-  // variable is not a symbol worth indexing: it would outnumber everything else and answer nothing.
+  // `constexpr int N = 4;` at file, namespace or class scope is a constant in the language's own
+  // terms. Inside a function body it is a local, and locals are not symbols: they would outnumber
+  // everything else in the index and answer no question anyone asks of it.
+  if (scope.inFunctionBody) {
+    emitCallsIn(node, scope, ctx, out);
+    return;
+  }
   const text = ctx.source.slice(node.startIndex, Math.min(node.endIndex, node.startIndex + 200));
-  const isConstant = /\b(?:constexpr|const|#define)\b/.test(text) || /\bstatic\b.*=/.test(text);
+  const isConstant = /\b(?:constexpr|const)\b/.test(text) || /\bstatic\b.*=/.test(text);
   if (!isConstant) {
     emitCallsIn(node, scope, ctx, out);
     return;
   }
+  // Only the declarator names the constant. The initialiser is a sibling node in a
+  // `field_declaration` (`static constexpr uint32_t K = K_;` puts `K` in `declarator` and `K_` in
+  // `default_value`), so scanning every identifier child would invent a second symbol named after
+  // whatever the constant was initialised from.
+  const valueStart = (node.childForFieldName("default_value") ?? node.childForFieldName("value"))?.startIndex ?? Infinity;
+  const typeEnd = node.childForFieldName("type")?.endIndex ?? -1;
   for (const child of node.namedChildren) {
+    if (child.startIndex >= valueStart || child.endIndex <= typeEnd) continue;
     const nameNode =
-      child.type === "init_declarator" ? child.childForFieldName("declarator") : child.type === "field_identifier" || child.type === "identifier" ? child : null;
+      child.type === "init_declarator"
+        ? child.childForFieldName("declarator")
+        : DECLARATOR_TYPES.has(child.type)
+          ? child
+          : null;
     if (nameNode === null) continue;
     const name = nameOfDeclarator(nameNode) ?? { name: nameNode.text, qualifier: null };
     if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(name.name)) continue;

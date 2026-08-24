@@ -55,7 +55,52 @@ const MARKERS: ReadonlyArray<{ pattern: RegExp; strength: DoctrineStrength }> = 
 const RETRACTED =
   /(~~|\bRETRACTED\b|\bSUPERSEDED\b|\bsuperseded by\b|\bno longer\b|\bwas wrong\b|\bthis reverses\b|\breversed\b|\bcorrected in\b|\bwithdrawn\b|❌|⛔ ?RETRACT)/i;
 
-/** Words that are never distinctive enough to look up in an enforcement corpus. */
+/**
+ * A "never" that reports history is not a rule. `has never been deployed`, `was never measured
+ * directly`, `had never run on CUDA` are all findings about the past, and admitting them buries the
+ * actual bans under narrative. This is the single biggest precision lever in the scan: on Arc it is
+ * the difference between a report whose head is doctrine and one whose head is a changelog.
+ */
+const DESCRIPTIVE: readonly RegExp[] = [
+  /\b(has|have|had|was|were|been|being)\s+(\w+\s+)?never\b/i,
+  /\bnever\s+(been|ran|run|reported|measured|deployed|existed|happened|worked|tested|shipped|landed|printed|scanned|merged|reproduced|observed|attempted|arrived|returned|fired)\b/i,
+  /\b(is|are|it|that|which|this)\s+never\s+(been|a|an|the)\b/i,
+  // "do not always transfer", "ratios do not always hold" — a hedge, not an obligation.
+  /\bnot always\b/i,
+  // "must have been", "must be why" — epistemic inference rather than obligation.
+  /\bmust\s+(have|be\s+(why|because|the reason))\b/i,
+];
+
+/**
+ * Signals that a document presents itself as rules. Used only to rank: an unenforced "never" inside
+ * `DOCTRINE.md` under "Hard invariants" deserves the top of the report, while the same sentence in a
+ * session log usually does not. Dropping the latter would be a judgement the scanner has no standing
+ * to make, so it is ranked down rather than hidden.
+ */
+const DOCTRINAL_FILE = /doctrine|rules?|protocol|polic|invariant|convention|standard|guideline|contributing|agents|discipline|access_rule/i;
+const DOCTRINAL_HEADING = /doctrine|\brule/i;
+const DOCTRINAL_HEADING_STRONG = /invariant|non-negotiable|must|never|ban|forbid|prohibit|discipline|hard\b|policy|regression/i;
+/** `NO DEGRADED ARTIFACTS` — the shouted-negation heading, same idiom the sentence markers catch. */
+const DOCTRINAL_HEADING_SHOUT = /\bNO\s+[A-Z][A-Z]/;
+
+/**
+ * A sentence that names a mechanism: a backticked span, a CLI flag, an `UPPER_SNAKE` identifier or a
+ * `key=value`. A rule that names one is checkable; one that does not is a sentiment, and ranking the
+ * two the same is what makes a doctrine report unreadable.
+ */
+const NAMES_A_MECHANISM =
+  /`[^`]{2,60}`|(?<![\w-])--[A-Za-z][\w-]{2,40}|\b[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+\b|\b[A-Za-z]\w*\s*=\s*\d/;
+
+/** Connectives that mark a sentence as explaining a rule rather than being one. */
+const EXPLANATORY = /\b(because|so that|which is why|the reason|for days|i\.e\.|e\.g\.|turns out)\b/i;
+
+/**
+ * Words too generic to be the object of a rule.
+ *
+ * The imperative vocabulary itself is in here, and that matters: without it `GREEDY IS BANNED`
+ * resolves its target to `banned` — the marker — instead of `greedy`, and then cross-checks the
+ * enforcement corpus for the word "banned", which answers nothing about greedy.
+ */
 const STOPWORDS: Record<string, true> = {
   never: true, always: true, must: true, should: true, this: true, that: true, with: true,
   from: true, they: true, them: true, then: true, than: true, when: true, what: true, which: true,
@@ -66,6 +111,9 @@ const STOPWORDS: Record<string, true> = {
   make: true, made: true, take: true, said: true, says: true, real: true, same: true, other: true,
   work: true, works: true, used: true, using: true, like: true, just: true, even: true, both: true,
   under: true, over: true, without: true, within: true, whole: true, still: true, again: true,
+  banned: true, forbidden: true, prohibited: true, mandatory: true, required: true, forever: true,
+  absolute: true, absolutely: true, exception: true, exceptions: true, violating: true,
+  negotiable: true, regression: true, invariant: true, invariants: true, policy: true,
 };
 
 export interface DoctrineScanOptions {
@@ -106,7 +154,7 @@ export function scanDoctrine(
   enforcers: readonly RuleCandidate[],
 ): DoctrineScan {
   const corpus = buildCorpus(enforcers);
-  const findings: UnenforcedFinding[] = [];
+  const found = new Map<string, UnenforcedFinding>();
   const sources: string[] = [];
   let enforcedCount = 0;
   let retractedCount = 0;
@@ -120,7 +168,15 @@ export function scanDoctrine(
     const file = loadSource(opts.dir, rel);
     if (!file) continue;
     sources.push(rel);
+    const fileSignal = DOCTRINAL_FILE.test(rel) ? 3 : 0;
+
     for (const block of blocksOf(file.lines)) {
+      const headingSignal = block.heading
+        ? (DOCTRINAL_HEADING.test(block.heading) ? 2 : 0) +
+          (DOCTRINAL_HEADING_STRONG.test(block.heading) ? 2 : 0) +
+          (DOCTRINAL_HEADING_SHOUT.test(block.heading) ? 2 : 0)
+        : 0;
+
       for (const sentence of sentencesOf(block)) {
         const marker = markerFor(sentence.text);
         if (!marker) continue;
@@ -128,38 +184,104 @@ export function scanDoctrine(
           retractedCount++;
           continue;
         }
+        if (DESCRIPTIVE.some((pattern) => pattern.test(sentence.text))) continue;
+
         const tokens = distinctiveTokens(sentence.text);
         // With no distinctive token there is nothing to look up, so "unenforced" would be an
         // assertion about our own ignorance rather than about the repo. Say nothing.
         if (tokens.length === 0) continue;
-        const hit = tokens.find((token) => corpus.has(token));
-        if (hit) {
+        const target = targetToken(sentence.text, marker.marker, tokens);
+        if (corpus.has(target)) {
           enforcedCount++;
           continue;
         }
-        findings.push({
-          statement: sentence.text.length > 400 ? `${sentence.text.slice(0, 397)}...` : sentence.text,
-          source: `${rel}:${sentence.line}`,
+
+        const statement =
+          sentence.text.length > 400 ? `${sentence.text.slice(0, 397)}...` : sentence.text;
+        const source = `${rel}:${sentence.line}`;
+        // The same rule is often written in several documents. Collapsing on the statement turns
+        // six copies into one finding that says it is written in six places, which is both less
+        // noise and a more damning fact than any single citation.
+        const key = statement.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+        const existing = found.get(key);
+        if (existing) {
+          existing.also_at.push(source);
+          continue;
+        }
+        found.set(key, {
+          statement,
+          source,
           file: rel,
           line: sentence.line,
           heading: block.heading,
           strength: marker.strength,
           marker: marker.marker,
+          target,
           tokens,
-          why: `no derived enforcement mentions ${tokens.slice(0, 4).map((t) => `\`${t}\``).join(", ")}`,
+          doctrinal:
+            fileSignal +
+            headingSignal +
+            // A rule that names a mechanism is checkable; one that does not is a sentiment.
+            (NAMES_A_MECHANISM.test(sentence.text) ? 2 : 0) +
+            (statement.length <= 120 ? 2 : statement.length <= 200 ? 1 : 0) +
+            // An explanation of a rule is not the rule, and it is the paragraph that a
+            // heading-weighted score would otherwise float above the one-line ban above it.
+            (EXPLANATORY.test(sentence.text) ? -2 : 0),
+          also_at: [],
+          why: `nothing that fails a build, a job or a merge mentions \`${target}\``,
         });
       }
     }
   }
 
+  // Ranked by signal first, not by strength. A crisp `**W=256 or no bake.**` under a shouted heading
+  // is more useful to a reader than a paragraph that happens to contain the word "never", and
+  // strength alone cannot tell those apart.
   const rank: Record<DoctrineStrength, number> = { absolute: 0, prohibition: 1, obligation: 2 };
-  findings.sort((a, b) => rank[a.strength] - rank[b.strength] || a.source.localeCompare(b.source));
+  const findings = [...found.values()].sort(
+    (a, b) =>
+      b.doctrinal - a.doctrinal ||
+      rank[a.strength] - rank[b.strength] ||
+      b.also_at.length - a.also_at.length ||
+      a.source.localeCompare(b.source),
+  );
   return {
     findings: opts.limit ? findings.slice(0, opts.limit) : findings,
     sources,
     enforcedCount,
     retractedCount,
   };
+}
+
+/**
+ * The token the imperative is about: the distinctive token nearest the marker, preferring one that
+ * follows it.
+ *
+ * Prohibitions put their object after the verb — "never `cudnn`", "do not add the `cudnn` feature",
+ * "W=256 or no bake" — so proximity to the marker is a good proxy for "the thing being regulated",
+ * and it is the fix for the failure that motivated this function: a sentence reading
+ * ``Build `--features "cuda flash-attn"`; never `cudnn` `` shares the token `cuda` with the CI build
+ * command, so checking "does any token appear in the enforcement corpus" declared the cudnn ban
+ * enforced by the very command that builds without it.
+ */
+function targetToken(sentence: string, marker: string, tokens: readonly string[]): string {
+  const lower = sentence.toLowerCase();
+  const markerAt = lower.indexOf(marker.toLowerCase());
+  if (markerAt < 0) return tokens[0]!;
+  let best = tokens[0]!;
+  let bestCost = Number.POSITIVE_INFINITY;
+  for (const token of tokens) {
+    const at = lower.indexOf(token);
+    if (at < 0) continue;
+    // A token before the marker is still admissible ("`greedy` is banned") but costs double, so a
+    // following object wins whenever there is one.
+    const cost = at >= markerAt ? at - markerAt : (markerAt - at) * 2;
+    if (cost < bestCost) {
+      bestCost = cost;
+      best = token;
+    }
+  }
+  return best;
 }
 
 /**

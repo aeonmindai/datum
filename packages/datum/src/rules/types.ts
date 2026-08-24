@@ -51,8 +51,25 @@ export interface UnenforcedFinding {
   strength: DoctrineStrength;
   /** The word that made this imperative — the reason it was picked up at all. */
   marker: string;
-  /** The distinctive tokens looked for in the enforcement corpus. */
+  /**
+   * The thing the imperative is actually about: the distinctive token nearest the marker.
+   *
+   * This, and not the whole token set, is what gets cross-checked. `never \`cudnn\`` sits in a
+   * sentence that also says `--features "cuda flash-attn"`, and `cuda` does appear in CI — so
+   * absolving the sentence because *some* token matched would silently declare the cudnn ban
+   * enforced by the very command that builds without it.
+   */
+  target: string;
+  /** Every distinctive token found, for a reviewer to judge the reading. */
   tokens: string[];
+  /**
+   * How strongly the surrounding document presents itself as rules: a file called `DOCTRINE.md`
+   * under a heading "Hard invariants" is far likelier to be doctrine than the same sentence in a
+   * session log. Used for ranking only — a low score is still reported, never dropped.
+   */
+  doctrinal: number;
+  /** Other places the same sentence is written. A rule repeated six times and enforced nowhere. */
+  also_at: string[];
   /** Why the conclusion is "nothing enforces this". */
   why: string;
 }
