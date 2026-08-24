@@ -118,8 +118,8 @@ export function ScopesScreen({ scopeRoot }: { scopeRoot: string }) {
           title="No scopes yet"
         />
       ) : (
-        <div className="overflow-hidden rounded-xl border-[0.5px] border-[#E5E5E5] shadow-sm">
-          <div className="flex items-center justify-between gap-4 border-b-[0.5px] border-b-[#E5E5E5] bg-[#FAFAFA] px-5 py-3">
+        <div className="overflow-hidden rounded-xl border border-edge bg-surface">
+          <div className="flex items-center justify-between gap-4 border-b border-edge-subtle px-5 py-3">
             <MicroLabel>Path</MicroLabel>
             <div className="flex items-center gap-8">
               <MicroLabel>Here</MicroLabel>
@@ -149,8 +149,8 @@ function ScopeRow({
   return (
     <li
       className={cn(
-        "group flex items-center justify-between gap-4 border-b-[0.5px] border-b-[#E5E5E5] px-5 py-2.5 transition-colors last:border-b-0 hover:bg-muted/50",
-        isRoot && "bg-primary/[0.04]",
+        "group flex items-center justify-between gap-4 border-b border-edge-subtle px-5 py-2.5 transition-colors last:border-b-0 hover:bg-muted/50",
+        isRoot && "bg-muted/40",
       )}
     >
       <div
@@ -176,13 +176,13 @@ function ScopeRow({
           <CodeBadge variant="outline">{node.kind}</CodeBadge>
         ) : (
           <span
-            className="text-[11px] text-muted-foreground"
+            className="text-2xs text-muted-foreground"
             title="A path segment on the way to a real scope. It holds no assertions of its own but a read still walks through it."
           >
             path only
           </span>
         )}
-        {isRoot ? <CodeBadge variant="purple">root</CodeBadge> : null}
+        {isRoot ? <CodeBadge variant="default">root</CodeBadge> : null}
       </div>
 
       <div className="flex shrink-0 items-center gap-6">

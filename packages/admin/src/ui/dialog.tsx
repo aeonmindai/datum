@@ -7,14 +7,26 @@ const FOCUSABLE =
   'a[href],button:not([disabled]),input:not([disabled]):not([type="hidden"]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
 
 /**
- * echos_app's Dialog is Radix. Radix is not a dependency here, so this is the
- * same visual contract implemented directly: overlay
- * `bg-black/50 backdrop-blur-xs`, panel
- * `rounded-2xl border-[0.5px] border-neutral-200 bg-white p-6 sm:max-w-lg`,
- * close button `top-4 right-4` with `hover:scale-110`, title
- * `text-xl font-semibold`, footer `border-t pt-4`. The behaviour Radix gave for
- * free — Escape to close, focus trap, focus restore, scroll lock, aria wiring —
- * is implemented below rather than dropped.
+ * runcrate_app's Dialog is Radix. Radix is not a dependency here, so this is the
+ * same visual contract implemented directly. Class strings from
+ * `src/components/ui/dialog.tsx`: overlay `fixed inset-0 z-50 bg-overlay`,
+ * panel `fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)]
+ * translate-x-[-50%] translate-y-[-50%] gap-4 rounded-2xl border
+ * border-border/60 bg-background p-6 shadow-xl duration-200 sm:max-w-lg`,
+ * header `flex flex-col gap-2 text-center sm:text-left`, title `text-lg
+ * leading-none font-semibold`, description `text-muted-foreground text-sm`,
+ * close button `absolute top-4 right-4 rounded-lg opacity-70 transition-opacity
+ * hover:opacity-100`.
+ *
+ * The behaviour Radix gave for free — Escape to close, focus trap, focus
+ * restore, scroll lock, aria wiring — is implemented below rather than dropped.
+ *
+ * One thing deliberately not copied: runcrate's DialogContent carries
+ * `style={{ fontFamily: 'var(--font-figtree), system-ui, sans-serif' }}`, and
+ * `--font-figtree` is not defined anywhere in that project. The declaration
+ * therefore falls through to system-ui, so runcrate's own dialogs are the only
+ * surface in the app that is not set in Geist. That is a bug, not a design
+ * decision, and reproducing it would make the panel inconsistent with itself.
  */
 export interface DialogProps {
   open: boolean;
@@ -108,7 +120,7 @@ export function Dialog({
     <>
       <div
         aria-hidden
-        className="datum-overlay fixed inset-0 z-50 bg-black/50 backdrop-blur-xs"
+        className="datum-overlay fixed inset-0 z-50 bg-overlay"
         onMouseDown={close}
       />
       <div
@@ -118,8 +130,8 @@ export function Dialog({
         className={cn(
           // grid-cols-1 resolves to minmax(0,1fr), which stops a wide child —
           // a long monospace secret, a JSON block — from blowing the panel out
-          // past max-w-lg. echos's Radix dialog relies on Radix for this.
-          "datum-dialog fixed top-[50%] left-[50%] z-50 grid grid-cols-1 max-h-[calc(100dvh-2rem)] w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 overflow-y-auto rounded-2xl border-[0.5px] border-neutral-200 bg-white p-6 shadow-md backdrop-blur-sm outline-none",
+          // past max-w-lg. runcrate's Radix dialog relies on Radix for this.
+          "datum-dialog fixed top-[50%] left-[50%] z-50 grid grid-cols-1 max-h-[calc(100dvh-2rem)] w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 overflow-y-auto rounded-2xl border border-border/60 bg-background p-6 shadow-xl outline-none",
           size === "lg" ? "sm:max-w-3xl" : "sm:max-w-lg",
         )}
         data-slot="dialog-content"
@@ -127,12 +139,12 @@ export function Dialog({
         role="dialog"
         tabIndex={-1}
       >
-        <div className="flex flex-col gap-1.5 pr-8 text-left" data-slot="dialog-header">
-          <h2 className="font-semibold text-xl leading-tight" id={titleId}>
+        <div className="flex flex-col gap-2 pr-8 text-left" data-slot="dialog-header">
+          <h2 className="font-semibold text-lg leading-none" id={titleId}>
             {title}
           </h2>
           {description ? (
-            <p className="text-muted-foreground text-sm leading-relaxed" id={descId}>
+            <p className="text-muted-foreground text-sm" id={descId}>
               {description}
             </p>
           ) : null}
@@ -141,7 +153,7 @@ export function Dialog({
         {children}
 
         {footer ? (
-          <div className="border-border border-t pt-4">
+          <div className="border-border/60 border-t pt-4">
             <div className="flex w-full min-w-0 items-center justify-between gap-2">
               {footer}
             </div>
@@ -150,7 +162,7 @@ export function Dialog({
 
         {showCloseButton ? (
           <button
-            className="absolute top-4 right-4 rounded-md p-1 text-[#737373] opacity-90 transition-all hover:scale-110 hover:bg-accent hover:opacity-100 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none"
+            className="absolute top-4 right-4 rounded-lg p-1 opacity-70 transition-opacity hover:bg-accent hover:opacity-100 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
             onClick={onClose}
             type="button"
           >
@@ -164,7 +176,7 @@ export function Dialog({
   );
 }
 
-/** echos `DialogFooterLeft` — muted supporting text opposite the actions. */
+/** Muted supporting text, opposite the actions in a dialog footer. */
 export function DialogFooterLeft({ children }: { children?: ReactNode }) {
   return (
     <div className="flex min-w-0 items-center gap-2 text-muted-foreground text-sm">
@@ -173,7 +185,7 @@ export function DialogFooterLeft({ children }: { children?: ReactNode }) {
   );
 }
 
-/** echos `DialogFooterRight`. */
+/** Actions side of a dialog footer. */
 export function DialogFooterRight({ children }: { children?: ReactNode }) {
   return <div className="flex shrink-0 items-center gap-2">{children}</div>;
 }

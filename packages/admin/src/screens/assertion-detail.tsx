@@ -32,7 +32,7 @@ import type {
   TakeResult,
   VerificationRecord,
 } from "../lib/types";
-import { Badge, CodeBadge } from "../ui/badge";
+import { Badge, BADGE_ALARM, BADGE_PENDING, BADGE_RETIRED, CodeBadge } from "../ui/badge";
 import { Button, LinkButton } from "../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Input, Label } from "../ui/input";
@@ -92,16 +92,16 @@ export function AssertionDetailScreen({
 
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex min-w-0 flex-col gap-2">
-          <h1 className="flex min-w-0 flex-wrap items-baseline gap-x-2 font-semibold text-xl tracking-tight">
-            <Mono className="text-[19px]">{a.subject}</Mono>
+          <h1 className="flex min-w-0 flex-wrap items-baseline gap-x-2 font-medium text-xl">
+            <Mono className="text-xl">{a.subject}</Mono>
             <span className="text-muted-foreground">·</span>
-            <Mono className="text-[19px]">{a.predicate}</Mono>
+            <Mono className="text-xl">{a.predicate}</Mono>
           </h1>
           <div className="flex flex-wrap items-center gap-2">
             <ConfidenceBadge confidence={a.confidence} />
             <KindBadge kind={a.kind} />
             <LifecycleBadges assertion={a} />
-            <Mono className="text-[12px] text-muted-foreground" title={a.scope}>
+            <Mono className="text-xs text-muted-foreground" title={a.scope}>
               {a.scope}
             </Mono>
           </div>
@@ -113,25 +113,25 @@ export function AssertionDetailScreen({
 
       {retired ? (
         <div
-          className="flex items-start gap-3 rounded-lg border-[0.5px] border-dead-foreground/30 bg-dead px-4 py-3"
+          className="flex items-start gap-3 rounded-lg border border-border/60 bg-muted/50 px-4 py-3"
           role="status"
         >
           <SkullIcon
             aria-hidden
-            className="mt-0.5 size-4 shrink-0 text-dead-foreground"
+            className="mt-0.5 size-4 shrink-0 text-muted-foreground"
           />
           <div className="flex min-w-0 flex-col gap-1 text-sm">
-            <p className="font-medium text-dead-foreground">
+            <p className="font-medium text-foreground">
               This row is retired and is excluded from every default read.
             </p>
-            <p className="text-dead-foreground/85">
+            <p className="text-muted-foreground">
               It was superseded at sequence{" "}
-              <Mono className="text-[13px]">{a.superseded_at ?? "—"}</Mono> by{" "}
+              <Mono className="text-sm">{a.superseded_at ?? "—"}</Mono> by{" "}
               <a
                 className="underline underline-offset-2"
                 href={href(`/assertions/${a.superseded_by}`)}
               >
-                <Mono className="text-[13px]">{shortId(a.superseded_by ?? "", 12)}</Mono>
+                <Mono className="text-sm">{shortId(a.superseded_by ?? "", 12)}</Mono>
               </a>
               . It is kept because rewriting history would destroy the ability to
               reproduce what was believed before.
@@ -186,19 +186,19 @@ export function AssertionDetailScreen({
                   </span>
                 </FieldRow>
                 <FieldRow label="Hash">
-                  <Mono className="break-all text-muted-foreground text-[12px]">
+                  <Mono className="break-all text-muted-foreground text-xs">
                     {a.hash}
                   </Mono>
                 </FieldRow>
                 <FieldRow label="Id">
-                  <Mono className="break-all text-muted-foreground text-[12px]">
+                  <Mono className="break-all text-muted-foreground text-xs">
                     {a.id}
                   </Mono>
                 </FieldRow>
               </div>
 
               {a.why || a.reopen_if || a.causality || a.derived_from.length > 0 ? (
-                <div className="grid gap-4 border-border border-t pt-5 sm:grid-cols-2">
+                <div className="grid gap-4 border-edge-subtle border-t pt-5 sm:grid-cols-2">
                   {a.why ? (
                     <FieldRow className="sm:col-span-2" label="Why">
                       <p className="leading-relaxed">{a.why}</p>
@@ -225,7 +225,7 @@ export function AssertionDetailScreen({
                               className="underline underline-offset-2"
                               href={href(`/assertions/${ref}`)}
                             >
-                              <Mono className="text-[12px]">{shortId(ref, 12)}</Mono>
+                              <Mono className="text-xs">{shortId(ref, 12)}</Mono>
                             </a>
                           </li>
                         ))}
@@ -235,7 +235,7 @@ export function AssertionDetailScreen({
                 </div>
               ) : null}
 
-              <div className="flex flex-col gap-2 border-border border-t pt-5">
+              <div className="flex flex-col gap-2 border-edge-subtle border-t pt-5">
                 <MicroLabel>Object</MicroLabel>
                 <JsonBlock value={a.object} />
               </div>
@@ -255,14 +255,14 @@ export function AssertionDetailScreen({
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <CircleAlertIcon aria-hidden className="size-4 text-warning" />
+                  <CircleAlertIcon aria-hidden className="size-4 text-destructive" />
                   Contradictions
                 </CardTitle>
               </CardHeader>
               <CardContent className="flex flex-col gap-2">
                 {data.contradictions.map((c) => (
                   <a
-                    className="flex items-center justify-between gap-3 rounded-md border-[0.5px] border-[#E5E5E5] bg-[#FAFAFA] px-3 py-2.5 transition-colors hover:bg-accent"
+                    className="flex items-center justify-between gap-3 rounded-lg border border-edge bg-muted/50 px-3 py-2.5 transition-colors hover:bg-accent"
                     href={href("/contradictions", { status: c.status })}
                     key={c.id}
                   >
@@ -275,7 +275,8 @@ export function AssertionDetailScreen({
                       </span>
                     </span>
                     <CodeBadge
-                      variant={c.status === "open" ? "warning" : "outline"}
+                      className={c.status === "open" ? BADGE_ALARM : undefined}
+                      variant="outline"
                     >
                       {c.status}
                     </CodeBadge>
@@ -313,7 +314,7 @@ function VerificationBanner({ record }: { record: VerificationRecord }) {
   if (record.outcome === "refuted") {
     return (
       <div
-        className="flex items-start gap-3 rounded-lg border-[0.5px] border-destructive/45 bg-destructive/8 px-4 py-3"
+        className="flex items-start gap-3 rounded-lg border border-destructive bg-destructive/10 px-4 py-3"
         role="alert"
       >
         <ShieldAlertIcon
@@ -321,10 +322,10 @@ function VerificationBanner({ record }: { record: VerificationRecord }) {
           className="mt-0.5 size-5 shrink-0 text-destructive"
         />
         <div className="flex min-w-0 flex-col gap-1.5">
-          <p className="font-semibold text-destructive">
+          <p className="font-medium text-destructive leading-none tracking-tight">
             A checker refuted this claim
           </p>
-          <p className="text-foreground/85 text-sm leading-relaxed">
+          <p className="text-foreground text-sm leading-relaxed">
             <Mono>{record.checker}</Mono> looked for the evidence this row cites and
             found it does not hold. The row is kept — nothing here is deleted — but
             it must not be treated as true, and it can never be promoted to
@@ -342,18 +343,18 @@ function VerificationBanner({ record }: { record: VerificationRecord }) {
   if (record.outcome === "unresolvable") {
     return (
       <div
-        className="flex items-start gap-3 rounded-lg border-[0.5px] border-warning/45 bg-warning/10 px-4 py-3"
+        className="flex items-start gap-3 rounded-lg border border-dashed border-border bg-muted/50 px-4 py-3"
         role="status"
       >
         <FileWarningIcon
           aria-hidden
-          className="mt-0.5 size-5 shrink-0 text-warning-foreground"
+          className="mt-0.5 size-5 shrink-0 text-muted-foreground"
         />
         <div className="flex min-w-0 flex-col gap-1.5">
-          <p className="font-semibold text-warning-foreground">
+          <p className="font-medium text-foreground leading-none tracking-tight">
             The cited reference could not be resolved
           </p>
-          <p className="text-warning-foreground/85 text-sm leading-relaxed">
+          <p className="text-muted-foreground text-sm leading-relaxed">
             <Mono>{record.checker}</Mono> could not find the commit this row points
             at. Recover the ref and the claim becomes promotable; until then it
             stays where it is.
@@ -368,15 +369,15 @@ function VerificationBanner({ record }: { record: VerificationRecord }) {
 
   return (
     <div
-      className="flex items-start gap-3 rounded-lg border-[0.5px] border-success/40 bg-success/8 px-4 py-3"
+      className="flex items-start gap-3 rounded-lg border border-foreground/25 bg-muted/50 px-4 py-3"
       role="status"
     >
-      <ShieldCheckIcon aria-hidden className="mt-0.5 size-5 shrink-0 text-success" />
+      <ShieldCheckIcon aria-hidden className="mt-0.5 size-5 shrink-0 text-foreground" />
       <div className="flex min-w-0 flex-col gap-1">
-        <p className="font-semibold text-success-foreground">
+        <p className="font-medium text-foreground leading-none tracking-tight">
           Verification confirmed this claim
         </p>
-        <p className="text-success-foreground/85 text-sm">
+        <p className="text-muted-foreground text-sm">
           <Mono>{record.checker}</Mono> resolved the cited commit and confirmed it is
           contained where the claim says it is — {absoluteTime(record.checked_at)}.
         </p>
@@ -425,17 +426,15 @@ function LineageCard({
                   <span
                     className={cn(
                       "z-10 mt-1 flex size-3.5 shrink-0 items-center justify-center rounded-full border-2 bg-background",
-                      isHead
-                        ? "border-success"
-                        : "border-dead-foreground/40",
+                      isHead ? "border-foreground" : "border-border",
                     )}
                   >
                     {isHead ? (
-                      <span className="size-1.5 rounded-full bg-success" />
+                      <span className="size-1.5 rounded-full bg-foreground" />
                     ) : null}
                   </span>
                   {index < chain.length - 1 ? (
-                    <span className="-mb-5 w-px flex-1 bg-border" />
+                    <span className="-mb-5 w-px flex-1 bg-edge" />
                   ) : null}
                 </div>
 
@@ -443,8 +442,8 @@ function LineageCard({
                   {previous ? (
                     <p
                       className={cn(
-                        "flex items-center gap-1.5 text-[11px]",
-                        promoted ? "text-success" : "text-muted-foreground",
+                        "flex items-center gap-1.5 text-2xs",
+                        promoted ? "font-medium text-foreground" : "text-muted-foreground",
                       )}
                     >
                       {promoted ? (
@@ -463,25 +462,27 @@ function LineageCard({
 
                   <div
                     className={cn(
-                      "flex flex-col gap-2 rounded-lg border-[0.5px] p-3 transition-colors",
+                      "flex flex-col gap-2 rounded-lg border p-3 transition-colors",
                       isCurrent
-                        ? "border-primary/40 bg-primary/5"
+                        ? "border-foreground/30 bg-muted/50"
                         : isHead
-                          ? "border-[#E5E5E5] bg-background"
-                          : "border-dead-foreground/25 bg-dead/60 opacity-80",
+                          ? "border-edge bg-background"
+                          : "border-edge-subtle bg-muted/40 opacity-80",
                     )}
                   >
                     <div className="flex flex-wrap items-center gap-1.5">
                       <ConfidenceBadge confidence={row.confidence} showIcon={false} />
                       {isHead ? (
-                        <Badge variant="success">
+                        <Badge variant="default">
                           <CircleDotIcon aria-hidden />
                           live head
                         </Badge>
                       ) : (
-                        <Badge variant="dead">superseded</Badge>
+                        <Badge className={BADGE_RETIRED} variant="secondary">
+                          superseded
+                        </Badge>
                       )}
-                      {isCurrent ? <Badge variant="purple">viewing</Badge> : null}
+                      {isCurrent ? <Badge variant="outline">viewing</Badge> : null}
                     </div>
 
                     <p className="flex items-baseline gap-1.5">
@@ -494,22 +495,22 @@ function LineageCard({
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-muted-foreground text-xs">
                       <span className="inline-flex items-center gap-1">
                         <span className="datum-microlabel">seq</span>
-                        <Mono className="text-[12px]">{row.asserted_at}</Mono>
+                        <Mono className="text-xs">{row.asserted_at}</Mono>
                       </span>
-                      <Mono className="truncate text-[12px]" title={row.asserted_by}>
+                      <Mono className="truncate text-xs" title={row.asserted_by}>
                         {row.asserted_by}
                       </Mono>
                     </div>
 
                     {row.why ? (
-                      <p className="border-border border-l-2 pl-2.5 text-muted-foreground text-xs leading-relaxed">
+                      <p className="border-border border-l-2 pl-2.5 text-muted-foreground text-2xs leading-relaxed">
                         {row.why}
                       </p>
                     ) : null}
 
                     {isCurrent ? null : (
                       <a
-                        className="w-fit text-[11px] underline underline-offset-2 hover:text-foreground"
+                        className="w-fit text-2xs underline underline-offset-2 hover:text-foreground"
                         href={href(`/assertions/${row.id}`)}
                       >
                         open this row
@@ -599,8 +600,8 @@ function AsOfCard({
       <CardContent className="flex flex-col gap-5">
         <p className="text-muted-foreground text-sm leading-relaxed">
           Rewind resolution to any write in this instance&apos;s history. The answer
-          below is what <Mono className="text-[12px]">{assertion.subject}</Mono> ·{" "}
-          <Mono className="text-[12px]">{assertion.predicate}</Mono> resolved to at
+          below is what <Mono className="text-xs">{assertion.subject}</Mono> ·{" "}
+          <Mono className="text-xs">{assertion.predicate}</Mono> resolved to at
           that point — not the current head.
         </p>
 
@@ -640,7 +641,7 @@ function AsOfCard({
           <input
             aria-label="As-of sequence"
             aria-valuetext={`sequence ${asOf} of ${max}`}
-            className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-border accent-[var(--primary)] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+            className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-border accent-[hsl(var(--primary))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
             max={max}
             min={1}
             onChange={(e) => jumpTo(Number.parseInt(e.target.value, 10))}
@@ -652,7 +653,7 @@ function AsOfCard({
           <div className="flex items-center justify-between text-muted-foreground text-xs">
             <span className="datum-num">1</span>
             <button
-              className="rounded-sm underline underline-offset-2 hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              className="rounded-md underline underline-offset-2 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
               onClick={() => {
                 if (Number.isFinite(writtenAt)) jumpTo(writtenAt);
               }}
@@ -667,7 +668,7 @@ function AsOfCard({
           </p>
         </div>
 
-        <div className="flex flex-col gap-3 border-border border-t pt-5">
+        <div className="flex flex-col gap-3 border-edge-subtle border-t pt-5">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <MicroLabel>
               Believed at sequence {debounced}
@@ -675,7 +676,10 @@ function AsOfCard({
             </MicroLabel>
             {take.data ? (
               <span className="flex items-center gap-1.5">
-                <CodeBadge variant={take.data.mode === "isolated" ? "warning" : "outline"}>
+                <CodeBadge
+                  className={take.data.mode === "isolated" ? BADGE_PENDING : undefined}
+                  variant="outline"
+                >
                   {take.data.mode}
                 </CodeBadge>
                 <span
@@ -694,7 +698,7 @@ function AsOfCard({
           ) : take.error ? (
             <InlineError error={take.error} onRetry={take.reload} />
           ) : believed.length === 0 ? (
-            <div className="flex flex-col gap-1.5 rounded-lg border-[0.5px] border-[#E5E5E5] bg-[#FAFAFA] px-3 py-4 text-center">
+            <div className="flex flex-col gap-1.5 rounded-lg border border-dashed border-border px-3 py-4 text-center">
               <p className="font-medium text-sm">Nothing was believed yet</p>
               <p className="text-muted-foreground text-xs leading-relaxed">
                 At sequence {debounced} this subject and predicate had no live
@@ -709,18 +713,22 @@ function AsOfCard({
                 return (
                   <li
                     className={cn(
-                      "flex flex-col gap-2 rounded-lg border-[0.5px] p-3",
+                      "flex flex-col gap-2 rounded-lg border p-3",
                       isThis
-                        ? "border-primary/40 bg-primary/5"
-                        : "border-[#E5E5E5] bg-background",
+                        ? "border-foreground/30 bg-muted/50"
+                        : "border-edge bg-background",
                     )}
                     key={row.id}
                   >
                     <div className="flex flex-wrap items-center gap-1.5">
                       <ConfidenceBadge confidence={row.confidence} showIcon={false} />
                       <KindBadge kind={row.kind} />
-                      {isThis ? <Badge variant="purple">this row</Badge> : null}
-                      {row.contested ? <Badge variant="warning">contested</Badge> : null}
+                      {isThis ? <Badge variant="outline">this row</Badge> : null}
+                      {row.contested ? (
+                        <Badge className={BADGE_ALARM} variant="outline">
+                          contested
+                        </Badge>
+                      ) : null}
                     </div>
                     <p className="flex items-baseline gap-1.5">
                       <Mono className="font-medium">{value}</Mono>
@@ -729,17 +737,17 @@ function AsOfCard({
                       ) : null}
                     </p>
                     <div className="flex flex-wrap items-center gap-x-3 text-muted-foreground text-xs">
-                      <Mono className="text-[12px]" title={row.scope}>
+                      <Mono className="text-xs" title={row.scope}>
                         {row.scope}
                       </Mono>
                       <span className="inline-flex items-center gap-1">
                         <span className="datum-microlabel">seq</span>
-                        <Mono className="text-[12px]">{row.asserted_at}</Mono>
+                        <Mono className="text-xs">{row.asserted_at}</Mono>
                       </span>
                     </div>
                     {isThis ? null : (
                       <a
-                        className="w-fit text-[11px] underline underline-offset-2 hover:text-foreground"
+                        className="w-fit text-2xs underline underline-offset-2 hover:text-foreground"
                         href={href(`/assertions/${row.id}`)}
                       >
                         open

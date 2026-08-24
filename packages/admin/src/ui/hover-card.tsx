@@ -10,14 +10,16 @@ import { createPortal } from "react-dom";
 import { cn } from "../lib/cn";
 
 /**
- * Hover/focus popover. Styled like echos_app's popover surface
- * (`rounded-md border bg-popover p-1 shadow-md` from dropdown-menu.tsx, widened
- * to a card with `p-4`), portalled to <body> so the table's
- * `overflow-x-auto` container cannot clip it, and positioned from the
- * trigger's bounding box.
+ * Hover/focus popover. Class string from runcrate_app
+ * `src/components/ui/hover-card.tsx`: `bg-popover text-popover-foreground z-50
+ * rounded-md border p-4 shadow-md outline-hidden`. runcrate fixes its width at
+ * `w-64`; this one takes a width because the provenance panel it carries is a
+ * table of evidence rather than a one-line preview.
  *
- * Opens on hover and on keyboard focus, closes on Escape and on blur, so the
- * provenance detail is reachable without a mouse.
+ * Portalled to <body> so the table's `overflow-x-auto` container cannot clip
+ * it, and positioned from the trigger's bounding box. Opens on hover and on
+ * keyboard focus, closes on Escape and on blur, so the provenance detail is
+ * reachable without a mouse.
  */
 export function HoverCard({
   trigger,
@@ -83,14 +85,14 @@ export function HoverCard({
       onMouseLeave={() => setOpen(false)}
       ref={anchor}
     >
-      <span aria-describedby={open ? panelId : undefined} tabIndex={0} className="rounded-sm outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
+      <span aria-describedby={open ? panelId : undefined} tabIndex={0} className="rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-ring/40">
         {trigger}
       </span>
       {open
         ? createPortal(
             <div
               className={cn(
-                "datum-pop fixed z-[55] rounded-xl border-[0.5px] border-neutral-200 bg-popover p-4 text-popover-foreground shadow-md",
+                "datum-pop fixed z-[55] rounded-md border bg-popover p-4 text-popover-foreground shadow-md",
                 className,
               )}
               id={panelId}

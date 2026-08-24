@@ -92,7 +92,7 @@ export function LoginScreen() {
   }
 
   return (
-    <div className="flex min-h-svh items-center justify-center bg-sidebar p-6">
+    <div className="flex min-h-svh items-center justify-center bg-background p-6">
       <div className="flex w-full max-w-md flex-col gap-6">
         <div className="flex items-center gap-2.5">
           <span className="flex size-9 items-center justify-center rounded-md bg-primary text-primary-foreground">
@@ -107,13 +107,13 @@ export function LoginScreen() {
         </div>
 
         <form
-          className="flex flex-col gap-6 rounded-2xl border-[0.5px] border-neutral-200 bg-white p-6 shadow-sm"
+          className="flex flex-col gap-6 rounded-2xl border border-border/60 bg-card p-6"
           noValidate
           onSubmit={submit}
         >
-          <div className="flex flex-col gap-1.5">
-            <h1 className="font-semibold text-xl leading-tight">Sign in</h1>
-            <p className="text-muted-foreground text-sm leading-relaxed">
+          <div className="flex flex-col gap-1">
+            <h1 className="font-medium text-xl">Sign in</h1>
+            <p className="text-muted-foreground text-sm">
               One shared password guards the human view of this instance. Agents
               authenticate separately, with scoped keys.
             </p>
@@ -152,7 +152,7 @@ export function LoginScreen() {
             disabled={submitting || locked || password.length === 0}
             size="lg"
             type="submit"
-            variant="primary"
+            variant="default"
           >
             <LockIcon />
             {locked
@@ -165,8 +165,8 @@ export function LoginScreen() {
 
         <p className="px-1 text-muted-foreground text-sm">
           No password set? The server refuses to boot without one. Generate a
-          hash with <code className="font-mono text-[13px]">datum hash-password</code>{" "}
-          and set <code className="font-mono text-[13px]">DATUM_ADMIN_PASSWORD_HASH</code>.
+          hash with <code className="font-mono text-sm">datum hash-password</code>{" "}
+          and set <code className="font-mono text-sm">DATUM_ADMIN_PASSWORD_HASH</code>.
         </p>
       </div>
     </div>
@@ -180,25 +180,27 @@ function FailurePanel({
   failure: Exclude<Failure, { kind: "rejected" }>;
   cooldown: number;
 }) {
-  const shell =
-    "flex items-start gap-3 rounded-lg border-[0.5px] px-4 py-3 text-sm";
+  // A lockout is not a failure of the operator's — it is the rate limiter doing
+  // its job — so it gets the recessed treatment. Only an actual refusal or an
+  // unreachable server earns the destructive edge.
+  const shell = "flex items-start gap-3 rounded-lg border px-4 py-3 text-sm";
 
   if (failure.kind === "throttled") {
     return (
       <div
-        className={cn(shell, "border-warning/40 bg-warning/10")}
+        className={cn(shell, "border-border/60 bg-muted/50")}
         id="datum-login-failure"
         role="alert"
       >
         <AlarmClockOffIcon
           aria-hidden
-          className="mt-0.5 size-4 shrink-0 text-warning-foreground"
+          className="mt-0.5 size-4 shrink-0 text-muted-foreground"
         />
         <div className="flex min-w-0 flex-col gap-1">
-          <p className="font-medium text-warning-foreground">
+          <p className="font-medium text-foreground">
             Too many attempts
           </p>
-          <p className="text-warning-foreground/80">
+          <p className="text-muted-foreground">
             {cooldown > 0 ? (
               <>
                 Rate limited. Try again in{" "}
@@ -211,7 +213,7 @@ function FailurePanel({
               "The lockout has expired. Try again."
             )}
           </p>
-          <CodeBadge className="mt-1" variant="warning">
+          <CodeBadge className="mt-1" variant="secondary">
             429 unauthorized
           </CodeBadge>
         </div>
@@ -222,15 +224,15 @@ function FailurePanel({
   if (failure.kind === "unreachable") {
     return (
       <div
-        className={cn(shell, "border-destructive/40 bg-destructive/5")}
+        className={cn(shell, "border-destructive/50")}
         id="datum-login-failure"
         role="alert"
       >
         <WifiOffIcon aria-hidden className="mt-0.5 size-4 shrink-0 text-destructive" />
         <div className="flex min-w-0 flex-col gap-1">
           <p className="font-medium text-destructive">Server not reachable</p>
-          <p className="text-foreground/80">{failure.error.message}</p>
-          <CodeBadge className="mt-1" variant="danger">
+          <p className="text-foreground">{failure.error.message}</p>
+          <CodeBadge className="mt-1" variant="destructive">
             unreachable
           </CodeBadge>
         </div>
@@ -240,7 +242,7 @@ function FailurePanel({
 
   return (
     <div
-      className={cn(shell, "border-destructive/40 bg-destructive/5")}
+      className={cn(shell, "border-destructive/50")}
       id="datum-login-failure"
       role="alert"
     >
@@ -250,8 +252,8 @@ function FailurePanel({
       />
       <div className="flex min-w-0 flex-col gap-1">
         <p className="font-medium text-destructive">Sign-in failed</p>
-        <p className="text-foreground/80">{failure.error.message}</p>
-        <CodeBadge className="mt-1" variant="danger">
+        <p className="text-foreground">{failure.error.message}</p>
+        <CodeBadge className="mt-1" variant="destructive">
           {failure.error.status > 0
             ? `${failure.error.status} ${failure.error.reason}`
             : failure.error.reason}

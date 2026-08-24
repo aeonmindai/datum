@@ -10,10 +10,10 @@ import {
 } from "../ui/card";
 
 /**
- * Modelled on echos_app `components/auth/error-boundary.tsx`: a Card with a
- * destructive title, the error message, and Try again / Reload. Nothing is
- * reported anywhere — this instance has no telemetry, so the message goes to
- * the operator's own console and screen and nowhere else.
+ * A Card with a destructive title, the error message and Try again / Reload,
+ * built from the same primitives as every other surface. Nothing is reported
+ * anywhere — this instance has no telemetry, so the message goes to the
+ * operator's own console and screen and nowhere else.
  */
 interface State {
   error: Error | null;
@@ -50,7 +50,10 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, State> {
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
-            <pre className="datum-scroll max-h-48 overflow-auto rounded-md border-[0.5px] border-[#E5E5E5] bg-[#FAFAFA] p-3 font-mono text-[12px] leading-relaxed whitespace-pre-wrap">
+            <pre
+              className="max-h-48 overflow-auto whitespace-pre-wrap rounded-lg border border-edge bg-muted/50 p-3 font-mono text-xs leading-relaxed"
+              data-slot="scroll-container"
+            >
               {error.message}
             </pre>
             <div className="flex gap-2">
@@ -61,7 +64,7 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, State> {
               <Button
                 className="flex-1"
                 onClick={() => window.location.reload()}
-                variant="primary"
+                variant="default"
               >
                 Reload
               </Button>

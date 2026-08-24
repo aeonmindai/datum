@@ -1,212 +1,260 @@
-# Design notes — where the admin panel's look comes from
+# Design notes
 
-The brief for this panel was: adopt `echos_app`'s **actual** design language, do not invent a
-visual system, and write down what was taken so the next person can tell inspiration from drift.
-This file is that record. `echos_app` is
-`~/Documents/GitHub/echos-backend/apps/frontend`; it was read-only throughout and nothing in it
-was modified.
+The admin panel is styled from **`runcrate_app`**. This file records exactly what
+was copied, what was deliberately changed, and why — specifically enough that a
+reader can tell a port from a drift.
 
-Every path below is a real file that was opened and copied from.
-
----
-
-## 1. Taken verbatim
-
-### Design tokens — `app/globals.css` → `src/index.css`
-
-The entire `:root` block (echos lines 8–67), the entire `.dark` block (lines 69–119) and the whole
-`@theme inline` mapping (lines 121–177) were copied character-for-character. That includes every
-OKLCH colour, the `hsla()` ones echos uses for `--muted-foreground` / `--border` / `--input` /
-`--ring`, all eight shadow tuples, `--radius: 0.7rem`, `--spacing: 0.25rem` and
-`--tracking-normal`.
-
-Load-bearing consequences that came along with the copy:
-
-- `--primary: oklch(0.5257 0.2464 282.95)` — echos's purple. It is the app's only accent.
-- `--ring: hsla(252, 86%, 59%, 1)` — the purple-blue focus ring, not a browser default.
-- The `@theme inline` block **redefines** `--radius-sm/md/lg/xl` from `--radius`. So `rounded-md`
-  here is `calc(0.7rem - 2px)` ≈ 9.2px, **not** Tailwind's stock 6px. Keeping that override is why
-  the controls have the same slightly-soft corner as echos. (The extraction report said
-  `rounded-md` was 0.375rem; reading `globals.css` directly showed otherwise. The file won.)
-- `@layer base` carries echos's `* { @apply border-border outline-ring/50 }` and its body font
-  rendering rules — `-webkit-font-smoothing: antialiased`, `text-rendering: optimizeLegibility`,
-  `font-feature-settings: 'liga' 1, 'kern' 1`.
-
-### Component class strings
-
-| this repo | copied from | what was taken |
-|---|---|---|
-| `src/lib/cn.ts` | `lib/utils.ts` | `twMerge(clsx(inputs))`, unchanged |
-| `src/ui/button.tsx` | `components/ui/button.tsx` | the full base string, and the `default`/`outline`/`secondary`/`ghost`/`link`/`destructive` variants; sizes `h-10` / `h-8` / `h-12` / `size-10` including the `has-[>svg]:px-*` tweaks |
-| `src/ui/card.tsx` | `components/ui/card.tsx` | `rounded-xl border bg-card py-6 gap-6 shadow-sm`, `px-6` on every sub-slot, the `has-data-[slot=card-action]` two-column header, `[.border-t]:pt-6` |
-| `src/ui/table.tsx` | `components/ui/table.tsx` | `border-separate border-spacing-0`, the `#FAFAFA` header with `#404040` text, `h-11` header cells, `hover:bg-muted/50` rows, `border-r-[0.5px] border-r-[#E5E5E5] last:border-r-0` cell hairlines, and the `sticky` header prop with its `z-30` comment intact |
-| `src/ui/badge.tsx` | `components/ui/badge.tsx` | the base string and the `default`/`secondary`/`destructive`/`outline` variants |
-| `src/ui/input.tsx` | `components/ui/input.tsx`, `label.tsx`, `form.tsx` | `h-10 rounded-md border-input px-3 py-1`, `focus-visible:ring-[3px] ring-ring/50`, `aria-invalid:border-destructive aria-invalid:ring-destructive/20`, the `suffix` slot with `pr-10`; `Label`'s string; `FormItem` → `Field` (`grid gap-2`), `FormDescription` → `FieldHint`, `FormMessage` → `FieldError` |
-| `src/ui/dialog.tsx` | `components/ui/dialog.tsx` | overlay `bg-black/50 backdrop-blur-xs`, panel `rounded-2xl border-[0.5px] border-neutral-200 bg-white p-6 sm:max-w-lg`, title `font-semibold text-xl leading-tight`, description `text-muted-foreground text-sm leading-relaxed`, close button at `top-4 right-4` with `hover:scale-110`, footer `border-t pt-4` plus the `DialogFooterLeft` / `DialogFooterRight` split |
-| `src/ui/tabs.tsx` | `components/ui/animated-tabs.tsx` | the whole sliding-indicator idea and its classes: list `h-10 gap-0.5 p-0.5 rounded-md bg-neutral-50 border border-neutral-200` (echos's `size="md"`), triggers `rounded-sm text-muted-foreground hover:bg-neutral-200/50 data-[state=active]:text-primary`, indicator `rounded-sm border border-neutral-200 bg-white shadow-sm transition-all duration-300 ease-in-out`, and the measure-the-selected-rect approach |
-| `src/ui/dropdown-menu.tsx` | `components/ui/dropdown-menu.tsx` | content `rounded-md border bg-popover p-1 shadow-md min-w-[8rem]`, items `rounded-sm px-2 py-1.5 text-sm gap-2 focus:bg-accent`, the destructive variant's `text-destructive focus:bg-destructive/10`, separator `-mx-1 my-1 h-px bg-border` |
-| `src/ui/select.tsx` | `components/ui/select.tsx` | the SelectTrigger string: `rounded-md border-input`, `data-[size=default]:h-10` / `data-[size=sm]:h-8`, `focus-visible:ring-[3px] ring-ring/50`, and the `ChevronDownIcon` |
-| `src/ui/skeleton.tsx` | `components/ui/skeleton.tsx` | `animate-pulse rounded-md bg-accent`, verbatim |
-| `src/ui/states.tsx` (`EmptyState`) | `components/accounts/accounts-empty-state.tsx` | `flex flex-1 flex-col items-center justify-center gap-4 rounded-lg border-[0.5px] border-[#E5E5E5] bg-[#FAFAFA] p-6`, the 84px visual slot, `text-xl font-semibold` title, centred `text-sm text-muted-foreground` body |
-| `src/ui/states.tsx` (`ErrorState`) | `components/auth/error-boundary.tsx` + `components/ui/alert.tsx` | the destructive-titled panel with an icon, the message as `text-sm`, and a `Try again` outline button |
-| `src/ui/toast.tsx` | `components/ui/sonner.tsx` | `w-[394px] rounded-xl border border-neutral-200 p-4`, the exact `shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-2px_rgba(0,0,0,0.05)]`, primary-coloured check for success, `size-6` white close button |
-| `src/app/shell.tsx` | `app/(main)/layout.tsx`, `components/ui/sidebar.tsx`, `components/navigation/app-sidebar.tsx`, `nav-manage.tsx` | `--sidebar-width: calc(var(--spacing) * 72)` (18rem) and `--header-height: calc(var(--spacing) * 12)` (3rem) as inline CSS properties; the `variant="inset"` content card (`m-2 ml-0 rounded-xl border border-sidebar-border bg-background h-[calc(100svh-1rem)] overflow-y-auto`); the nav button treatment from `sidebarMenuButtonVariants` — `rounded-sm p-2.5 font-medium text-sm`, `hover:bg-muted-foreground/10`, and the active state's `rounded-md border border-border bg-sidebar-accent text-foreground shadow-[0_1px_3px_0_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)]` with a `!text-primary` icon; group labels as `font-normal text-neutral-600 text-sm`; the footer's `bg-linear-to-b from-transparent to-sidebar` fade |
-| `src/app/error-boundary.tsx` | `components/auth/error-boundary.tsx` | the class-component shape and the Card-with-destructive-title fallback, plus Try again / Reload |
-
-### echos's hardcoded hexes, kept on purpose
-
-`#FAFAFA` (table headers, empty-state and recessed panels), `#E5E5E5` (0.5px hairlines), `#404040`
-(table header text), `#737373` (dialog close icon), `border-neutral-200` / `bg-neutral-50` (dialogs
-and the tab rail). These are not tokens in echos either. They were kept as literals so the two apps
-render identically rather than "close enough".
-
-### Motion
-
-Everything sits in echos's 120–300ms band with `ease`/`ease-out`/`ease-in-out`. The tab indicator is
-`duration-300 ease-in-out`, exactly as echos has it. No bounce or elastic easing anywhere.
+An earlier version of this panel was styled from `echos_app` (Outfit, an OKLCH
+purple palette, a five-colour semantic ramp, a recessed `--dead` surface). That
+is gone. No token, class string or component in `src/` descends from it.
 
 ---
 
-## 2. Where this diverges, and why
+## 1. What was read, and what came from where
 
-Each of these is a decision, not an oversight.
+Every file below was read from `/Users/jish/Documents/GitHub/runcrate_app`
+(read-only; nothing in that repo was modified).
 
-1. **Vite SPA instead of Next.js App Router.** echos is Next 16 with server components. This panel is
-   a static bundle the Datum server hands out at `/admin/`, built to
-   `packages/datum/public/admin` with `base: "/admin/"`. A Node-rendering framework inside the
-   product server would mean a second runtime in the image for a single-operator admin page.
+| runcrate source | What was taken |
+| --- | --- |
+| `src/styles/globals.css` — `:root` (lines 87–152), `.dark` (165–227) | Every colour triplet, verbatim, including the explanatory comments. They document a real hierarchy (`bg === surface → muted → surface-hover`, `edge-subtle → edge → border`) and the next reader needs them. |
+| `src/styles/globals.css` — `body` rule (251–258) | `font-family`, `font-weight: 400`, `font-synthesis: none`, `font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1, 'case' 1, 'cpsp' 1`, `letter-spacing: -0.011em`, plus `h1..h6 { text-rendering: optimizeLegibility }`. |
+| `src/styles/globals.css` — 32–68, 265–291, 7–15 | The 6px auto-fading scrollbar, the Firefox `scrollbar-width: thin`, the `100dvh`/`overflow: hidden` viewport lock, the inset 8px scroll-container scrollbar, `.scrollbar-hide`. |
+| `tailwind.config.js` — `fontSize` (57–64) | The **entire** type ramp, not just `2xs`. `2xs .6875 / xs .78125 / sm .84375 / base .9375 / lg 1.03125 / xl 1.15625 rem` with paired line heights. Every one is smaller than the framework default; this is most of why the interface reads dense and precise. `2xl` and above are **not** overridden — runcrate does not override them either. |
+| `tailwind.config.js` — `borderRadius` (65–69) | `--radius: 0.75rem`, `lg: var(--radius)`, `md: calc(--radius - 2px)`, `sm: calc(--radius - 4px)`. `rounded-lg` is 12px here, not the framework's 8px. `xl`/`2xl` are untouched, which is why buttons (`rounded-xl`) read slightly rounder than a card's internals. |
+| `tailwind.config.js` — `colors` (70–138) | `surface`/`surface-hover`, `edge`/`edge-subtle`, `brand`/`brand-dim`, `input-bg`, `overlay` and the `sidebar-*` family as real Tailwind colours, not raw vars. `edge`/`edge-subtle` are a visibly softer tier than `border` and are what internal dividers use. |
+| `tailwind.config.js` — `boxShadow` (12–16) | `shadow-card`, `shadow-floating`, `shadow-hero` mapped to per-theme values. |
+| `src/pages/_app.tsx` (15–40) | Font wiring: Geist for sans, JetBrains Mono for mono. |
+| `src/components/ui/button.tsx` | Base string and all six variants and four sizes, verbatim. |
+| `src/components/ui/card.tsx` | `rounded-2xl border border-border/60 py-6 gap-6`, `px-6` sub-slots, `leading-none font-semibold` title, and **no shadow**. |
+| `src/components/ui/badge.tsx` | Base string and all four variants, verbatim. |
+| `src/components/ui/table.tsx` | Row `hover:bg-muted/50 transition-colors`, head cell `h-10 text-left align-middle font-medium whitespace-nowrap`, container `relative w-full overflow-x-auto`. |
+| `src/components/ui/input.tsx`, `textarea.tsx`, `label.tsx` | Field treatment `rounded-xl border border-input bg-input-bg px-3.5 py-2 text-base md:text-sm` + `focus:border-ring` + `aria-invalid:border-destructive`. |
+| `src/components/ui/select.tsx` | The `SelectTrigger` class string and its `h-10`/`h-8` sizes. |
+| `src/components/ui/dialog.tsx` | Overlay `bg-overlay`, panel `rounded-2xl border border-border/60 bg-background p-6 shadow-xl sm:max-w-lg`, header/title/description/close-button treatments. |
+| `src/components/ui/dropdown-menu.tsx` | Content `bg-popover rounded-xl border border-border/60 p-1 shadow-lg`, items `rounded-lg px-2 py-1.5 text-sm`, destructive items, separator. |
+| `src/components/ui/tabs.tsx` | List `bg-muted rounded-xl h-10 p-1`, trigger `rounded-lg px-3 py-1.5`, selected `bg-background text-foreground shadow-sm`. |
+| `src/components/ui/skeleton.tsx` | `bg-accent animate-pulse rounded-md`, verbatim. |
+| `src/components/ui/separator.tsx` | Used as the inline `h-4 w-px bg-edge-subtle` hairline idiom rather than as a component. |
+| `src/components/ui/hover-card.tsx` | `bg-popover rounded-md border p-4 shadow-md`. |
+| `src/components/ui/alert.tsx` | Base, `default` and `destructive` variants; the title and description treatments. |
+| `src/components/ui/sidebar.tsx` | `SIDEBAR_WIDTH = 16rem`, `SIDEBAR_WIDTH_ICON = 3rem`; `SidebarInset`'s inset variant; `SidebarHeader`/`Footer`/`Content`/`Group` paddings; `sidebarMenuButtonVariants`. |
+| `src/components/ui/sonner.tsx` | Toast surface `bg-surface border border-edge`, title `text-foreground`, body `text-muted-foreground`. |
+| `src/components/dashboard-layout.tsx` | The shell: sidebar + inset content, `p-8 pb-10 lg:p-10 lg:pb-12` on the scroll container. |
+| `src/components/dashboard-header.tsx` | `flex h-11 items-center gap-3 px-4 lg:px-6 border-b border-edge-subtle`, `ml-auto` actions, `h-4 w-px bg-edge-subtle` dividers, and the `h-7 rounded-full border border-edge` pill for a live monospace figure. |
+| `src/components/nav-items.tsx` | Group label `text-2xs font-semibold text-muted-foreground/50 uppercase tracking-widest`; nav row height `h-9`/`text-[13.5px]` (= `text-sm`). |
+| `src/pages/dashboard/audit-log.tsx` | The dense data-table idiom: container `rounded-xl border border-edge bg-surface overflow-hidden`, toolbar/footbar strips `px-5 py-3 border-*-edge-subtle`, header cells `px-5 py-3 text-2xs font-medium text-muted-foreground uppercase tracking-wider`, body cells `px-5 py-3.5`. Also the page-header idiom (`h1.text-xl.font-medium` + `text-muted-foreground text-sm mt-1`) and the empty-state idiom. |
+| `src/pages/dashboard/api-keys.tsx` | Confirmed the same table idiom is used across screens, not one-off. |
 
-2. **Hash routing, ~55 lines, no router library.** `src/lib/router.ts`. One `index.html` covers
-   every screen, so the server needs no SPA rewrite rules and deep links survive a cold start.
+### The surface philosophy, restated because it is load-bearing
 
-3. **Hand-rolled primitives instead of shadcn + Radix.** The dependency list is fixed: react,
-   react-dom, lucide-react, clsx, tailwind-merge. No Radix, no `class-variance-authority`, no
-   `tw-animate-css`. So:
-   - `cva` variant maps became plain `Record<K, string>` lookups through `cn()` (`variant()` in
-     `src/lib/cn.ts`). Identical output, no runtime, and the strings stay diff-able against echos.
-   - `Dialog` reimplements what Radix gave echos for free — Escape to close, a focus trap that wraps
-     both ways, focus restore to the trigger, body scroll lock, `role="dialog"` +
-     `aria-modal` + `aria-labelledby`/`aria-describedby`. All verified in a browser.
-   - `Select` is a native `<select>` wearing echos's `SelectTrigger` classes. On an admin panel,
-     free keyboard and screen-reader behaviour beats a custom popover.
-   - `DropdownMenu` and `HoverCard` use a click-outside listener and a `<body>` portal instead of
-     Radix's.
-   - The four `tw-animate-css` entrance animations echos leans on are written out as keyframes at
-     the bottom of `src/index.css`, plus a `prefers-reduced-motion` block echos does not have.
-
-4. **Outfit via a `<link>`, not `next/font/google`.** There is no `next/font` here. `index.html`
-   loads Outfit from Google Fonts and `--font-sans` names `'Outfit'` directly instead of
-   `var(--font-outfit)`. Both families fall back to the system stack, which is what an air-gapped
-   self-hosted instance will render.
-
-5. **`--font-mono` is a real monospace stack.** echos aliases `--font-mono` to Outfit and never
-   renders code — the extraction report flagged "monospace never used" as one of its distinctive
-   choices. Datum shows an id, hash, commit, scope path or sequence number on every screen, so it
-   loads JetBrains Mono and falls back to `ui-monospace`. This is the largest single deviation and
-   it is deliberate: rendering a commit sha in a geometric sans is a legibility bug.
-
-6. **`tabular-nums` and uppercase micro-labels, which echos does not do.** `.datum-num` and
-   `.datum-microlabel` in `src/index.css`. Counts and sequence numbers must not jitter while the
-   rejection log polls every five seconds, and the detail panels need a field-name treatment that is
-   quieter than echos's sentence-case `text-sm font-medium` labels when twelve of them sit in a
-   grid.
-
-7. **Three added tokens.** echos defines `--success` and `--warning` but, per its own extraction
-   notes, "rarely uses" them; it has no blue semantic and no recessed one.
-   - `--info` / `--info-foreground` — `--info` takes `--chart-4`'s exact value
-     (`oklch(0.6187 0.2067 259.23)`). `derived` confidence needs its own colour.
-   - `--dead` / `--dead-foreground` — the recessed surface for retired rows. Named rather than
-     scattered as opacity utilities because it is used in five places and is load-bearing.
-   Dark-mode counterparts were derived by matching the lightness relationships echos uses between
-   its own light and dark values.
-
-8. **Added badge variants.** echos ships four (`default`/`secondary`/`destructive`/`outline`); this
-   adds `muted`, `success`, `info`, `warning`, `purple`, `danger`, `dead`. All follow echos's badge
-   base string and use a tinted surface with a matching border rather than a solid fill, because a
-   single assertions row can carry three badges and three solid fills would shout.
-
-9. **`Button` variants dropped and one added.** Dropped `special`, `specialSecondary`,
-   `editOutline`, `destructiveOutline` — echos-brand radial gradients that carry no meaning here.
-   Added `primary` (a plain `bg-primary`), because echos's `default` variant is text-only and this
-   app needs a filled primary action without importing a gradient.
-
-10. **`grid-cols-1` on the dialog panel.** Tailwind's `grid-cols-1` is `minmax(0, 1fr)`, which stops
-    a long monospace secret or a JSON block from blowing the panel past `max-w-lg`. Radix handles
-    this for echos; without it the reveal-once dialog overflowed, which browser testing caught.
-
-11. **No `next-themes`.** The full `.dark` token block is present and correct, but nothing toggles
-    it yet; the panel renders light. Adding a toggle later is a class on `<html>` and no token work.
-
-12. **Table column density.** echos's `Table` is built for horizontal scroll and this one keeps
-    `overflow-x-auto`, but four tables were re-columned (pairs merged into stacked cells:
-    confidence·kind, asserted-by·seq, reason·invariant, actor·route) so that at 1440px the row
-    action is on screen rather than behind a scroll. Verified by measuring
-    `scrollWidth === clientWidth` on assertions, keys and rejections.
+Page background **is** the card surface: `--surface` and `--sidebar` are both
+defined equal to `--background` in both themes. A card is therefore defined by
+its outline, not by contrast — it reads as cut into the page rather than
+floating on it. `Card` in this panel has **no shadow** for exactly that reason.
+Adding elevation the original does not have is the fastest way to make a port
+look like a copy.
 
 ---
 
-## 3. Product decisions that drove visual choices
+## 2. Confidence classes: the one real design problem, and how it was resolved
 
-These are not echos patterns; they are Datum's thesis expressed in the design.
+runcrate's palette is pure neutral grey with exactly **two** chromatic tokens:
+`--ring` (`217 91% 60%`, blue, used only for focus) and `--destructive`
+(`0 72% 51%`, red, used only for alarm). There is no green, no amber and no
+second blue to spend on a four-class semantic ramp, and inventing three would
+not be a restyle.
 
-- **A superseded row is dead, not struck through.** `assertionRowClass` in
-  `src/components/confidence.tsx`: muted `--dead` surface, 75% opacity, a heavy left border in the
-  dead foreground and an explicit `superseded` badge with a link to the row that replaced it.
-  Strikethrough was rejected because it reads as *edited*, and this store never edits anything.
-- **Confidence has the only fully semantic colour scale in the app.** `measured` = success,
-  `confirmed-by-human` = echos purple (the human-authority colour), `derived` = info blue,
-  `unverified` = warning amber. Amber, never red: no agent may write `measured`, so `unverified` is
-  the normal state of an honest write.
-- **Neither side of a contradiction is the winner.** Both columns in
-  `src/screens/contradictions.tsx` are identical containers at an identical type scale, separated by
-  a `both live` divider. Presenting one as the answer would be the silent last-write-wins behaviour
-  the store exists to refuse.
-- **A gate has three states.** `GatePill` in `src/screens/missions.tsx`. `reached: null` renders as
-  "no qualifying evidence" in a dashed warning pill that names the `requires_confidence` class it
-  would accept, with `why_null` as help text. Rendering null as false would turn a missing
-  measurement into a failing one.
-- **Verification standing is stated, not implied.** `src/components/provenance.tsx` distinguishes
-  "verification promoted this claim", "awaiting verification", "human testimony, not promoted",
-  "derived — not a verification target", and — when `/admin/api/me` reports
-  `verification.configured: false` — "verification not configured on this instance". The last one is
-  an operator fact, not a pending queue, and saying "awaiting" there would be a lie.
-- **The as-of control is sequence-based.** `asserted_at` is a sequence number, so a sequence is the
-  only exact cut point; two writes in the same millisecond are still ordered. The field commits on
-  blur or Enter rather than clamping per keystroke, which browser testing showed made it impossible
-  to type a smaller number.
-- **`asserted_at` is never formatted as a date.** `src/lib/format.ts` keeps `relativeTime` /
-  `absoluteTime` for `created_at`, `at` and `checked_at` only.
+So the ranking is carried by **fill weight, border style, icon and monospace
+labelling** instead of hue. This replaces the previous green / purple / blue /
+amber ramp entirely.
+
+| Confidence | Badge | Icon | Reading |
+| --- | --- | --- | --- |
+| `measured` | `default` — solid, inverted | `CircleCheckIcon` | Strongest. The only class a gate will read. |
+| `confirmed-by-human` | `secondary` — grey fill | `UserCheckIcon` | Testimony, not an instrument. |
+| `derived` | `outline` | `GitBranchIcon` | Computed from other rows. |
+| `unverified` | `outline` + dashed border + `text-muted-foreground` | `ClockIcon` | Normal, and **not** an error. |
+
+Weight decreases exactly as authority decreases, so a column of these reads as
+a ranking at a glance. It also survives greyscale, colour-blindness and a
+printed screenshot, which a hue ramp does not.
+
+`unverified` is dashed rather than red on purpose: no agent may write
+`measured`, so every honest agent write starts at `unverified`.
+
+### Where red is allowed
+
+Red is reserved. It is a **solid `destructive` fill** on exactly three things:
+
+- a **refuted** verification (`ShieldAlertIcon`, plus a full-strength
+  `border-destructive` banner on the detail screen — this one is loud);
+- a **rejected** write (every reason chip and row spine in `/rejections`);
+- `kind: dead` and `kind: failed`.
+
+It appears as an **edge and text tint only** (`BADGE_ALARM` =
+`border-destructive/50 text-destructive`) on states that are a genuine problem
+but not a refusal: a **contested** row, an open contradiction, a derived row
+whose inputs no longer resolve, an expired key, a blocked mission, a missed
+gate.
+
+### Retired versus contested
+
+Both are row-level treatments, and they must not be confusable:
+
+- **Superseded / revoked / `kind: dead`** → `bg-muted/50 text-muted-foreground
+  opacity-75` with a left `border-l-2 border-border` spine and a `secondary`
+  badge in `text-muted-foreground`. Recession, not alarm — the row is retired,
+  not broken. **No strikethrough**: strikethrough reads as "edited" and this
+  store never edits.
+- **Contested** → the same left `border-l-2` spine in `border-destructive/50`
+  plus a destructive-outline badge, because two live rows disagreeing genuinely
+  is a problem and the store refuses to pick one for you.
+
+### Three named compositions
+
+Because these treatments appear on eight screens, they are named once in
+`src/ui/badge.tsx` rather than retyped:
+
+- `BADGE_PENDING` = `border-dashed text-muted-foreground` — not-yet-known, and
+  that is fine (`unverified`, an unresolvable check, a gate with no qualifying
+  evidence, an isolated take).
+- `BADGE_ALARM` = `border-destructive/50 text-destructive` — a real problem
+  that is not a refusal.
+- `BADGE_RETIRED` = `text-muted-foreground` — kept in the record, excluded from
+  every default read.
+
+They are class strings, not new `Badge` variants, because they are *states*:
+each is an `outline` or `secondary` badge with its border style or text weight
+adjusted. `Badge` itself ships exactly runcrate's four variants and no more.
+
+### Other places hue used to do the work
+
+| Was | Now |
+| --- | --- |
+| `text-success` / `text-warning` / `text-info` on verification standing | Only `ok` gets `text-foreground`; everything else is `text-muted-foreground`. The distinction that matters is settled-vs-not-settled, and contrast carries it. |
+| Green/red timeline dots in the supersession chain | Live head is `border-foreground` + a filled `bg-foreground` dot; superseded is `border-border`, hollow. |
+| Green "reached" / amber "no qualifying evidence" gate pills | `reached` is a solid `bg-primary` pill; `not reached` is a destructive-edge pill; `unknown` is a dashed, recessed pill. `unknown` is deliberately the quietest of the three — it is the absence of a reading, not a failure. |
+| Amber login lockout banner | `border-border/60 bg-muted/50` with a muted icon. A rate limiter doing its job is not an error. |
+| Amber "copy this secret now" warning in the key dialog | Same recessed treatment. It is an instruction, not a failure. |
+| Green/amber `--dead` recessed surface | `bg-muted/50` + `opacity-75`, which is the same idea using tokens that already exist. |
+| Purple `admin` permission / `root` scope chips | `default` (solid) — the privileged value is the strongest one, which is what solid means here. |
+| Green/red heartbeat spine in `/nodes` | Live is `border-l-foreground/40`; stale is `border-l-edge-subtle`. Staleness is a hint, not a fault, so it does not earn the destructive edge. |
 
 ---
 
-## 4. Verified in a browser, not assumed
+## 3. Deliberate divergences from runcrate
 
-Driven against a throwaway fixture API kept in `/tmp` (never in this repo) in four modes —
-populated, all-empty, 500-refusing, and no backend at all — plus the production bundle served by
-`vite preview`:
+Each of these is a structural constraint of this package, not a taste call.
 
-- login's 401 / 429-with-retry-seconds / unreachable states as three visually distinct panels
-- create key → reveal-once → copy → revoke, with `aria-invalid` and field errors on submit
-- the assertions table's dead / contested / `inputs unresolvable` treatments, and the provenance
-  popover on hover and on keyboard focus
-- the as-of slider rewinding to sequence 4000 and correctly reporting the 96-minute value that was
-  later superseded
-- the lineage timeline labelling the `unverified → measured` step "promoted by verification"
-- resolve dialog → three exits → toast; Escape closes; focus trapped both directions; focus
-  restored to the trigger
-- all three gate states on one mission
-- every screen's empty state, every screen's error state, and a mid-session 401 redirecting to
-  `#/login`
-- a misconfigured proxy answering `/admin/api/me` with HTML, which is now caught by `readMe` in
-  `src/app/session.tsx` and reported precisely instead of white-screening
-- 430px-wide layout: sidebar swaps to a scrolling `MobileNav`, filters stack, contradiction cards
-  become one column
+1. **Tailwind v4, not v3.** runcrate is v3 with `hsl(var(--x))` triplets in
+   `tailwind.config.js`. This package is v4 (`@import "tailwindcss"` +
+   `@tailwindcss/vite`) and must stay there. The triplets and the class strings
+   are identical; only the plumbing differs — `colors: { x: 'hsl(var(--x)) }`
+   becomes `@theme inline { --color-x: hsl(var(--x)) }`. `inline` is what makes
+   the `.dark` override reach the utility. Verified in the built CSS: opacity
+   modifiers compile to `color-mix(in oklab, hsl(var(--muted)) 50%, transparent)`
+   with an `hsl(var(--muted))` fallback, so `bg-muted/50`, `border-border/60`
+   and `ring-ring/40` behave exactly as in runcrate.
+2. **`darkMode: ['class']` → `@custom-variant dark (&:is(.dark *))`.** Same
+   semantics, v4 syntax.
+3. **`--shadow-card|floating|hero` are stored as `--elevation-*`.** In v4,
+   `--shadow-*` *is* the theme namespace, so keeping runcrate's variable names
+   would make `@theme` self-referential. The values are byte-identical; only the
+   source variable is renamed.
+4. **Google Fonts `<link>`, not `next/font`.** There is no `next/font` in a Vite
+   SPA. `index.html` loads `family=Geist:wght@100..900` and
+   `family=JetBrains+Mono:wght@400;500;600`; both degrade to the system stacks
+   declared in `index.css`, which is what an air-gapped self-hosted instance
+   renders. Verified in a browser: `document.fonts.check` is true for both.
+   runcrate's `--font-satoshi` logo wordmark is not ported — there is no
+   Satoshi licence or file here, and the wordmark is set in Geist.
+5. **Hand-rolled primitives, no Radix, no cva, no `tailwindcss-animate`.** The
+   package deliberately has none of those and keeps none. Variant maps are plain
+   records looked up through `cn` (`src/lib/cn.ts`), `asChild` is replaced by a
+   `LinkButton` that renders a real `<a>` (the hash router navigates through
+   links), and the four enter animations `tailwindcss-animate` would have
+   supplied are written out as keyframes at the bottom of `index.css` at
+   runcrate's own 200ms/ease-out. All existing focus-trap, click-outside,
+   Escape, scroll-lock and ARIA behaviour is unchanged — only classes moved.
+6. **`iconSm` button size added** (`h-8 w-8 rounded-lg`). runcrate reaches for
+   `size="icon" className="size-7"` in its own header and sidebar trigger; a
+   dense admin table needs that shape often enough to name it.
+7. **`muted` alert variant added** (`border-border/60 bg-muted/50
+   text-muted-foreground`). runcrate's alert ships only neutral and alarm, and
+   this product has several notices that are neither — the banner over a retired
+   row, a check that could not resolve, "copy this secret now".
+8. **Table dividers sit on the cells, not on `<tr>`.** All four data tables use
+   a sticky header, which needs `border-separate border-spacing-0` to keep its
+   border while scrolling; in the separated-borders model a `<tr>` cannot paint a
+   border at all. Same hairlines, same `border-edge-subtle` tier, one level down
+   the tree. This is also what lets a row carry the `border-l-2` retired /
+   contested spine.
+9. **No sidebar collapse.** runcrate's sidebar collapses to a 3rem icon rail.
+   Adding that here would be new behaviour, and this is a restyle. `16rem` is
+   fixed; the sidebar is simply hidden below `md`, where `MobileNav` takes over.
+10. **`[data-slot="scroll-container"]`, not `[data-tour="welcome"]`.** runcrate
+    hangs its thin inset scrollbar off a product-tour hook. The rules are
+    identical; the selector is renamed to what it actually is. The viewport lock
+    keeps runcrate's own `[data-slot="sidebar-wrapper"]` selector, which means
+    `/login` and the 404 — which do not mount the shell — still scroll normally.
+
+### Two runcrate details deliberately *not* reproduced
+
+- **`DialogContent`'s `style={{ fontFamily: 'var(--font-figtree), system-ui,
+  sans-serif' }}`.** `--font-figtree` is not defined anywhere in runcrate, so
+  that declaration falls through to `system-ui` and runcrate's dialogs are the
+  only surface in the app not set in Geist. That is a bug, and copying it would
+  make this panel inconsistent with itself.
+- **`nav-items.tsx`'s active pill and `audit-log.tsx`'s row hover.** The pill is
+  `bg-background` on a `bg-sidebar` parent and row hover is `hover:bg-surface`
+  inside a `bg-surface` container — and since `--sidebar` and `--surface` are
+  both defined equal to `--background`, both are the same colour as what is
+  behind them and read as nothing. The shipped primitives are used instead:
+  `data-[active=true]:bg-sidebar-accent` from `sidebarMenuButtonVariants`, and
+  `hover:bg-muted/50` from `ui/table.tsx`. Both are runcrate's own code and both
+  actually register.
+- runcrate spells two of its own boxes with raw palette literals
+  (`border-red-500/20 bg-red-950/20 text-red-400` for the audit-log error box;
+  `bg-red-50 / bg-green-50 / bg-yellow-50` for per-tone Sonner toasts). Those
+  are outside the token set and only resolve legibly in one theme. The
+  token-correct equivalents from runcrate's own `alert.tsx` and base Sonner
+  surface are used instead.
 
 ---
 
-## 5. What is not here
+## 4. Dark mode
 
-No telemetry, no analytics, no phone-home, no licence check, no feature flag, no paid tier, no
-"upgrade" affordance. The only network calls the panel makes are to `/admin/api/*` on its own
-origin, plus the Google Fonts stylesheet in `index.html`. `DATUM_ORG` is read from
-`/admin/api/me`; the string "aeonmind" does not appear in `src/`.
+`darkMode: ['class']` is ported as `@custom-variant dark`, and both themes ship.
+`index.html` applies the class **before first paint** so a dark-mode operator
+never sees a white flash: an explicit choice in `localStorage["datum-theme"]`
+wins, otherwise `prefers-color-scheme` decides. With no explicit choice stored,
+a live OS theme change is followed (a `matchMedia` listener in `useTheme`); once
+the operator picks, the choice is sticky. The toggle is in the sidebar footer,
+with a `md:hidden` duplicate in the header row for the mobile layout where the
+sidebar is not rendered.
+
+Dark is where this palette looks best and it was verified in a browser at
+1440×900: `background` resolves to `rgb(18,18,18)` and `foreground` to
+`rgb(235,235,235)` — runcrate's `#121212` / `#ebebeb` exactly.
+
+---
+
+## 5. Verification performed
+
+Against a real server (`datum serve` on a seeded Postgres), not fixtures:
+
+- `npx tsc -b --noEmit` — clean.
+- `npx vite build` — succeeds, writes to `packages/datum/public/admin`.
+- No Outfit, no OKLCH and no `#E5E5E5`/`#FAFAFA`/`neutral-*` literals anywhere
+  in `src/`.
+- No new dependencies in `package.json`.
+- All ten routes plus the styled 404 render in both themes at 1440px, with real
+  loading (skeleton), empty and error states exercised on each.
+- `scrollWidth === clientWidth` on every data table (`/assertions`, `/keys`,
+  `/rejections`, `/nodes`) and no horizontal overflow on the page scroll
+  container on any route. `/assertions` needed its truncating columns tightened
+  by 2rem each to reach this; every one of those cells already carried a `title`,
+  so nothing became unreadable.
+- Dialogs, the reveal/revoke flow, the toast queue and the provenance hover-card
+  (opened by keyboard focus) all render and behave as before.

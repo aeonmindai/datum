@@ -21,7 +21,7 @@ import {
   type Mission,
   type Rejection,
 } from "../lib/types";
-import { Badge, CodeBadge } from "../ui/badge";
+import { Badge, BADGE_ALARM, CodeBadge } from "../ui/badge";
 import { LinkButton } from "../ui/button";
 import { MicroLabel, Mono, PageHeader } from "../ui/primitives";
 import { Skeleton } from "../ui/skeleton";
@@ -106,7 +106,7 @@ export function OverviewScreen({ org }: { org: string }) {
           label="Open contradictions"
           loading={contradictions.loading}
           onRetry={contradictions.reload}
-          tone={openContradictions.length > 0 ? "warning" : "neutral"}
+          tone={openContradictions.length > 0 ? "attention" : "neutral"}
           value={contradictions.data ? openContradictions.length : undefined}
         />
         <StatCard
@@ -117,7 +117,7 @@ export function OverviewScreen({ org }: { org: string }) {
           label="Refusals, 24h"
           loading={rejections.loading}
           onRetry={rejections.reload}
-          tone={recentRefusals.length > 0 ? "danger" : "neutral"}
+          tone={recentRefusals.length > 0 ? "alarm" : "neutral"}
           value={rejections.data ? recentRefusals.length : undefined}
         />
         <StatCard
@@ -140,7 +140,7 @@ export function OverviewScreen({ org }: { org: string }) {
           onRetry={keys.reload}
           value={keys.data ? liveKeys.length : undefined}
         />
-        <div className="flex flex-col gap-4 rounded-xl border-[0.5px] border-[#E5E5E5] bg-card p-5 shadow-sm">
+        <div className="flex flex-col gap-4 rounded-2xl border border-border/60 bg-card p-5">
           <div className="flex items-center gap-2">
             <ShieldCheckIcon aria-hidden className="size-4 text-muted-foreground" />
             <MicroLabel>By confidence class</MicroLabel>
@@ -151,7 +151,7 @@ export function OverviewScreen({ org }: { org: string }) {
               return (
                 <li className="flex items-center justify-between gap-3" key={confidence}>
                   <a
-                    className="min-w-0 rounded-sm focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                    className="min-w-0 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
                     href={href("/assertions", { confidence })}
                   >
                     <ConfidenceBadge confidence={confidence} showIcon={false} />
@@ -194,22 +194,22 @@ export function OverviewScreen({ org }: { org: string }) {
               Nothing has been refused. The invariants have not had to bite yet.
             </Quiet>
           ) : (
-            <ul className="flex flex-col divide-y divide-border">
+            <ul className="flex flex-col divide-y divide-edge-subtle">
               {rejections.data?.rejections.slice(0, 5).map((r) => (
                 <li className="flex items-start gap-3 py-2.5 first:pt-0 last:pb-0" key={r.id}>
                   <Mono
-                    className="mt-0.5 shrink-0 text-[12px] text-muted-foreground"
+                    className="mt-0.5 shrink-0 text-xs text-muted-foreground"
                     title={absoluteTime(r.at)}
                   >
                     {clockTime(r.at)}
                   </Mono>
                   <div className="flex min-w-0 flex-col gap-1">
-                    <CodeBadge variant="danger">{r.reason}</CodeBadge>
+                    <CodeBadge variant="destructive">{r.reason}</CodeBadge>
                     <p className="truncate text-sm" title={r.message ?? ""}>
                       {r.message ?? "—"}
                     </p>
                     {r.actor ? (
-                      <Mono className="truncate text-[11px] text-muted-foreground">
+                      <Mono className="truncate text-2xs text-muted-foreground">
                         {r.actor}
                       </Mono>
                     ) : null}
@@ -241,7 +241,7 @@ export function OverviewScreen({ org }: { org: string }) {
               Nothing is contested. Every subject and predicate has one live answer.
             </Quiet>
           ) : (
-            <ul className="flex flex-col divide-y divide-border">
+            <ul className="flex flex-col divide-y divide-edge-subtle">
               {openContradictions.slice(0, 3).map((c) => (
                 <li className="flex flex-col gap-2 py-3 first:pt-0 last:pb-0" key={c.id}>
                   <div className="flex flex-wrap items-baseline gap-x-2">
@@ -250,9 +250,13 @@ export function OverviewScreen({ org }: { org: string }) {
                     <Mono className="font-medium">{c.predicate}</Mono>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <Badge variant="warning">{c.a_confidence}</Badge>
+                    <Badge className={BADGE_ALARM} variant="outline">
+                      {c.a_confidence}
+                    </Badge>
                     <span className="text-muted-foreground text-xs">vs</span>
-                    <Badge variant="warning">{c.b_confidence}</Badge>
+                    <Badge className={BADGE_ALARM} variant="outline">
+                      {c.b_confidence}
+                    </Badge>
                     <span className="text-muted-foreground text-xs">
                       detected {relativeTime(c.detected_at) ?? ""}
                     </span>
@@ -286,15 +290,18 @@ function StatCard({
   loading: boolean;
   error: Resource<Counted>["error"];
   onRetry: () => void;
-  tone?: "neutral" | "warning" | "danger";
+  /**
+   * `attention` is a count that should be zero and is not; `alarm` is a count
+   * of refusals. Neither gets a fill — the edge and the figure carry it, so a
+   * grid of six cards still reads as one surface.
+   */
+  tone?: "neutral" | "attention" | "alarm";
 }) {
   return (
     <div
       className={cn(
-        "flex flex-col gap-3 rounded-xl border-[0.5px] bg-card p-5 shadow-sm",
-        tone === "warning" && "border-warning/40",
-        tone === "danger" && "border-destructive/35",
-        tone === "neutral" && "border-[#E5E5E5]",
+        "flex flex-col gap-3 rounded-2xl border bg-card p-5",
+        tone === "alarm" ? "border-destructive/50" : "border-border/60",
       )}
     >
       <div className="flex items-center justify-between gap-2">
@@ -304,7 +311,7 @@ function StatCard({
         </div>
         <a
           aria-label={`Open ${label}`}
-          className="rounded-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+          className="rounded-lg text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
           href={link}
         >
           <ArrowRightIcon aria-hidden className="size-4" />
@@ -319,8 +326,7 @@ function StatCard({
         <p
           className={cn(
             "datum-num font-semibold text-3xl leading-none",
-            tone === "warning" && "text-warning-foreground",
-            tone === "danger" && "text-destructive",
+            tone === "alarm" && "text-destructive",
           )}
         >
           {value ?? 0}
@@ -342,7 +348,7 @@ function Panel({
   children: ReactNode;
 }) {
   return (
-    <div className="flex flex-col gap-4 rounded-xl border-[0.5px] border-[#E5E5E5] bg-card p-5 shadow-sm">
+    <div className="flex flex-col gap-4 rounded-2xl border border-border/60 bg-card p-5">
       <div className="flex items-center justify-between gap-3">
         <h2 className="font-semibold leading-none">{title}</h2>
         {action}
@@ -364,7 +370,7 @@ function SkeletonRows() {
 
 function Quiet({ children }: { children: ReactNode }) {
   return (
-    <p className="rounded-lg border-[0.5px] border-[#E5E5E5] bg-[#FAFAFA] px-4 py-6 text-center text-muted-foreground text-sm">
+    <p className="rounded-lg border border-edge bg-muted/50 px-4 py-6 text-center text-muted-foreground text-sm">
       {children}
     </p>
   );

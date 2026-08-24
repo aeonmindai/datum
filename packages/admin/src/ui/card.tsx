@@ -2,16 +2,22 @@ import type * as React from "react";
 import { cn } from "../lib/cn";
 
 /**
- * Structure and class strings from echos_app `components/ui/card.tsx`. The
- * `@container/card-header` query variant is dropped (nothing here needs it);
- * everything else — `rounded-xl border bg-card py-6 gap-6`, `px-6` on every
- * sub-slot, the `has-data-[slot=card-action]` two-column header — is echos's.
+ * Class strings copied verbatim from runcrate_app `src/components/ui/card.tsx`.
+ * The `@container/card-header` query variant is dropped (nothing here needs
+ * it); everything else — `rounded-2xl border border-border/60 py-6 gap-6`,
+ * `px-6` on every sub-slot, the `has-data-[slot=card-action]` two-column
+ * header, `leading-none font-semibold` on the title — is runcrate's.
+ *
+ * There is deliberately no shadow. In runcrate the page background and the card
+ * surface are the same colour: a card is defined by its outline, so it reads as
+ * cut into the page rather than floating on it. Adding elevation here would be
+ * the single fastest way to make this look like a copy instead of the original.
  */
 export function Card({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       className={cn(
-        "flex flex-col gap-6 rounded-xl border bg-card py-6 text-card-foreground shadow-sm",
+        "flex flex-col gap-6 rounded-2xl border border-border/60 bg-card py-6 text-card-foreground",
         className,
       )}
       data-slot="card"

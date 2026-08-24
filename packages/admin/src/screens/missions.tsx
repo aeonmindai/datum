@@ -10,7 +10,7 @@ import { cn } from "../lib/cn";
 import { absoluteTime, gateActual } from "../lib/format";
 import { href, replaceQuery } from "../lib/router";
 import type { GateStatus, Mission, MissionState } from "../lib/types";
-import { Badge, CodeBadge } from "../ui/badge";
+import { Badge, BADGE_ALARM, BADGE_RETIRED, CodeBadge } from "../ui/badge";
 import { Input, Label } from "../ui/input";
 import { MicroLabel, Mono, PageHeader } from "../ui/primitives";
 import { BlockSkeleton } from "../ui/skeleton";
@@ -20,11 +20,20 @@ interface MissionsResponse {
   missions: Mission[];
 }
 
-const STATE_VARIANT: Record<MissionState, "outline" | "success" | "warning" | "muted"> = {
-  proposed: "outline",
-  active: "success",
-  blocked: "warning",
-  closed: "muted",
+/**
+ * State ranks by fill weight, not hue. `active` is the one state that means
+ * work is live, so it takes the solid badge; `blocked` keeps the plain outline
+ * with the destructive edge, because a blocked mission is a problem; `closed`
+ * is recessed.
+ */
+const STATE_STYLE: Record<
+  MissionState,
+  { variant: "default" | "outline" | "secondary"; className?: string }
+> = {
+  proposed: { variant: "outline" },
+  active: { variant: "default" },
+  blocked: { variant: "outline", className: BADGE_ALARM },
+  closed: { variant: "secondary", className: BADGE_RETIRED },
 };
 
 export function MissionsScreen({ scope }: { scope: string }) {
@@ -43,7 +52,7 @@ export function MissionsScreen({ scope }: { scope: string }) {
       <div className="grid max-w-md gap-2">
         <Label htmlFor="mission-scope">Scope</Label>
         <Input
-          className="font-mono text-[13px]"
+          className="font-mono text-sm"
           id="mission-scope"
           onChange={(e) =>
             replaceQuery("/missions", { scope: e.target.value || undefined })
@@ -87,20 +96,25 @@ function MissionCard({ mission }: { mission: Mission }) {
   const unknown = mission.gates.filter((g) => g.reached === null).length;
 
   return (
-    <div className="flex flex-col overflow-hidden rounded-xl border-[0.5px] border-[#E5E5E5] shadow-sm">
-      <div className="flex flex-wrap items-start justify-between gap-4 border-b-[0.5px] border-b-[#E5E5E5] bg-[#FAFAFA] px-5 py-4">
+    <div className="flex flex-col overflow-hidden rounded-xl border border-edge bg-surface">
+      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-edge-subtle px-5 py-4">
         <div className="flex min-w-0 flex-col gap-2">
-          <p className="max-w-3xl font-semibold text-[15px] leading-snug">
+          <p className="max-w-3xl font-medium text-base leading-snug">
             {mission.statement}
           </p>
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant={STATE_VARIANT[mission.state]}>{mission.state}</Badge>
-            <Mono className="text-[12px] text-muted-foreground" title={mission.scope}>
+            <Badge
+              className={STATE_STYLE[mission.state].className}
+              variant={STATE_STYLE[mission.state].variant}
+            >
+              {mission.state}
+            </Badge>
+            <Mono className="text-xs text-muted-foreground" title={mission.scope}>
               {mission.scope}
             </Mono>
             <span className="text-muted-foreground text-xs">
               v{mission.version} · declared by{" "}
-              <Mono className="text-[12px]">{mission.asserted_by}</Mono> ·{" "}
+              <Mono className="text-xs">{mission.asserted_by}</Mono> ·{" "}
               {absoluteTime(mission.created_at)}
             </span>
           </div>
@@ -111,7 +125,7 @@ function MissionCard({ mission }: { mission: Mission }) {
           </span>
           <span className="datum-microlabel">gates reached</span>
           {unknown > 0 ? (
-            <span className="text-warning-foreground text-xs">
+            <span className="text-muted-foreground text-xs">
               {unknown} with no qualifying evidence
             </span>
           ) : null}
@@ -149,8 +163,8 @@ function GateRow({ gate }: { gate: GateStatus }) {
   return (
     <li
       className={cn(
-        "flex flex-col gap-3 border-b-[0.5px] border-b-[#E5E5E5] px-5 py-4 last:border-b-0 lg:flex-row lg:items-center lg:gap-6",
-        state === "unknown" && "bg-warning/[0.05]",
+        "flex flex-col gap-3 border-b border-edge-subtle px-5 py-4 last:border-b-0 lg:flex-row lg:items-center lg:gap-6",
+        state === "unknown" && "bg-muted/40",
       )}
     >
       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
@@ -175,7 +189,7 @@ function GateRow({ gate }: { gate: GateStatus }) {
           {gate.resolved_scope ? (
             <span className="inline-flex items-center gap-1.5">
               <span className="datum-microlabel">resolved at</span>
-              <Mono className="text-[12px] text-muted-foreground">
+              <Mono className="text-xs text-muted-foreground">
                 {gate.resolved_scope}
               </Mono>
             </span>
@@ -195,7 +209,7 @@ function GateRow({ gate }: { gate: GateStatus }) {
         ) : null}
 
         {state === "unknown" ? (
-          <p className="max-w-2xl text-warning-foreground text-xs leading-relaxed">
+          <p className="max-w-2xl text-muted-foreground text-xs leading-relaxed">
             {gate.why_null ??
               `Nothing of confidence class "${gate.requires_confidence}" has been asserted for ${gate.subject}.${gate.predicate}. A claim of another class may exist, but this gate will not read it.`}
           </p>
@@ -231,6 +245,17 @@ function GateRow({ gate }: { gate: GateStatus }) {
   );
 }
 
+/**
+ * The three answers, ranked by weight rather than hue:
+ *
+ *   reached   solid inverted fill — the gate is satisfied, full stop
+ *   missed    destructive edge and text — we looked and the number is wrong
+ *   unknown   dashed edge, recessed — nothing we would accept has been measured
+ *
+ * `unknown` is deliberately the quietest of the three. It is not a failure; it
+ * is the absence of a reading, and dressing it as a failure would turn a
+ * missing measurement into a claim about the world.
+ */
 function GatePill({
   state,
   requires,
@@ -240,8 +265,8 @@ function GatePill({
 }) {
   if (state === "reached") {
     return (
-      <span className="inline-flex w-[13.5rem] items-center justify-center gap-1.5 rounded-md border-[0.5px] border-success/35 bg-success/12 px-3 py-2 font-medium text-sm text-success-foreground">
-        <CircleCheckIcon aria-hidden className="size-4 text-success" />
+      <span className="inline-flex w-[13.5rem] items-center justify-center gap-1.5 rounded-lg bg-primary px-3 py-2 font-medium text-primary-foreground text-sm">
+        <CircleCheckIcon aria-hidden className="size-4" />
         reached
       </span>
     );
@@ -249,7 +274,7 @@ function GatePill({
 
   if (state === "missed") {
     return (
-      <span className="inline-flex w-[13.5rem] items-center justify-center gap-1.5 rounded-md border-[0.5px] border-destructive/30 bg-destructive/8 px-3 py-2 font-medium text-destructive text-sm">
+      <span className="inline-flex w-[13.5rem] items-center justify-center gap-1.5 rounded-lg border border-destructive/50 px-3 py-2 font-medium text-destructive text-sm">
         <CircleXIcon aria-hidden className="size-4" />
         not reached
       </span>
@@ -258,14 +283,14 @@ function GatePill({
 
   return (
     <span
-      className="inline-flex w-[13.5rem] flex-col items-center gap-0.5 rounded-md border-[0.5px] border-warning/45 border-dashed bg-warning/10 px-3 py-2 text-center"
+      className="inline-flex w-[13.5rem] flex-col items-center gap-0.5 rounded-lg border border-dashed border-border px-3 py-2 text-center text-muted-foreground"
       title={`This gate evaluates only ${requires} rows. None exists, so the answer is unknown — not false.`}
     >
-      <span className="inline-flex items-center gap-1.5 font-medium text-sm text-warning-foreground">
+      <span className="inline-flex items-center gap-1.5 font-medium text-sm">
         <CircleHelpIcon aria-hidden className="size-4" />
         no qualifying evidence
       </span>
-      <span className="text-[11px] text-warning-foreground/80">
+      <span className="text-2xs">
         needs <span className="font-mono">{requires}</span>
       </span>
     </span>

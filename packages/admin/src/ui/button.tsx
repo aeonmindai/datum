@@ -2,35 +2,36 @@ import type * as React from "react";
 import { cn, variant as pick } from "../lib/cn";
 
 /**
- * Base + variant + size class strings taken from echos_app
- * `components/ui/button.tsx`. Dropped: `special` / `specialSecondary` /
- * `editOutline` / `destructiveOutline` (echos-brand gradients with no meaning
- * here) and Radix `asChild` (no @radix-ui/react-slot dependency). Kept: the
- * `default` variant's unusual text-only treatment, so a bare <Button> reads as
- * a quiet action exactly as it does in echos.
+ * Base, variant and size strings copied verbatim from runcrate_app
+ * `src/components/ui/button.tsx`. Same six variants (default / destructive /
+ * outline / secondary / ghost / link) and the same four sizes.
+ *
+ * Two differences, both structural rather than visual: there is no cva (variant
+ * maps are plain records looked up through `cn`) and no Radix `asChild` (the
+ * hash router navigates through real anchors, so `LinkButton` renders an <a>
+ * wearing the same classes). `iconSm` is an addition — runcrate's own header
+ * and sidebar trigger reach for `size="icon" className="size-7"`, and a dense
+ * admin table needs that shape often enough to name it.
  */
 const buttonBase =
-  "inline-flex shrink-0 items-center justify-center gap-1 whitespace-nowrap rounded-md font-medium text-sm outline-none transition-all cursor-pointer focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0";
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0";
 
 const buttonVariants = {
-  default: "text-foreground hover:text-foreground/80",
-  primary:
-    "bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-primary/30",
+  default: "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90",
   destructive:
-    "bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20",
-  outline:
-    "border bg-background hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
+    "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
+  outline: "border border-input bg-input-bg hover:bg-accent hover:text-accent-foreground",
   secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-  ghost: "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
+  ghost: "hover:bg-accent hover:text-accent-foreground",
   link: "text-primary underline-offset-4 hover:underline",
 } as const;
 
 const buttonSizes = {
-  default: "h-10 px-4 py-2 has-[>svg]:px-3",
-  sm: "h-8 gap-1.5 rounded-md px-3 has-[>svg]:px-2.5",
-  lg: "h-12 rounded-md px-6 has-[>svg]:px-4",
-  icon: "size-10",
-  iconSm: "size-8",
+  default: "h-10 px-5 py-2",
+  sm: "h-8 rounded-lg px-3.5 text-xs",
+  lg: "h-11 rounded-xl px-8",
+  icon: "h-10 w-10",
+  iconSm: "h-8 w-8 rounded-lg",
 } as const;
 
 export type ButtonVariant = keyof typeof buttonVariants;

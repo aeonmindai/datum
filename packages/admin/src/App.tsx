@@ -88,22 +88,22 @@ function Routed({ location, me }: { location: Location; me: Me }) {
 
 function Booting() {
   return (
-    <div className="flex min-h-svh flex-col gap-6 bg-sidebar p-6">
-      <div className="flex items-center gap-2.5">
-        <span className="flex size-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
-          <ShieldCheckIcon aria-hidden className="size-4" />
+    <div className="flex min-h-svh flex-col gap-3 bg-sidebar p-3">
+      <div className="flex h-11 items-center gap-2.5 px-2">
+        <span className="flex size-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
+          <ShieldCheckIcon aria-hidden className="size-3.5" />
         </span>
-        <span className="font-semibold text-foreground">Datum</span>
+        <span className="font-semibold text-lg leading-5">Datum</span>
       </div>
-      <div className="flex flex-1 flex-col gap-4 rounded-xl border border-sidebar-border bg-background p-6">
+      <div className="flex flex-1 flex-col gap-6 rounded-xl border border-edge-subtle bg-background p-8 lg:p-10">
         <Skeleton className="h-7 w-56" />
         <Skeleton className="h-4 w-96" />
         <div className="grid gap-4 sm:grid-cols-3">
-          <Skeleton className="h-28 rounded-xl" />
-          <Skeleton className="h-28 rounded-xl" />
-          <Skeleton className="h-28 rounded-xl" />
+          <Skeleton className="h-28 rounded-2xl" />
+          <Skeleton className="h-28 rounded-2xl" />
+          <Skeleton className="h-28 rounded-2xl" />
         </div>
-        <Skeleton className="h-64 rounded-xl" />
+        <Skeleton className="h-64 rounded-2xl" />
       </div>
     </div>
   );
@@ -133,7 +133,7 @@ function Routes() {
 
   if (session.status === "unreachable") {
     return (
-      <div className="flex min-h-svh items-center justify-center bg-sidebar p-6">
+      <div className="flex min-h-svh items-center justify-center bg-background p-6">
         <div className="flex w-full max-w-xl flex-col gap-4">
           <div className="flex items-center gap-2.5">
             <span className="flex size-9 items-center justify-center rounded-md bg-primary text-primary-foreground">

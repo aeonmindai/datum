@@ -15,7 +15,7 @@ import type {
   VerificationCapability,
   VerificationRecord,
 } from "../lib/types";
-import { Badge } from "../ui/badge";
+import { Badge, BADGE_PENDING } from "../ui/badge";
 import { HoverCard } from "../ui/hover-card";
 import { MicroLabel, Mono } from "../ui/primitives";
 
@@ -80,11 +80,17 @@ const STANDING_ICON = {
   "n/a": InfoIcon,
 } as const;
 
+/**
+ * Only `ok` gets full-contrast text; every other standing is recessed. The
+ * palette has no green to spend on "verified" and no amber on "waiting", and
+ * the distinction that actually matters here — settled versus not settled —
+ * is carried by contrast on its own.
+ */
 const STANDING_CLASS = {
-  ok: "text-success",
-  pending: "text-warning",
+  ok: "text-foreground",
+  pending: "text-muted-foreground",
   off: "text-muted-foreground",
-  "n/a": "text-info",
+  "n/a": "text-muted-foreground",
 } as const;
 
 function VerificationOutcomeBadge({ record }: { record: VerificationRecord }) {
@@ -102,8 +108,9 @@ function VerificationOutcomeBadge({ record }: { record: VerificationRecord }) {
   if (record.outcome === "unresolvable") {
     return (
       <Badge
-        title="A checker could not resolve the referenced commit at all — it may have been lost or never pushed."
-        variant="warning"
+        className={BADGE_PENDING}
+        title="A checker could not resolve the referenced commit at all — it may have been lost or never pushed. That is not a refutation."
+        variant="outline"
       >
         <FileWarningIcon aria-hidden />
         unresolvable
@@ -111,7 +118,7 @@ function VerificationOutcomeBadge({ record }: { record: VerificationRecord }) {
     );
   }
   return (
-    <Badge variant="success">
+    <Badge variant="default">
       <ShieldCheckIcon aria-hidden />
       confirmed
     </Badge>
@@ -166,7 +173,7 @@ export function ProvenancePanel({
           <MicroLabel>Contained in</MicroLabel>
           <div className="flex flex-wrap gap-1">
             {e.contained_in.map((ref) => (
-              <Badge className="font-mono text-[11px]" key={ref} variant="outline">
+              <Badge className="font-mono text-2xs" key={ref} variant="outline">
                 {ref}
               </Badge>
             ))}
@@ -209,7 +216,7 @@ export function ProvenancePanel({
         </div>
       ) : null}
 
-      <div className="flex flex-col gap-1.5 border-border border-t pt-3">
+      <div className="flex flex-col gap-1.5 border-edge-subtle border-t pt-3">
         <MicroLabel>Verification</MicroLabel>
         {verification ? (
           <div className="flex flex-col gap-1.5">
@@ -251,7 +258,7 @@ export function EvidenceCell({ assertion }: { assertion: Assertion }) {
   return (
     <HoverCard
       trigger={
-        <span className="inline-flex max-w-[9rem] items-center gap-1.5">
+        <span className="inline-flex max-w-[8rem] items-center gap-1.5">
           {commit ? (
             <GitCommitHorizontalIcon
               aria-hidden
@@ -261,7 +268,7 @@ export function EvidenceCell({ assertion }: { assertion: Assertion }) {
           <span
             className={cn(
               "truncate border-muted-foreground/40 border-b border-dashed text-sm",
-              commit ? "font-mono text-[13px]" : "text-muted-foreground",
+              commit ? "font-mono text-sm" : "text-muted-foreground",
             )}
           >
             {summary}

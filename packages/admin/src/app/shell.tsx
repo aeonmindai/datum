@@ -5,13 +5,15 @@ import {
   KeyRoundIcon,
   LayoutDashboardIcon,
   LogOutIcon,
+  MoonIcon,
   ScrollTextIcon,
   ServerIcon,
   ShieldCheckIcon,
+  SunIcon,
   TargetIcon,
   type LucideIcon,
 } from "lucide-react";
-import type { ReactNode } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { cn } from "../lib/cn";
 import { href } from "../lib/router";
 import type { Me } from "../lib/types";
@@ -46,20 +48,84 @@ export const NAV_GROUPS: { label: string; items: NavEntry[] }[] = [
   },
 ];
 
+const THEME_KEY = "datum-theme";
+
 function isActive(current: string, path: string): boolean {
   if (path === "/") return current === "/";
   return current === path || current.startsWith(`${path}/`);
 }
 
 /**
- * Layout is echos_app's `app/(main)/layout.tsx` shape: an 18rem sidebar on the
- * `--sidebar` surface with a 3rem header row, and the content as an inset card
- * (`SidebarInset`: `m-2 ml-0 rounded-xl border border-sidebar-border
- * bg-background`, `h-[calc(100svh-1rem)]`, its own scroll container). The nav
- * button treatment — `rounded-sm p-2.5 font-medium text-sm`,
- * `hover:bg-muted-foreground/10`, and the active state's bordered
- * `bg-sidebar-accent` card with echos's exact shadow tuple and `!text-primary`
- * icon — is copied from `sidebarMenuButtonVariants`.
+ * Theme state. index.html applies the class before first paint so a dark-mode
+ * operator never sees a white flash; this hook only reflects and mutates it.
+ * An explicit choice is sticky. With no stored choice the OS keeps control, so
+ * a system theme switch is followed live rather than only on reload.
+ */
+function useTheme(): ["light" | "dark", () => void] {
+  const [theme, setTheme] = useState<"light" | "dark">(() =>
+    document.documentElement.classList.contains("dark") ? "dark" : "light",
+  );
+
+  useEffect(() => {
+    let stored: string | null = null;
+    try {
+      stored = localStorage.getItem(THEME_KEY);
+    } catch {
+      return;
+    }
+    if (stored === "light" || stored === "dark") return;
+
+    const query = window.matchMedia("(prefers-color-scheme: dark)");
+    const follow = (event: MediaQueryListEvent | MediaQueryList) => {
+      document.documentElement.classList.toggle("dark", event.matches);
+      setTheme(event.matches ? "dark" : "light");
+    };
+    query.addEventListener("change", follow);
+    return () => query.removeEventListener("change", follow);
+  }, []);
+
+  const toggle = useCallback(() => {
+    setTheme((current) => {
+      const next = current === "dark" ? "light" : "dark";
+      document.documentElement.classList.toggle("dark", next === "dark");
+      try {
+        localStorage.setItem(THEME_KEY, next);
+      } catch {
+        // Private mode: the choice holds for this tab and no longer.
+      }
+      return next;
+    });
+  }, []);
+
+  return [theme, toggle];
+}
+
+/**
+ * Layout is runcrate_app's `src/components/dashboard-layout.tsx` shape:
+ * `SidebarProvider` (a `bg-sidebar flex h-svh w-full` wrapper carrying
+ * `--sidebar-width: 16rem`), a `variant="inset"` sidebar in its own `p-3`
+ * gutter, and `SidebarInset` — `bg-background relative flex w-full flex-1
+ * flex-col overflow-hidden md:m-3 md:ml-0 md:rounded-xl md:border
+ * md:border-edge-subtle`. Content sits in the scroll container at
+ * `p-8 pb-10 lg:p-10 lg:pb-12`, exactly as runcrate pads it.
+ *
+ * The header row is `src/components/dashboard-header.tsx`: `flex h-11
+ * items-center gap-3 px-4 lg:px-6 flex-shrink-0 border-b border-edge-subtle`,
+ * label on the left, `ml-auto` actions on the right, `h-4 w-px bg-edge-subtle`
+ * hairlines between groups, and the rounded-full `border border-edge` pill for
+ * a live monospace figure — which is what the write sequence is.
+ *
+ * Nav rows use the shipped `sidebarMenuButtonVariants` from
+ * `src/components/ui/sidebar.tsx`, not the bespoke `nav-items.tsx` override:
+ * that override draws its active pill in `bg-background` on a `bg-sidebar`
+ * parent, and since `--sidebar` is defined equal to `--background` the pill is
+ * the same colour as what is behind it. The primitive's
+ * `data-[active=true]:bg-sidebar-accent` is a real step off the surface.
+ * Group labels are the screen idiom from `nav-items.tsx` — `text-2xs
+ * font-semibold text-muted-foreground/50 uppercase tracking-widest`.
+ *
+ * There is no collapse toggle. runcrate's sidebar collapses to an icon rail;
+ * adding that here would be new behaviour, and this is a restyle.
  */
 export function Shell({
   me,
@@ -73,129 +139,163 @@ export function Shell({
   children: ReactNode;
 }) {
   const { signOut } = useSession();
+  const [theme, toggleTheme] = useTheme();
 
   return (
     <div
-      className="flex min-h-svh w-full bg-sidebar text-sidebar-foreground"
-      style={
-        {
-          "--sidebar-width": "calc(var(--spacing) * 72)",
-          "--header-height": "calc(var(--spacing) * 12)",
-        } as React.CSSProperties
-      }
+      className="flex h-svh w-full bg-sidebar text-sidebar-foreground"
+      data-slot="sidebar-wrapper"
+      style={{ "--sidebar-width": "16rem" } as React.CSSProperties}
     >
-      <aside className="sticky top-0 hidden h-svh w-(--sidebar-width) shrink-0 flex-col md:flex">
-        <div className="flex h-(--header-height) items-center gap-2.5 px-4">
-          <span className="flex size-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
-            <ShieldCheckIcon aria-hidden className="size-4" />
-          </span>
-          <span className="flex min-w-0 flex-col leading-none">
-            <span className="font-semibold text-[15px] text-foreground">Datum</span>
-            <Mono className="truncate text-[11px] text-muted-foreground">
-              {me.scope_root}
-            </Mono>
-          </span>
-        </div>
-
-        <nav
-          aria-label="Sections"
-          className="datum-scroll flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-2 py-2"
-        >
-          {NAV_GROUPS.map((group) => (
-            <div className="flex flex-col gap-1 px-2" key={group.label}>
-              <div className="flex h-8 shrink-0 items-center font-normal text-neutral-600 text-sm">
-                {group.label}
-              </div>
-              <ul className="flex w-full min-w-0 flex-col gap-0.5">
-                {group.items.map((item) => {
-                  const active = isActive(currentPath, item.path);
-                  return (
-                    <li key={item.path}>
-                      <a
-                        aria-current={active ? "page" : undefined}
-                        className={cn(
-                          "flex w-full items-center gap-2.5 overflow-hidden rounded-sm p-2.5 text-left font-medium text-sm outline-hidden transition-[width,height,padding] focus-visible:ring-2 focus-visible:ring-sidebar-ring",
-                          "hover:bg-muted-foreground/10 hover:text-sidebar-accent-foreground",
-                          active &&
-                            "rounded-md border border-border bg-sidebar-accent text-foreground shadow-[0_1px_3px_0_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)]",
-                        )}
-                        data-active={active}
-                        href={href(item.path)}
-                      >
-                        <item.icon
-                          aria-hidden
-                          className={cn(
-                            "size-4 shrink-0",
-                            active ? "text-primary" : "text-neutral-500",
-                          )}
-                        />
-                        <span className="truncate">{item.label}</span>
-                      </a>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          ))}
-        </nav>
-
-        <div className="relative flex flex-col gap-2 px-4 pb-4">
-          <div className="pointer-events-none absolute inset-x-0 -top-16 h-16 bg-linear-to-b from-transparent to-sidebar" />
-          <div className="flex flex-col gap-1 rounded-md border border-sidebar-border bg-sidebar-accent/60 p-3">
-            <div className="flex items-baseline justify-between gap-2">
-              <span className="datum-microlabel">org</span>
-              <Mono className="truncate text-[12px]">{me.org}</Mono>
-            </div>
-            <div className="flex items-baseline justify-between gap-2">
-              <span className="datum-microlabel">postgres</span>
-              <Mono className="text-[12px]">{me.postgres}</Mono>
-            </div>
-            <div className="flex items-baseline justify-between gap-2">
-              <span className="datum-microlabel">verification</span>
-              <Mono
-                className={cn(
-                  "text-[12px]",
-                  me.verification.configured ? "text-success" : "text-muted-foreground",
-                )}
-                title={
-                  me.verification.configured
-                    ? `Checker: ${me.verification.method}. Unverified rows can be promoted to measured.`
-                    : "No checker configured on this instance, so nothing can be promoted to measured."
-                }
-              >
-                {me.verification.configured ? me.verification.method : "not configured"}
-              </Mono>
+      <aside className="hidden w-(--sidebar-width) shrink-0 p-3 md:flex">
+        <div className="flex h-full w-full min-w-0 flex-col overflow-hidden">
+          <div className="flex flex-col gap-2 p-2">
+            <div className="flex items-center gap-2.5 overflow-hidden px-2 py-1">
+              <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
+                <ShieldCheckIcon aria-hidden className="size-3.5" />
+              </span>
+              <span className="flex min-w-0 flex-col">
+                <span className="font-semibold text-lg leading-5 text-sidebar-foreground">
+                  Datum
+                </span>
+                <Mono className="truncate text-2xs text-muted-foreground">
+                  {me.scope_root}
+                </Mono>
+              </span>
             </div>
           </div>
-          <Button
-            className="justify-start px-2.5"
-            onClick={() => void signOut()}
-            size="sm"
-            variant="ghost"
+
+          <nav
+            aria-label="Sections"
+            className="scrollbar-hide flex min-h-0 flex-1 flex-col gap-2 overflow-auto"
           >
-            <LogOutIcon />
-            Sign out
-          </Button>
+            {NAV_GROUPS.map((group) => (
+              <div
+                className="relative flex w-full min-w-0 flex-col p-2"
+                key={group.label}
+              >
+                <div className="flex h-8 shrink-0 items-center px-2 font-semibold text-2xs text-muted-foreground/50 uppercase tracking-widest">
+                  {group.label}
+                </div>
+                <ul className="flex w-full min-w-0 flex-col gap-1">
+                  {group.items.map((item) => {
+                    const active = isActive(currentPath, item.path);
+                    return (
+                      <li key={item.path}>
+                        <a
+                          aria-current={active ? "page" : undefined}
+                          className={cn(
+                            "flex h-8 w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm outline-hidden ring-sidebar-ring transition-[background-color,color] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0",
+                            "data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground",
+                          )}
+                          data-active={active}
+                          href={href(item.path)}
+                        >
+                          <item.icon aria-hidden className="text-muted-foreground" />
+                          <span>{item.label}</span>
+                        </a>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            ))}
+          </nav>
+
+          <div className="flex flex-col gap-2 p-2">
+            <div className="flex flex-col gap-1 rounded-lg border border-edge-subtle px-3 py-2.5">
+              <div className="flex items-baseline justify-between gap-2">
+                <span className="datum-microlabel">org</span>
+                <Mono className="truncate text-xs">{me.org}</Mono>
+              </div>
+              <div className="flex items-baseline justify-between gap-2">
+                <span className="datum-microlabel">postgres</span>
+                <Mono className="text-xs">{me.postgres}</Mono>
+              </div>
+              <div className="flex items-baseline justify-between gap-2">
+                <span className="datum-microlabel">checker</span>
+                <Mono
+                  className={cn(
+                    "truncate text-xs",
+                    me.verification.configured
+                      ? "text-foreground"
+                      : "text-muted-foreground",
+                  )}
+                  title={me.verification.note}
+                >
+                  {me.verification.configured
+                    ? me.verification.method
+                    : "not configured"}
+                </Mono>
+              </div>
+            </div>
+            <div className="flex items-center gap-1">
+              <Button
+                className="flex-1 justify-start px-2"
+                onClick={() => void signOut()}
+                size="sm"
+                variant="ghost"
+              >
+                <LogOutIcon />
+                Sign out
+              </Button>
+              <Button
+                aria-label={
+                  theme === "dark" ? "Switch to light theme" : "Switch to dark theme"
+                }
+                onClick={toggleTheme}
+                size="iconSm"
+                title={
+                  theme === "dark" ? "Switch to light theme" : "Switch to dark theme"
+                }
+                variant="ghost"
+              >
+                {theme === "dark" ? <SunIcon /> : <MoonIcon />}
+              </Button>
+            </div>
+          </div>
         </div>
       </aside>
 
-      <main className="relative m-0 flex min-w-0 w-full flex-1 flex-col bg-background md:m-2 md:ml-0 md:h-[calc(100svh-1rem)] md:overflow-y-auto md:rounded-xl md:border md:border-sidebar-border">
-        <header className="sticky top-0 z-40 flex h-(--header-height) shrink-0 items-center justify-between gap-4 border-b border-b-[0.5px] border-b-[#E5E5E5] bg-background/95 px-6 backdrop-blur-sm">
-          <div className="flex min-w-0 items-center gap-2">
-            <span className="truncate font-medium text-sm">{title}</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <span
-              className="flex items-baseline gap-1.5"
+      <main className="relative flex w-full min-w-0 flex-1 flex-col overflow-hidden bg-background md:m-3 md:ml-0 md:rounded-xl md:border md:border-edge-subtle">
+        <header className="flex h-11 shrink-0 items-center gap-3 border-b border-edge-subtle px-4 lg:px-6">
+          <span className="truncate font-medium text-sm">{title}</span>
+          <div className="ml-auto flex items-center gap-3">
+            <div
+              className="flex h-7 items-center overflow-hidden rounded-full border border-edge"
               title="Current write sequence. Every assertion is stamped with one of these, and the as-of control rewinds against it."
             >
-              <span className="datum-microlabel">sequence</span>
-              <Mono className="text-[13px] text-foreground">{me.sequence}</Mono>
-            </span>
+              <span className="px-3 font-medium text-2xs text-muted-foreground uppercase tracking-wider">
+                seq
+              </span>
+              <span className="h-full w-px bg-edge" />
+              <span className="datum-num px-3 font-medium font-mono text-sm text-foreground/70">
+                {me.sequence}
+              </span>
+            </div>
+            <span className="h-4 w-px bg-edge-subtle md:hidden" />
+            <Button
+              aria-label={
+                theme === "dark" ? "Switch to light theme" : "Switch to dark theme"
+              }
+              className="md:hidden"
+              onClick={toggleTheme}
+              size="iconSm"
+              variant="ghost"
+            >
+              {theme === "dark" ? <SunIcon /> : <MoonIcon />}
+            </Button>
           </div>
         </header>
 
-        <div className="flex min-h-0 flex-1 flex-col gap-6 p-6">{children}</div>
+        <div
+          className="min-h-0 w-full min-w-0 flex-1 overflow-x-hidden overflow-y-auto p-8 pb-10 lg:p-10 lg:pb-12"
+          data-slot="scroll-container"
+        >
+          <div className="flex min-h-full min-w-0 max-w-full flex-col gap-6">
+            {children}
+          </div>
+        </div>
       </main>
     </div>
   );
@@ -206,7 +306,7 @@ export function MobileNav({ currentPath }: { currentPath: string }) {
   return (
     <nav
       aria-label="Sections"
-      className="datum-scroll -mx-6 flex gap-1 overflow-x-auto px-6 pb-1 md:hidden"
+      className="scrollbar-hide -mx-8 flex shrink-0 gap-1 overflow-x-auto px-8 md:hidden"
     >
       {NAV_GROUPS.flatMap((g) => g.items).map((item) => {
         const active = isActive(currentPath, item.path);
@@ -214,10 +314,10 @@ export function MobileNav({ currentPath }: { currentPath: string }) {
           <a
             aria-current={active ? "page" : undefined}
             className={cn(
-              "flex shrink-0 items-center gap-2 rounded-md px-3 py-1.5 font-medium text-sm transition-colors",
+              "flex h-8 shrink-0 items-center gap-2 rounded-md px-2.5 font-medium text-sm transition-colors",
               active
-                ? "border border-border bg-accent text-foreground"
-                : "text-muted-foreground hover:bg-accent",
+                ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                : "text-muted-foreground hover:bg-accent hover:text-foreground",
             )}
             href={href(item.path)}
             key={item.path}

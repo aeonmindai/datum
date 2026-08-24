@@ -10,12 +10,18 @@ import {
 import { cn } from "../lib/cn";
 
 /**
- * echos_app uses Sonner. Its styling is what carries over
- * (`components/ui/sonner.tsx`): `w-[394px] rounded-xl border border-neutral-200
- * p-4` with the custom
- * `shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-2px_rgba(0,0,0,0.05)]`,
- * a primary-coloured check for success, and a white `size-6` close button.
- * The queue itself is a small context rather than a dependency.
+ * runcrate_app uses Sonner. Its styling is what carries over, from
+ * `src/components/ui/sonner.tsx`: the toast is `bg-surface border border-edge`,
+ * the title is `text-foreground`, the body is `text-muted-foreground`. The
+ * elevation is `shadow-floating` — one of the three per-theme shadow tokens
+ * runcrate defines in its tailwind config precisely for detached surfaces.
+ *
+ * Two things not copied. runcrate's per-tone Sonner classNames are raw
+ * `bg-red-50 / bg-green-50 / bg-yellow-50` literals, which are outside the
+ * palette and read as a different product; the tone here is carried by the icon
+ * instead, `text-foreground` for success and `text-destructive` plus a
+ * `border-destructive/50` edge for failure. And the queue is a small context
+ * rather than a dependency.
  */
 export type ToastTone = "success" | "error";
 
@@ -67,27 +73,32 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         {toasts.map((toast) => (
           <div
             className={cn(
-              "datum-toast pointer-events-auto flex w-[394px] max-w-[calc(100vw-2rem)] items-start gap-3 rounded-xl border border-neutral-200 bg-white p-4",
-              "shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-2px_rgba(0,0,0,0.05)]",
+              "datum-toast pointer-events-auto flex w-88 max-w-[calc(100vw-2rem)] items-start gap-3 rounded-xl border bg-surface p-4 shadow-floating",
+              toast.tone === "error" ? "border-destructive/50" : "border-edge",
             )}
             key={toast.id}
           >
             {toast.tone === "success" ? (
-              <CircleCheckIcon aria-hidden className="mt-px size-5 shrink-0 text-primary" />
+              <CircleCheckIcon
+                aria-hidden
+                className="mt-px size-4 shrink-0 text-foreground"
+              />
             ) : (
               <TriangleAlertIcon
                 aria-hidden
-                className="mt-px size-5 shrink-0 text-destructive"
+                className="mt-px size-4 shrink-0 text-destructive"
               />
             )}
             <div className="flex min-w-0 flex-1 flex-col gap-1">
-              <p className="font-medium text-sm leading-5">{toast.title}</p>
+              <p className="font-medium text-foreground text-sm leading-none">
+                {toast.title}
+              </p>
               {toast.body ? (
-                <p className="text-muted-foreground text-sm leading-5">{toast.body}</p>
+                <p className="text-muted-foreground text-sm">{toast.body}</p>
               ) : null}
             </div>
             <button
-              className="flex size-6 shrink-0 items-center justify-center rounded-md bg-white text-muted-foreground transition-colors hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none"
+              className="flex size-6 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
               onClick={() => dismiss(toast.id)}
               type="button"
             >

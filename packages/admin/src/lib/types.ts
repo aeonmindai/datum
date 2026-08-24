@@ -203,14 +203,24 @@ export interface RegistryNode {
 }
 
 /**
- * Instance-level verification capability. When `configured` is false nothing on
- * this instance can ever be promoted to `measured`, so an `unverified` row is
- * not "pending" — it is terminal until an operator wires a checker up. The
- * provenance popover says so rather than implying a queue exists.
+ * Instance-level verification capability, as `/admin/api/me` sends it. When
+ * `configured` is false nothing on this instance can ever be promoted to
+ * `measured`, so an `unverified` row is not "pending" — it is terminal until an
+ * operator wires a checker up. The provenance popover says so rather than
+ * implying a queue exists.
+ *
+ * `note` is the server's own sentence about what this deployment can actually
+ * resolve — local clones, the GitHub API with a token, or the public GitHub API
+ * where a private repo comes back unresolvable rather than refuted. It is the
+ * difference between "unverified" meaning "not yet" and "not here", so it is
+ * surfaced on hover wherever the method is shown. `authenticated` says whether
+ * a GitHub token is set.
  */
 export interface VerificationCapability {
   configured: boolean;
   method: "local-mirror" | "github-api" | "none";
+  authenticated: boolean;
+  note: string;
 }
 
 export interface Me {

@@ -5,10 +5,11 @@ import { cn } from "../lib/cn";
 import { Button } from "./button";
 
 /**
- * Monospace token. echos aliases --font-mono to Outfit and never renders code,
- * so this treatment is Datum's own: every id, hash, commit, scope path and
- * sequence number goes through it, with tabular figures so a polling table does
- * not jitter.
+ * Monospace token. runcrate sets `font-mono` to JetBrains Mono and reaches for
+ * it on every literal value in its data tables — ip addresses, resource names,
+ * balances, timestamps — always with `tabular-nums` so a polling table does not
+ * jitter. Every id, hash, commit, scope path and sequence number here goes
+ * through this.
  */
 export function Mono({
   children,
@@ -21,7 +22,7 @@ export function Mono({
 }) {
   return (
     <span
-      className={cn("datum-num font-mono text-[13px] tracking-tight", className)}
+      className={cn("datum-num font-mono text-sm tracking-tight", className)}
       title={title}
     >
       {children}
@@ -29,7 +30,10 @@ export function Mono({
   );
 }
 
-/** Uppercase tracked micro-label for field names in detail panels. */
+/**
+ * Uppercase tracked micro-label. Same treatment runcrate uses for the column
+ * headers of its data tables — see `.datum-microlabel` in index.css.
+ */
 export function MicroLabel({
   children,
   className,
@@ -68,7 +72,7 @@ export function CopyButton({
   value: string;
   label?: string;
   size?: "sm" | "default";
-  variant?: "outline" | "ghost" | "primary";
+  variant?: "outline" | "ghost" | "default";
   className?: string;
 }) {
   const [copied, setCopied] = useState(false);
@@ -117,17 +121,25 @@ export function JsonBlock({
   return (
     <pre
       className={cn(
-        "datum-scroll overflow-auto rounded-md border-[0.5px] border-[#E5E5E5] bg-[#FAFAFA] p-3 font-mono text-[12px] leading-relaxed",
+        "overflow-auto rounded-lg border border-edge bg-muted/50 p-3 font-mono text-xs leading-relaxed",
         maxHeight,
         className,
       )}
+      data-slot="scroll-container"
     >
       {prettyJson(value)}
     </pre>
   );
 }
 
-/** Page header: title, one-line explanation, actions on the right. */
+/**
+ * Page header. runcrate's screens all open the same way
+ * (`src/pages/dashboard/audit-log.tsx`, `api-keys.tsx`): a `flex justify-between
+ * items-center mb-6` row with `h1.text-xl.font-medium`, a
+ * `text-muted-foreground text-sm mt-1` line under it, and actions in a
+ * `flex gap-2` on the right. `font-medium` rather than semibold, and no
+ * letter-spacing override — the body rule's -0.011em already does that work.
+ */
 export function PageHeader({
   title,
   description,
@@ -139,12 +151,12 @@ export function PageHeader({
 }) {
   return (
     <div className="flex flex-wrap items-start justify-between gap-4">
-      <div className="flex min-w-0 flex-col gap-1.5">
-        <h1 className="font-semibold text-foreground text-xl tracking-tight">
-          {title}
-        </h1>
+      <div className="flex min-w-0 flex-col">
+        <h1 className="font-medium text-xl">{title}</h1>
         {description ? (
-          <p className="max-w-2xl text-muted-foreground text-sm">{description}</p>
+          <p className="mt-1 max-w-2xl text-muted-foreground text-sm">
+            {description}
+          </p>
         ) : null}
       </div>
       {actions ? <div className="flex items-center gap-2">{actions}</div> : null}
@@ -160,18 +172,18 @@ export function StatChip({
 }: {
   label: string;
   value: number | string;
-  tone?: "muted" | "danger" | "primary";
+  tone?: "muted" | "destructive";
 }) {
   return (
     <div
       className={cn(
-        "flex items-center gap-2 rounded-md border-[0.5px] px-2.5 py-1.5",
-        tone === "danger" && "border-destructive/30 bg-destructive/5",
-        tone === "primary" && "border-primary/25 bg-primary/5",
-        tone === "muted" && "border-[#E5E5E5] bg-[#FAFAFA]",
+        "flex items-center gap-2 rounded-lg border px-2.5 py-1.5",
+        tone === "destructive"
+          ? "border-destructive/50 text-destructive"
+          : "border-edge bg-muted/50",
       )}
     >
-      <span className="font-mono text-[11px] text-muted-foreground">{label}</span>
+      <span className="font-mono text-2xs text-muted-foreground">{label}</span>
       <span className="datum-num font-semibold text-sm">{value}</span>
     </div>
   );

@@ -1,18 +1,25 @@
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { cn } from "../lib/cn";
 
 /**
- * Port of echos_app `components/ui/animated-tabs.tsx`: the list is
- * `rounded-md bg-neutral-50 border border-neutral-200` with `h-10 gap-0.5 p-0.5`
- * (echos's `size="md"`), triggers are `rounded-sm text-muted-foreground`
- * turning `text-primary` when selected, and a white indicator
- * `rounded-sm border border-neutral-200 bg-white shadow-sm` slides between them
- * with `transition-all duration-300 ease-in-out`.
+ * Class strings copied verbatim from runcrate_app `src/components/ui/tabs.tsx`:
+ * list `bg-muted text-muted-foreground inline-flex h-10 w-fit items-center
+ * justify-center rounded-xl p-1`, trigger `inline-flex h-full flex-1
+ * items-center justify-center gap-1.5 rounded-lg px-3 py-1.5 text-sm
+ * font-medium whitespace-nowrap transition-colors focus-visible:ring-2
+ * focus-visible:ring-ring/40` with the selected state
+ * `bg-background text-foreground shadow-sm`.
  *
- * The measurement approach is echos's too — read the selected trigger's
- * bounding box relative to the list and position an absolute div — but driven by
- * the controlled `value` prop rather than a MutationObserver on Radix's
- * aria-selected attribute.
+ * runcrate's tabs have no sliding indicator — the selected trigger simply gets
+ * the background surface and a hairline shadow. The animated sliding indicator
+ * that used to live here came from the previous design language, so it is gone
+ * along with the measurement effect it needed; `transition-colors` is the whole
+ * animation now.
+ *
+ * Behaviour is unchanged: controlled `value`, roving tabindex, and arrow keys
+ * that move selection and focus together (with a roving tabindex, leaving focus
+ * on the deselected tab would strand the focus ring on something Tab can no
+ * longer reach).
  */
 export interface TabItem<T extends string> {
   value: T;
@@ -35,110 +42,69 @@ export function Tabs<T extends string>({
   label,
   className,
 }: TabsProps<T>) {
-  const list = useRef<HTMLDivElement>(null);
-  const [indicator, setIndicator] = useState({
-    left: 0,
-    top: 0,
-    width: 0,
-    height: 0,
-  });
-
-  const update = useCallback(() => {
-    const host = list.current;
-    if (!host) return;
-    const active = host.querySelector<HTMLElement>('[aria-selected="true"]');
-    if (!active) return;
-    const a = active.getBoundingClientRect();
-    const h = host.getBoundingClientRect();
-    setIndicator({
-      left: a.left - h.left,
-      top: a.top - h.top,
-      width: a.width,
-      height: a.height,
-    });
-  }, []);
-
-  useEffect(() => {
-    const id = window.setTimeout(update, 0);
-    window.addEventListener("resize", update);
-    return () => {
-      window.clearTimeout(id);
-      window.removeEventListener("resize", update);
-    };
-  }, [update, value, items]);
-
-  /**
-   * Arrow keys move selection AND focus. With a roving tabindex the previously
-   * selected tab drops to tabIndex -1, so leaving focus on it would strand the
-   * focus ring on a tab that is no longer reachable by Tab.
-   */
   const move = (direction: 1 | -1) => {
     const at = items.findIndex((i) => i.value === value);
     const next = items[(at + direction + items.length) % items.length];
     if (!next) return;
     onValueChange(next.value);
     window.setTimeout(() => {
-      list.current
-        ?.querySelector<HTMLElement>('[role="tab"][aria-selected="true"]')
+      document
+        .querySelector<HTMLElement>(
+          `[role="tablist"][aria-label="${label}"] [role="tab"][aria-selected="true"]`,
+        )
         ?.focus();
     }, 0);
   };
 
   return (
-    <div className={cn("relative w-fit", className)} ref={list}>
-      <div
-        aria-label={label}
-        className="relative inline-flex h-10 w-fit items-center justify-center gap-0.5 rounded-md border border-neutral-200 bg-neutral-50 p-0.5 text-muted-foreground"
-        role="tablist"
-      >
-        {items.map((item) => {
-          const selected = item.value === value;
-          return (
-            <button
-              aria-selected={selected}
-              className={cn(
-                "z-10 inline-flex h-full cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap rounded-sm border border-transparent px-3 font-medium text-sm transition-colors hover:bg-neutral-200/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none aria-selected:hover:bg-transparent",
-                selected ? "text-primary" : "text-muted-foreground",
-              )}
-              key={item.value}
-              onClick={() => onValueChange(item.value)}
-              onKeyDown={(event) => {
-                if (event.key === "ArrowRight") {
-                  event.preventDefault();
-                  move(1);
-                } else if (event.key === "ArrowLeft") {
-                  event.preventDefault();
-                  move(-1);
-                }
-              }}
-              role="tab"
-              tabIndex={selected ? 0 : -1}
-              type="button"
-            >
-              {item.label}
-              {item.count === undefined ? null : (
-                <span
-                  className={cn(
-                    "datum-num rounded-sm px-1 text-[11px]",
-                    selected
-                      ? "bg-primary/10 text-primary"
-                      : "bg-neutral-200/70 text-muted-foreground",
-                  )}
-                >
-                  {item.count}
-                </span>
-              )}
-            </button>
-          );
-        })}
-      </div>
-      {indicator.width > 0 ? (
-        <div
-          aria-hidden
-          className="pointer-events-none absolute rounded-sm border border-neutral-200 bg-white shadow-sm transition-all duration-300 ease-in-out"
-          style={{ ...indicator, zIndex: 5 }}
-        />
-      ) : null}
+    <div
+      aria-label={label}
+      className={cn(
+        "inline-flex h-10 w-fit items-center justify-center rounded-xl bg-muted p-1 text-muted-foreground",
+        className,
+      )}
+      role="tablist"
+    >
+      {items.map((item) => {
+        const selected = item.value === value;
+        return (
+          <button
+            aria-selected={selected}
+            className={cn(
+              "inline-flex h-full items-center justify-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-1.5 font-medium text-sm transition-colors focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+              selected
+                ? "bg-background text-foreground shadow-sm"
+                : "text-muted-foreground",
+            )}
+            key={item.value}
+            onClick={() => onValueChange(item.value)}
+            onKeyDown={(event) => {
+              if (event.key === "ArrowRight") {
+                event.preventDefault();
+                move(1);
+              } else if (event.key === "ArrowLeft") {
+                event.preventDefault();
+                move(-1);
+              }
+            }}
+            role="tab"
+            tabIndex={selected ? 0 : -1}
+            type="button"
+          >
+            {item.label}
+            {item.count === undefined ? null : (
+              <span
+                className={cn(
+                  "datum-num rounded-md px-1 text-2xs",
+                  selected ? "bg-muted text-foreground" : "bg-accent text-muted-foreground",
+                )}
+              >
+                {item.count}
+              </span>
+            )}
+          </button>
+        );
+      })}
     </div>
   );
 }

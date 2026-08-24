@@ -2,7 +2,7 @@ import type * as React from "react";
 import { cn } from "../lib/cn";
 import { Table, TableBody, TableCell, TableRow } from "./table";
 
-/** echos_app `components/ui/skeleton.tsx`, verbatim. */
+/** runcrate_app `src/components/ui/skeleton.tsx`, verbatim. */
 export function Skeleton({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -16,7 +16,10 @@ export function Skeleton({ className, ...props }: React.ComponentProps<"div">) {
 /**
  * Skeleton rows shaped like the table that is loading — column count and
  * per-column widths come from the caller so the placeholder does not reflow
- * into something a different width when the data lands.
+ * into something a different width when the data lands. The bar is one
+ * `text-sm` line box tall (1.375rem), which is exactly the height of a real
+ * single-line row inside the same `py-3.5` cell, so the table does not jump
+ * either.
  */
 export function TableSkeleton({
   columns,
@@ -31,8 +34,8 @@ export function TableSkeleton({
         {Array.from({ length: rows }, (_, r) => (
           <TableRow key={r} className="hover:bg-transparent">
             {columns.map((width, c) => (
-              <TableCell key={c} className="h-11">
-                <Skeleton className="h-4" style={{ width }} />
+              <TableCell key={c}>
+                <Skeleton className="h-[1.375rem]" style={{ width }} />
               </TableCell>
             ))}
           </TableRow>
@@ -55,10 +58,7 @@ export function BlockSkeleton({
   return (
     <div className={cn("grid gap-4", className)}>
       {Array.from({ length: count }, (_, i) => (
-        <Skeleton
-          key={i}
-          className={cn("w-full rounded-xl", height)}
-        />
+        <Skeleton key={i} className={cn("w-full rounded-2xl", height)} />
       ))}
     </div>
   );

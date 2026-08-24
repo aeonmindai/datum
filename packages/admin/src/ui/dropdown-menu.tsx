@@ -8,12 +8,15 @@ import {
 import { cn } from "../lib/cn";
 
 /**
- * echos_app's DropdownMenu is Radix. Same class strings here — content
- * `rounded-md border bg-popover p-1 shadow-md min-w-[8rem]`, items
- * `rounded-sm px-2 py-1.5 text-sm gap-2 focus:bg-accent`, destructive items
- * `text-destructive focus:bg-destructive/10`, separator `-mx-1 my-1 h-px
- * bg-border` — implemented with a click-outside listener and roving keyboard
- * handling instead of a Radix portal.
+ * runcrate_app's DropdownMenu is Radix. Same class strings here, from
+ * `src/components/ui/dropdown-menu.tsx`: content `bg-popover
+ * text-popover-foreground min-w-[8rem] rounded-xl border border-border/60 p-1
+ * shadow-lg`, items `relative flex cursor-default items-center gap-2 rounded-lg
+ * px-2 py-1.5 text-sm select-none` with `focus:bg-accent
+ * focus:text-accent-foreground`, destructive items `text-destructive
+ * focus:bg-destructive/10`, label `px-2 py-1.5 text-sm font-medium`, separator
+ * `bg-border -mx-1 my-1 h-px`. Implemented with a click-outside listener and
+ * Escape handling instead of a Radix portal.
  */
 export interface DropdownMenuProps {
   trigger: (props: {
@@ -71,7 +74,7 @@ export function DropdownMenu({
       {open ? (
         <div
           className={cn(
-            "datum-pop absolute top-[calc(100%+4px)] z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md",
+            "datum-pop absolute top-[calc(100%+4px)] z-50 min-w-[8rem] overflow-x-hidden overflow-y-auto rounded-xl border border-border/60 bg-popover p-1 text-popover-foreground shadow-lg",
             align === "end" ? "right-0" : "left-0",
             className,
           )}
@@ -99,7 +102,7 @@ export function DropdownMenuItem({
   return (
     <button
       className={cn(
-        "relative flex w-full cursor-pointer select-none items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm outline-none hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent disabled:pointer-events-none disabled:opacity-50 [&_svg:not([class*='size-'])]:size-4 [&_svg:not([class*='text-'])]:text-muted-foreground [&_svg]:shrink-0",
+        "relative flex w-full cursor-default select-none items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm outline-none hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent disabled:pointer-events-none disabled:opacity-50 [&_svg:not([class*='size-'])]:size-4 [&_svg:not([class*='text-'])]:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0",
         variant === "destructive" &&
           "text-destructive hover:bg-destructive/10 hover:text-destructive [&_svg]:!text-destructive",
         className,

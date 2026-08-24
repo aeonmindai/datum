@@ -10,7 +10,7 @@ import { request, toApiError, useResource, type ApiError } from "../lib/api";
 import { cn } from "../lib/cn";
 import { absoluteTime, ageMs, relativeTime, SEVEN_DAYS } from "../lib/format";
 import { PERMISSIONS, type ApiKey, type Permission } from "../lib/types";
-import { Badge, CodeBadge } from "../ui/badge";
+import { Badge, BADGE_ALARM, BADGE_RETIRED, CodeBadge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Dialog, DialogFooterLeft, DialogFooterRight } from "../ui/dialog";
 import { Field, FieldError, FieldHint, Input, Label } from "../ui/input";
@@ -58,7 +58,7 @@ export function KeysScreen({ scopeRoot }: { scopeRoot: string }) {
     <>
       <PageHeader
         actions={
-          <Button onClick={() => setCreating(true)} variant="primary">
+          <Button onClick={() => setCreating(true)} variant="default">
             <PlusIcon />
             New key
           </Button>
@@ -78,7 +78,7 @@ export function KeysScreen({ scopeRoot }: { scopeRoot: string }) {
       ) : (keys.data?.keys.length ?? 0) === 0 ? (
         <EmptyState
           action={
-            <Button onClick={() => setCreating(true)} variant="primary">
+            <Button onClick={() => setCreating(true)} variant="default">
               <PlusIcon />
               Mint the first key
             </Button>
@@ -148,9 +148,11 @@ function KeyRow({ row, onRevoke }: { row: ApiKey; onRevoke: () => void }) {
   return (
     <TableRow
       className={cn(
-        "[&>td:first-child]:border-l-[3px]",
+        "[&>td:first-child]:border-l-2",
+        // Same recession as a superseded assertion: a revoked key is retired, not
+        // broken, so it steps back rather than turning red.
         revoked
-          ? "bg-dead/70 text-dead-foreground opacity-75 hover:bg-dead hover:opacity-90 [&>td:first-child]:border-l-dead-foreground/45"
+          ? "bg-muted/50 text-muted-foreground opacity-75 hover:bg-muted hover:opacity-100 [&>td:first-child]:border-l-border"
           : "[&>td:first-child]:border-l-transparent",
       )}
     >
@@ -161,20 +163,29 @@ function KeyRow({ row, onRevoke }: { row: ApiKey; onRevoke: () => void }) {
         <div className="flex items-center gap-2">
           <span className="truncate font-medium">{row.label}</span>
           {revoked ? (
-            <Badge title={`Revoked ${absoluteTime(row.revoked_at)}`} variant="dead">
+            <Badge
+              className={BADGE_RETIRED}
+              title={`Revoked ${absoluteTime(row.revoked_at)}`}
+              variant="secondary"
+            >
               <BanIcon aria-hidden />
               revoked
             </Badge>
           ) : null}
           {expired && !revoked ? (
-            <Badge title={`Expired ${absoluteTime(row.expires_at)}`} variant="danger">
+            <Badge
+              className={BADGE_ALARM}
+              title={`Expired ${absoluteTime(row.expires_at)}`}
+              variant="outline"
+            >
               expired
             </Badge>
           ) : null}
           {idle ? (
             <Badge
+              className={BADGE_RETIRED}
               title="Not used in over seven days. A key that goes quiet is usually an agent that died."
-              variant="muted"
+              variant="secondary"
             >
               <MoonIcon aria-hidden />
               idle
@@ -193,7 +204,7 @@ function KeyRow({ row, onRevoke }: { row: ApiKey; onRevoke: () => void }) {
             <span className="text-muted-foreground text-sm">none</span>
           ) : (
             row.permissions.map((p) => (
-              <CodeBadge key={p} variant={p === "admin" ? "purple" : "outline"}>
+              <CodeBadge key={p} variant={p === "admin" ? "default" : "outline"}>
                 {p}
               </CodeBadge>
             ))
@@ -311,7 +322,7 @@ function CreateKeyDialog({
             <Button
               disabled={submitting}
               onClick={() => void submit()}
-              variant="primary"
+              variant="default"
             >
               {submitting ? "Creating…" : "Create key"}
             </Button>
@@ -347,7 +358,7 @@ function CreateKeyDialog({
           <Label htmlFor="key-scope">Scope</Label>
           <Input
             aria-invalid={(touched && scopeMissing) || undefined}
-            className="font-mono text-[13px]"
+            className="font-mono text-sm"
             id="key-scope"
             onChange={(e) => setScope(e.target.value)}
             placeholder={scopeRoot}
@@ -371,16 +382,16 @@ function CreateKeyDialog({
               return (
                 <label
                   className={cn(
-                    "flex cursor-pointer items-start gap-2.5 rounded-md border p-3 transition-colors",
+                    "flex cursor-pointer items-start gap-2.5 rounded-xl border p-3 transition-colors",
                     checked
-                      ? "border-primary/40 bg-primary/5"
-                      : "border-input hover:bg-accent",
+                      ? "border-foreground/30 bg-muted/50"
+                      : "border-input bg-input-bg hover:bg-accent",
                   )}
                   key={permission}
                 >
                   <input
                     checked={checked}
-                    className="mt-0.5 size-4 accent-[var(--primary)]"
+                    className="mt-0.5 size-4 accent-[hsl(var(--primary))]"
                     onChange={(e) =>
                       setPermissions((prev) =>
                         e.target.checked
@@ -391,7 +402,7 @@ function CreateKeyDialog({
                     type="checkbox"
                   />
                   <span className="flex min-w-0 flex-col gap-0.5">
-                    <span className="font-mono font-medium text-[13px]">{permission}</span>
+                    <span className="font-mono font-medium text-sm">{permission}</span>
                     <span className="text-muted-foreground text-xs leading-snug">
                       {PERMISSION_COPY[permission]}
                     </span>
@@ -445,7 +456,7 @@ function RevealDialog({
             <Mono className="truncate">{created?.key.prefix}</Mono>
           </DialogFooterLeft>
           <DialogFooterRight>
-            <Button onClick={onClose} variant="primary">
+            <Button onClick={onClose} variant="default">
               I have copied it
             </Button>
           </DialogFooterRight>
@@ -459,14 +470,14 @@ function RevealDialog({
       {created ? (
         <div className="flex flex-col gap-4">
           <div
-            className="flex items-start gap-3 rounded-lg border-[0.5px] border-warning/40 bg-warning/10 px-4 py-3"
+            className="flex items-start gap-3 rounded-lg border border-border/60 bg-muted/50 px-4 py-3"
             role="alert"
           >
             <TriangleAlertIcon
               aria-hidden
-              className="mt-0.5 size-4 shrink-0 text-warning-foreground"
+              className="mt-0.5 size-4 shrink-0 text-muted-foreground"
             />
-            <p className="text-sm text-warning-foreground">
+            <p className="text-muted-foreground text-sm">
               Close this dialog and the secret is gone. If you lose it, revoke this
               key and mint another — there is no recovery path, by design.
             </p>
@@ -475,7 +486,7 @@ function RevealDialog({
           <div className="flex flex-col gap-2">
             <span className="datum-microlabel">Secret</span>
             <div className="flex items-start gap-2">
-              <code className="min-w-0 flex-1 break-all rounded-md border-[0.5px] border-[#E5E5E5] bg-[#FAFAFA] px-3 py-2.5 font-mono text-[13px] leading-relaxed">
+              <code className="min-w-0 flex-1 break-all rounded-lg border border-edge bg-muted/50 px-3 py-2.5 font-mono text-sm leading-relaxed">
                 {created.secret}
               </code>
               <CopyButton
@@ -501,7 +512,7 @@ function RevealDialog({
               <span className="datum-microlabel">Permissions</span>
               <span className="flex flex-wrap gap-1">
                 {created.key.permissions.map((p) => (
-                  <CodeBadge key={p} variant={p === "admin" ? "purple" : "outline"}>
+                  <CodeBadge key={p} variant={p === "admin" ? "default" : "outline"}>
                     {p}
                   </CodeBadge>
                 ))}

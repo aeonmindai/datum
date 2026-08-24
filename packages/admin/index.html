@@ -4,21 +4,37 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="robots" content="noindex, nofollow" />
-    <meta name="color-scheme" content="light" />
+    <meta name="color-scheme" content="light dark" />
     <title>Datum</title>
-    <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><circle cx="16" cy="16" r="15" fill="%23fff"/><circle cx="16" cy="16" r="11" fill="none" stroke="%236028d9" stroke-width="2.5"/><circle cx="16" cy="16" r="4" fill="%236028d9"/></svg>'>
+    <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><circle cx="16" cy="16" r="15" fill="%23f9f9f9"/><circle cx="16" cy="16" r="11" fill="none" stroke="%231a1a1a" stroke-width="2.5"/><circle cx="16" cy="16" r="4" fill="%231a1a1a"/></svg>'>
     <!--
-      echos_app loads Outfit through next/font/google. There is no next/font in
-      a Vite SPA, so the same family comes from a plain stylesheet link. Both
-      families degrade to the system stack declared in index.css, which is what
-      an air-gapped self-hosted instance will render.
+      runcrate_app loads Geist and JetBrains Mono through next/font/google. There
+      is no next/font in a Vite SPA, so the same two families come from a plain
+      stylesheet link. Both degrade to the system stacks declared in index.css,
+      which is what an air-gapped self-hosted instance will render.
     -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=JetBrains+Mono:wght@400;500;600&display=swap"
     />
+    <script>
+      // Theme applied before first paint so a dark-mode operator never sees a
+      // white flash. An explicit choice wins; otherwise follow the OS.
+      (function () {
+        try {
+          var stored = localStorage.getItem("datum-theme");
+          var dark =
+            stored === "dark" ||
+            (stored !== "light" &&
+              window.matchMedia("(prefers-color-scheme: dark)").matches);
+          if (dark) document.documentElement.classList.add("dark");
+        } catch (_) {
+          /* private mode: fall through to light */
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

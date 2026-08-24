@@ -48,7 +48,7 @@ export function RejectionsScreen() {
             <span
               className={cn(
                 "size-1.5 rounded-full",
-                result.refreshing ? "bg-primary" : "bg-success",
+                result.refreshing ? "bg-foreground" : "bg-muted-foreground",
               )}
             />
             live · every {POLL_MS / 1000}s
@@ -62,9 +62,9 @@ export function RejectionsScreen() {
         <div className="flex flex-col gap-2">
           <MicroLabel>By reason</MicroLabel>
           <div className="flex flex-wrap gap-2">
-            <StatChip label="total" tone="primary" value={rows.length} />
+            <StatChip label="total" value={rows.length} />
             {byReason.map(([reason, count]) => (
-              <StatChip key={reason} label={reason} tone="danger" value={count} />
+              <StatChip key={reason} label={reason} tone="destructive" value={count} />
             ))}
           </div>
         </div>
@@ -135,26 +135,26 @@ function RejectionRow({ row }: { row: Rejection }) {
     <>
       <TableRow
         className={cn(
-          "[&>td:first-child]:border-l-[3px] [&>td:first-child]:border-l-destructive/45",
+          "[&>td:first-child]:border-l-2 [&>td:first-child]:border-l-destructive/50",
           open && "bg-muted/40",
         )}
       >
         <TableCell>
           <span className="flex flex-col leading-tight" title={absoluteTime(row.at)}>
-            <Mono className="text-[12px]">{clockTime(row.at)}</Mono>
-            <span className="text-[11px] text-muted-foreground">
+            <Mono className="text-xs">{clockTime(row.at)}</Mono>
+            <span className="text-2xs text-muted-foreground">
               {relativeTime(row.at) ?? ""}
             </span>
           </span>
         </TableCell>
         <TableCell>
           <span className="flex items-center gap-1.5">
-            <CodeBadge variant="danger">{row.reason}</CodeBadge>
+            <CodeBadge variant="destructive">{row.reason}</CodeBadge>
             {invariant === null ? null : (
               <Badge
                 className="datum-num"
                 title={`Invariant ${invariant}`}
-                variant="danger"
+                variant="destructive"
               >
                 {invariant}
               </Badge>
@@ -163,11 +163,11 @@ function RejectionRow({ row }: { row: Rejection }) {
         </TableCell>
         <TableCell className="max-w-[13rem]">
           <div className="flex flex-col gap-0.5">
-            <Mono className="truncate text-[12px]" title={row.actor ?? ""}>
+            <Mono className="truncate text-xs" title={row.actor ?? ""}>
               {row.actor ?? "—"}
             </Mono>
             <Mono
-              className="truncate text-[11px] text-muted-foreground"
+              className="truncate text-2xs text-muted-foreground"
               title={row.route ?? ""}
             >
               {row.route ?? "—"}
@@ -178,7 +178,7 @@ function RejectionRow({ row }: { row: Rejection }) {
           {target.length === 0 ? (
             <span className="text-muted-foreground text-sm">—</span>
           ) : (
-            <Mono className="block truncate text-[12px]" title={target.join(" · ")}>
+            <Mono className="block truncate text-xs" title={target.join(" · ")}>
               {target.join(" · ")}
             </Mono>
           )}
@@ -191,8 +191,7 @@ function RejectionRow({ row }: { row: Rejection }) {
         <TableCell className="text-right">
           {hasDetail || row.sqlstate ? (
             <button
-              aria-expanded={open}
-              className="inline-flex items-center gap-1 rounded-sm text-muted-foreground text-xs hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              className="inline-flex items-center gap-1 rounded-md text-muted-foreground text-xs hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
               onClick={() => setOpen((v) => !v)}
               type="button"
             >
@@ -213,12 +212,12 @@ function RejectionRow({ row }: { row: Rejection }) {
       {open ? (
         <TableRow className="hover:bg-transparent">
           <TableCell
-            className="whitespace-normal border-r-0 bg-muted/30 p-0"
+            className="whitespace-normal bg-muted/30 p-0"
             colSpan={6}
           >
             <div className="flex flex-col gap-3 px-5 py-4">
               <div className="flex flex-wrap items-center gap-2">
-                <CodeBadge variant="danger">{row.reason}</CodeBadge>
+                <CodeBadge variant="destructive">{row.reason}</CodeBadge>
                 {row.sqlstate ? (
                   <CodeBadge variant="outline">sqlstate {row.sqlstate}</CodeBadge>
                 ) : null}

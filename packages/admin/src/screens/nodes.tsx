@@ -88,16 +88,19 @@ function NodeRow({ row }: { row: RegistryNode }) {
   return (
     <TableRow
       className={cn(
-        "[&>td:first-child]:border-l-[3px]",
+        "[&>td:first-child]:border-l-2",
+        // A live node gets the full-contrast spine; a stale one is recessed to
+        // the divider tier. Staleness is a hint, not a fault, so it does not
+        // earn the destructive edge.
         stale
-          ? "[&>td:first-child]:border-l-dead-foreground/35"
-          : "[&>td:first-child]:border-l-success/60",
+          ? "[&>td:first-child]:border-l-edge-subtle"
+          : "[&>td:first-child]:border-l-foreground/40",
       )}
     >
       <TableCell className="max-w-[16rem]">
         <div className="flex flex-col gap-0.5">
           <span className="truncate font-medium">{row.label ?? row.id}</span>
-          <Mono className="truncate text-[11px] text-muted-foreground" title={row.id}>
+          <Mono className="truncate text-2xs text-muted-foreground" title={row.id}>
             {row.id}
           </Mono>
         </div>
@@ -126,7 +129,7 @@ function NodeRow({ row }: { row: RegistryNode }) {
             title={absoluteTime(row.last_seen)}
           >
             {relativeTime(row.last_seen)}
-            {stale ? <Badge variant="muted">stale</Badge> : null}
+            {stale ? <Badge variant="secondary">stale</Badge> : null}
           </span>
         )}
       </TableCell>
@@ -143,7 +146,7 @@ function NodeRow({ row }: { row: RegistryNode }) {
       <TableCell className="max-w-[20rem] whitespace-normal">
         {hasMeta ? (
           <details>
-            <summary className="datum-microlabel cursor-pointer list-none rounded-sm hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
+            <summary className="datum-microlabel cursor-pointer list-none rounded-md hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40">
               show
             </summary>
             <div className="pt-2">

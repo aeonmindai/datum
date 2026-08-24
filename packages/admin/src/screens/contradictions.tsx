@@ -17,7 +17,7 @@ import type {
   ContradictionStatus,
   ContradictionWithSides,
 } from "../lib/types";
-import { Badge, CodeBadge } from "../ui/badge";
+import { Badge, BADGE_ALARM, CodeBadge } from "../ui/badge";
 import { Button, LinkButton } from "../ui/button";
 import { Dialog, DialogFooterLeft, DialogFooterRight } from "../ui/dialog";
 import { Field, FieldError, FieldHint, Label, Textarea } from "../ui/input";
@@ -138,25 +138,29 @@ function ContradictionCard({
   return (
     <div
       className={cn(
-        "flex flex-col gap-0 overflow-hidden rounded-xl border-[0.5px] shadow-sm",
-        open ? "border-warning/40" : "border-[#E5E5E5]",
+        "flex flex-col gap-0 overflow-hidden rounded-xl border bg-surface",
+        // An open contradiction is a genuine problem: two live rows disagree and
+        // the store will not pick one. That earns the destructive edge.
+        open ? "border-destructive/50" : "border-edge",
       )}
     >
       <div
         className={cn(
-          "flex flex-wrap items-start justify-between gap-3 border-b-[0.5px] px-5 py-4",
-          open ? "border-b-warning/30 bg-warning/[0.06]" : "border-b-[#E5E5E5] bg-[#FAFAFA]",
+          "flex flex-wrap items-start justify-between gap-3 border-b px-5 py-4",
+          open ? "border-b-destructive/30" : "border-b-edge-subtle",
         )}
       >
         <div className="flex min-w-0 flex-col gap-1.5">
           <div className="flex min-w-0 flex-wrap items-baseline gap-x-2">
-            <Mono className="font-medium text-[15px]">{row.subject}</Mono>
+            <Mono className="font-medium text-base">{row.subject}</Mono>
             <span className="text-muted-foreground">·</span>
-            <Mono className="font-medium text-[15px]">{row.predicate}</Mono>
+            <Mono className="font-medium text-base">{row.predicate}</Mono>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <CodeBadge variant={open ? "warning" : "outline"}>{row.status}</CodeBadge>
-            <Mono className="text-[12px] text-muted-foreground" title={row.scope}>
+            <CodeBadge className={open ? BADGE_ALARM : undefined} variant="outline">
+              {row.status}
+            </CodeBadge>
+            <Mono className="text-xs text-muted-foreground" title={row.scope}>
               {row.scope}
             </Mono>
             <span className="text-muted-foreground text-xs">
@@ -165,7 +169,7 @@ function ContradictionCard({
           </div>
         </div>
         {open ? (
-          <Button onClick={onResolve} variant="primary">
+          <Button onClick={onResolve} variant="default">
             <ScaleIcon />
             Resolve
           </Button>
@@ -175,7 +179,7 @@ function ContradictionCard({
       <p
         className={cn(
           "px-5 py-3 text-sm",
-          open ? "text-warning-foreground" : "text-muted-foreground",
+          open ? "text-foreground" : "text-muted-foreground",
         )}
       >
         {STATUS_COPY[row.status]}
@@ -187,9 +191,9 @@ function ContradictionCard({
         exactly the silent last-write-wins behaviour this store exists to
         refuse.
       */}
-      <div className="grid gap-0 border-t-[0.5px] border-t-[#E5E5E5] lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
+      <div className="grid gap-0 border-t border-t-edge-subtle lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
         <SideColumn assertion={row.a} label="Side A" />
-        <div className="flex items-center justify-center border-t-[0.5px] border-t-[#E5E5E5] bg-[#FAFAFA] px-4 py-3 lg:border-t-0 lg:border-x-[0.5px] lg:border-x-[#E5E5E5] lg:py-0">
+        <div className="flex items-center justify-center border-t border-t-edge-subtle bg-muted/40 px-4 py-3 lg:border-x lg:border-x-edge-subtle lg:border-t-0 lg:py-0">
           <div className="flex items-center gap-2 lg:flex-col">
             <SplitIcon aria-hidden className="size-4 text-muted-foreground" />
             <span className="datum-microlabel">both live</span>
@@ -199,13 +203,13 @@ function ContradictionCard({
       </div>
 
       {row.resolution ? (
-        <div className="flex flex-col gap-1.5 border-t-[0.5px] border-t-[#E5E5E5] bg-[#FAFAFA] px-5 py-4">
+        <div className="flex flex-col gap-1.5 border-t border-t-edge-subtle bg-muted/40 px-5 py-4">
           <MicroLabel>Resolution</MicroLabel>
           <p className="text-sm leading-relaxed">{row.resolution}</p>
           <p className="text-muted-foreground text-xs">
             {row.resolved_by ? (
               <>
-                by <Mono className="text-[12px]">{row.resolved_by}</Mono>
+                by <Mono className="text-xs">{row.resolved_by}</Mono>
               </>
             ) : null}
             {row.resolved_at ? ` — ${absoluteTime(row.resolved_at)}` : null}
@@ -241,7 +245,11 @@ function SideColumn({
       <div className="flex flex-wrap items-center gap-1.5">
         <ConfidenceBadge confidence={assertion.confidence} />
         <KindBadge kind={assertion.kind} />
-        {assertion.contested ? <Badge variant="warning">contested</Badge> : null}
+        {assertion.contested ? (
+          <Badge className={BADGE_ALARM} variant="outline">
+            contested
+          </Badge>
+        ) : null}
       </div>
 
       <div className="flex flex-col gap-1">
@@ -262,17 +270,17 @@ function SideColumn({
       <div className="grid grid-cols-2 gap-3">
         <div className="flex min-w-0 flex-col gap-1">
           <MicroLabel>Asserted by</MicroLabel>
-          <Mono className="truncate text-[12px]" title={assertion.asserted_by}>
+          <Mono className="truncate text-xs" title={assertion.asserted_by}>
             {assertion.asserted_by}
           </Mono>
         </div>
         <div className="flex flex-col gap-1">
           <MicroLabel>Sequence</MicroLabel>
-          <Mono className="text-[12px]">{assertion.asserted_at}</Mono>
+          <Mono className="text-xs">{assertion.asserted_at}</Mono>
         </div>
       </div>
 
-      <div className="border-border border-t pt-4">
+      <div className="border-edge-subtle border-t pt-4">
         <ProvenancePanel assertion={assertion} />
       </div>
 
@@ -286,7 +294,7 @@ function SideColumn({
       ) : null}
 
       <details className="group">
-        <summary className="datum-microlabel cursor-pointer list-none rounded-sm hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
+        <summary className="datum-microlabel cursor-pointer list-none rounded-md hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40">
           Object JSON
         </summary>
         <div className="pt-2">
@@ -425,7 +433,7 @@ function ResolveDialog({
             {exit ? (
               <>
                 Posts status{" "}
-                <CodeBadge variant={exit.status === "resolved" ? "success" : "warning"}>
+                <CodeBadge variant={exit.status === "resolved" ? "default" : "secondary"}>
                   {exit.status}
                 </CodeBadge>
               </>
@@ -440,7 +448,7 @@ function ResolveDialog({
             <Button
               disabled={submitting}
               onClick={() => void submit()}
-              variant="primary"
+              variant="default"
             >
               {submitting ? "Recording…" : "Record resolution"}
             </Button>
@@ -457,14 +465,14 @@ function ResolveDialog({
     >
       {target ? (
         <div className="flex flex-col gap-5">
-          <div className="flex flex-wrap items-center gap-2 rounded-md border-[0.5px] border-[#E5E5E5] bg-[#FAFAFA] px-3 py-2.5">
+          <div className="flex flex-wrap items-center gap-2 rounded-lg border border-edge bg-muted/50 px-3 py-2.5">
             <Mono className="font-medium">
               {target.subject} · {target.predicate}
             </Mono>
             <span className="text-muted-foreground text-xs">
-              <Mono className="text-[12px]">{shortId(target.a_id)}</Mono> (
+              <Mono className="text-xs">{shortId(target.a_id)}</Mono> (
               {target.a_confidence}) vs{" "}
-              <Mono className="text-[12px]">{shortId(target.b_id)}</Mono> (
+              <Mono className="text-xs">{shortId(target.b_id)}</Mono> (
               {target.b_confidence})
             </span>
           </div>
@@ -477,16 +485,16 @@ function ResolveDialog({
               return (
                 <label
                   className={cn(
-                    "flex cursor-pointer items-start gap-3 rounded-lg border p-3.5 transition-colors",
+                    "flex cursor-pointer items-start gap-3 rounded-xl border p-3.5 transition-colors",
                     selected
-                      ? "border-primary/45 bg-primary/5"
-                      : "border-input hover:bg-accent",
+                      ? "border-foreground/30 bg-muted/50"
+                      : "border-input bg-input-bg hover:bg-accent",
                   )}
                   key={option.id}
                 >
                   <input
                     checked={selected}
-                    className="mt-1 size-4 shrink-0 accent-[var(--primary)]"
+                    className="mt-1 size-4 shrink-0 accent-[hsl(var(--primary))]"
                     name="contradiction-exit"
                     onChange={() => chooseExit(option)}
                     type="radio"
@@ -498,7 +506,7 @@ function ResolveDialog({
                         aria-hidden
                         className={cn(
                           "size-4",
-                          selected ? "text-primary" : "text-muted-foreground",
+                          selected ? "text-foreground" : "text-muted-foreground",
                         )}
                       />
                       {option.title}

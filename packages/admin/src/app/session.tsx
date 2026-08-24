@@ -43,6 +43,11 @@ function readMe(payload: unknown): Me | null {
     verification: {
       configured: verification.configured,
       method: verification.method,
+      // Both fields arrived after the first admin release. An older server
+      // omits them, and that is not a reason to declare the instance
+      // unreachable — the panel just has nothing extra to say on hover.
+      authenticated: verification.authenticated === true,
+      note: typeof verification.note === "string" ? verification.note : "",
     },
   };
 }

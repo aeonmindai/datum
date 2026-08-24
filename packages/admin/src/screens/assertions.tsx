@@ -149,7 +149,7 @@ export function AssertionsScreen({ filters }: { filters: AssertionFilters }) {
         title="Assertions"
       />
 
-      <div className="flex flex-col gap-3 rounded-xl border-[0.5px] border-[#E5E5E5] bg-[#FAFAFA] p-4">
+      <div className="flex flex-col gap-3 rounded-xl border border-edge bg-surface p-4">
         <div className="flex items-center gap-2 text-muted-foreground">
           <FunnelIcon aria-hidden className="size-3.5" />
           <span className="datum-microlabel">Filters</span>
@@ -171,7 +171,7 @@ export function AssertionsScreen({ filters }: { filters: AssertionFilters }) {
           <div className="grid gap-2">
             <Label htmlFor="f-scope">Scope</Label>
             <Input
-              className="font-mono text-[13px]"
+              className="font-mono text-sm"
               id="f-scope"
               onChange={(e) => setDraft({ ...draft, scope: e.target.value })}
               placeholder="org/acme/project/arc"
@@ -181,7 +181,7 @@ export function AssertionsScreen({ filters }: { filters: AssertionFilters }) {
           <div className="grid gap-2">
             <Label htmlFor="f-subject">Subject</Label>
             <Input
-              className="font-mono text-[13px]"
+              className="font-mono text-sm"
               id="f-subject"
               onChange={(e) => setDraft({ ...draft, subject: e.target.value })}
               placeholder="bake"
@@ -191,7 +191,7 @@ export function AssertionsScreen({ filters }: { filters: AssertionFilters }) {
           <div className="grid gap-2">
             <Label htmlFor="f-predicate">Predicate</Label>
             <Input
-              className="font-mono text-[13px]"
+              className="font-mono text-sm"
               id="f-predicate"
               onChange={(e) => setDraft({ ...draft, predicate: e.target.value })}
               placeholder="duration_minutes"
@@ -219,10 +219,10 @@ export function AssertionsScreen({ filters }: { filters: AssertionFilters }) {
             />
           </div>
           <div className="flex items-end">
-            <label className="flex h-10 w-full cursor-pointer items-center gap-2.5 rounded-md border border-input bg-background px-3 text-sm transition-colors hover:bg-accent">
+            <label className="flex h-10 w-full cursor-pointer items-center gap-2.5 rounded-xl border border-input bg-input-bg px-3.5 text-sm transition-colors hover:bg-accent">
               <input
                 checked={filters.live}
-                className="size-4 accent-[var(--primary)]"
+                className="size-4 accent-[hsl(var(--primary))]"
                 onChange={(e) => apply({ live: e.target.checked })}
                 type="checkbox"
               />
@@ -239,14 +239,13 @@ export function AssertionsScreen({ filters }: { filters: AssertionFilters }) {
         <TableShell>
           <TableSkeleton
             columns={[
-              "8rem",
-              "5rem",
               "9rem",
-              "10rem",
               "6rem",
               "8rem",
-              "8rem",
-              "5rem",
+              "4rem",
+              "7rem",
+              "7rem",
+              "3rem",
             ]}
             rows={8}
           />
@@ -356,17 +355,17 @@ function AssertionRow({ row }: { row: Assertion }) {
           <KindBadge kind={row.kind} />
         </div>
       </TableCell>
-      <TableCell className="max-w-[11rem]">
+      <TableCell className="max-w-[9rem]">
         <div className="flex flex-col gap-0.5">
           <Mono className="truncate font-medium" title={row.subject}>
             {row.subject}
           </Mono>
-          <Mono className="truncate text-[11px] text-muted-foreground" title={row.scope}>
+          <Mono className="truncate text-2xs text-muted-foreground" title={row.scope}>
             {row.scope}
           </Mono>
         </div>
       </TableCell>
-      <TableCell className="max-w-[13rem]">
+      <TableCell className="max-w-[11rem]">
         <div className="flex flex-col items-start gap-1">
           <Mono className="max-w-full truncate" title={row.predicate}>
             {row.predicate}
@@ -374,17 +373,17 @@ function AssertionRow({ row }: { row: Assertion }) {
           <LifecycleBadges assertion={row} />
           {retired && row.superseded_by ? (
             <a
-              className="inline-flex w-fit items-center gap-1 text-[11px] text-muted-foreground underline underline-offset-2 hover:text-foreground"
+              className="inline-flex w-fit items-center gap-1 text-2xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
               href={href(`/assertions/${row.superseded_by}`)}
             >
               superseded by
-              <Mono className="text-[11px]">{shortId(row.superseded_by)}</Mono>
+              <Mono className="text-2xs">{shortId(row.superseded_by)}</Mono>
               <ArrowRightIcon aria-hidden className="size-3" />
             </a>
           ) : null}
         </div>
       </TableCell>
-      <TableCell className="max-w-[9rem] text-right">
+      <TableCell className="max-w-[8rem] text-right">
         <span className="inline-flex max-w-full items-baseline justify-end gap-1">
           <Mono className="truncate font-medium" title={value}>
             {value}
@@ -394,13 +393,13 @@ function AssertionRow({ row }: { row: Assertion }) {
           ) : null}
         </span>
       </TableCell>
-      <TableCell className="max-w-[11rem]">
+      <TableCell className="max-w-[9rem]">
         <div className="flex flex-col gap-0.5">
           <Mono className="truncate text-muted-foreground" title={row.asserted_by}>
             {row.asserted_by}
           </Mono>
           <Mono
-            className="text-[11px] text-muted-foreground"
+            className="text-2xs text-muted-foreground"
             title="Write sequence number — not a timestamp"
           >
             seq {row.asserted_at}

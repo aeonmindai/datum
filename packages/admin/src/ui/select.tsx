@@ -3,17 +3,21 @@ import type * as React from "react";
 import { cn } from "../lib/cn";
 
 /**
- * echos_app's Select is a Radix popover listbox. Radix is not a dependency
- * here, so this is a native <select> wearing echos's SelectTrigger class
- * string — same `h-10` / `h-8` sizing, same border, same
- * `ring-[3px] ring-ring/50` focus ring, same chevron. A native control also
- * gives keyboard and screen-reader behaviour for free, which matters more on an
- * admin panel than a custom popover does.
+ * runcrate_app's Select is a Radix popover listbox. Radix is not a dependency
+ * here, so this is a native <select> wearing runcrate's SelectTrigger class
+ * string from `src/components/ui/select.tsx` — same `rounded-xl border
+ * border-input bg-input-bg px-3.5 py-2 text-sm`, same `data-[size=default]:h-10
+ * / data-[size=sm]:h-8` sizing, same `focus:border-ring` and
+ * `aria-invalid:border-destructive`, same chevron in `text-muted-foreground`.
+ *
+ * A native control also gives keyboard and screen-reader behaviour for free,
+ * which matters more on an admin panel than a custom popover does.
  */
 export interface SelectProps
   extends Omit<React.ComponentProps<"select">, "size"> {
-  /** Control height, matching echos's SelectTrigger sizes. Shadows the native
-   * `size` attribute (a visible-row count) which a styled select never uses. */
+  /** Control height, matching runcrate's SelectTrigger sizes. Shadows the
+   * native `size` attribute (a visible-row count) which a styled select never
+   * uses. */
   size?: "sm" | "default";
   containerClassName?: string;
 }
@@ -29,9 +33,9 @@ export function Select({
     <div className={cn("relative inline-flex w-full items-center", containerClassName)}>
       <select
         className={cn(
-          "w-full cursor-pointer appearance-none items-center justify-between gap-2 whitespace-nowrap rounded-md border border-input bg-background py-2 pr-9 pl-3 font-normal text-sm shadow-none outline-none transition-all",
-          "focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
-          "disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20",
+          "w-full cursor-pointer appearance-none items-center justify-between gap-2 whitespace-nowrap rounded-xl border border-input bg-input-bg py-2 pr-9 pl-3.5 font-normal text-sm outline-none transition-colors",
+          "focus:border-ring",
+          "disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive",
           size === "sm" ? "h-8" : "h-10",
           className,
         )}
@@ -43,7 +47,7 @@ export function Select({
       </select>
       <ChevronDownIcon
         aria-hidden
-        className="pointer-events-none absolute right-3 size-4 text-muted-foreground"
+        className="pointer-events-none absolute right-3 size-4 text-muted-foreground opacity-50"
       />
     </div>
   );

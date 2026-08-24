@@ -127,7 +127,11 @@ export async function request<T>(
       status: res.status,
       reason: b.reason ?? `http_${res.status}`,
       message: b.message ?? `${res.status} ${res.statusText}`,
-      ...(b.invariant !== undefined ? { invariant: b.invariant } : {}),
+      // The server always sends the key and sets it to null when the refusal
+      // is not an invariant, so `!== undefined` would let a null through a
+      // `number | undefined` field and render an "invariant" badge with no
+      // number in it. Only a real number counts.
+      ...(typeof b.invariant === "number" ? { invariant: b.invariant } : {}),
       ...(b.says !== undefined ? { says: b.says } : {}),
       ...(b.hint !== undefined ? { hint: b.hint } : {}),
       ...(b.detail !== undefined ? { detail: b.detail } : {}),
