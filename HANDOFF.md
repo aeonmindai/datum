@@ -1,9 +1,12 @@
-# Commissure — build handoff
+# Datum — build handoff
 
-**A commissure is the white-matter tract that carries shared state between separate hemispheres.**
-The corpus callosum is merely the largest one. That is the product: the tract between any number of
-agents, projects, worktrees and humans, so they hold the same facts, the same mission, and know each
-other.
+**A datum is the fixed reference point every measurement is taken from.** In surveying and geodesy
+the datum is what makes independent instruments agree — which is exactly the job here: making any
+number of agents, projects, worktrees and humans agree on the same facts, the same mission, and each
+other. From Latin *datum*, "that which is given": the store of what is given.
+
+The vocabulary is the design. *Is that on datum?* — is the claim verified. *Take a datum* — read
+current truth. *That's off datum* — superseded. *The datum of record* — this system.
 
 This document is written to be built from in a fresh session with no prior context. Read it
 top to bottom once. The evidence for every design decision is in `research/` (523 KB, ~200 URLs,
@@ -78,7 +81,7 @@ memory-based LLMsys can consistently outperform RAG baselines that simply use al
 LOCOMO itself is unusable — an independent audit found 6.4% answer-key errors and a judge that
 accepts 62.81% of intentionally wrong answers.
 
-> **If Commissure cannot beat both full-context and file-plus-grep by ≥10 points on our own data,
+> **If Datum cannot beat both full-context and file-plus-grep by ≥10 points on our own data,
 > it has no reason to exist.** That is the acceptance gate for the whole project, and it is the
 > single most important sentence in this document.
 
@@ -101,19 +104,19 @@ $249/mo, Zep caps at 5–10). **Nobody implements nearest-scope-wins.**
 precompiled monolith, on the same task in the same lab in the same year: 16% versus **5%** semantic
 error, 2–20× slower. Erman's own post-mortem: "the advantages of blackboard systems do not scale
 down to simple problems." Blackboards died not from being wrong but because every team rebuilt the
-machinery from scratch and there was no commercial tooling. **Commissure is that missing machinery.
+machinery from scratch and there was no commercial tooling. **Datum is that missing machinery.
 That is the bet.**
 
 ---
 
 ## 2. Non-goals
 
-- **Not a durable execution engine.** Do not rebuild Temporal, Restate or Inngest. Commissure holds
+- **Not a durable execution engine.** Do not rebuild Temporal, Restate or Inngest. Datum holds
   *beliefs*, not *executions*.
 - **Not a vector database.** Embeddings are a secondary, separately-typed, clearly-labelled channel.
 - **Not a message bus.** Agent-to-agent chat is explicitly optional and lowest priority.
 - **Not a tracker.** Linear and Discord are read models for humans.
-- **Not an extraction pipeline.** Commissure never invents facts from prose. The mem0 failure below
+- **Not an extraction pipeline.** Datum never invents facts from prose. The mem0 failure below
   is what that produces.
 
 > A customer audited 10,134 mem0 production entries over 32 days: **97.8% junk**, 224 survivors, 38
@@ -122,7 +125,7 @@ That is the bet.**
 > "the extraction prompt is the bottleneck, not the model" (mem0 issue #4573). Their top request is
 > literally "make the pipeline provenance-aware."
 >
-> **Commissure writes what it is told, with evidence, or rejects the write.**
+> **Datum writes what it is told, with evidence, or rejects the write.**
 
 ---
 
@@ -377,7 +380,7 @@ becomes a non-event because there is nothing to rotate.
    the headline claim. Mitigation is Hickey's accretion/relaxation/fixation applied to predicates
    and schema: **never redefine a predicate, always introduce a new name.** `research/` lists 14
    named event-sourcing failure modes with war stories; this is the deadliest for us.
-2. **Extraction loops manufacture facts.** See mem0's 808 hallucinated duplicates. Commissure never
+2. **Extraction loops manufacture facts.** See mem0's 808 hallucinated duplicates. Datum never
    extracts. A human or a verified instrument asserts.
 3. **Memory injection.** >95% success with query-only access in the published attack. Mitigations:
    evidence required on write, scope-bound tokens, and provenance-derived read authorization (Zep's
@@ -450,23 +453,47 @@ secondary-sourced and flagged as such.
 
 ---
 
-## Appendix — why "Commissure"
+## Appendix — why "Datum"
 
-Fifteen candidates were checked against npm, PyPI, crates.io, Verisign RDAP, and TMview filtered to
-USPTO + EUIPO in Nice classes 9 and 42.
+A datum is the fixed reference from which measurements are taken. In surveying and geodesy it is
+specifically the thing that makes **independent instruments agree** — the exact job this system does
+for independent agents. Latin *datum*, "that which is given." It is also the singular of *data*,
+which quietly says *one verified fact* against the noise.
 
-- **Callosum** — eliminated. A UK AI-infrastructure startup raised **$100M** seed in Aug 2026 for
-  AI compute orchestration, and Rolls Royce Power Systems holds the mark in classes 9 and 42.
-- **Engram** — eliminated. An SF **AI-memory** startup raised **$98M** in June 2026 at a $600M
-  valuation. Our exact category.
-- **Astrocyte** — eliminated. Already shipped as "Memory for every agent".
-- **Fornix** — eliminated. FORNIX AI, Inc. holds the mark in our classes.
-- **Claustrum** — third choice, medium-high risk: Life2, Inc. holds a live "CLAUSTRUM AI" mark in
-  classes 9 and 42.
-- **Commissure** — **chosen.** The only name of fifteen where npm, PyPI **and** crates.io are all
-  simultaneously free. Zero filed or registered marks in classes 9 or 42 across USPTO and EUIPO.
-  The sole historical software user was Commissure Inc., a medical-imaging company acquired by
-  Nuance in 2007 and dormant as a brand for 19 years. Note `commissure.com` was registered in 2004
-  and **expires 2026-11-06** — worth watching. `.ai` was registered 2026-05-05.
+The name was chosen on the vocabulary test: *on datum* / *off datum* / *take a datum* / *the datum
+of record* all mean something precise and useful, so the product teaches itself.
+
+### What it cost
+
+`research/research-projections-and-naming.md` records an earlier study of fifteen anatomical names
+that recommended **Commissure**. It won on collision data and was rejected on taste — it is clinical
+and hard to say. That report is left unedited on purpose: it is the record of a decision, not a
+description of the outcome. Two names it eliminated are worth remembering, because both are live
+competitors in or beside our category:
+
+- **Engram** — an SF AI-memory startup, **$98M** raised June 2026 at a $600M valuation. Our exact
+  category.
+- **Callosum** — a UK AI-infrastructure startup, **$100M** seed August 2026, plus Rolls Royce Power
+  Systems holding the mark in classes 9 and 42.
+
+### Datum's own collision reality, measured 2026-08-24
+
+| surface | status |
+|---|---|
+| npm / PyPI / crates.io | all **taken** — use the scope `@aeonmind/datum`, binary `datum` |
+| `datum.com` | 302s to **microchip.com**. Unbuyable. |
+| `datum.ai`, `datum.sh` | live products |
+| `datum.dev` | **parked** on GoDaddy (`LANDER_SYSTEM="PW"`, `ap:"parking"`) — make-offer target |
+| `datum.io` | bare A record, no HTTPS — dormant, worth an inquiry |
+| `datum.build` | **available** |
+| `datum.aeonmind.ai` | owned; use it now |
+
+🔴 **Open risk, must be closed before any public launch.** Microchip owns `datum.com` through the
+Datum Inc. timing-and-frequency-standards lineage, so a registered `DATUM` in **Nice class 9** is
+likely. Software sits in class 42 and a common dictionary word is hard for anyone to own broadly,
+but this needs a real trademark search. A TMview query filtered to USPTO + EUIPO, classes 9 and 42,
+status Filed or Registered, is the check; it was blocked by bot protection during this session.
+**Do not announce, fundraise or file on this name until that search is done.** Internal use and a
+private repo carry no such exposure, so building can start immediately.
 
 Not a clearance opinion. Nothing here has been reviewed by counsel.
