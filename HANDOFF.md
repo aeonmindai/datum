@@ -214,11 +214,12 @@ logged. Rejected. This is the entire product.
    4.8× on 5 processors.
 3. **No two live contradicting assertions.** An `EXCLUDE USING gist` constraint over
    `(scope =, subject =, predicate =, valid_period &&) WHERE superseded_by IS NULL` makes a
-   contradiction **physically un-insertable**. Postgres 18's `WITHOUT OVERLAPS` expresses this more
-   elegantly, but **Fly Managed Postgres is PG16**, so the exclusion constraint is the shipping
-   form — and it works from PG13, which makes the host swappable. No bitemporal engine offers
+   contradiction **physically un-insertable**. Postgres 18's `WITHOUT OVERLAPS` says the same thing
+   more elegantly and we deliberately do not use it: the exclusion constraint gives the identical
+   guarantee, has been hardened since PG9.x, and runs on PG13+, which keeps the host swappable
+   instead of welding the core invariant to one vendor's newest feature. No bitemporal engine offers
    either, and this turns the field's hardest unsolved problem into a declarative constraint.
-   See §10 for the exact DDL.
+   Exact DDL in §10.
 4. **Confidence is earned, never claimed.** This is a correction to an earlier draft that made the
    commit check a database constraint — Postgres cannot run git, so that was unimplementable.
    The right design is stronger: **an agent cannot assert `measured`.** Every write lands as
@@ -380,11 +381,15 @@ Requirement is millisecond, no guesses. Therefore:
 
 ## 10. Stack — hosted on fly.io
 
-Verified against Fly's docs 2026-08-24. **One finding changes the design: Fly Managed Postgres is
-Postgres 16**, and "security patches and version upgrades" are listed under *what's not there yet*.
-So `WITHOUT OVERLAPS` (PG18), which §4.3 called the strongest argument for Postgres, **is not
-available on Fly.** Invariant 3 uses the exclusion-constraint route instead, which achieves the same
-physical impossibility on PG13+:
+Verified against Fly's docs 2026-08-24.
+
+**Postgres runs as our own Machine, not Fly Managed Postgres.** MPG is pinned to **Postgres 16** and
+lists "security patches and version upgrades" under *what's not there yet*, at a $38/mo floor. A
+plain `postgres:<latest>` image on a Fly Machine with an attached volume gives any version we want at
+a fraction of the cost. That is the call.
+
+**But the schema does not follow the version up.** Postgres 18 can express invariant 3 as
+`WITHOUT OVERLAPS`; we deliberately do **not** use it, and keep the exclusion constraint:
 
 ```sql
 CREATE EXTENSION btree_gist;   -- trusted since PG13, ships in contrib
@@ -397,34 +402,45 @@ ALTER TABLE assertions ADD CONSTRAINT no_two_live_contradictions
   ) WHERE (superseded_by IS NULL);
 ```
 
-This is strictly better for portability: the schema now runs on any Postgres from 13 up, so the host
-is a swappable decision rather than a dependency. Confirm `btree_gist` is creatable on MPG at first
-deploy — it is a trusted extension in the default PG16 contrib set, but MPG restricts third-party
-extensions to `pgvector` and `PostGIS`.
+Three reasons, and they outrank elegance. It achieves the **identical** physical impossibility, so
+there is no functional gain from the newer syntax. `EXCLUDE USING gist` has been production hardened
+since PG9.x, whereas `WITHOUT OVERLAPS` is new. And it runs on **any Postgres from 13 up**, which
+keeps the host a swappable decision — Neon, Supabase, RDS, a laptop, or a different cloud — instead
+of welding the core invariant to one version of one vendor's newest feature. Run the latest Postgres
+because it is free to do so; do not become dependent on it.
 
 | layer | choice | why |
 |---|---|---|
-| store | **Fly Managed Postgres**, Basic plan | HA, automatic backups, failover, connection pooling and encryption included; lives on the org's private network |
-| contradiction constraint | `EXCLUDE USING gist` + `btree_gist` | PG16-compatible; `WITHOUT OVERLAPS` needs PG18 which Fly does not offer |
+| store | **`postgres:<latest>` on a Fly Machine + volume** | any version, ~1/4 the cost of MPG, full control of extensions |
+| contradiction constraint | `EXCLUDE USING gist` + `btree_gist` | identical guarantee, battle-tested, portable to PG13+ |
 | immutability | `REVOKE UPDATE, DELETE` on the table | invariant 2, enforced by the grant system |
 | ordering | a Postgres sequence as `asserted_at` | total order, no clock, no skew |
-| API | one **Fly Machine**, `min_machines_running = 1` | never scale to zero: a cold start breaks the p99 <10 ms read SLO. This is the same trap the research flagged for Neon |
+| API | a second **Fly Machine**, `min_machines_running = 1` | never scale to zero: a cold start breaks the p99 <10 ms read SLO. Same trap the research flagged for Neon |
 | fanout | outbox **table** in v0; NATS JetStream when projections land | **never `LISTEN/NOTIFY`** — global `AccessExclusiveLock` on commit serialises the whole instance, three dated outages in the research |
 | hot cache | per-worktree **SQLite**, content-addressed, read-through | immutable rows cache perfectly; no CRDT, because append-only with a server-assigned sequence cannot conflict |
 | search | `tsvector` + partial index on live rows | exact-first |
-| transport | HTTP + **MCP server** + CLI | MCP is how any harness plugs in with no SDK |
-| private networking | Fly 6PN, `.internal` DNS | API↔DB never crosses the public internet |
+| transport | HTTP + **MCP facade** + CLI | see the routing note below |
+| private networking | Fly 6PN, `.internal` DNS | the DB listens only on the private network and is never publicly routable |
 
-**Running cost, sourced.** MPG Basic is **$38.00/mo** (shared-2x, 1 GB) plus storage at **$0.28 per
-provisioned GB** for a 30-day month. One always-on `shared-cpu-1x` 256 MB Machine is **~$2.02/mo**
-(~$2.32 in `sjc`). Volumes, if any, are **$0.15/GB-mo** with the first 10 GB free, and are billed
-even while the attached Machine is stopped. So **v0 lands at roughly $41–45/mo.**
+**Cost.** One always-on `shared-cpu-1x` 256 MB Machine is **~$2.02/mo** (~$2.32 in `sjc`); size the
+Postgres Machine larger and confirm its figure at deploy. Volumes are **$0.15/GB-mo with the first
+10 GB free**, billed even while the attached Machine is stopped; snapshots are **$0.08/GB-mo**. This
+lands **well under MPG's $38 floor** — call it low-teens per month, and confirm rather than quote me.
 
-If that is too much for a v0, the alternative is Postgres on a Fly Machine with a volume for
-~$4–8/mo — but then you are the operator: no backups, no failover, no upgrades. Recommendation is
-MPG, because the whole product is a claim about durable truth and running the database as a hobby
-contradicts it. Note MPG does not yet do version upgrades, so plan on PG16 for the foreseeable
-future; the exclusion constraint above means that costs nothing.
+### 🔴 We are now the database operator. That is a v0 deliverable, not a later chore.
+
+The entire product is a claim about durable truth. Running its store as a hobby contradicts the
+pitch, so self-hosting buys the version freedom on condition that these ship **in v0**:
+
+1. **`pg_dump` to object storage on a schedule** — Tigris on Fly, or any S3 bucket. Encrypted, and
+   outside the Fly org, because a backup inside the blast radius is not a backup.
+2. **Volume snapshots enabled**, and know that volumes are single-region and unreplicated.
+3. **A restore drill, executed and recorded.** Restore into a fresh Machine and re-run the invariant
+   test suite against it. *A backup you have never restored is not a backup* — and given this
+   project's own doctrine that nothing is a result until it has actually run, an untested backup is
+   exactly the kind of unverified claim the store is built to reject.
+4. **A single writer.** No HA in v0; one Postgres Machine, and accept the restart window. Add a
+   replica when someone outside the org depends on it, not before.
 
 **Rejected:** Datomic — Jepsen found intra-transaction operations execute as if concurrent, so two
 individually invariant-preserving transaction functions jointly produce a record that is both
@@ -572,8 +588,9 @@ usually an agent that died.
 Everything above is the design. This is what to actually ship, in one pass. Estimated 4–6 focused
 hours; there is no research left in it.
 
-**Deploy target:** one Fly app, Fly Managed Postgres (Basic), custom domain
-`datum.aeonmind.ai`, `min_machines_running = 1`. Roughly $41–45/mo (§10).
+**Deploy target:** one Fly app. Two Machines — `postgres:<latest>` with a volume, and the API with
+`min_machines_running = 1`. Custom domain `datum.aeonmind.ai`. Low-teens per month (§10), and we
+are the database operator, so backups plus an executed restore drill are in scope (§10).
 
 | # | deliverable | done when |
 |---|---|---|
@@ -584,6 +601,7 @@ hours; there is no research left in it.
 | 5 | **CLI** `datum link` / `mode` / `status` | links a repo to its project scope, flips global vs isolated as a superseding assertion, reports scope and mission (§5) |
 | 6 | **Admin panel** `/admin` | §13 items 1–7, in `echos_app`'s design language |
 | 7 | **Seeded with Arc** | the ~30 real facts from `arc/memory/STATE.json`, including the ten `confirmed_by_jish` answers, and the retired numbers loaded as `kind: dead` so the store can prove it refuses to surface them |
+| 8 | **Backups + an executed restore drill** | `pg_dump` on a schedule to object storage outside the Fly org, volume snapshots on, and a restore into a fresh Machine that then **passes the deliverable-1 invariant tests**. Record the drill. A backup you have never restored is not a backup, and by this project's own doctrine an untested backup is an unverified claim. |
 
 **Out of v0, deliberately:** projections to Discord and Linear, NATS (the outbox table is written but
 not consumed), registry heartbeats, embeddings, multi-tenant auth, OIDC token exchange, the

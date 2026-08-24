@@ -9,9 +9,10 @@ is no research left in it.
 
 ## The kickoff prompt
 
-> Read `HANDOFF.md` in full, then build **v0 per §14**. Seven deliverables: schema + the five
+> Read `HANDOFF.md` in full, then build **v0 per §14**. Eight deliverables: schema + the five
 > invariants, verification worker, `/v1` HTTP API, `/mcp` facade, the `datum` CLI, the `/admin`
-> panel, and the Arc seed. Deployed to fly.io on `datum.aeonmind.ai`.
+> panel, the Arc seed, and backups with an executed restore drill. Deployed to fly.io on
+> `datum.aeonmind.ai`, with Postgres self-hosted on its own Machine.
 >
 > Start with #1 and do not move on until its six adversarial writes are each rejected **by the
 > database**, with a machine-readable reason, and every test is **mutation-checked both ways** with
@@ -21,8 +22,12 @@ is no research left in it.
 > tokens, spacing, typography, component patterns, empty and error states. Say in the PR which
 > patterns you took. Do not invent a new visual system and do not ship unstyled component defaults.
 >
-> Constraints that are already decided, do not relitigate: Fly Managed Postgres is **PG16**, so the
-> contradiction constraint is `EXCLUDE USING gist` with `btree_gist`, not PG18 `WITHOUT OVERLAPS`.
+> Constraints that are already decided, do not relitigate: Postgres is **self-hosted on a Fly
+> Machine with a volume, running the latest version** — not Fly Managed Postgres, which is pinned to
+> PG16 at a $38/mo floor. But the contradiction constraint stays `EXCLUDE USING gist` with
+> `btree_gist` rather than PG18 `WITHOUT OVERLAPS`: identical guarantee, hardened since PG9.x, and
+> portable to PG13+, so the host stays swappable. Self-hosting means **we are the database
+> operator**, so backups and an executed restore drill are v0 deliverable 8, not a later chore.
 > `min_machines_running = 1` — never scale to zero, it breaks the read SLO. MCP is a **facade**, not
 > the substrate; `/v1` is the real interface. Confidence is **earned**: nothing may be asserted as
 > `measured`, the verification worker promotes it.
