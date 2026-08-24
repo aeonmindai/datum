@@ -20,3 +20,19 @@ pub fn caller(v: u32) -> u32 {
 pub fn calls_ambiguously(v: u32) -> u32 {
     shared_helper(v)
 }
+
+pub struct Left;
+pub struct Right;
+
+pub trait Pairable {
+    fn combine(&self) -> u32;
+}
+
+/// The impl *target* is a tuple, which has no nameable type. Deriving one produces an fqn
+/// containing a space and a comma that no call site can ever match, so `combine` would read as
+/// unreferenced; the honest answer is that there is no type name here to scope it under.
+impl Pairable for (Left, Right) {
+    fn combine(&self) -> u32 {
+        1
+    }
+}

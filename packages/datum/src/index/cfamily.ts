@@ -275,11 +275,19 @@ function visitRecord(
   // A forward declaration (`struct Foo;`) or an elaborated type use (`struct Foo x;`) has no body
   // and defines nothing; emitting a symbol for it would duplicate the real definition.
   if (name === null || body === null) return;
-  const fqn = joinFqn(scope.prefix, name.text);
-  const signature = signatureText(templateParams, null);
+  // An explicit specialisation writes its arguments into the name: `template <> struct
+  // Vec<__nv_bfloat16, 1>`. Keeping them there produces a symbol called `Vec<__nv_bfloat16, 1>`,
+  // which no call site can ever match — `Vec<T, N>::Type` is written with the caller's own type
+  // parameters — so the specialisation reads as unreferenced. Strip them for the same reason
+  // function specialisations are stripped, and let the signature carry the distinction.
+  const bare = stripTemplateArgs(name.text);
+  if (bare === "" || !IDENTIFIER.test(bare)) return;
+  const specialisation = name.text.slice(bare.length);
+  const fqn = joinFqn(scope.prefix, bare);
+  const signature = signatureText(`${templateParams}${specialisation}`, null);
   const symbol = out.addSymbol({
     kind: "type",
-    name: name.text,
+    name: bare,
     fqn,
     language: ctx.language,
     path: ctx.path,
@@ -337,13 +345,14 @@ function visitFunction(
     return;
   }
   let named = nameOfDeclarator(declarator);
-  // The grammar sometimes hands back a storage specifier where the name should be. An explicit
-  // CUDA template specialisation is the case that matters — in
-  // `template <> __device__ __forceinline__ float hc_narrow<float>(float v)` the empty `<>` throws
-  // the parse off enough that `template_function`'s name field is `__forceinline__` and the real
-  // name is stranded inside an ERROR node. Measured on Arc, believing the grammar here mis-named
-  // 65 kernels, which makes every call into them unresolvable.
-  if (named !== null && isSpecifierWord(named.name)) {
+  // The grammar sometimes hands back something that is not a name at all, and it must not be
+  // believed. Two shapes were measured on Arc, both from CUDA qualifiers it cannot parse:
+  // `template <> __device__ __forceinline__ float hc_narrow<float>(float v)` reports the bare
+  // qualifier `__forceinline__` (65 symbols), and `__device__ __forceinline__ vec_t<float, N>
+  // vec_apply_llama_rope(...)` reports the whole phrase `__forceinline__ vec_t
+  // vec_apply_llama_rope` \u2014 newline included \u2014 as one name (6 more). Testing for a plain identifier
+  // catches both, and every future variant, rather than enumerating the ones already seen.
+  if (named !== null && (isSpecifierWord(named.name) || !IDENTIFIER.test(named.name))) {
     named = recoverStrandedName(declarator);
   }
   if (named === null) return;
@@ -395,18 +404,22 @@ function visitDeclaration(
   templateParams: string,
   lineStart: number,
 ): void {
+  // Inside a function body, a `declaration` is never a function declaration, and saying so is the
+  // only defence against C++'s most vexing parse. `dim3 block(TILE, TILE);` is syntactically
+  // indistinguishable from a prototype, and the grammar resolves it the wrong way: on Arc that
+  // invented eight `function` symbols called `block` and `grid` inside kernel launch helpers,
+  // which then compete for resolution with anything genuinely named `block`. C++ forbids nested
+  // function definitions, and a prototype inside a body is vanishingly rare next to this, so the
+  // trade is not close.
+  if (scope.inFunctionBody) {
+    emitCallsIn(node, scope, ctx, out);
+    return;
+  }
   const declarator = findFunctionDeclarator(node);
   if (declarator !== null) {
     // A prototype: same shape as a definition, but marked as a declaration so the resolver can
     // drop it once the real definition turns up.
     visitFunction(node, scope, ctx, out, templateParams, lineStart, false);
-    return;
-  }
-  // `constexpr int N = 4;` at file, namespace or class scope is a constant in the language's own
-  // terms. Inside a function body it is a local, and locals are not symbols: they would outnumber
-  // everything else in the index and answer no question anyone asks of it.
-  if (scope.inFunctionBody) {
-    emitCallsIn(node, scope, ctx, out);
     return;
   }
   const text = ctx.source.slice(node.startIndex, Math.min(node.endIndex, node.startIndex + 200));
@@ -680,6 +693,9 @@ const SPECIFIER_WORDS: ReadonlySet<string> = new Set([
 function isSpecifierWord(name: string): boolean {
   return SPECIFIER_WORDS.has(name) || /^__[A-Za-z0-9_]+__$/.test(name);
 }
+
+/** A single C identifier and nothing else. Anything wider means the declarator did not parse. */
+const IDENTIFIER = /^[A-Za-z_][A-Za-z0-9_]*$/;
 
 /**
  * Pull the real name out of a declarator whose parse collapsed, by taking the last identifier that

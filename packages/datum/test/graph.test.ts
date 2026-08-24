@@ -196,6 +196,58 @@ describe("ingest", () => {
     });
   });
 
+  it("counts symbol names that cannot be identifiers instead of hiding them", async () => {
+    // Taken from the real corpus. A templated return type on a __forceinline__ CUDA function makes
+    // the grammar sweep the qualifier and the return type into the declarator's name, so five real
+    // functions in one flashinfer header were indexed under names containing spaces and a newline.
+    // Such a symbol is unreachable — no call site can resolve to a name with a space in it — so it
+    // reads as "nothing calls this", an absence indistinguishable from a genuine one. The loader
+    // does not refuse it (that would block a 147k-row load over five rows) but it must not let the
+    // defect pass silently either.
+    const mangled = sym("__forceinline__ vec_t vec_apply_llama_rope", {
+      key: "flashinfer/pos_enc.cuh#104:kernel:mangled",
+      kind: "kernel",
+      fqn: "flashinfer::__forceinline__ vec_t vec_apply_llama_rope",
+      language: "cuda",
+      path: "flashinfer/pos_enc.cuh",
+      line_start: 104,
+    });
+    const wrapped = sym("__forceinline__ vec_t\nvec_apply_llama_rope_reuse_half", {
+      key: "flashinfer/pos_enc.cuh#216:kernel:wrapped",
+      kind: "kernel",
+      fqn: "flashinfer::__forceinline__ vec_t\nvec_apply_llama_rope_reuse_half",
+      language: "cuda",
+      path: "flashinfer/pos_enc.cuh",
+      line_start: 216,
+    });
+    const clean = sym("hc_narrow", { language: "cuda", kind: "kernel" });
+    const loaded = await ingestGraph(db, artifact("acme/mangled", [mangled, wrapped, clean], []));
+
+    // All three are stored: the count is a diagnostic, not a filter.
+    expect(loaded.symbols).toBe(3);
+    const row = await db.one<{ stats: Record<string, Record<string, unknown>> }>(
+      "app",
+      `SELECT stats FROM datum.code_index WHERE id = $1`,
+      [loaded.indexId],
+    );
+    const loader = row!.stats.loader;
+    expect(loader.symbol_names_with_whitespace).toBe(2);
+    expect(loader.symbol_names_with_whitespace_sample).toEqual([
+      'flashinfer/pos_enc.cuh:104 "__forceinline__ vec_t vec_apply_llama_rope"',
+      'flashinfer/pos_enc.cuh:216 "__forceinline__ vec_t\\nvec_apply_llama_rope_reuse_half"',
+    ]);
+
+    // A clean artifact reports zero rather than omitting the counter, so "not checked" and
+    // "checked, none found" are distinguishable.
+    const fine = await ingestGraph(db, artifact("acme/unmangled", [sym("tidy")], []));
+    const fineRow = await db.one<{ stats: Record<string, Record<string, unknown>> }>(
+      "app",
+      `SELECT stats FROM datum.code_index WHERE id = $1`,
+      [fine.indexId],
+    );
+    expect(fineRow!.stats.loader.symbol_names_with_whitespace).toBe(0);
+  });
+
   it("derives a scope from the repo slug when none is given", async () => {
     const a = sym("solo");
     const loaded = await ingestGraph(db, artifact("acme/scoped", [a], []));

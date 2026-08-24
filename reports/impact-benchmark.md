@@ -56,6 +56,41 @@ them and cannot, structurally, express "nothing reaches this" — there is no te
 distinguishes a symbol's own definition and its doc comments from a call site. That asymmetry is not
 an artefact of the question set; it is the finding.
 
+## Sensitivity: does the empty-answer class carry the result?
+
+Ten of the forty questions have an empty correct answer and score 1.0 for an empty closure. That is
+a real differentiator — no text search can say "nothing reaches this" — but it has a dangerous
+property: **any silent coverage hole produces an empty closure too, and here an empty closure is a
+scoreable success.** An unparsed language, an excluded directory, a file skipped for size or a
+mangled symbol name all look identical to a correct answer, and no amount of grading the *answers*
+would reveal it.
+
+So the class was tested three ways before the headline was accepted:
+
+| scenario | datum | grep-line | margin |
+|---|---|---|---|
+| all 40 questions | 0.975 | 0.815 | **+0.160** |
+| excluding the 10 empty-answer questions | 0.966 | 0.820 | **+0.146** |
+| only the 10 empty-answer questions | 1.000 | 0.800 | +0.200 |
+| adversarial: assume all 10 are coverage holes, score them 0 | 0.718 | 0.815 | **−0.096** |
+
+The class does not carry the headline — drop it entirely and the gate still clears at +14.6. But if
+those ten answers were *wrong*, the verdict inverts to a loss. A metric whose downside is total
+inversion is where a cheap audit stops being optional.
+
+**So the ten were audited individually.** For each: the target's file was indexed, the symbol was
+found, its name is clean, and — the check that matters — **no edge names it even unresolved**
+(`dst_name` count 0 for all ten), so the ambiguity ceiling is not concealing a caller behind a
+demoted edge. 0 of 10 suspect. Symbols by language: rust 15,842 / cuda 2,618 / python 682 / c 35, so
+every declared language produced symbols and there is no unparsed-language hole in this artifact,
+and 0 symbols carry whitespace in their names.
+
+The empty-answer scores are therefore audited, not assumed. A permanent
+`stats.symbols_by_language` counter is being added anyway, because the next person to index a repo
+containing a language nobody considered would get an empty closure scored as a correct answer with
+nothing anywhere to contradict them, and a silent hole that grades as success is the worst failure
+shape a benchmark can have.
+
 ## What this run does NOT establish
 
 Stated because the numbers above are strong enough to be worth distrusting.

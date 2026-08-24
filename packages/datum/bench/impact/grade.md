@@ -24,6 +24,22 @@ reference to the target, at `depth: 1`, inside the scoped file set. For a trait 
 an implementation of that method counts as a referrer (an `implements` edge) as well as any body
 that calls it.
 
+**The unit is a caller symbol, deduplicated — never a call site, an edge, or a grep hit.** A function
+that references the target from three lines is **one** entry, not three. This matches the API, whose
+`code_impact` query is `DISTINCT ON (symbol_id)` so a caller appears once at its nearest depth and
+strongest confidence, and it is verified on the real graph: `vec_apply_llama_rope` has 5 inbound edge
+rows and 4 distinct callers, returning 4 hops. It is also the semantically right unit, which is why
+it was chosen before the API was checked — two call sites inside one function are one thing an
+engineer has to go and fix.
+
+`I08` exists to hold this line. `prefill_admission_cap` is called twice, at
+`default_scheduler.rs:531` and `:574`, and both calls are inside `DefaultScheduler::schedule`, so
+`expect_symbols` has exactly one entry. Ground truth was built this way throughout: no question has
+two entries with the same `name`+`path`+`line`, asserted mechanically. A fixture built by counting
+call sites, edges or grep hits would over-count against the API and score correct answers as
+incomplete, and `grep_hits_code` is recorded separately precisely so the two units are never
+confused: `I22` has 146 textual hits against 9 correct answers, `I12` has 19 against 6.
+
 `expect_none: true` means the correct answer is the **empty set**. Ten of the forty questions are
 of this kind. An empty answer is a positive claim, not a failure to answer, and it is graded as one.
 
@@ -149,7 +165,7 @@ uncertain(q) = ambiguous  ∪ covered_by_tests.filter(h => h.path_confidence ===
 **The fourth thing an edge can be: `unresolved`.** A call whose name matches more than eight symbols
 is emitted `unresolved` — `dst` null, `dst_name` preserved — rather than ambiguous, on the ground
 that a three-hundred-element candidate list for "one of the things called `new`" carries no decision
-value. On Arc HEAD 9,123 edges are demoted this way. An unresolved edge produces **no hop in any of
+value. On Arc HEAD 9,413 edges are demoted this way. An unresolved edge produces **no hop in any of
 the three arrays**, so it is invisible to the answer set: it costs recall, it cannot appear in
 `certain`, and it therefore cannot produce a false-confidence event. That asymmetry is the correct
 behaviour and it must not be reported as if it were free. Every run must therefore also report the
@@ -233,9 +249,10 @@ correct behaviour, not a failure. The refusal body carries `detail.disambiguate_
 a runner can tell mechanically whether qualifying would help at all — where it reads `"id"`,
 qualifying by name cannot work and only the id path will resolve.
 
-**`measured` is zero on this corpus, and that is the correct answer.** The Arc HEAD index resolves to
-47,658 `derived` and 55,161 `unverified` edges and **zero** `measured`: tree-sitter is neither a
-compiler nor a language server, so the indexer refuses that label rather than inflating it. The
+**`measured` is zero on this corpus, and that is the correct answer.** The Arc HEAD index resolves
+with a histogram of unique-name 47,564 / ambiguous-name 10,863 / unresolved 44,023, and **zero**
+`measured`: tree-sitter is neither a compiler nor a language server, so the indexer refuses that
+label rather than inflating it. The
 entire `certain` set on Arc is therefore `derived` — sound but inferred, not observed. Nothing in this
 file depends on a `measured` hop existing, and `counts.measured === 0` must never be treated as a
 fault. It does bound what the run can claim: every true positive reported here rests on unique-name
@@ -316,6 +333,35 @@ commit it answered for, and an answer for the wrong commit is a false-confidence
 partial credit. `I23` is the control: the same nine-symbol answer set at both commits, with every
 line number moved. Line drift alone is not a bitemporal difference, and a report that conflates the
 two has not tested the claim.
+
+## 7a. Stated limit of this metric
+
+This must appear in the report, because it is a property of the grading scheme rather than of any
+system being graded.
+
+Ten of the forty questions score a perfect 1.0 for an empty answer, which is correct — an empty
+reverse-dependency closure is a positive claim and a text search cannot produce one. But it follows
+that **any silent coverage hole in the indexer masquerades as a correct zero-callers answer.** A
+symbol the parser mangled, a language the walker does not parse, an excluded directory, a file skipped
+for size: all of them return an empty closure, and an empty closure is a scoreable success here.
+
+This is not hypothetical. Six CUDA functions were indexed under names containing whitespace, which no
+call site can ever resolve to, so they had zero inbound edges. Had one of them been a target, this
+benchmark would have recorded a perfect score for a total coverage hole — a worse failure than a
+wrong caller, and invisible to any check that grades answers, because the answers looked right.
+
+Three cheap structural defences exist and any run should state which it has:
+
+1. the indexer's own invariant audits (every symbol's declared span contains its own name; no
+   identifier contains whitespace; no name is a bare language specifier; no fqn is unreachable by a
+   syntactically valid call) — currently five audits reporting zero;
+2. a `symbol_names_with_whitespace` counter carried on the index row;
+3. **a per-language symbol count compared against the per-language file count.** A language with
+   files and no symbols is a coverage hole that no closure query can reveal, and neither of the first
+   two defences would catch an excluded directory or an unparsed language.
+
+Defence 3 does not exist yet. Until it does, the honest form of any high score on the `zero-callers`
+class is "correct, subject to the coverage audits listed above", not "correct".
 
 ## 8. Prohibited
 

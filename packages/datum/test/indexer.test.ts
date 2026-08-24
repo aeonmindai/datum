@@ -115,6 +115,7 @@ describe("symbol extraction", () => {
       "packed_bytes_per_row",
       "to_float",
       "to_float",
+      "vec_helper",
     ]);
     expect(kernels.every((s) => s.language === "cuda")).toBe(true);
     // The C++ grammar parks `__global__` in an ERROR node; the file is still indexed, because the
@@ -149,6 +150,63 @@ describe("symbol extraction", () => {
     const source = readFileSync(new URL("./fixtures/repo/kernels/pack.cu", import.meta.url), "utf8");
     const span = source.split("\n").slice((bounded[0]?.line_start ?? 1) - 1, bounded[0]?.line_end);
     expect(span.join("\n")).toContain("bounded_pack");
+  });
+
+  it("recovers a name the grammar fused with its return type", () => {
+    // A *templated return type* is a different failure from a specialisation:
+    // `__device__ __forceinline__ Geom<BLOCK> vec_helper(int n)` comes back as the single "name"
+    // `__forceinline__ Geom vec_helper` — qualifier, return base name and real name concatenated,
+    // sometimes with a newline inside. On Arc this left five real functions, including the hot
+    // `vec_apply_llama_rope`, unreachable: no call site can resolve to a name containing a space,
+    // so each one read as "nothing calls this" — an absence indistinguishable from a genuine one,
+    // which is the most dangerous answer this tool can give.
+    expect(symbolsNamed("vec_helper").length).toBe(1);
+    const whitespaced = artifact.symbols.filter((s) => /\s/.test(s.name) || /\s/.test(s.fqn ?? ""));
+    // No identifier in Rust, C, CUDA or Python contains whitespace, so one that does is a parser
+    // defect by construction. This is the invariant, not the individual shapes above.
+    expect(whitespaced).toEqual([]);
+  });
+
+  it("strips template arguments from a specialised record's name", () => {
+    // `template <> struct Geom<0>` puts its arguments in the name field. Keeping them yields a
+    // symbol called `Geom<0>` that no call site can match, because callers write `Geom<K>` with
+    // their own parameter — so the specialisation reads as unreferenced. The primary and the
+    // specialisation therefore share a name and are separated by signature, as functions are.
+    const geoms = symbolsNamed("Geom");
+    expect(geoms.length).toBe(2);
+    expect(geoms.every((s) => s.fqn === "fixture::Geom")).toBe(true);
+    expect(new Set(geoms.map((s) => s.signature_hash)).size).toBe(2);
+  });
+
+  it("keeps a method whose impl target has no name, at module scope", () => {
+    // `impl Pairable for (Left, Right)` has no nameable subject, so there is no type segment to
+    // put in the fqn and no subject for an `implements` edge. The method is still real: dropping
+    // it would trade a fabricated name for a missing symbol, and both are wrong.
+    const combine = symbolsNamed("combine").map((s) => s.fqn).sort();
+    expect(combine).toEqual(["fixture_beta::Pairable::combine", "fixture_beta::combine"]);
+    const bogus = artifact.edges.filter(
+      (e) => e.kind === "implements" && e.dst_name === "Pairable",
+    );
+    expect(bogus).toEqual([]);
+  });
+
+  it("does not mistake C++'s most vexing parse for a function declaration", () => {
+    // `dim3 grid(n, 1);` inside a body is syntactically identical to a prototype and the grammar
+    // resolves it the wrong way. On Arc that invented eight `function` symbols named `block` and
+    // `grid`, which then competed for resolution with anything genuinely bearing those names.
+    expect(symbolsNamed("grid")).toEqual([]);
+    // Every symbol's declared span must contain its own name; a fabricated one cannot satisfy that.
+    for (const s of artifact.symbols) {
+      if (s.kind === "module") continue;
+      const lines = readFileSync(
+        new URL(`./fixtures/repo/${s.path}`, import.meta.url),
+        "utf8",
+      ).split("\n");
+      expect(
+        lines.slice(s.line_start - 1, s.line_end).join("\n"),
+        `${s.kind} ${s.name} at ${s.path}:${s.line_start}-${s.line_end}`,
+      ).toContain(s.name);
+    }
   });
 
   it("does not index function-local constants as symbols", () => {

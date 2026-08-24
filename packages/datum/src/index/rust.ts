@@ -181,10 +181,13 @@ function visit(
 
     case "impl_item": {
       const typeName = typeNameOf(node.childForFieldName("type"));
-      if (typeName === null) return;
-      const implFqn = joinFqn(scope.prefix, typeName);
+      // `impl Trait for (A, B)` has no nameable target, so there is no type to scope its methods
+      // under and no subject for an `implements` edge. The methods are still real, so they are
+      // indexed at module scope rather than dropped — under-claiming the fqn is right, losing the
+      // symbol is not.
+      const implFqn = typeName === null ? scope.prefix : joinFqn(scope.prefix, typeName);
       const traitNode = node.childForFieldName("trait");
-      if (traitNode !== null) {
+      if (traitNode !== null && typeName !== null) {
         const traitName = typeNameOf(traitNode);
         if (traitName !== null) {
           out.addEdge({
@@ -202,7 +205,7 @@ function visit(
       }
       const body = node.childForFieldName("body");
       if (body === null) return;
-      const inner: Scope = { ...scope, prefix: implFqn, selfType: implFqn };
+      const inner: Scope = { ...scope, prefix: implFqn, selfType: typeName === null ? null : implFqn };
       for (const child of body.namedChildren) visit(child, inner, ctx, out);
       return;
     }
@@ -579,6 +582,9 @@ function visibilityOf(node: TsNode): string | null {
   return null;
 }
 
+/** A Rust path: identifiers joined by `::`, and nothing else. */
+const RUST_PATH = /^[A-Za-z_][A-Za-z0-9_]*(::[A-Za-z_][A-Za-z0-9_]*)*$/;
+
 /** The name of a type, with generic arguments and reference sigils removed. */
 function typeNameOf(node: TsNode | null): string | null {
   if (node === null) return null;
@@ -600,8 +606,14 @@ function typeNameOf(node: TsNode | null): string | null {
     case "identifier":
       return node.text;
   }
+  // Anything that is not shaped like a path is not a name we can resolve against. `impl TryInto<X>
+  // for (TomlSelector, TomlLoaderArgs)` is the real case: a tuple type has no name, and inventing
+  // `(TomlSelector, TomlLoaderArgs)::try_into` produces an fqn containing a space and a comma that
+  // no call site can ever match, so the method reads as unreferenced. Returning null instead
+  // scopes those methods under the module and emits no `implements` edge, which is the honest
+  // answer: there is nothing there to name.
   const stripped = stripGenerics(node.text).trim();
-  return stripped === "" ? null : stripped;
+  return RUST_PATH.test(stripped) ? stripped : null;
 }
 
 function stripGenerics(text: string): string {

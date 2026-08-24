@@ -499,7 +499,7 @@
     "bare_name_is_ambiguous": false,
     "target_path": "mistralrs-quant/kernels/qtip/qtip_geom.cuh",
     "target_line": 69,
-    "target_kind": "function",
+    "target_kind": "kernel",
     "commit": "526c909986de48b13d4ae33964baf0451fb79270",
     "question": "If I change the signature of `qtip_packed_bytes_per_row` (mistralrs-quant/kernels/qtip/qtip_geom.cuh:69), what else must I care about?",
     "depth": 1,
@@ -523,7 +523,7 @@
     "grep_hits_code": 2,
     "grep_files_code": 2,
     "verified_by": "rg -w qtip_packed_bytes_per_row returns 2 lines: the `__device__ __forceinline__` definition at qtip_geom.cuh:69 and `qtip_packed_bytes_per_row<G>(num_symbols)` at qtip_beam.cu:328. Listed every top-level declarator in qtip_beam.cu above line 328: the nearest is the `__global__` kernel whose name sits on :277 (`template <class G, bool COMPUTED_CB>` on :275, `__global__ void __launch_bounds__(...)` on :276). Read those three lines directly.",
-    "note": "CUDA, and the callee is a template so the call text is `qtip_packed_bytes_per_row<G>(...)`. The kernel's name is on a different line from its `__global__` qualifier, which is where naive C parsers put the symbol."
+    "note": "CUDA, and the callee is a template so the call text is `qtip_packed_bytes_per_row<G>(...)`. The kernel's name is on a different line from its `__global__` qualifier, which is where naive C parsers put the symbol. Confirmed against the regenerated HEAD artifact: exactly one incoming edge, `calls`, resolution `unique-name`, from `qtip_quantize_rows_beam_kernel` — matching this hand-built ground truth. Note the indexer reports that kernel's line_start as 275 (the `template` line) where the fixture records 277 (the name line); the difference of 2 is inside the ±3 tolerance, which is exactly the case that tolerance exists for."
   },
   {
     "id": "I15",

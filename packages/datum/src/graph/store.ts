@@ -189,6 +189,7 @@ export async function ingestGraph(
   const indexId = newId("cidx");
   const startedAt = Date.now();
   const symbolsByKind: Record<string, number> = {};
+  const malformedNames: { count: number; sample: string[] } = { count: 0, sample: [] };
   const tally: EdgeTally = {
     byResolution: {},
     byConfidence: { measured: 0, derived: 0, unverified: 0 },
@@ -243,7 +244,13 @@ export async function ingestGraph(
         ],
       );
 
-      const idByKey = await insertSymbols(client, indexId, artifact, symbolsByKind);
+      const idByKey = await insertSymbols(
+        client,
+        indexId,
+        artifact,
+        symbolsByKind,
+        malformedNames,
+      );
       const edgeRows = await insertEdges(client, indexId, artifact, idByKey, tally);
 
       const stats = {
@@ -252,6 +259,9 @@ export async function ingestGraph(
         // by the thing that actually wrote the rows.
         loader: {
           symbols_by_kind: symbolsByKind,
+          // A parser defect the loader can see but must not hide: see NAME_HAS_WHITESPACE.
+          symbol_names_with_whitespace: malformedNames.count,
+          symbol_names_with_whitespace_sample: malformedNames.sample,
           // Both numbers, because they differ: an ambiguous edge becomes one row per candidate.
           artifact_edges: artifact.edges.length,
           edge_rows: edgeRows,
@@ -293,11 +303,27 @@ export async function ingestGraph(
   }
 }
 
+/**
+ * No identifier in any language this indexer parses contains whitespace, so a name that does is a
+ * parser defect rather than a symbol.
+ *
+ * This is a counter, not a refusal. Such a symbol is real code that the extractor mis-named: it is
+ * unreachable, because no call site can resolve to a name with a space in it, so every call to it
+ * silently lands in the unresolved bucket and the symbol reads as "nothing calls this" — an
+ * absence that looks identical to a genuine one. Refusing the whole artifact over it would block a
+ * 147k-row load for a handful of rows, and policing name extraction is not the loader's job. But a
+ * defect nobody can see is a defect nobody fixes, so the count and a sample land in `stats` where
+ * an audit will trip over them. Found this way: five real CUDA functions in one flashinfer header
+ * whose templated return type was swept into their name.
+ */
+const NAME_HAS_WHITESPACE = /\s/;
+
 async function insertSymbols(
   client: pg.PoolClient,
   indexId: string,
   artifact: GraphArtifact,
   byKind: Record<string, number>,
+  malformed: { count: number; sample: string[] },
 ): Promise<Map<string, string>> {
   const idByKey = new Map<string, string>();
   const columns = `(index_id, id, kind, name, fqn, language, path, line_start, line_end, visibility, signature, signature_hash)`;
@@ -332,6 +358,13 @@ async function insertSymbols(
       }
       idByKey.set(sym.key, id);
       byKind[sym.kind] = (byKind[sym.kind] ?? 0) + 1;
+      if (NAME_HAS_WHITESPACE.test(sym.name)) {
+        malformed.count += 1;
+        // A handful is enough to find the pattern; the count is what says how bad it is.
+        if (malformed.sample.length < 10) {
+          malformed.sample.push(`${sym.path}:${sym.line_start} ${JSON.stringify(sym.name)}`);
+        }
+      }
       params.push(
         id,
         sym.kind,

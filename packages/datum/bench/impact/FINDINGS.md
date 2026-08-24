@@ -53,6 +53,80 @@ Neither is a defect in the test — it scans for the symbol, not the line — bu
 a hand-maintained line number is stale the moment it is written, which is the argument for deriving
 this from a parser.
 
+## The one CUDA question found two indexer coverage holes, and the audit that followed found three more
+
+`I14` is the only question in the set that targets a CUDA symbol. Its target,
+`qtip_packed_bytes_per_row` at `mistralrs-quant/kernels/qtip/qtip_geom.cuh:69`, is declared
+`__device__ __forceinline__`; its single caller, `qtip_quantize_rows_beam_kernel` at
+`qtip_beam.cu:277`, is a `__global__ void __launch_bounds__(...)` kernel whose name sits on a
+different line from its qualifier. Both of those shapes were broken in the indexer, and both were
+found because a hand-built question demanded an answer the index could not give.
+
+- 65 symbols were being indexed under the *name* `__forceinline__`: explicit template specialisations
+  where the grammar reports the qualifier as the declarator. Real names (`hc_narrow`, `to_float`,
+  `from_float`, …) are now recovered.
+- `__launch_bounds__(...)` on its own line above `__global__ void name(...)` was consuming the
+  declarator, so three real kernels were absent from the index outright and a fourth was misfiled as
+  a plain function. After the fix: 221 live `__global__` kernels in Arc, 221 indexed, 0 missing.
+
+The regenerated artifact confirms `I14`'s ground truth exactly — one incoming edge, `calls`,
+resolution `unique-name`, from `qtip_quantize_rows_beam_kernel` — which is the outcome worth having:
+two independent derivations agreeing, one by hand and one by parser, after the parser was fixed by
+the disagreement.
+
+Two things generalise from it. First, **a coverage hole does not announce itself.** Neither defect
+was visible to any check that only inspects what the index *contains*; a repository missing four
+kernels looks exactly like a repository that has four fewer kernels. The `__forceinline__` phantoms
+surfaced from an fqn-uniqueness audit and the missing kernels only from diffing indexed symbols
+against a regex sweep of the source. That is the same lesson as `I34` from the other direction: there,
+widening the extension list by one entry *manufactures* a confident wrong answer; here, a parser bug
+silently *removes* correct ones. Neither shows up in a score.
+
+Second, it vindicates the `± 3` line tolerance in `grade.md` section 3 rather than merely excusing it.
+The indexer reports that kernel's `line_start` as **275**, the `template <class G, bool COMPUTED_CB>`
+line; the fixture records **277**, where the name actually appears. A grader demanding line equality
+would have scored a correct answer as a miss.
+
+Three further classes turned up in the same audit, and they matter here because each one produced a
+**confidently empty** answer rather than a visible failure:
+
+- **Names fused with a templated return type.** `__device__ __forceinline__ vec_t<float, N>
+  vec_apply_llama_rope(...)` was indexed under the single name
+  `"__forceinline__ vec_t vec_apply_llama_rope"`. Six functions, including the hot RoPE path, had
+  **zero** inbound edges, because no call site can ever resolve to a name containing a space.
+  `vec_apply_llama_rope` now has five. Any impact question on those six would have scored a
+  confident empty closure — the single worst outcome available under this grading scheme, since an
+  empty answer reads as the positive claim "nothing reaches this".
+- **C++'s most vexing parse.** `dim3 block(TILE, TILE);` inside a function body is textually
+  indistinguishable from a prototype, and the grammar chose prototype, inventing roughly 182 phantom
+  `function` symbols named `block` and `grid` that then competed for resolution against anything
+  genuinely so named.
+- **Specialised record names.** `template <> struct Vec<__nv_bfloat16, 1>` produced roughly 310 fqns
+  of the form `vllm::Vec<__nv_bfloat16, 1>::Type`, unmatchable because callers write their own type
+  parameters.
+
+Removing those fabrications took the index from 19,495 to 19,177 symbols across three regenerations.
+That is roughly 490 fabrications removed, not coverage lost, and it is worth stating plainly because
+a shrinking symbol count is the shape a *regression* usually has.
+
+I re-verified the fixture against the final artifact by reading it directly rather than through the
+benchmark. `I14`: one inbound `calls` edge, `unique-name`, from `qtip_quantize_rows_beam_kernel`. The
+four `from_env` definitions, keyed by name rather than by sequence because a bare sequence of counts
+is only meaningful alongside its order — `QtipCodebook::from_env` one caller, `get`;
+`TrellisSearch::from_env` two, `env_search` and `get`; `KvQuantMode::from_env` two, `dequant` and
+`forward`; `EpPlacementMode::from_env` one, `build_expert_parallel_plan`. Every caller name matches
+this fixture's `expect_symbols` exactly. Two independent derivations of the same answer sets, one by
+hand and one by parser, with the hand-built one never having read the parser's output.
+
+And the lesson that generalises furthest, which is not really about CUDA at all: **all five classes
+shipped past a green 27-test suite.** What caught them was invariant auditing — every symbol's
+declared span must contain its own name; no identifier may contain whitespace; no name may be a bare
+language specifier; no fqn may be unreachable by any syntactically valid call. A test asserts what
+someone thought to check. An invariant asserts what must be true of everything, including the cases
+nobody imagined. Coverage holes only ever show up in the second, which is the same reason this
+benchmark grades ten questions whose correct answer is *empty*: the interesting failures are the ones
+that look like success.
+
 ## Two corpus contradictions worth reporting on their own
 
 `extend_draft_kv` (`I32`) has zero call sites at HEAD. `docs/engine-explainer.html:1668` tags it

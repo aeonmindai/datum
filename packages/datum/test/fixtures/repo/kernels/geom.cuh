@@ -32,4 +32,12 @@ __device__ __forceinline__ float to_float<int>(int v) {
     return packed_bytes_per_row(v);
 }
 
+// An explicit specialisation writes its arguments into the name, so the grammar reports the name as
+// `Geom<0>`. Keeping that produces a symbol no call site can match: callers write `Geom<K>` with
+// their own parameter, so the specialisation would read as unreferenced.
+template <>
+struct Geom<0> {
+    static constexpr uint32_t K = 0;
+};
+
 }  // namespace fixture
