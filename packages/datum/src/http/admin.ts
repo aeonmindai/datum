@@ -28,7 +28,12 @@ export interface AdminDeps {
   db: Db;
   config: Config;
   adminHash: string;
-  verification: { configured: boolean; method: "local-mirror" | "github-api" | "none" };
+  verification: {
+    configured: boolean;
+    method: "local-mirror" | "github-api";
+    authenticated: boolean;
+    note: string;
+  };
 }
 
 const ScopeString = z.string().regex(/^[A-Za-z0-9_.-]+(\/[A-Za-z0-9_.-]+)*$/);

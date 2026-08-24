@@ -54,14 +54,24 @@ export async function buildServer(
   await app.register(cookie);
 
   const adminHash = await resolveAdminHash(config);
+  // What this instance can actually verify, stated accurately.
+  //
+  // The earlier version reported "not configured" whenever there was no mirror and no token,
+  // and that was simply false: the GitHub API answers for PUBLIC repositories without any
+  // credential, so rows were being promoted while the panel and the startup log both claimed
+  // nothing could be. A store whose whole purpose is refusing unsupported claims does not get
+  // to make one about itself.
   const mirrorCount = Object.keys(config.gitMirrors).length;
   const verification = {
-    configured: mirrorCount > 0 || config.githubToken !== null,
-    method: (mirrorCount > 0
-      ? "local-mirror"
-      : config.githubToken
-        ? "github-api"
-        : "none") as "local-mirror" | "github-api" | "none",
+    configured: true,
+    method: (mirrorCount > 0 ? "local-mirror" : "github-api") as "local-mirror" | "github-api",
+    authenticated: config.githubToken !== null,
+    note:
+      mirrorCount > 0
+        ? `resolving commits from ${mirrorCount} local clone(s); no network involved`
+        : config.githubToken
+          ? "resolving commits via the GitHub API with a token, so private repos work too"
+          : "resolving commits via the public GitHub API. Private repos cannot be read, and a claim about one is reported unresolvable rather than refuted — set DATUM_GITHUB_TOKEN to promote those.",
   };
 
   app.get("/healthz", async (_request, reply) => {
@@ -115,12 +125,7 @@ export async function buildServer(
   }
 
   const worker = opts.startWorker === false ? null : startVerificationWorker(db, config);
-  if (worker && !verification.configured) {
-    console.warn(
-      "[verify] no DATUM_GIT_MIRRORS and no DATUM_GITHUB_TOKEN: no claim can be promoted to " +
-        "`measured` on this instance. That is correct behaviour, not a bug — confidence is earned.",
-    );
-  }
+  if (worker) console.log(`[verify] ${verification.note}`);
   if (bootstrap?.firstKeySecret) {
     console.log(
       [

@@ -707,7 +707,16 @@ describe("deliverable 6 — the admin panel's backend", () => {
 
     const me = await app.inject({ method: "GET", url: "/admin/api/me", headers: session });
     expect(me.json()).toMatchObject({ authenticated: true, org: ORG, scope_root: ROOT });
-    expect(me.json().verification).toMatchObject({ configured: true, method: "local-mirror" });
+    // A mirror is configured in this test, so the panel must say local-mirror and say it is
+    // not relying on the network. On an instance with neither a mirror nor a token the honest
+    // answer is still "configured": the public GitHub API verifies public repos with no
+    // credential, and claiming otherwise while promoting rows is the store lying about itself.
+    expect(me.json().verification).toMatchObject({
+      configured: true,
+      method: "local-mirror",
+      authenticated: false,
+    });
+    expect(me.json().verification.note).toContain("local clone");
 
     const created = await app.inject({
       method: "POST",
