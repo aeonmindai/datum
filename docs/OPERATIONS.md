@@ -455,3 +455,27 @@ per attempt and defeat the limit entirely — on a single shared admin password.
 order: `CF-Connecting-IP`, then `Fly-Client-IP`, then the **rightmost** `X-Forwarded-For` entry,
 then the socket peer. If you front Datum with a different proxy, add its equivalent header there
 rather than loosening the rule.
+
+---
+
+## Before every deploy: boot the image
+
+```bash
+./scripts/smoke-image.sh
+```
+
+`docker build` succeeding is not the image booting, and the test suite runs against source rather
+than against the artifact you ship. Neither would have caught the outage that produced this script:
+adding `--omit=optional` to the runtime install passed the build, passed all 191 tests, and killed
+production, because napi-style native packages ship their per-platform binary as an **optional**
+dependency — so `@node-rs/argon2` lost the file it loads at require time, the server died on boot,
+and the machine restart-looped until Fly gave up.
+
+The script builds the real image, runs it against a real Postgres, and requires the same
+`/healthz` the platform's health check uses, plus the front door, the panel, and a 401 from both
+authenticated surfaces. An image that boots wide open is worse than one that does not boot.
+
+**Deploy with `--local-only`.** There is no persistent remote builder on this account, so a plain
+`fly deploy` provisions a builder VM, uploads the context to it and builds cold every single time.
+`--local-only` uses the warm local daemon and its layer cache: measured **61s** against several
+minutes.

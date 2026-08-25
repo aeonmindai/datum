@@ -52,12 +52,18 @@ ENV NODE_ENV=production
 COPY package.json package-lock.json ./
 COPY packages/datum/package.json packages/datum/package.json
 COPY packages/admin/package.json packages/admin/package.json
-# --omit=optional here, and only here. The optional deps are rollup's build-time platform binary
-# and tree-sitter plus four grammars — native modules with a node-gyp-build install script. The
-# runtime needs none of them: the indexer is deliberately decoupled, so `datum index` emits JSON
-# where the code lives and `datum ingest-graph` needs no parser. Keeping them cost ~80 MB in every
-# layer push and a native install attempt on an image with no C++ toolchain.
-RUN npm ci --omit=dev --omit=optional --no-audit --no-fund \
+# NO --omit=optional here. It was tried and it took production down.
+#
+# napi-style native packages ship their per-platform binary AS an optional dependency:
+# @node-rs/argon2 needs @node-rs/argon2-linux-arm64-gnu, exactly as rollup needs its own platform
+# binary in the build stage. Omitting optional deps therefore removes the thing argon2 loads, the
+# server dies on require, and the machine restart-loops to death. `docker build` succeeds either
+# way, because building an image is not booting it.
+#
+# The measured prize for getting this right was ~1 MB: tree-sitter and its grammars are never in
+# the linux image at all, since native optional deps fail silently here with no toolchain. A 1 MB
+# saving is not worth a boot-path risk, so the flag is gone rather than narrowed.
+RUN npm ci --omit=dev --no-audit --no-fund \
  && npm cache clean --force
 
 # Normalise modes after copying, because git does not track the read bit. A contributor whose umask
