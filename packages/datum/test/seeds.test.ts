@@ -4,6 +4,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { startPostgres, type TestPostgres } from "./helpers/postgres.js";
 import type { Db } from "../src/db/pool.js";
 import { loadSeed, SEEDS_DIR } from "../src/ops/seed.js";
+import { createMission } from "../src/domain/store.js";
 import { loadConfig, type Config } from "../src/config.js";
 import { runVerificationPass } from "../src/worker/verify.js";
 import { take } from "../src/domain/store.js";
@@ -123,6 +124,58 @@ describe("deliverable 7 — the Arc seed", () => {
     expect(rows.rows.length).toBe(1);
     expect(rows.rows[0]!.statement).toContain("K=9");
     expect(rows.rows[0]!.gates.length).toBeGreaterThanOrEqual(3);
+  });
+
+  it("can supersede a mission at all — the FK was immediate and this never worked", async () => {
+    // `missions` shipped with `supersedes`, `superseded_by`, an immutability trigger and a
+    // supersession function in migration 005, and every call failed with 23503. The stamp is
+    // applied by a BEFORE INSERT trigger, so it names a row that does not exist yet, and an
+    // immediate foreign key refuses that. Assertions hit the same thing in 002 and deferred the
+    // FK; missions were written the same way and the fix was never carried across. Nothing
+    // exercised it, so a documented capability was dead for its whole life.
+    const original = await createMission(db, {
+      scope: "org/aeonmind",
+      statement: "supersession smoke test — original",
+      state: "active",
+      gates: [
+        {
+          subject: "smoke",
+          predicate: "value",
+          op: ">=",
+          target: 1,
+          requires_confidence: "measured",
+        },
+      ],
+      asserted_by: "agent:test",
+    });
+
+    const replacement = await createMission(db, {
+      scope: "org/aeonmind",
+      statement: "supersession smoke test — replacement",
+      state: "closed",
+      gates: [],
+      asserted_by: "agent:test",
+      supersedes: original.id,
+    });
+
+    const after = await db.one<{ superseded_by: string | null; version: number }>(
+      "app",
+      `SELECT superseded_by, version FROM datum.missions WHERE id = $1`,
+      [original.id],
+    );
+    expect(after!.superseded_by).toBe(replacement.id);
+
+    // And superseding it twice is still refused: the chain must not fork.
+    await expect(
+      createMission(db, {
+        scope: "org/aeonmind",
+        statement: "supersession smoke test — second replacement",
+        state: "closed",
+        gates: [],
+        asserted_by: "agent:test",
+        supersedes: original.id,
+      }),
+    ).rejects.toThrow(/already superseded/);
   });
 
   it("is safe to load twice — a seed that cannot be re-run is not a seed", async () => {

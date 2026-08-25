@@ -133,6 +133,29 @@ describe("compactState — a decision only a human can close is never dropped", 
     expect(out).toContain("bucket.chosen");
   });
 
+  it("ignores closed gate-less missions, so cleaning up duplicates cannot inflate the count", () => {
+    // The duplicate-mission cleanup supersedes each duplicate with a `closed` row carrying NO
+    // gates. If it had copied the original's gates instead, six decisions would have been
+    // reported as fourteen - a cleanup that corrupts the number it was protecting.
+    const out = compactState(
+      state([
+        {
+          statement: "real blocker",
+          state: "blocked",
+          gates: [gate({ subject: "b", predicate: "chosen", requires_confidence: "confirmed-by-human", reached: null, actual: null })],
+        },
+        ...Array.from({ length: 9 }, (_, i) => ({
+          statement: `Closed as a duplicate load of: thing ${i}`,
+          state: "closed",
+          gates: [],
+        })),
+      ]),
+      200,
+    );
+    expect(out).toContain("awaiting-you=1");
+    expect(out).toContain("b.chosen");
+  });
+
   it("names the human requirement on the gate line, so OPEN is not mistaken for actionable", () => {
     expect(compactGate(gate({ requires_confidence: "confirmed-by-human" }))).toContain(
       "OPEN(needs-human)",
