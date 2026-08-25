@@ -126,33 +126,48 @@ describe("deliverable 7 — the Arc seed", () => {
   });
 
   it("is safe to load twice — a seed that cannot be re-run is not a seed", async () => {
-    // Production hit this for real: `seeds/datum.json` names the same human as `seeds/arc.json`,
-    // and the node insert had no ON CONFLICT, so the second file aborted on a unique violation
-    // *after* its assertions and missions had already been written. Partway is the worst place
-    // to stop. Node identity is (kind, scope, label), so re-announcing must be a heartbeat.
-    const before = await db.one<{ n: string }>(
-      "app",
-      `SELECT count(*)::text AS n FROM datum.nodes WHERE retired_at IS NULL`,
-    );
-    const again = await loadSeed(db, resolve(SEEDS_DIR, "arc.json"), { log: () => {} });
-    const after = await db.one<{ n: string }>(
-      "app",
-      `SELECT count(*)::text AS n FROM datum.nodes WHERE retired_at IS NULL`,
-    );
-    expect(after!.n).toBe(before!.n);
-    expect(again.nodes).toBeGreaterThan(0);
+    // Production hit all three of these. First the node insert had no ON CONFLICT, so the second
+    // file aborted on a unique violation *after* its assertions and missions had landed. Then,
+    // with that fixed, a re-load minted nine fresh assertions because `valid_from` is part of the
+    // content hash and the seed had not pinned it. Then eight identical live missions appeared,
+    // because missions have no content identity at all.
+    //
+    // The earlier version of this test counted only nodes, which is why it passed while two of
+    // the three were broken. Count everything a load can create.
+    const counts = async (): Promise<Record<string, string>> => {
+      const r = await db.one<Record<string, string>>(
+        "app",
+        `SELECT (SELECT count(*)::text FROM datum.nodes WHERE retired_at IS NULL) AS nodes,
+                (SELECT count(*)::text FROM datum.assertions) AS assertions,
+                (SELECT count(*)::text FROM datum.missions) AS missions`,
+      );
+      return r!;
+    };
 
-    // Identity stays unique: no duplicate live node for the same (kind, scope, label).
-    const dupes = await db.query<{ kind: string; scope: string; label: string }>(
-      "app",
-      `SELECT kind, scope, label FROM datum.nodes WHERE retired_at IS NULL
-        GROUP BY kind, scope, label HAVING count(*) > 1`,
-    );
-    expect(dupes.rows).toEqual([]);
+    // Establish it once - this block's fixture is arc.json - then measure the *second* load.
+    await loadSeed(db, resolve(SEEDS_DIR, "datum.json"), { log: () => {} });
+    const before = await counts();
+    const again = await loadSeed(db, resolve(SEEDS_DIR, "datum.json"), { log: () => {} });
+    const after = await counts();
 
-    // Re-applying a supersession chain is refused rather than duplicated, and the refusal is
-    // reported with the constraint name rather than thrown away.
+    expect(after).toEqual(before);
+    // The loader still reports what it saw rather than pretending it did nothing.
+    expect(again.skipped.length).toBeGreaterThan(0);
     for (const s of again.skipped) expect(s.reason).toBeTruthy();
+    expect(again.skipped.some((s) => s.reason === "mission_already_live")).toBe(true);
+
+    // No duplicate live identity of any kind.
+    for (const [table, key] of [
+      ["datum.nodes", "kind, scope, label"],
+      ["datum.missions", "scope, statement"],
+    ] as const) {
+      const where = table === "datum.nodes" ? "retired_at IS NULL" : "superseded_by IS NULL";
+      const dupes = await db.query(
+        "app",
+        `SELECT ${key} FROM ${table} WHERE ${where} GROUP BY ${key} HAVING count(*) > 1`,
+      );
+      expect(dupes.rows, `${table} has duplicate live rows`).toEqual([]);
+    }
   });
 
   it("promotes real Arc measurements when the real repo is on disk", async () => {

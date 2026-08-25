@@ -195,6 +195,24 @@ export async function loadSeed(
   }
 
   for (const m of seed.missions ?? []) {
+    // Assertions are content-addressed, so re-inserting one is a no-op the database enforces.
+    // Missions have no such identity, and a second load of this file put eight identical live
+    // missions into production. Until the database can refuse it - tracked as its own mission -
+    // the loader must, keyed on the same (scope, statement) pair a human would call the same.
+    const existing = await db.one<{ n: string }>(
+      "app",
+      `SELECT count(*)::text AS n FROM datum.missions
+        WHERE superseded_by IS NULL AND scope = $1 AND statement = $2`,
+      [m.scope, m.statement],
+    );
+    if (Number(existing?.n ?? 0) > 0) {
+      report.skipped.push({
+        subject: `mission:${m.scope}`,
+        predicate: m.statement.slice(0, 48),
+        reason: "mission_already_live",
+      });
+      continue;
+    }
     try {
       await createMission(db, { ...m, asserted_by: "agent:seed" });
       report.missions += 1;

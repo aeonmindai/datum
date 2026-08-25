@@ -32,7 +32,8 @@
         "path": "reports/m2-rerun.md",
         "method": "33 questions x 3 repeats x 4 arms, mechanical grader validated 26/26 on adversarial cases"
       },
-      "why": "The store-only arm is the architecture's own number. It fails the gate."
+      "why": "The store-only arm is the architecture's own number. It fails the gate.",
+      "valid_from": "2026-08-25T01:55:05+01:00"
     },
     {
       "scope": "org/aeonmind/proj/datum",
@@ -52,7 +53,8 @@
         "path": "reports/m2-rerun.md",
         "method": "same 33 questions, same grading, prose fallback answered the three questions the store abstained on"
       },
-      "why": "The gate passes, but on an arm that reads material nobody asserted. Whether that counts is a decision, not a measurement."
+      "why": "The gate passes, but on an arm that reads material nobody asserted. Whether that counts is a decision, not a measurement.",
+      "valid_from": "2026-08-25T01:55:05+01:00"
     },
     {
       "scope": "org/aeonmind/proj/datum",
@@ -71,7 +73,8 @@
         "path": "reports/impact-benchmark.md",
         "method": "limit test A over 19,495 symbols; no edge in the index is `measured` because tree-sitter is not a compiler"
       },
-      "why": "A label nobody outside Datum can check is a claim, not a derivation."
+      "why": "A label nobody outside Datum can check is a claim, not a derivation.",
+      "valid_from": "2026-08-24T22:18:44+01:00"
     },
     {
       "scope": "org/aeonmind/proj/datum",
@@ -91,7 +94,8 @@
         "path": "reports/graph-staleness.md",
         "method": "32 commits parsed at c^ and c under both identity rules: 887 edges vs 24"
       },
-      "why": "Incremental indexing has to answer 'is this the same symbol as last commit'. Today it cannot."
+      "why": "Incremental indexing has to answer 'is this the same symbol as last commit'. Today it cannot.",
+      "valid_from": "2026-08-25T15:11:54+01:00"
     },
     {
       "scope": "org/aeonmind/proj/datum",
@@ -110,7 +114,8 @@
         "commit": "89277deec1bd43efa4f4f6c12a5ae9386c57faa2",
         "path": "reports/graph-staleness.md",
         "method": "measured on real Arc at origin/master, 966 files, 19,177 symbols"
-      }
+      },
+      "valid_from": "2026-08-25T15:11:54+01:00"
     },
     {
       "scope": "org/aeonmind/proj/datum",
@@ -129,7 +134,8 @@
         "commit": "89277deec1bd43efa4f4f6c12a5ae9386c57faa2",
         "path": "reports/graph-staleness.md",
         "method": "git ls-tree over the last 60 commits of origin/master, counting distinct blob shas"
-      }
+      },
+      "valid_from": "2026-08-25T15:11:54+01:00"
     },
     {
       "scope": "org/aeonmind/proj/datum",
@@ -149,7 +155,8 @@
         "path": "reports/graph-staleness.md",
         "method": "32 commits, changed files parsed at c^ and at c, symbol and edge sets diffed under line-independent identity"
       },
-      "why": "This is the size of the gap a working-tree channel would close."
+      "why": "This is the size of the gap a working-tree channel would close.",
+      "valid_from": "2026-08-25T15:11:54+01:00"
     },
     {
       "scope": "org/aeonmind/proj/datum",
@@ -169,7 +176,8 @@
         "path": "reports/graph-staleness.md",
         "method": "indexer run over 2/4/8/26 real files, JSON serialised and gzipped"
       },
-      "why": "It removes cost from the argument. What is left is trust."
+      "why": "It removes cost from the argument. What is left is trust.",
+      "valid_from": "2026-08-25T15:11:54+01:00"
     },
     {
       "scope": "org/aeonmind/proj/datum",
@@ -188,7 +196,8 @@
         "commit": "3b3e1c8e66fdf5515f60bb1362b8d4578e34b688",
         "path": "docs/OPERATIONS.md",
         "method": "rates read off Fly's pricing page for the sjc region on the day of the commit"
-      }
+      },
+      "valid_from": "2026-08-25T13:20:13+01:00"
     }
   ],
   "missions": [
@@ -348,6 +357,21 @@
           "target": 0,
           "requires_confidence": "measured",
           "note": "Today it is `datum index` then `datum ingest-graph`, by hand, which means the graph is stale the moment anyone commits and nothing says so."
+        }
+      ]
+    },
+    {
+      "scope": "org/aeonmind/proj/datum",
+      "statement": "A mission has an identity, so loading the same seed twice cannot duplicate it.",
+      "state": "active",
+      "gates": [
+        {
+          "subject": "missions",
+          "predicate": "duplicate_live_statements",
+          "op": "=",
+          "target": 0,
+          "requires_confidence": "measured",
+          "note": "Assertions are content-addressed and refuse duplicates at the database. Missions are not, so a second seed load created 8 identical live missions in production. The seed now skips them, but nothing at the database level prevents it."
         }
       ]
     }
