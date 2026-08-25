@@ -33,10 +33,12 @@ That's it. Your agent gets six tools and nothing to learn:
 | **`why`** | how do you know that? |
 | **`assert`** | record this |
 | **`supersede`** | that was wrong, here's the correction |
+| **`impact`** | if I change this, what else breaks? |
+| **`feedback`** | the human corrected me — remember it |
 | **`nodes`** | who else is working here? |
 
-Six, not thirty — every tool description is injected into every conversation, so a chatty MCP server
-is a tax you pay on every message forever.
+Eight, not thirty — every tool description is injected into every conversation, so a chatty MCP
+server is a tax you pay on every message forever. The whole manifest is under 8 KB.
 
 ## What your agent gets back
 
@@ -103,6 +105,45 @@ docker compose exec datum node packages/datum/dist/cli/index.js seed --example
 ```
 
 There is no default password in this image. It refuses to start without one, deliberately.
+
+## The `datum` command
+
+```bash
+npm i -g @aeonmind/datum
+```
+
+**Wire up a repo.** One command, and this repo becomes a project your agents can reason about:
+
+```bash
+cd your-repo
+datum link                 # figures out the project from your git remote
+datum status               # which scope, which mode, what's the mission, which gates are open
+datum mode isolated        # stop inheriting org-wide facts (writes a correction, erases nothing)
+```
+
+`datum link` writes `.datum.toml`, which is safe to commit — it holds the scope and server address,
+never your key. Many worktrees of one repo are **one project with many nodes**, not many projects.
+
+**Teach it your code.** Parsing happens where the code lives; loading happens where the database
+lives, and the two halves don't need each other's dependencies:
+
+```bash
+datum index                       # parse this repo -> a graph artifact
+datum ingest-graph datum-graph-*.json
+datum impact parse_config         # and now ask what breaks
+```
+
+**Running the server.**
+
+```bash
+datum serve                       # the API, /mcp, /admin and the verification worker
+datum migrate                     # apply migrations (also happens automatically on boot)
+datum seed --example              # load the demo fixture
+datum verify                      # run one verification pass and show what it decided
+datum hash-password 'secret'      # for DATUM_ADMIN_PASSWORD_HASH
+```
+
+`datum --help` lists everything.
 
 ## It also knows your code and your rules
 

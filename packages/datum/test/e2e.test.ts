@@ -1,4 +1,7 @@
 import { execFileSync } from "node:child_process";
+import { mkdtemp, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import type { FastifyInstance } from "fastify";
@@ -501,47 +504,83 @@ describe("deliverable 2 — the verification worker", () => {
   });
 
   it("flags a verified measurement that never landed on the default branch", async () => {
-    // The failure this defends against was reproduced during this project's own construction.
-    // Arc's headline number, 757.5 tok/s, sits on a commit 21 ahead of `master` on an unmerged
-    // release branch. Datum verified it, promoted it to `measured`, and it then read back
-    // indistinguishable from a number that had shipped — so a brief written from that output
-    // quoted branch-only work as mainline. The measurement is real; what was missing is that
-    // containment is part of what the claim means.
-    const branchTip = git(["rev-parse", currentBranch]);
-    const created = await post("/v1/assert", {
-      scope: PROJ,
-      subject: "engine",
-      predicate: "branch_only_probe",
-      object: { value: 757.5, unit: "tok/s" },
-      kind: "measured",
-      evidence: {
-        ...EV,
-        repo: "aeonmindai/datum",
-        commit: branchTip,
-        // Honest about the branch, and that is exactly the trap: the claim is true about the
-        // branch and says nothing about whether it shipped.
-        contained_in: [currentBranch],
-      },
+    // The failure this defends against was reproduced during this project's own construction:
+    // Arc's headline 757.5 tok/s sits on a commit 21 ahead of master on an unmerged release
+    // branch, and Datum promoted it to `measured` where it read back indistinguishable from a
+    // number that had shipped.
+    //
+    // The test builds its own two-branch repository rather than using this one. An earlier version
+    // asserted against whatever branch the developer happened to be on, so merging to the default
+    // branch silently removed its premise and it began asserting the opposite of what it meant.
+    // A test whose meaning depends on the checkout is not a test.
+    const repoDir = await mkdtemp(join(tmpdir(), "datum-branch-"));
+    const g = (...args: string[]) => execFileSync("git", ["-C", repoDir, ...args], { encoding: "utf8" }).trim();
+    execFileSync("git", ["init", "-q", "-b", "main", repoDir]);
+    g("config", "user.email", "t@example.invalid");
+    g("config", "user.name", "T");
+    await writeFile(join(repoDir, "a.txt"), "one\n");
+    g("add", "-A");
+    g("commit", "-qm", "on main");
+    const onMain = g("rev-parse", "HEAD");
+    g("checkout", "-q", "-b", "feature");
+    await writeFile(join(repoDir, "b.txt"), "two\n");
+    g("add", "-A");
+    g("commit", "-qm", "only on feature");
+    const onFeature = g("rev-parse", "HEAD");
+    g("checkout", "-q", "main");
+    // origin/HEAD is how a clone records which branch is canonical; set it so the worker reads the
+    // repository's own opinion rather than guessing.
+    // The form a real clone records. The worker also tolerates refs/heads/<b>, which is
+    // what a hand-set or bare-init HEAD looks like.
+    g("symbolic-ref", "refs/remotes/origin/HEAD", "refs/remotes/origin/main");
+    g("update-ref", "refs/remotes/origin/main", onMain);
+    g("update-ref", "refs/remotes/origin/feature", onFeature);
+
+    const cfg = loadConfig({
+      DATABASE_URL: pg.url("datum_e2e"),
+      DATUM_ORG: ORG,
+      DATUM_ADMIN_PASSWORD: "correct-horse-battery-staple",
+      DATUM_SESSION_SECRET: "0".repeat(64),
+      DATUM_GIT_MIRRORS: `acme/two-branch=${repoDir}`,
     });
-    const id = created.json().assertion.id;
 
-    const results = await runVerificationPass(db, config, { recheckMs: 0, limit: 100 });
-    const outcome = results.find((r) => r.assertion_id === id);
-    // It is confirmed: the commit resolves and is contained where claimed. Both true.
-    expect(outcome?.outcome).toBe("confirmed");
+    const assertOn = async (predicate: string, commit: string, branch: string) => {
+      const res = await post("/v1/assert", {
+        scope: PROJ,
+        subject: "engine",
+        predicate,
+        object: { value: 757.5, unit: "tok/s" },
+        kind: "measured",
+        evidence: { ...EV, repo: "acme/two-branch", commit, contained_in: [branch] },
+      });
+      expect(res.statusCode).toBe(201);
+      return res.json().assertion.id as string;
+    };
 
-    const read = await get(`/v1/ask?scope=${PROJ}&subject=engine&predicate=branch_only_probe`);
-    const row = read.json().assertions[0];
-    expect(row.confidence).toBe("measured");
-    // ...and the read cannot hide where it landed.
-    expect(row.evidence.default_branch).toBeTruthy();
-    expect(row.evidence.on_default_branch).toBe(false);
-    expect(row.evidence.branch_only).toBe(true);
-    expect(String(row.evidence.says)).toContain("NOT landed");
+    const shipped = await assertOn("shipped_probe", onMain, "main");
+    const branchOnly = await assertOn("branch_only_probe", onFeature, "feature");
+    await runVerificationPass(db, cfg, { recheckMs: 0, limit: 200 });
 
-    // The MCP line must carry it too, or an agent reading the cheap surface never learns it.
-    const mcpLine = compactAssertion(row);
-    expect(mcpLine).toContain("BRANCH-ONLY");
+    const read = async (predicate: string) =>
+      (await get(`/v1/ask?scope=${PROJ}&subject=engine&predicate=${predicate}`)).json().assertions[0];
+
+    // Both are genuine measurements, confirmed, and promoted. The difference is where they landed.
+    const a = await read("shipped_probe");
+    expect(a.confidence).toBe("measured");
+    expect(a.evidence.default_branch).toBe("main");
+    expect(a.evidence.on_default_branch).toBe(true);
+    expect(a.evidence.branch_only).toBeUndefined();
+    expect(compactAssertion(a)).not.toContain("BRANCH-ONLY");
+
+    const b = await read("branch_only_probe");
+    expect(b.confidence).toBe("measured");
+    expect(b.evidence.on_default_branch).toBe(false);
+    expect(b.evidence.branch_only).toBe(true);
+    expect(String(b.evidence.says)).toContain("NOT landed");
+    // The cheap surface must carry it too, or an agent reading only that never learns it.
+    expect(compactAssertion(b)).toContain("BRANCH-ONLY");
+
+    expect(shipped).not.toBe(branchOnly);
   });
 
   it("says unresolvable, never refuted, when it cannot read the repo at all", async () => {
@@ -660,10 +699,15 @@ describe("deliverable 4 — /mcp is a facade, and it is quiet", () => {
   it("advertises six tools, not thirty", async () => {
     const res = await mcp("tools/list");
     const tools = res.result?.tools as Array<{ name: string }>;
-    expect(tools).toHaveLength(6);
+    // Eight, not thirty. The original argument was against bloat, not against completeness: two
+    // capabilities that had no MCP surface were the impact query (which beat grep by 16 points)
+    // and recording feedback (without which the preference loop cannot close over MCP at all).
+    expect(tools).toHaveLength(8);
     expect(tools.map((t) => t.name).sort()).toEqual([
       "ask",
       "assert",
+      "feedback",
+      "impact",
       "nodes",
       "state",
       "supersede",
@@ -672,7 +716,9 @@ describe("deliverable 4 — /mcp is a facade, and it is quiet", () => {
     // The tool list is itself a permanent context cost, so it gets a budget too.
     const listBytes = Buffer.byteLength(JSON.stringify(tools), "utf8");
     sizes.push({ tool: "tools/list (whole manifest)", bytes: listBytes, text: "" });
-    expect(listBytes).toBeLessThan(6_000);
+    // The manifest is a permanent per-conversation cost, so it stays budgeted even as tools are
+    // added. Two more tools must not mean an unbounded manifest.
+    expect(listBytes).toBeLessThan(8_000);
   });
 
   it("answers initialize even though the handshake was removed from the protocol", async () => {

@@ -18,7 +18,8 @@ import {
 } from "../domain/store.js";
 import { CONFIDENCE_CLASSES, KINDS } from "../domain/types.js";
 import { authenticateKey, requirePermission, requireScope } from "./auth.js";
-import { activePreferences } from "../preferences/index.js";
+import { activePreferences, recordFeedback } from "../preferences/index.js";
+import { impact } from "../graph/index.js";
 import { compactAssertion, compactState, pack, DEFAULT_BUDGET_BYTES } from "./compact.js";
 
 /**
@@ -160,7 +161,72 @@ const TOOLS = [
       properties: { scope: { type: "string" }, kind: { type: "string" }, max_bytes: { type: "number" } },
     },
   },
+  {
+    name: "impact",
+    description:
+      "If I change this symbol, what else must I care about? Returns everything that reaches it, " +
+      "which tests cover it, and — separately, never mixed in — anything reached only through an " +
+      "edge the indexer could not pin down. An empty answer means nothing calls it, which is the " +
+      "answer you want before deleting something and the one a text search cannot give you.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        symbol: { type: "string", description: "name, qualified name, or id:<n> for an exact symbol" },
+        repo: { type: "string", description: "owner/name; omit to use the only indexed repo" },
+        depth: { type: "number", description: "how many hops out; default 1" },
+        max_bytes: { type: "number" },
+      },
+      required: ["symbol"],
+    },
+  },
+  {
+    name: "feedback",
+    description:
+      "Record that a human corrected you. Nothing is learned from one report — repetition on a " +
+      "DIFFERENT occasion earns a preference, and corroboration by other people turns it into a " +
+      "team then an org rule that every agent is told before it starts work. Call this when you " +
+      "are corrected, and the correction stops recurring.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        scope: { type: "string" },
+        subject: { type: "string", description: "what the feedback is about, e.g. commit_messages" },
+        predicate: { type: "string", description: "which aspect, e.g. style" },
+        correction: { type: "object", description: "what they wanted instead" },
+        occasion: { type: "string", description: "this session or PR id. Repeats within one occasion count once." },
+        actor: { type: "string", description: "the human who said it" },
+        raw: { type: "string", description: "their words, verbatim" },
+      },
+      required: ["scope", "subject", "predicate", "correction", "occasion", "actor"],
+    },
+  },
 ] as const;
+
+/**
+ * `repo` is optional on the impact tool because most instances index one repository and making an
+ * agent name it is friction for nothing. If several are indexed, the caller must say which — a
+ * silent pick would answer confidently about the wrong codebase.
+ */
+async function onlyIndexedRepo(db: Db): Promise<string | null> {
+  const { rows } = await db.query<{ repo: string }>(
+    "app",
+    `SELECT DISTINCT repo FROM datum.code_index WHERE completed_at IS NOT NULL LIMIT 2`,
+  );
+  return rows.length === 1 ? (rows[0]?.repo ?? null) : null;
+}
+
+/** The scope a repo's newest completed index sits in, so the key's reach is checked against the
+ *  same scope the answer came from. */
+async function resolveIndexScope(db: Db, repo: string): Promise<string | null> {
+  const row = await db.one<{ scope: string }>(
+    "app",
+    `SELECT scope FROM datum.code_index
+      WHERE repo = $1 AND completed_at IS NOT NULL
+      ORDER BY indexed_at DESC LIMIT 1`,
+    [repo],
+  );
+  return row?.scope ?? null;
+}
 
 const ToolCall = z.object({
   name: z.string(),
@@ -419,6 +485,76 @@ export function registerMcp(app: FastifyInstance, deps: { db: Db; config: Config
           ),
           budget,
           `no nodes registered under ${scope}`,
+        );
+      }
+
+      case "impact": {
+        const parsed = z
+          .object({
+            symbol: z.string(),
+            repo: z.string().optional(),
+            depth: z.number().int().min(1).max(8).optional(),
+            max_bytes: z.number().optional(),
+          })
+          .parse(args);
+        requirePermission(key, "read");
+        const repo = parsed.repo ?? (await onlyIndexedRepo(db));
+        if (!repo) {
+          throw new Rejection({
+            reason: "not_found",
+            message: "no code graph has been ingested. Run `datum index` then `datum ingest-graph`.",
+          });
+        }
+        const r = await impact(db, {
+          repo,
+          symbol: parsed.symbol,
+          ...(parsed.depth ? { depth: parsed.depth } : {}),
+        });
+        requireScope(key, (await resolveIndexScope(db, repo)) ?? key.scope);
+        const lines = [
+          `${r.target.name} ${r.target.path}:${r.target.line_start} @${r.commit_sha.slice(0, 8)}`,
+        ];
+        if (r.reached_by.length === 0 && r.ambiguous.length === 0) {
+          // A real answer, and the one no text search can give.
+          lines.push("nothing reaches this symbol — changing it breaks nothing here");
+        }
+        for (const h of r.reached_by) {
+          lines.push(`d${h.depth} ${h.name} ${h.path}:${h.line_start} via ${h.via_kind} [${h.path_confidence}]`);
+        }
+        // Kept apart for the same reason the API keeps it apart: "might break" and "will break"
+        // must not read alike.
+        for (const h of r.ambiguous) {
+          lines.push(`AMBIGUOUS ${h.name} ${h.path}:${h.line_start} — verify before trusting`);
+        }
+        if (r.covered_by_tests.length > 0) {
+          lines.push(`tests: ${r.covered_by_tests.map((t) => t.name).join(", ")}`);
+        }
+        return pack(lines.slice(1), budget, "", [lines[0]!]);
+      }
+
+      case "feedback": {
+        const parsed = z
+          .object({
+            scope: z.string(),
+            subject: z.string(),
+            predicate: z.string(),
+            correction: z.record(z.string(), z.unknown()),
+            occasion: z.string(),
+            actor: z.string(),
+            raw: z.string().optional(),
+          })
+          .parse(args);
+        requirePermission(key, "assert");
+        requireScope(key, parsed.scope);
+        const r = await recordFeedback(db, parsed);
+        return (
+          `${r.created ? "recorded" : "already recorded for this occasion"} — ` +
+          `${r.occasions} occasion(s), ${r.distinctHumans} human(s)\n` +
+          (r.occasions < 2
+            ? "one occasion is an event, not a pattern. nothing is learned until it recurs elsewhere."
+            : r.distinctHumans >= 3
+              ? "this is now an org rule and every agent is told before it starts work."
+              : "a preference is now on record and will be delivered in `state`.")
         );
       }
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { readFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import { parseArgs } from "node:util";
 import { resolve } from "node:path";
 import { ConfigError, loadConfig, type Config } from "../config.js";
@@ -11,6 +11,7 @@ import { hashPassword } from "../http/auth.js";
 import { serve } from "../http/server.js";
 import { runVerificationPass } from "../worker/verify.js";
 import { impact, ingestGraph } from "../graph/index.js";
+import { indexRepo } from "../index/index.js";
 import type { GraphArtifact } from "../graph/types.js";
 import { gitIdentity, readProjectFile, writeProjectFile } from "./project.js";
 
@@ -30,6 +31,11 @@ const USAGE = `datum — the datum of record
     datum seed --file <path.json>    load a seed file
     datum verify [--once]            run one verification pass and print the outcomes
     datum hash-password [pw]         print an argon2id hash for DATUM_ADMIN_PASSWORD_HASH
+
+  Code graph (index where the code is, load where the database is):
+    datum index [--emit f.json]      parse this repo into a graph artifact (needs tree-sitter)
+    datum ingest-graph <f.json>      load an artifact into the store (needs nothing)
+    datum impact <symbol>            what else must I care about if I change this?
 
   Project commands (need a running server):
     datum link [--server URL] [--scope PATH]   link this repo to its project scope
@@ -406,6 +412,54 @@ async function main(): Promise<void> {
         );
       });
       return;
+
+    case "index": {
+      const { values } = parseArgs({
+        args: rest,
+        options: {
+          dir: { type: "string" }, repo: { type: "string" }, commit: { type: "string" },
+          emit: { type: "string" }, quiet: { type: "boolean" },
+        },
+      });
+      const dir = resolve(process.cwd(), values.dir ?? ".");
+      // Repo slug and commit come from git unless overridden, because an index is only meaningful
+      // pinned to a commit — an artifact that cannot say which revision it describes is a snapshot
+      // of nothing.
+      const git = await gitIdentity(dir);
+      const repo = values.repo ?? git.repo;
+      const commitSha = values.commit ?? git.head;
+      if (!repo) bail("could not derive the repo from git. Pass --repo owner/name.");
+      if (!commitSha) bail("could not derive HEAD from git. Pass --commit <sha>.");
+      if (git.dirty && !values.commit) {
+        process.stderr.write(
+          "warning: the working tree is dirty, so the artifact will claim a commit whose contents\n" +
+            "         differ from what was parsed. Commit first, or pass --commit explicitly.\n",
+        );
+      }
+      const out = values.emit ?? `datum-graph-${commitSha.slice(0, 9)}.json`;
+      const artifact = await indexRepo({
+        dir,
+        repo,
+        commitSha,
+        ...(values.quiet ? {} : { onProgress: (m: string) => process.stderr.write(`${m}\n`) }),
+      });
+      await writeFile(resolve(process.cwd(), out), `${JSON.stringify(artifact)}\n`, "utf8");
+      const res = artifact.stats?.["resolution"] as Record<string, number> | undefined;
+      process.stdout.write(
+        [
+          `indexed ${repo} @ ${commitSha.slice(0, 9)}`,
+          `  files    ${artifact.file_count}  (${artifact.languages.join(", ")})`,
+          `  symbols  ${artifact.symbols.length}`,
+          `  edges    ${artifact.edges.length}`,
+          ...(res ? [`  resolved ${JSON.stringify(res)}`] : []),
+          `  wrote    ${out}`,
+          "",
+          "Load it with: datum ingest-graph " + out,
+          "",
+        ].join("\n"),
+      );
+      return;
+    }
 
     case "ingest-graph": {
       const file = rest[0];

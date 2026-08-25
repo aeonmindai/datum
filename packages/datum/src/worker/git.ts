@@ -98,7 +98,12 @@ export async function checkViaLocalClone(
   let defaultBranch: string | null = null;
   try {
     const { stdout } = await git(["symbolic-ref", "refs/remotes/origin/HEAD"]);
-    defaultBranch = stdout.trim().replace(/^refs\/remotes\/origin\//, "") || null;
+    // Both spellings occur in the wild: a normal clone records refs/remotes/origin/main, while a
+    // repo whose HEAD was set by hand or by a bare-init points at refs/heads/main. Strip either,
+    // because returning "refs/heads/main" as a branch name silently fails every containment test
+    // against it.
+    defaultBranch =
+      stdout.trim().replace(/^refs\/(remotes\/origin|heads)\//, "") || null;
   } catch {
     for (const guess of ["origin/main", "origin/master", "main", "master"]) {
       try {
