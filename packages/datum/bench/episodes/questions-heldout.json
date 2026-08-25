@@ -1,0 +1,898 @@
+[
+  {
+    "id": "H01",
+    "question": "On the morning of 14 Aug Jish went after the GEMV numbers. What percent did he say we actually reached, what percent did he want, and how many milliseconds were unaccounted for?",
+    "expect": [
+      "50",
+      "90",
+      "60"
+    ],
+    "forbid": [
+      "9.7",
+      "1006"
+    ],
+    "kind": "correction",
+    "difficulty": "easy",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 3584,
+      "session": "4d267202",
+      "ts": "2026-08-14T07:46:47.768Z",
+      "quote": "You got gemv to only 50% not even 90% and don’t even know where 60 MILLISECONDS GO and you think 640 is overselling?",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "H02",
+    "question": "Jish told the agent its throughput maths was wrong and gave his own batch-1 ceiling instead. What number was it, and which batch range did he call bullshit?",
+    "expect": [
+      "640",
+      "32",
+      "256"
+    ],
+    "forbid": [
+      "1413",
+      "1400"
+    ],
+    "kind": "correction",
+    "difficulty": "medium",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 9439,
+      "session": "4d267202",
+      "ts": "2026-08-15T19:59:32.687Z",
+      "quote": "Your calculations are wrong this time. The ceiling for batch 1 is 640 t/s. And at batch 32-256 calculations are bullshit.",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "H03",
+    "question": "Jish pushed back on the batch-1 throughput figure with a number he remembered. What was it?",
+    "expect": [
+      "16.57"
+    ],
+    "forbid": [
+      "34.48",
+      "17",
+      "37.19"
+    ],
+    "kind": "correction",
+    "difficulty": "hard",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 29217,
+      "session": "4d267202",
+      "ts": "2026-08-20T21:15:08.408Z",
+      "quote": "but we aren't 16.57 on b1?",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "H04",
+    "question": "When Jish complained that throughput had gone backwards on 21 Aug, what range did he say we already had before things got broken?",
+    "expect": [
+      "37",
+      "39"
+    ],
+    "forbid": [
+      "34.48",
+      "644.8"
+    ],
+    "kind": "correction",
+    "difficulty": "medium",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 32854,
+      "session": "4d267202",
+      "ts": "2026-08-21T13:58:38.377Z",
+      "quote": "We had 37-39 even before things got fucked up, and its not the first time it was produced.",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "H05",
+    "question": "What time-to-first-token number did Jish flatly refuse to accept?",
+    "expect": [
+      "24"
+    ],
+    "forbid": [
+      "12",
+      "0.000"
+    ],
+    "kind": "correction",
+    "difficulty": "easy",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 21405,
+      "session": "4d267202",
+      "ts": "2026-08-18T11:39:04.762Z",
+      "quote": "ttft cannot be fucking 24 second in any fucking case.",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "H06",
+    "question": "Just before midnight on 14 Aug Jish asked what the optimisations had actually bought if baking still cost a certain number of seconds per layer. What number did he quote?",
+    "expect": [
+      "400"
+    ],
+    "forbid": [
+      "373.6",
+      "369",
+      "100"
+    ],
+    "kind": "correction",
+    "difficulty": "medium",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 7695,
+      "session": "4d267202",
+      "ts": "2026-08-14T23:54:46.239Z",
+      "quote": "Wait a damn second what the fuck optimisations landed then if it still takes 400s? Per layer? Layman pls",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "H07",
+    "question": "Jish doubted how big the kernel stack's speedup really was. What multiplier did he say it was?",
+    "expect": [
+      "1.2"
+    ],
+    "forbid": [
+      "1.21",
+      "1.68"
+    ],
+    "kind": "correction",
+    "difficulty": "hard",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 7721,
+      "session": "4d267202",
+      "ts": "2026-08-14T23:57:52.730Z",
+      "quote": "U sure the kernel stack is just a 1.2x upgrade? Worth checking",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "H08",
+    "question": "The agent said hours had been lost waiting on a login. Jish corrected it — what two durations did he put against each other?",
+    "expect": [
+      "3.6",
+      "15"
+    ],
+    "forbid": [
+      "3.5",
+      "20"
+    ],
+    "kind": "correction",
+    "difficulty": "hard",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 26926,
+      "session": "4d267202",
+      "ts": "2026-08-19T23:46:27.613Z",
+      "quote": "brah its not 3.6 hours doing nothing it took 15 mins plus I logged in",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "H09",
+    "question": "On the evening of 14 Aug, while asking for proven solutions from the internet, what per-layer bake time did Jish say he wanted?",
+    "expect": [
+      "30"
+    ],
+    "forbid": [
+      "45",
+      "60",
+      "100"
+    ],
+    "kind": "target-change",
+    "difficulty": "medium",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 6849,
+      "session": "4d267202",
+      "ts": "2026-08-14T19:32:16.386Z",
+      "quote": "What else? what is proven? Make the agent search the internet up given all these 3 + better proven solutions, I want close to 30s per layer",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "H10",
+    "question": "About half an hour later Jish dropped that per-layer target and replaced it with a range. What was the old number and what was the new range?",
+    "expect": [
+      "30",
+      "42",
+      "60"
+    ],
+    "forbid": [
+      "45",
+      "25"
+    ],
+    "kind": "target-change",
+    "difficulty": "medium",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 6983,
+      "session": "4d267202",
+      "ts": "2026-08-14T20:03:19.142Z",
+      "quote": "forget the 30s thing explain in layman why beam might be the wrong architecture + these other 5 to bring 42-60s per layer",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "H11",
+    "question": "Jish lifted the one-hour cap on the beam-kernel agent's GPU time. Which card did he say it could keep for as long as it wanted, and what per-layer time did he want out of it?",
+    "expect": [
+      "a30",
+      "40",
+      "60"
+    ],
+    "forbid": [
+      "h200",
+      "a100"
+    ],
+    "kind": "target-change",
+    "difficulty": "medium",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 7043,
+      "session": "4d267202",
+      "ts": "2026-08-14T20:08:58.134Z",
+      "quote": "then it doesn't need to be under an hour, it can use the a30 as long as it wants to, I just want it to ship a shit that actually brings down the time to 40-60s",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "H12",
+    "question": "On the morning of 20 Aug, what tok/s number did Jish ask for the map to?",
+    "expect": [
+      "800"
+    ],
+    "forbid": [
+      "640",
+      "1400",
+      "1200"
+    ],
+    "kind": "target-change",
+    "difficulty": "easy",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 28060,
+      "session": "4d267202",
+      "ts": "2026-08-20T10:36:51.494Z",
+      "quote": "explain in layman what's happening and what's the map to 800 tok/s",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "H13",
+    "question": "In the early hours of 20 Aug Jish asked for the only route to a much larger throughput number. Which number?",
+    "expect": [
+      "1400"
+    ],
+    "forbid": [
+      "1413",
+      "800",
+      "644.8"
+    ],
+    "kind": "target-change",
+    "difficulty": "medium",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 27217,
+      "session": "4d267202",
+      "ts": "2026-08-20T02:25:34.359Z",
+      "quote": "what's the only way we can reach 1400?",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "H14",
+    "question": "What GSM8K score did Jish ask for on the full set, and what recurring output problem did he want fixed forever at the same time?",
+    "expect": [
+      "90",
+      "degerate"
+    ],
+    "forbid": [
+      "96",
+      "87"
+    ],
+    "kind": "target-change",
+    "difficulty": "medium",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 10315,
+      "session": "4d267202",
+      "ts": "2026-08-15T23:13:44.340Z",
+      "quote": "I also want you to fix degerate answers ffs forever, and maybe run gsm8k on the full set and get 90+",
+      "only_in_transcript": true
+    }
+  },
+  {
+    "id": "H15",
+    "question": "On 19 Aug Jish put a deadline on finishing Arc. How long did he give?",
+    "expect": [
+      "1 day"
+    ],
+    "forbid": [
+      "10 hours",
+      "1 week",
+      "24 hours"
+    ],
+    "kind": "target-change",
+    "difficulty": "medium",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 25378,
+      "session": "4d267202",
+      "ts": "2026-08-19T12:35:26.619Z",
+      "quote": "I can't wait much longer to have a complete arc. You have 1 day to fulfil goals. Time is short. Find the reasons without guesswork",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "H16",
+    "question": "Jish told the agent to stop chasing the many-user number until a single user was getting everything the silicon could give. How did he put it, and what did he say we had done?",
+    "expect": [
+      "forget 32 users",
+      "single user",
+      "you lost the game"
+    ],
+    "forbid": [
+      "aggregate",
+      "644.8"
+    ],
+    "kind": "target-change",
+    "difficulty": "medium",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 26212,
+      "session": "4d267202",
+      "ts": "2026-08-19T18:59:10.933Z",
+      "quote": "Forget 32 users when you can't give a single user all that can be delivered from the silicon. you lost the game.",
+      "only_in_transcript": true
+    }
+  },
+  {
+    "id": "H17",
+    "question": "Jish told the agent to set the Runcrate MCP up itself rather than wait. What URL did he give it?",
+    "expect": [
+      "mcp.runcrate.ai"
+    ],
+    "forbid": [],
+    "kind": "decision",
+    "difficulty": "easy",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 9783,
+      "session": "4d267202",
+      "ts": "2026-08-15T20:56:57.617Z",
+      "quote": "Actually setup runcrate mcp yourself https://mcp.runcrate.ai/mcp locally, I'll authenticate",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "H18",
+    "question": "When Jish demanded a full per-step profile instead of guesses, what two output formats did he want it reported in, and what did he want the HTML to be?",
+    "expect": [
+      "html",
+      "json",
+      "interactive"
+    ],
+    "forbid": [
+      "csv",
+      "markdown"
+    ],
+    "kind": "decision",
+    "difficulty": "medium",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 11737,
+      "session": "4d267202",
+      "ts": "2026-08-16T22:30:00.881Z",
+      "quote": "And document this whole shit, and this profiling should report in an html and a json, the html should be highly detailed and interactive.",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "H19",
+    "question": "On the afternoon of 14 Aug Jish gave a standing rule for what to do whenever the beam run hit a problem on the GPU. What was the loop?",
+    "expect": [
+      "tear down",
+      "spin up",
+      "loop until alright"
+    ],
+    "forbid": [
+      "reboot",
+      "wait"
+    ],
+    "kind": "decision",
+    "difficulty": "medium",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 5808,
+      "session": "4d267202",
+      "ts": "2026-08-14T16:11:39.363Z",
+      "quote": "beam should work on 256, if fail, tear down, spin up, loop until alright, any other problem -> do the fucking same.",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "H20",
+    "question": "Which NVIDIA profiling tool did Jish order a full run of on the night of 21 Aug, and what did he want alongside it?",
+    "expect": [
+      "nsight",
+      "batch sweeps"
+    ],
+    "forbid": [
+      "nsys"
+    ],
+    "kind": "decision",
+    "difficulty": "medium",
+    "source": {
+      "file": "77361a23-4a7c-4f3f-b868-b3da8230eaeb.jsonl",
+      "line": 1135,
+      "session": "77361a23",
+      "ts": "2026-08-21T22:00:19.694Z",
+      "quote": "Do a full nsight compute profiling so that we know what's actually pending to reach our final goals, and multiple batch sweeps so that we know every non-efficient kernel and so on",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "H21",
+    "question": "What MMLU score did Jish say Arc had to hit before we published?",
+    "expect": [],
+    "forbid": [
+      "MMLU-Pro",
+      "GPQA",
+      "LiveCodeBench"
+    ],
+    "kind": "decision",
+    "abstain": true,
+    "difficulty": "medium",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 1819,
+      "session": "4d267202",
+      "ts": "2026-08-13T17:13:25.626Z",
+      "quote": "so gsm8k 90/90 wen",
+      "only_in_transcript": false,
+      "absent_probes": [
+        "mmlu",
+        "mmlu-pro",
+        "gpqa"
+      ]
+    },
+    "forbid_subject": [
+      "mmlu"
+    ]
+  },
+  {
+    "id": "H22",
+    "question": "When Jish said to make the model public, which licence did he pick for Arc?",
+    "expect": [],
+    "forbid": [
+      "Apache-2.0",
+      "BSL-1.1",
+      "MIT"
+    ],
+    "kind": "decision",
+    "abstain": true,
+    "difficulty": "hard",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 11424,
+      "session": "4d267202",
+      "ts": "2026-08-16T16:30:05.005Z",
+      "quote": "Make the model spublic I don't care, and also what's the speeds right now? also runcrate logged in",
+      "only_in_transcript": false,
+      "absent_probes": [
+        "license",
+        "licence",
+        "bsl"
+      ]
+    },
+    "forbid_subject": [
+      "license",
+      "licence",
+      "bsl"
+    ]
+  },
+  {
+    "id": "H23",
+    "question": "Late on 14 Aug Jish shelved one geometry change but asked for it to be written down. Which one, and what did he tell the agent to do about the GPU?",
+    "expect": [
+      "v=4",
+      "document",
+      "cheapest"
+    ],
+    "forbid": [
+      "v=8"
+    ],
+    "kind": "abandoned",
+    "difficulty": "medium",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 7421,
+      "session": "4d267202",
+      "ts": "2026-08-14T22:51:22.527Z",
+      "quote": "nah don't do v=4 now then, but document it so that we can revisit, do the rest and get the bake started, i'm going away, don't wait for me, get the cheapest gpu",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "H24",
+    "question": "Right after telling the agent to get the cheapest GPU, what class of work did Jish refuse outright?",
+    "expect": [
+      "driver"
+    ],
+    "forbid": [
+      "cudnn"
+    ],
+    "kind": "abandoned",
+    "difficulty": "easy",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 7447,
+      "session": "4d267202",
+      "ts": "2026-08-14T22:53:12.417Z",
+      "quote": "don't do driver shit, fuck that",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "H25",
+    "question": "Which agent did Jish suggest stopping once he decided rotation was the cleaner long-term bet?",
+    "expect": [
+      "beam",
+      "hessian"
+    ],
+    "forbid": [
+      "calibration"
+    ],
+    "kind": "abandoned",
+    "difficulty": "medium",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 5159,
+      "session": "4d267202",
+      "ts": "2026-08-14T12:58:19.451Z",
+      "quote": "so I think we should stop the beam + hessian aware agent? or no?",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "H26",
+    "question": "The handoff said to create a persistent volume before spending anything. What did Jish say to that?",
+    "expect": [
+      "persistent volumes"
+    ],
+    "forbid": [
+      "219"
+    ],
+    "kind": "abandoned",
+    "difficulty": "medium",
+    "source": {
+      "file": "77361a23-4a7c-4f3f-b868-b3da8230eaeb.jsonl",
+      "line": 207,
+      "session": "77361a23",
+      "ts": "2026-08-21T18:09:09.015Z",
+      "quote": "No persistent volumes.",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "H27",
+    "question": "Late on 21 Aug the agent kept steering back to the throughput goal. What did Jish tell it to do instead?",
+    "expect": [
+      "fuck the goal",
+      "handoff"
+    ],
+    "forbid": [
+      "throughput",
+      "roofline"
+    ],
+    "kind": "abandoned",
+    "difficulty": "hard",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 33773,
+      "session": "4d267202",
+      "ts": "2026-08-21T17:49:29.719Z",
+      "quote": "fuck the goal, give me the proper handoff",
+      "only_in_transcript": true
+    }
+  },
+  {
+    "id": "H28",
+    "question": "Just after midnight on 14 Aug Jish banned a word from the conversation entirely. Which word?",
+    "expect": [
+      "CPU"
+    ],
+    "forbid": [
+      "GPU"
+    ],
+    "kind": "preference",
+    "difficulty": "easy",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 2780,
+      "session": "4d267202",
+      "ts": "2026-08-14T00:04:52.747Z",
+      "quote": "BRO FUCKING FUCK THE CPU, I DONT WANNA HEAR THE WORD CPU EVER AGAIN",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "H29",
+    "question": "Jish told the agent to write the quality and speed calculations down so future sessions couldn't be pessimistic. How did he describe the mission he thought we were on?",
+    "expect": [
+      "eco friendly",
+      "cutting carbon",
+      "pessimistic"
+    ],
+    "forbid": [
+      "carbon credits",
+      "offset"
+    ],
+    "kind": "preference",
+    "difficulty": "medium",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 9480,
+      "session": "4d267202",
+      "ts": "2026-08-15T20:07:43.606Z",
+      "quote": "we're on a mission to make more use of the existing compute today, turning AI a bit more eco friendly and cutting carbon from the world. We can be anything but pessimistic in this project",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "H30",
+    "question": "On the things where Arc was behind SGLang, what did Jish say to do instead of building our own?",
+    "expect": [
+      "copy",
+      "get inspired",
+      "reinventing the wheel"
+    ],
+    "forbid": [
+      "rewrite",
+      "fork"
+    ],
+    "kind": "preference",
+    "difficulty": "medium",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 26831,
+      "session": "4d267202",
+      "ts": "2026-08-19T23:17:15.738Z",
+      "quote": "Brah on things where we're behind sglang why don't you just copy them or get inspired instead of reinventing the wheel",
+      "only_in_transcript": true
+    }
+  },
+  {
+    "id": "H31",
+    "question": "Which two GPU architectures did Jish tell the agent to write for whenever it wrote code?",
+    "expect": [
+      "hopper",
+      "blackwell"
+    ],
+    "forbid": [
+      "ada",
+      "ampere"
+    ],
+    "kind": "preference",
+    "difficulty": "medium",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 13747,
+      "session": "4d267202",
+      "ts": "2026-08-17T11:28:06.434Z",
+      "quote": "also when you're writing stuff make sure you're writing for both hopper and blackwell",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "H32",
+    "question": "What sampling temperature did Jish settle on for serving Arc?",
+    "expect": [],
+    "forbid": [
+      "min-p",
+      "top-nsigma",
+      "entropy-adaptive"
+    ],
+    "kind": "preference",
+    "abstain": true,
+    "difficulty": "hard",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 10258,
+      "session": "4d267202",
+      "ts": "2026-08-15T23:07:14.228Z",
+      "quote": "not now, tell me about the tokens/s game and 1 degerate in layman",
+      "only_in_transcript": false,
+      "absent_probes": [
+        "temperature",
+        "top-p",
+        "min-p"
+      ]
+    },
+    "forbid_subject": [
+      "temperature",
+      "top-p",
+      "min-p"
+    ]
+  },
+  {
+    "id": "H33",
+    "question": "Someone had already told Jish what Arc could do before he looked himself. What single-user speed did he say he'd been told?",
+    "expect": [
+      "10",
+      "20"
+    ],
+    "forbid": [
+      "14.58",
+      "37.19"
+    ],
+    "kind": "who-said",
+    "difficulty": "medium",
+    "source": {
+      "file": "73267a1b-5ed8-40e4-a8c3-4a17005bf0fd.jsonl",
+      "line": 191,
+      "session": "73267a1b",
+      "ts": "2026-08-11T02:14:07.567Z",
+      "quote": "Deepseek v4 flash in 1 single H200 gpu he said, quality unsure, 10-20 tps single user he said, why is the speed too less?",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "H34",
+    "question": "On the night of 10 Aug, who did Jish say had been working on a completely different branch instead of pushing to master?",
+    "expect": [
+      "asmit"
+    ],
+    "forbid": [],
+    "kind": "who-said",
+    "difficulty": "easy",
+    "source": {
+      "file": "73267a1b-5ed8-40e4-a8c3-4a17005bf0fd.jsonl",
+      "line": 44,
+      "session": "73267a1b",
+      "ts": "2026-08-10T22:10:37.682Z",
+      "quote": "Seems like nothing is pushed to master, asmit has been working on a completely different branch, find shit.",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "H35",
+    "question": "In the handoff prompt Jish pasted into the fresh session, what role did he tell it to take and how many years of experience did he give it?",
+    "expect": [
+      "lead inference engineer",
+      "10 years"
+    ],
+    "forbid": [
+      "5 years"
+    ],
+    "kind": "who-said",
+    "difficulty": "medium",
+    "source": {
+      "file": "77361a23-4a7c-4f3f-b868-b3da8230eaeb.jsonl",
+      "line": 72,
+      "session": "77361a23",
+      "ts": "2026-08-21T17:56:55.577Z",
+      "quote": "You are the lead inference engineer at Runcrate with 10 years of experience in CUDA, Rust, and carry solid engineering principles, and you keep inventing novel stuff which change the world.",
+      "only_in_transcript": true
+    }
+  },
+  {
+    "id": "H36",
+    "question": "Jish quoted a line back at the agent about rules being useless if they're never read. What was the line?",
+    "expect": [
+      "adding a rule doesn't fix it",
+      "doesn't read it at all"
+    ],
+    "forbid": [],
+    "kind": "who-said",
+    "difficulty": "hard",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 15962,
+      "session": "4d267202",
+      "ts": "2026-08-17T19:59:15.752Z",
+      "quote": "what about \"Yeah adding a rule doesn't fix it if claude doesn't read it at all or doesn't remember it before writing every message on every session\"",
+      "only_in_transcript": true
+    }
+  },
+  {
+    "id": "H37",
+    "question": "On the evening of 20 Aug Jish complained about the pace. How did he describe how long all of it was taking?",
+    "expect": [
+      "days rather than hours"
+    ],
+    "forbid": [
+      "weeks",
+      "months"
+    ],
+    "kind": "when",
+    "difficulty": "medium",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 29309,
+      "session": "4d267202",
+      "ts": "2026-08-20T21:32:22.733Z",
+      "quote": "idk why all of this is so hard to be done and why its taking days rather than hours.",
+      "only_in_transcript": true
+    }
+  },
+  {
+    "id": "H38",
+    "question": "On the morning of 24 Aug Jish asked for a handoff. What had happened to the credits, and what did he want the new session to carry on in?",
+    "expect": [
+      "credits",
+      "worktrees",
+      "branches"
+    ],
+    "forbid": [],
+    "kind": "when",
+    "difficulty": "medium",
+    "source": {
+      "file": "77361a23-4a7c-4f3f-b868-b3da8230eaeb.jsonl",
+      "line": 1586,
+      "session": "77361a23",
+      "ts": "2026-08-24T10:36:42.807Z",
+      "quote": "Credits finished that day, what I want you to do is see where every agent was last at, and prepare a handoff for me please, I want the new session to continue in the same worktrees/branches",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "H39",
+    "question": "What message did Jish say he'd just been sent on the evening of 18 Aug?",
+    "expect": [
+      "balance depleted",
+      "instances stopped"
+    ],
+    "forbid": [
+      "topped up"
+    ],
+    "kind": "when",
+    "difficulty": "medium",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 23146,
+      "session": "4d267202",
+      "ts": "2026-08-18T20:07:03.840Z",
+      "quote": "I just got a balance depleted instances stopped message.",
+      "only_in_transcript": true
+    }
+  },
+  {
+    "id": "H40",
+    "question": "When did Jish say the Docker image had to be ready for the OpenRouter launch?",
+    "expect": [],
+    "forbid": [
+      "Docker image",
+      "167",
+      "Dockerfile.cuda-13.0-ubi9"
+    ],
+    "kind": "when",
+    "abstain": true,
+    "difficulty": "medium",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 29379,
+      "session": "4d267202",
+      "ts": "2026-08-20T21:39:13.669Z",
+      "quote": "we didn't even reach 250 t/s how is it openrouter ready? what's the plan?",
+      "only_in_transcript": false,
+      "absent_probes": [
+        "docker",
+        "container",
+        "dockerfile"
+      ]
+    },
+    "forbid_subject": [
+      "docker",
+      "container"
+    ]
+  }
+]

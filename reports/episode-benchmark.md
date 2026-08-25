@@ -1,108 +1,114 @@
-# Episode retrieval, measured — and it fails the gate
+# Episode retrieval, measured twice — and it still fails the gate
 
-`packages/datum/bench/episodes/SPEC.md` is the full spec, question set and per-arm loss analysis.
-This is the result and what it means.
+`packages/datum/bench/episodes/RESULTS.md` has the per-question detail. `SPEC.md` has the question
+set construction. `HELDOUT.md` has the control set's provenance. This is the verdict.
 
-## Verdict
+## The number that counts
 
-**Episode retrieval does not clear the stop gate.** The gate is +10 points over *both* baselines.
+The retrieval half was rebuilt after reading the 14 questions it failed. That is tuning on the test,
+so a second agent — which never read `src/` — built a **held-out set** of 40 questions: disjoint
+source lines, identical kind and difficulty distributions, 4 traps.
 
-| regime | vs grep | vs full-context | gate |
+**On the held-out set `datum-recall` scores 85.0%. The gate is +10 over both baselines. It is +47.5
+over `grep` and −10.0 under `full-context`. It needs 105.0%. It fails by 20 points.**
+
+| held-out set, derived queries | accuracy | wrong | tokens/q | ms/q |
+|---|---|---|---|---|
+| `full-context` | **95.0%** | 5.0% | 72,633 | 0 |
+| `datum-recall` (new) | 85.0% | 15.0% | **7,817** | 21 |
+| `datum` (old arm) | 75.0% | 25.0% | 12,477 | 23 |
+| `grep` | 37.5% | 62.5% | 19,207 | 1,249 |
+
+3 repeats, **0.0% standard deviation on every arm in both sets**. Nothing here is inside the noise.
+
+## How much of the gain was real
+
+Against the arm it replaces it is **+10.0 held-out**, at 37% fewer tokens. On the tuned set the same
+comparison is **+30.0**. So **two thirds of the improvement did not survive a set the code was not
+designed against.**
+
+The overfitting signature is unambiguous and it does not flatter the rebuild:
+
+| arm | tuned | held-out | delta |
 |---|---|---|---|
-| derived queries | **+40.0** | **−35.0** | **FAIL** |
-| oracle-topic queries | **+30.0** | **−2.5** | **FAIL** |
+| `grep` | 22.5% | 37.5% | **+15.0** |
+| `datum` (old) | 62.5% | 75.0% | **+12.5** |
+| `full-context` | 97.5% | 95.0% | −2.5 |
+| `datum-recall` | 92.5% | 85.0% | **−7.5** |
 
-It beats text search decisively and loses to handing the model everything. Same shape as M2:
-the architecture's own number does not clear the bar somebody set before seeing it.
+The held-out set is *easier* for both untuned lexical arms and *harder* only for the tuned one.
+Stratifying by whether a question names a date (the date reader fires on 30/40 tuned but 16/40
+held-out) accounts for about 1.5 points of that; **roughly 6 points is a genuine generalisation
+gap.**
 
-## The numbers
+## What the new mechanism is actually worth
 
-40 questions whose answers exist only in 668 MB of real Claude Code transcripts, 3 repeats,
-**0.0% variance across every arm and both regimes.** Mechanical grading throughout, never a model
-judge; the grader is validated against 23 adversarial answers and 8 positive controls.
+Answers reached by tier, and the third tier is the one the rebuild was for — a question that names a
+time whose words appear nowhere in what was said:
 
-**Derived queries** — terms taken from the question text, which paraphrases. The hard, realistic case.
-
-| arm | score | wrong | tokens/question | ms |
-|---|---|---|---|---|
-| grep | 22.5% | 77.5% | 19,263 | 1,418 |
-| full-context | **97.5%** | 2.5% | 72,633 | 0 |
-| datum | 62.5% | 37.5% | **11,939** | 32 |
-
-**Oracle-topic queries** — the retrieval ceiling, queries given the right topic words.
-
-| arm | score | wrong | tokens/question | ms |
-|---|---|---|---|---|
-| grep | 65.0% | 30.0% | 16,506 | 1,292 |
-| full-context | **97.5%** | 2.5% | 72,633 | 0 |
-| datum | 95.0% | **0.0%** | **10,164** | 11 |
-
-Two things survive the failed gate. At its ceiling datum is **2.5 points behind full-context with
-zero wrong answers against its 2.5%**, and it gets there on **7.1× less context** — 10,164 tokens
-against 72,633. The gap between 62.5% and 95.0% is entirely query formulation, not storage: the
-same corpus, the same index, different words in the query.
-
-## What actually matters here, and it is not the score
-
-The benchmark found a defect worth more than the number.
-
-**A human pasting the agent's words is stored as the human's testimony.** Measured: **23 of 550
-human utterances carry 83.4% of the corpus by volume**, and every one is machine-authored prose
-arriving in the user's slot. One of them quotes an invented *"9,000 GPU instructions issued per
-token"*, and the live API returned it as `role=human actor=human:jish`.
-
-That is the failure mode this project exists to prevent — a customer audit of a competing memory
-product found 10,134 entries, 97.8% junk, including 808 copies of one hallucinated preference from
-a recall-then-re-extract loop. Here there is a person in the middle of the loop instead of an
-extractor, and **attribution cannot see it**: the actor is correct, he did type it, and the
-provenance is wrong in every sense that matters.
-
-Three detectors now run at ingest, and rows are **labelled, not dropped** — the human really did
-say it, and the act of quoting is part of the record:
-
-| signal | catches | why the others miss it |
+| tier | tuned | held-out |
 |---|---|---|
-| `machine_prose` | pasted tables, box drawing, arrow runs, bulleted bold | a table the agent never said has no verbatim counterpart |
-| `quoted_from_agent` | the 24,726-char prose paste | no table, no arrow, no heading anywhere in it |
-| `echoes_agent_verbatim` | the 203-char case the benchmark named | too short to judge statistically |
+| `term+window` | 19 | 9 |
+| `term` | 5 | 16 |
+| **`window` only** | **8** | **5** |
 
-`recall` prints `RELAYED-AGENT-PROSE` over MCP and the CLI, so *"Jish decided X"* is
-distinguishable from *"Jish pasted the agent saying X"*. 10 of 542 episodes flagged, 53.0% of the
-corpus by volume.
+Deleting the window tier costs **22.5 points on the tuned set and 12.5 on the held-out set.** So it
+is real, load-bearing, and worth about half what it first appeared to be. All 14 window-only answers
+were audited: every one had a genuinely parsed window, none is a null-window artefact.
 
-**The compaction-summary exclusion turned out to be load-bearing for correctness rather than
-tidiness.** It was added to stop a 21k-character document outranking real sentences. It also means
-the benchmark's B200 decoy — which reaches the human corpus only inside two `/compact` summaries —
-is invisible to datum. full-context fails that trap; datum passes it for exactly that reason.
+The date reader itself generalises cleanly — it fired on exactly the date-bearing questions in both
+sets, **0 misses and 0 false fires.**
 
-## Four defects in the instrument, found and fixed before the result was believed
+## Traps
 
-1. **The runner sent all query terms as one AND-query** while grep got each term separately and
-   unioned the hits. datum abstained on 28 of 40 and scored 15.0%. Same OR semantics now, and
-   `grade.md` records that the fix raised its score.
-2. **Bare numeric forbid tokens matched anything.** `85` appears nowhere in the corpus, yet a trap
-   forbidding it read as contaminated — the real hits were list indices and unrelated figures
-   (`est bake 44 layers`, `85 unmeasured claims`, `was at 48 gb`). Forbid matching is anchored to
-   its subject now. Corrected traps: **datum 4/4, full-context 3/4, grep 2/4–3/4.**
-3. **Abstention was being credited for words that came from the corpus.** "I don't know" is
-   something Jish says, so arms were scored for refusals they never made — 10 rows across both
-   regimes.
-4. **Agent turns under 200 characters never entered the quote-back index**, so quoting a *short*
-   agent claim — `throughput is 757.5 tok/s`, the shape that most reads as a fact — was invisible.
-   A test caught it; the floor is 80.
+`datum-recall` is the only arm that refuses all four on both sets.
 
-Every one of those four made a number look better or worse than the truth, and none was caught by
-a test. All four were caught by re-deriving the number.
+| arm | tuned | held-out |
+|---|---|---|
+| `datum-recall` | **4/4** | **4/4** |
+| `datum` | 4/4 | 4/4 |
+| `full-context` | 3/4 | 2/4 |
+| `grep` | 2/4 | 0/4 |
+
+Context contamination on the held-out set is high for everything — `full-context` 82.5%, `datum`
+60%, `datum-recall` 50%, `grep` 47.5%. Handing over a decoy in the retrieved context is not the same
+as asserting it, but it is the thing an answerer would trip on, and every arm does it.
+
+## The six it gets wrong, and why
+
+Diagnosed individually by re-querying at limits 12, 40 and 100:
+
+| | cause | fixable |
+|---|---|---|
+| **H08** | no stemmer: the question's rarest term is `login`, the corpus writes `logged in` | **yes, cheaply** |
+| **H23** | `"Late on 14 Aug"` is read as the *whole day*, so the window is 4× too wide and the answer sits at rank 23 | **yes, cheaply** |
+| **H10** | relative time — *"about half an hour later"* has no anchor this arm can see; answer found at rank 15, cut off by `limit=12` | partly |
+| **H03** | question says `batch-1`, utterance says `b1`; no time named, so no window to fall back on | no |
+| **H31** | question's whole content is the word `architectures`; the utterance names them and never uses it | no |
+
+Two are one-line fixes. Two are a genuine vocabulary gap with no temporal handle, and no amount of
+lexical work reaches them.
+
+## Why this stops here
+
+**I am not fixing H08 and H23.** They were found on the held-out set, and tuning against it would
+destroy the only uncontaminated measurement in this report — which is exactly the mistake the first
+round made and the reason a control set had to be built at all.
+
+Doing it honestly needs a **third** question set, built by someone who has not read this file. That
+is a real cost and it should be a decision, not a reflex.
 
 ## Honest limits
 
-- **Token matching cannot see polarity.** *"He never said 90+ quality"* grades as correct.
-  `verify.mts` asserts this still reproduces so it cannot rot into a silent bug.
-- **n = 40, and the question set was written in this effort.** The same conflict of interest §16 of
-  `HANDOFF.md` warns about. The grader was validated adversarially to limit it, not remove it.
-- **8 of 40 answers are `only_in_transcript`** — computed, not asserted, by scanning 1,746 tracked
-  files and running `git log -S` on the rarest expected token. The first hand labelling guessed 10
-  and the machine found 1.
-- **A quarter of derived-regime hits come back via the trigram tier**, which stops firing entirely
-  once queries use real words. The fuzzy tier is covering paraphrase and doing it badly. That is
-  the most likely place to find the missing 32.5 points, and it is unexplored.
+- **Token matching cannot see polarity.** *"He never said 90+ quality"* grades correct. Asserted in
+  `verify.mts` so it cannot rot into a silent bug.
+- **n = 40 per set.** Both sets were written inside this effort, by different agents; the held-out
+  one was written without reading the code, which limits the conflict of interest rather than
+  removing it.
+- **The held-out builder disclosed its own selection pressure**: 6 of its 40 questions were swapped
+  to reach the `only_in_transcript ≥ 8` floor. The criterion never moved; the questions did.
+- **`datum-recall` has no oracle-topic upper bound** — it always receives the raw question, which is
+  the point of it. Given oracle queries the *old* arm reaches 95.0% held-out, so 95% is the ceiling
+  of this index either way and the rebuild closes most of the distance to it from below.
+- **Four grading defects were fixed before any of these numbers were believed**, all of them found
+  by re-deriving a value rather than by a test. They are itemised in §8 of `RESULTS.md`.

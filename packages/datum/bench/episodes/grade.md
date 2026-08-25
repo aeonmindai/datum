@@ -367,3 +367,73 @@ Rule 8's commit is pinned in `results.json`. `memory/` **is** tracked in the Arc
 `memory/mission/SESSION7_RECONSTRUCTION.md` deliberately transcribes parts of the conversation, so a
 good number of otherwise attractive questions are **not** `only_in_transcript` and are labelled
 `false`. That was measured, not assumed, and the labels were corrected in that direction.
+
+## 10. The fourth arm, and the second question set
+
+Appended before the run that produced `RESULTS.md`, so that the rules exist before the numbers do.
+**No grading rule in §2–§7 changed.** The grader binary is untouched, `evidence` mode is untouched,
+`forbid` handling is untouched, and every score in `RESULTS.md` — old arms and new — comes out of the
+same `grade.mts`. Nothing in this section moved a previously published number. What it adds is a
+fourth arm, a second set, and two derived statistics.
+
+### 10.1 `datum-recall`
+
+- **`datum-recall`** — `GET /v1/recall?scope=&question=&limit=` with a bearer token, expecting
+  `{ ok: true, note, plan, episodes: [...] }` where each episode carries `tier` in
+  `term+window | term | window`, a `score`, and `matched_terms`. Endpoint, scope and token come from
+  `DATUM_BASE_URL`, `DATUM_RECALL_PATH`, `DATUM_SCOPE` and `DATUM_TOKEN`, exactly as the `datum` arm
+  takes `DATUM_EPISODES_PATH`. Default `limit` is 12, `--recall-limit=`.
+
+  **The entire question text is sent verbatim, in every regime.** This arm performs no term
+  extraction: it does not use `queryTerms`, it does not use `STOP`, and `--query=topic` does not
+  change what it sends. That is not an exemption from the shared query rule, it is the hypothesis
+  being tested — that interpreting the question is the server's job. It cuts both ways and the cost
+  side has to be stated: this arm never gets the oracle-topic query, so in the `topic` regime the
+  other three arms are handed ground-truth-derived terms and `datum-recall` is not. Its `topic`
+  column is therefore *not* an upper bound and must not be read as one; it is the same `derived`
+  behaviour reported beside a stronger baseline.
+
+  **`datum` is unchanged and stays in the table.** It keeps deriving four terms and issuing one
+  request each, unioned, exactly as §8 specifies. It is the before-picture and it is not permitted
+  to improve.
+
+- **Tier attribution.** Two derived counts, both computed with the §3 matcher and no new rule:
+  - `answer_tiers` — for each answerable question whose retrieved context satisfies `expect`, the
+    context is rebuilt from **one tier at a time** and attributed to the first tier, in the order
+    `term+window`, `term`, `window`, that satisfies `expect` on its own; `combined` if no single tier
+    does.
+  - `window_only` — that question's context is rebuilt with **every `window`-tier episode removed**,
+    and the count increments when `expect` is then no longer satisfied. This is the honest reading of
+    "found only because the question named a time", and it is the number to quote. `answer_tiers`
+    over-credits `window` whenever a term-tier episode also carried the answer, so where the two
+    disagree, `window_only` is smaller and `window_only` is correct.
+
+  Attribution is computed for answerable questions only. On an abstention trap there is no `expect`
+  to locate, and a trap is scored by §5 like every other question in every other arm.
+
+### 10.2 Two question sets
+
+`--questions=<path>`, default `questions.json`. Same runner, same grader, same arms; the set name is
+carried in `question_set` and in the output filename, which is `results-<set>-<regime>.json`.
+
+- **`questions.json` (`tuned`, `E01`–`E40`).** §9 governs it. The retrieval code now under test —
+  including `/v1/recall`'s date reading and df weighting — **was designed after reading which of
+  these questions the previous build failed.** Every number on this set is contaminated by that and
+  is required to be labelled `tuned` wherever it appears. It is reported because the before-picture
+  needs a fixed set, not because it measures generalisation.
+- **`questions-heldout.json` (`heldout`, `H01`–`H40`).** Built by an agent with no access to the
+  retrieval code, from source lines provably disjoint from the `E` set, with §9's distribution and
+  trap structure reproduced. Its construction and its own self-criticism are in `HELDOUT.md`.
+  **This is the set the gate is decided on.** Where the two disagree, the held-out number is the
+  result and the gap is the overfit.
+
+`verify.mts` asserts §9 against `questions.json`. It has not been pointed at the held-out file; the
+equivalent assertions for that set were run by its author and are transcribed in `HELDOUT.md` §1–§6.
+That is a weaker guarantee than a checked-in test and is recorded as such.
+
+### 10.3 The gate
+
+`datum-recall` passes only by beating **both** `grep` and `full-context` by at least 10 accuracy
+points on the **held-out** set in the `derived` regime, under `evidence` answering. Beating one
+baseline is not a pass. Beating them on the tuned set is not a pass. A margin inside one repeat
+standard deviation is reported with that standard deviation next to it.

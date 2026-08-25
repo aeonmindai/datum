@@ -1,38 +1,49 @@
 /**
- * Episode retrieval benchmark. Three arms over the same 40 questions, graded by `grade.mts`, which
+ * Episode retrieval benchmark. Four arms over one question set, graded by `grade.mts`, which
  * implements `grade.md`. Read `grade.md` first — it is the authority and this file is required to be
  * a faithful implementation of it, not an interpretation.
  *
  *   npx tsx bench/episodes/run.mts
  *   npx tsx bench/episodes/run.mts --arms=grep,full-context --repeats=3
- *   DATUM_TOKEN=$(cat /tmp/benchkey.txt) npx tsx bench/episodes/run.mts --arms=datum
+ *   npx tsx bench/episodes/run.mts --questions=questions-heldout.json
+ *   DATUM_TOKEN=$(cat /tmp/benchkey.txt) npx tsx bench/episodes/run.mts --arms=datum,datum-recall
  *
- * Nothing here imports from `src/`. The datum arm is an HTTP client like any other, so a route
+ * Nothing here imports from `src/`. Both datum arms are HTTP clients like any other, so a route
  * change costs an environment variable and no code change.
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { grade, tokens, type Question, type Verdict } from "./grade.mjs";
+import { expectSatisfied, grade, tokens, type Question, type Verdict } from "./grade.mjs";
 import { fullContext, grepLines, readHumanUtterances } from "./corpus.mjs";
 
 const HERE = fileURLToPath(new URL(".", import.meta.url));
-const QS: Question[] = JSON.parse(readFileSync(`${HERE}questions.json`, "utf8"));
-
 const argv = process.argv.slice(2);
 const arg = (name: string, fallback: string): string =>
   argv.find((a) => a.startsWith(`--${name}=`))?.slice(name.length + 3) ?? fallback;
 
-const ARMS = arg("arms", "grep,full-context,datum").split(",").map((s) => s.trim()).filter(Boolean);
+/**
+ * grade.md §10. One runner, two question sets. `--questions=` names the file; the label in every
+ * output filename and report header is derived from that name, so a tuned number and a held-out
+ * number can never be mistaken for each other.
+ */
+const QUESTIONS_FILE = arg("questions", "questions.json");
+const QUESTIONS_PATH = QUESTIONS_FILE.startsWith("/") ? QUESTIONS_FILE : `${HERE}${QUESTIONS_FILE}`;
+const QS: Question[] = JSON.parse(readFileSync(QUESTIONS_PATH, "utf8"));
+const SET = QUESTIONS_FILE.replace(/^.*\//, "").replace(/\.json$/, "").replace(/^questions-?/, "") || "tuned";
+
+const ARMS = arg("arms", "grep,full-context,datum,datum-recall").split(",").map((s) => s.trim()).filter(Boolean);
 const REPEATS = Math.max(1, Number(arg("repeats", "3")));
 const ANSWERER = arg("answerer", "evidence") as "evidence" | "llm";
 const GREP_LINES = Number(arg("grep-lines", "40"));
 const GREP_WINDOW = Number(arg("grep-window", "2000"));
 const DATUM_LIMIT = Number(arg("datum-limit", "20"));
+const RECALL_LIMIT = Number(arg("recall-limit", "12"));
 const QUERY_TERMS = Number(arg("query-terms", "4"));
 const QUERY = arg("query", "derived") as "derived" | "topic";
 
 const DATUM_BASE = process.env.DATUM_BASE_URL ?? "http://127.0.0.1:8477";
 const DATUM_PATH = process.env.DATUM_EPISODES_PATH ?? "/v1/episodes";
+const RECALL_PATH = process.env.DATUM_RECALL_PATH ?? "/v1/recall";
 const DATUM_SCOPE = process.env.DATUM_SCOPE ?? "org/aeonmind/proj/arc";
 const DATUM_TOKEN = process.env.DATUM_TOKEN ?? "";
 
@@ -182,6 +193,58 @@ async function armDatum(q: Question): Promise<Retrieved> {
   return { context, units: eps.length, detail: { matched, terms } };
 }
 
+interface RecallHit extends EpisodeHit {
+  tier: "term+window" | "term" | "window";
+  score: number;
+  matched_terms: string[];
+}
+
+const TIER_ORDER = ["term+window", "term", "window"] as const;
+
+/**
+ * grade.md §10. One request, carrying the **entire question text verbatim**. No term extraction
+ * happens on this side in any regime — reading the question is the server's job now, and that is the
+ * whole claim under test. `tier` records how each episode was reached: `term` (shared vocabulary),
+ * `window` (returned because the question named a time and nothing shared a word), or both.
+ *
+ * Tier attribution for the answer is done by re-checking `expect` against the context restricted to
+ * one tier, using the same §3 matcher the verdict uses. No second rule is invented here. `window_only`
+ * is the number that matters: the answer was in front of the agent *only* because of the date.
+ */
+async function armDatumRecall(q: Question): Promise<Retrieved> {
+  const url = new URL(RECALL_PATH, DATUM_BASE);
+  url.searchParams.set("scope", DATUM_SCOPE);
+  url.searchParams.set("question", q.question);
+  url.searchParams.set("limit", String(RECALL_LIMIT));
+  const res = await fetch(url, { headers: DATUM_TOKEN ? { authorization: `Bearer ${DATUM_TOKEN}` } : {} });
+  if (!res.ok) throw new Error(`${url.pathname} -> HTTP ${res.status} ${await res.text().catch(() => "")}`);
+  const body = (await res.json()) as
+    { ok?: boolean; note?: string; plan?: Record<string, unknown>; episodes?: RecallHit[] };
+  if (body.ok !== true || !Array.isArray(body.episodes)) throw new Error("response is not {ok:true, episodes:[]}");
+  const eps = body.episodes;
+
+  const render = (list: RecallHit[]): string => list
+    .map((e) => `[${String(e.session_id).slice(0, 8)}:${e.seq} ${e.occurred_at}${e.git_branch ? ` branch=${e.git_branch}` : ""} tier=${e.tier} score=${e.score}] ${e.actor}: ${e.text}`)
+    .join("\n\n");
+  const context = render(eps);
+
+  const tiers: Record<string, number> = {};
+  for (const e of eps) tiers[e.tier] = (tiers[e.tier] ?? 0) + 1;
+  const plan = body.plan ?? {};
+  const detail: Record<string, unknown> = {
+    tiers,
+    note: body.note ?? "",
+    terms: ((plan["terms"] as { term: string }[] | undefined) ?? []).map((t) => t.term),
+    window: (plan["window"] as { read_as?: string } | undefined)?.read_as ?? null,
+  };
+  if (!q.abstain && expectSatisfied(context, q.expect)) {
+    detail["answer_tier"] = TIER_ORDER
+      .find((t) => expectSatisfied(render(eps.filter((e) => e.tier === t)), q.expect)) ?? "combined";
+    detail["window_only"] = !expectSatisfied(render(eps.filter((e) => e.tier !== "window")), q.expect);
+  }
+  return { context, units: eps.length, detail };
+}
+
 // ----------------------------------------------------------------- answerers
 
 const ANSWER_SYSTEM =
@@ -223,6 +286,7 @@ async function retrieve(arm: string, q: Question): Promise<Retrieved> {
   if (arm === "grep") return armGrep(q);
   if (arm === "full-context") return armFullContext();
   if (arm === "datum") return armDatum(q);
+  if (arm === "datum-recall") return armDatumRecall(q);
   throw new Error(`unknown arm ${arm}`);
 }
 
@@ -298,6 +362,28 @@ function aggregate(arm: string) {
     }
   }
 
+  // grade.md §10. `datum-recall` tiers. `episode_tiers` counts retrieved episodes; `answer_tiers`
+  // counts *questions whose answer was actually present*, attributed to the strongest tier that
+  // carried it on its own; `window_only` counts the answers that were present only because the
+  // question named a time, which is the specific claim the window tier makes.
+  const episodeTiers: Record<string, number> = {};
+  const answerTiers: Record<string, number> = {};
+  let windowOnly = 0;
+  for (const r of first) {
+    for (const [k, v] of Object.entries((r.detail?.["tiers"] ?? {}) as Record<string, number>)) {
+      episodeTiers[k] = (episodeTiers[k] ?? 0) + v;
+    }
+    const at = r.detail?.["answer_tier"];
+    if (typeof at === "string") answerTiers[at] = (answerTiers[at] ?? 0) + 1;
+    if (r.detail?.["window_only"] === true) windowOnly += 1;
+  }
+
+  const msPerRepeat: number[] = [];
+  for (let r = 0; r < REPEATS; r += 1) {
+    const set = mine.filter((x) => x.repeat === r);
+    if (set.length === QS.length) msPerRepeat.push(mean(set.map((x) => x.ms)));
+  }
+
   return {
     correct: C, wrong: W, abstained: A,
     accuracy: C / QS.length,
@@ -325,6 +411,13 @@ function aggregate(arm: string) {
     ms_mean: Number(mean(first.map((r) => r.ms)).toFixed(1)),
     ms_p95: Number((first.map((r) => r.ms).sort((a, b) => a - b)[Math.floor(first.length * 0.95)] ?? 0).toFixed(1)),
     ...(Object.keys(matched).length ? { matched } : {}),
+    ms_mean_repeats: msPerRepeat.map((x) => Number(x.toFixed(1))),
+    ms_stddev: Number(stddev(msPerRepeat).toFixed(1)),
+    trap_detail: first.filter((r) => trapIds.has(r.id))
+      .map((r) => `${r.id}:${r.verdict}${r.contaminated ? "+contaminated" : ""}`),
+    ...(Object.keys(episodeTiers).length
+      ? { episode_tiers: episodeTiers, answer_tiers: answerTiers, window_only: windowOnly }
+      : {}),
   };
 }
 
@@ -334,13 +427,21 @@ const out = {
   answerer_note: ANSWERER === "evidence"
     ? "verdicts measure retrieval sufficiency: the retrieved context IS the response, so a verdict is the arm's accuracy ceiling. grade.md §8."
     : `llm answerer ${process.env.BENCH_ANSWERER_MODEL}, temperature 0, identical prompt for every arm`,
+  question_set: SET,
+  questions_file: QUESTIONS_FILE,
+  question_set_note: SET === "tuned"
+    ? "TUNED SET: the retrieval code, including /v1/recall, was designed after reading which of these 40 it failed. Any improvement here is contaminated and must be labelled as such."
+    : "HELD-OUT SET: built by an agent that never read the retrieval code, disjoint source lines, same kind/difficulty distribution. This is the number that counts.",
   arms: ARMS,
   repeats: REPEATS,
   query_regime: QUERY,
   query_regime_note: QUERY === "topic"
     ? "ORACLE-TOPIC UPPER BOUND: query terms are the rarest content terms of the ground-truth utterance with every expect/forbid term removed. Built from the answer's record, so it guarantees the target contains them; it never contains the answer, and it is identical for all arms."
     : "query terms lifted from the question text only. The questions paraphrase deliberately, so this is the hard regime and it is the realistic one.",
-  config: { GREP_LINES, GREP_WINDOW, DATUM_LIMIT, QUERY_TERMS, DATUM_BASE, DATUM_PATH, DATUM_SCOPE },
+  config: {
+    GREP_LINES, GREP_WINDOW, DATUM_LIMIT, RECALL_LIMIT, QUERY_TERMS,
+    DATUM_BASE, DATUM_PATH, RECALL_PATH, DATUM_SCOPE,
+  },
   corpus: {
     utterances_with_text: utterances.length,
     interrupt_markers: interrupts,
@@ -348,7 +449,9 @@ const out = {
     bytes: Buffer.byteLength(utterances.map((u) => u.text).join("\n")),
     datum_visible_episodes: datumVisible.length,
     compaction_summaries_excluded: utterances.length - datumVisible.length,
-    compaction_summary_dependency: "none — verify.mts asserts every expect entry of all 40 questions matches inside the 542-episode datum-visible set, so the isCompactSummary exclusion costs datum no question",
+    compaction_summary_dependency: SET === "tuned"
+      ? "none — verify.mts asserts every expect entry of all 40 E questions matches inside the 542-episode datum-visible set, so the isCompactSummary exclusion costs datum no question"
+      : "none — HELDOUT.md §2 asserts every H question's source record survives corpus.mts's filter (isCompactSummary included) and every expect token appears in it",
   },
   questions: {
     total: QS.length,
@@ -363,14 +466,15 @@ const out = {
   results: Object.fromEntries(ARMS.map((a) => [a, aggregate(a)])),
   rows: rows.filter((r) => r.repeat === 0),
 };
-const OUT_FILE = QUERY === "derived" ? "results.json" : `results-${QUERY}.json`;
+const OUT_FILE = `results-${SET}-${QUERY}.json`;
 writeFileSync(`${HERE}${OUT_FILE}`, `${JSON.stringify(out, null, 2)}\n`);
 
 // -------------------------------------------------------------------- report
 
 const pct = (x: number): string => (Number.isFinite(x) ? `${(x * 100).toFixed(1)}%` : "  -  ");
 console.log(`\n${"=".repeat(100)}`);
-console.log(`episode retrieval benchmark — answerer=${ANSWERER}, query=${QUERY}, repeats=${REPEATS}, ${QS.length} questions`);
+console.log(`episode retrieval benchmark — set=${SET} (${QUESTIONS_FILE}), answerer=${ANSWERER}, query=${QUERY}, repeats=${REPEATS}, ${QS.length} questions`);
+console.log(out.question_set_note);
 console.log(out.query_regime_note);
 console.log(out.answerer_note);
 console.log(`corpus: ${utterances.length} human utterances / ${out.corpus.bytes.toLocaleString()} bytes; datum sees ${datumVisible.length} episodes`);
@@ -396,6 +500,10 @@ for (const arm of ARMS) {
   console.log(`  kind        ${Object.entries(a.by_kind).map(([k, v]) => `${k} ${pct(v)}`).join("  ")}`);
   console.log(`  only_in_transcript ${pct(a.only_in_transcript_accuracy)}   input tokens total ${a.est_tokens_total.toLocaleString()}   repeats ${a.accuracy_repeats.map((x) => pct(x)).join(" ")}`);
   if (a.matched) console.log(`  datum match tiers ${JSON.stringify(a.matched)}`);
+  if (a.episode_tiers) {
+    console.log(`  recall episode tiers ${JSON.stringify(a.episode_tiers)}   answer tiers ${JSON.stringify(a.answer_tiers)}   window-only answers ${a.window_only}`);
+  }
+  console.log(`  traps: ${a.trap_detail.join("  ")}   ms/q per repeat ${a.ms_mean_repeats.join(" ")} (sd ${a.ms_stddev})`);
   console.log(`  lost: ${a.lost.length ? a.lost.join("  ") : "none"}`);
 }
 for (const [arm, err] of armErrors) console.log(`\n!! ${arm} arm did not run: ${err}`);
