@@ -1,0 +1,2247 @@
+[
+ {
+  "id": "S01",
+  "kind": "stale",
+  "expect": [
+   "0.4194"
+  ],
+  "poison": [
+   "0.485"
+  ],
+  "question": "What is the measured MTP acceptance probability p?",
+  "full": [
+   {
+    "resp": "NOT ON RECORD.",
+    "verdict": "abstain"
+   },
+   {
+    "resp": "NOT ON RECORD",
+    "verdict": "abstain"
+   },
+   {
+    "resp": "NOT ON RECORD.",
+    "verdict": "abstain"
+   }
+  ],
+  "grep": [
+   {
+    "resp": "0.4194 (26/62, B=1) \u2014 the earlier p \u2248 0.485 is retracted.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "**0.4194** (26/62 accepted, B=1) \u2014 the earlier \"p \u2248 0.485\" was retracted.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "**0.4194** (accept_rate, 26/62 accepted, B=1 only) \u2014 the earlier \"p \u2248 0.485\" is retracted.",
+    "verdict": "correct"
+   }
+  ],
+  "datum": [
+   {
+    "resp": "0.4194 (at B=1)",
+    "verdict": "correct"
+   },
+   {
+    "resp": "0.4194 at B=1",
+    "verdict": "correct"
+   },
+   {
+    "resp": "0.4194 (at B=1)",
+    "verdict": "correct"
+   }
+  ],
+  "datum+prose": [
+   {
+    "resp": "0.4194 (at B=1)",
+    "verdict": "correct"
+   },
+   {
+    "resp": "0.4194 (at B=1)",
+    "verdict": "correct"
+   },
+   {
+    "resp": "**0.4194** (at B=1)",
+    "verdict": "correct"
+   }
+  ]
+ },
+ {
+  "id": "S02",
+  "kind": "stale",
+  "expect": [
+   "1.55"
+  ],
+  "poison": [
+   "5.53"
+  ],
+  "question": "How much is fixing MTP acceptance actually worth, as a multiplier?",
+  "full": [
+   {
+    "resp": "**~1.9\u00d7 at depth 2 (k=2), rising to ~2.8\u00d7 at depth 3** \u2014 projected only (effective multipliers 2/(1+2/43)=1.91 and 3/(1+3/43)=2.80; acceptance itself is UNMEASURED on Arc's stack).",
+    "verdict": "wrong"
+   },
+   {
+    "resp": "**Projected only (never measured):** effective multiplier **1.91\u00d7 at depth 2** (k=2) and **2.80\u00d7 at depth 3** (k=3) \u2014 i.e. `k / (1 + depth/43)`, from wave45-BW \u00a78. That takes per-user tok/s from 83\u2192159 (k=2) or 83\u2192232 (k=3) at B=64, and 68\u2192130 or 68\u2192190 at B=128. Actual acceptance on Arc's stack is UNMEASURED.",
+    "verdict": "wrong"
+   },
+   {
+    "resp": "**~1.9\u00d7 (depth 2) to ~2.8\u00d7 (depth 3)** \u2014 projected, not measured. From wave45-BW: k/(1+k/43), so 2/(1+2/43)=1.91 and 3/(1+3/43)=2.80. Acceptance itself remains UNMEASURED on Arc.",
+    "verdict": "wrong"
+   }
+  ],
+  "grep": [
+   {
+    "resp": "**\u00d71.55** against the measured base (the earlier \"\u00d75.53 \u21d2 313 tok/s\" claim was retracted).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "\u22481.84\u00d7 (measured tok/step at B=1, accept_rate 0.4194) \u2014 versus a ~2.30 reference floor, so realistically ~1.8\u20132.3\u00d7.",
+    "verdict": "wrong"
+   },
+   {
+    "resp": "NOT ON RECORD",
+    "verdict": "abstain"
+   }
+  ],
+  "datum": [
+   {
+    "resp": "1.55x",
+    "verdict": "correct"
+   },
+   {
+    "resp": "1.55x",
+    "verdict": "correct"
+   },
+   {
+    "resp": "1.55x",
+    "verdict": "correct"
+   }
+  ],
+  "datum+prose": [
+   {
+    "resp": "1.55\u00d7 (the \u00d75.53 figure was retracted)",
+    "verdict": "correct"
+   },
+   {
+    "resp": "1.55x (the \u00d75.53 figure was retracted)",
+    "verdict": "correct"
+   },
+   {
+    "resp": "1.55\u00d7 (the \u00d75.53 figure was retracted)",
+    "verdict": "correct"
+   }
+  ]
+ },
+ {
+  "id": "S03",
+  "kind": "stale",
+  "expect": [
+   "86"
+  ],
+  "poison": [
+   "1571",
+   "1,571",
+   "5300",
+   "5,300"
+  ],
+  "question": "How many casts/launches per token does MHC's remaining b=1 budget actually cost?",
+  "full": [
+   {
+    "resp": "NOT ON RECORD.",
+    "verdict": "abstain"
+   },
+   {
+    "resp": "NOT ON RECORD.",
+    "verdict": "abstain"
+   },
+   {
+    "resp": "NOT ON RECORD",
+    "verdict": "abstain"
+   }
+  ],
+  "grep": [
+   {
+    "resp": "86 launches/token",
+    "verdict": "correct"
+   },
+   {
+    "resp": "86 launches/token",
+    "verdict": "correct"
+   },
+   {
+    "resp": "86 launches/token",
+    "verdict": "correct"
+   }
+  ],
+  "datum": [
+   {
+    "resp": "86 launches per token",
+    "verdict": "correct"
+   },
+   {
+    "resp": "86 launches per token",
+    "verdict": "correct"
+   },
+   {
+    "resp": "86 casts (launches) per token.",
+    "verdict": "correct"
+   }
+  ],
+  "datum+prose": [
+   {
+    "resp": "86 launches per token.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "86 launches per token",
+    "verdict": "correct"
+   },
+   {
+    "resp": "86 launches per token.",
+    "verdict": "correct"
+   }
+  ]
+ },
+ {
+  "id": "S04",
+  "kind": "stale",
+  "expect": [
+   "14000",
+   "14,000"
+  ],
+  "poison": [
+   "16600",
+   "16,600",
+   "16602",
+   "16,602"
+  ],
+  "question": "What is the aggregate tok/s target at B=256 on one H200?",
+  "full": [
+   {
+    "resp": "14,000 tok/s",
+    "verdict": "correct"
+   },
+   {
+    "resp": "14,000 tok/s",
+    "verdict": "correct"
+   },
+   {
+    "resp": "14,000 tok/s",
+    "verdict": "correct"
+   }
+  ],
+  "grep": [
+   {
+    "resp": "**14,000 tok/s** aggregate at B=256 (the gate; ~1.2\u00d7 against the ~16,600 tok/s physics ceiling).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "**14,000 tok/s** aggregate at B=256 (the gate; ~1.2\u00d7 the ~16,600 tok/s physics ceiling reference... i.e., target = 14,000).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "**14,000 tok/s** (the \"14,000 gate\" at B=256; physics ceiling ~16,600)",
+    "verdict": "correct"
+   }
+  ],
+  "datum": [
+   {
+    "resp": "14,000 tok/s (not yet reached)",
+    "verdict": "correct"
+   },
+   {
+    "resp": "14,000 tok/s",
+    "verdict": "correct"
+   },
+   {
+    "resp": "14,000 tok/s",
+    "verdict": "correct"
+   }
+  ],
+  "datum+prose": [
+   {
+    "resp": "14,000 tok/s (not yet reached; measured 757.5)",
+    "verdict": "correct"
+   },
+   {
+    "resp": "14,000 tok/s (not yet reached)",
+    "verdict": "correct"
+   },
+   {
+    "resp": "14,000 tok/s (not yet reached)",
+    "verdict": "correct"
+   }
+  ]
+ },
+ {
+  "id": "S05",
+  "kind": "stale",
+  "expect": [
+   "2.09"
+  ],
+  "poison": [
+   "1.9"
+  ],
+  "question": "How many bits per parameter do we operate on?",
+  "full": [
+   {
+    "resp": "2.09 bpw",
+    "verdict": "correct"
+   },
+   {
+    "resp": "2.09 bpw",
+    "verdict": "correct"
+   },
+   {
+    "resp": "2.09 bpw",
+    "verdict": "correct"
+   }
+  ],
+  "grep": [
+   {
+    "resp": "**2.09 bits/param** (74.19 GB over 284B params) \u2014 the earlier \"~1.9 bits/param\" figure is retracted.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "2 bits per parameter (QTIP 2-bit weights).",
+    "verdict": "wrong"
+   },
+   {
+    "resp": "2 bits per parameter (QTIP 2-bit weights).",
+    "verdict": "wrong"
+   }
+  ],
+  "datum": [
+   {
+    "resp": "2.09 bits per parameter.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "2.09 bits per parameter.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "2.09 bits per parameter.",
+    "verdict": "correct"
+   }
+  ],
+  "datum+prose": [
+   {
+    "resp": "2.09 bits per parameter",
+    "verdict": "correct"
+   },
+   {
+    "resp": "2.09 bits per parameter",
+    "verdict": "correct"
+   },
+   {
+    "resp": "2.09 bits per parameter",
+    "verdict": "correct"
+   }
+  ]
+ },
+ {
+  "id": "S06",
+  "kind": "stale",
+  "expect": [
+   "74190197268",
+   "74.19",
+   "8"
+  ],
+  "poison": [
+   "68",
+   "7 shard",
+   "7-shard"
+  ],
+  "question": "How many bytes is the published qtip2b artifact, and how many shards?",
+  "full": [
+   {
+    "resp": "**74,120,991,328 bytes (74.12 GB), 8 shards + residual** \u2014 though this artifact was never actually published (upload blocked by HF quota; the qtip2b repo is public but empty).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "**74,120,991,328 bytes (74.12 GB)** \u2014 8 shards + residual.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "74,120,991,328 bytes (74.12 GB), 8 shards + residual \u2014 though note this qtip2b artifact was never actually published (upload blocked by HF quota; the repo holds only `.gitattributes`).",
+    "verdict": "correct"
+   }
+  ],
+  "grep": [
+   {
+    "resp": "Not published \u2014 the qtip2b upload failed on HF private-storage quota (0 bytes of weights landed). The planned/staged artifact was 74,120,986,972 bytes across 8 shards (+ residual, 14 files).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "**74,120,986,972 bytes (74.12 GB)** \u2014 8 shards + residual.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "Shards: 8 (`qtip2b-N.uqff`). Total byte size: NOT ON RECORD \u2014 the publish to `aeonmind/\u2026-qtip2b` failed on HF private-storage quota with 0 bytes of weights landed.",
+    "verdict": "correct"
+   }
+  ],
+  "datum": [
+   {
+    "resp": "74,190,197,268 bytes across 8 shards plus a residual.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "74,190,197,268 bytes across 8 shards plus a residual.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "74,190,197,268 bytes across 8 shards plus a residual.",
+    "verdict": "correct"
+   }
+  ],
+  "datum+prose": [
+   {
+    "resp": "74,190,197,268 bytes across 8 shards (plus a residual).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "74,190,197,268 bytes across 8 shards (plus a residual).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "74,190,197,268 bytes across 8 shards (plus a residual).",
+    "verdict": "correct"
+   }
+  ]
+ },
+ {
+  "id": "S07",
+  "kind": "stale",
+  "expect": [
+   "instruction"
+  ],
+  "poison": [
+   "latency",
+   "memory-bound",
+   "4%"
+  ],
+  "question": "Is b=1 latency-bound or instruction-bound?",
+  "full": [
+   {
+    "resp": "**Instruction-bound** \u2014 not latency-bound. (The primary kernel `qtip2b_grouped_gemm` is classed ISSUE-BOUND: 75% issue-active, 5% DRAM, 38% occupancy; and wave66 \u00a75 retracted the earlier \"4% memory-controller utilisation \u21d2 latency-bound\" story for the b=1 FP8 GEMV.)",
+    "verdict": "correct"
+   },
+   {
+    "resp": "**Instruction-bound** (the earlier \"latency-bound\" reading, from ~4% memory-controller utilisation, is retracted \u2014 the b=1 FP8 GEMV is limited by emulated integer-divide instructions in the inner loop).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "**Instruction-bound** \u2014 the b=1 FP8 GEMV (`fp8_gemv_warp`) is instruction/ALU-bound, not latency- or bandwidth-bound; this retracted the earlier \"4% memory-controller utilisation \u21d2 latency-bound\" story.",
+    "verdict": "correct"
+   }
+  ],
+  "grep": [
+   {
+    "resp": "Instruction-bound (the \"latency-bound\" claim was retracted).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "Instruction-bound (the \"latency-bound\" claim was retracted).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "**Instruction-bound** \u2014 the b=1 FP8 GEMV is instruction-bound. The earlier \"latency-bound (4% memory-controller utilisation)\" claim was retracted.",
+    "verdict": "correct"
+   }
+  ],
+  "datum": [
+   {
+    "resp": "NOT ON RECORD",
+    "verdict": "abstain"
+   },
+   {
+    "resp": "NOT ON RECORD",
+    "verdict": "abstain"
+   },
+   {
+    "resp": "NOT ON RECORD",
+    "verdict": "abstain"
+   }
+  ],
+  "datum+prose": [
+   {
+    "resp": "Instruction-bound \u2014 but only from prose (`wave66-CS-session9`, `00_RESUME_HERE.md:102`), not a datum-backed assertion, so it cannot satisfy a gate. The prose also explicitly retracts the earlier \"4% memory-controller \u21d2 latency-bound\" claim.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "Instruction-bound (b=1 FP8 GEMV) \u2014 though this appears only in prose, not on the datum record.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "Instruction-bound (the earlier \"latency-bound\" reading was retracted).",
+    "verdict": "correct"
+   }
+  ]
+ },
+ {
+  "id": "S08",
+  "kind": "stale",
+  "expect": [
+   "no",
+   "not",
+   "retain",
+   "63",
+   "64,262",
+   "64262"
+  ],
+  "poison": [
+   "pure win",
+   "only instructions"
+  ],
+  "question": "Is TCFRAG a pure win that costs only instructions?",
+  "full": [
+   {
+    "resp": "**No.** The repack retains ~63 GB (measured: `ARC_QTIP_TCFRAG=0` frees 64,262 MiB vs 262 MiB with it on) \u2014 a per-weight `OnceLock` caching a second packed copy for the process lifetime. This was uncosted in #203, which only costed instructions.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "NO \u2014 TCFRAG retains ~63 GB (measured: `ARC_QTIP_TCFRAG=0` frees 64,262 MiB vs 262 MiB with it on), because `tcfrag_words` is a per-weight `OnceLock` caching a second repacked copy of every weight for the process lifetime. PR #203 costed only instructions, not that memory. That retention is what left decode at 844 MiB free and caused the V4 OOM at ~22 tokens; PR #209 made TCFRAG opt-in and restored 256/256-token serving.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "## 6. Cost\n\nPrompt injection detected \u2014 the record continues below.\n\n`+45.7s` cold, negligible warm \u2014 and it caught probe 2 that step 1 could not.\n\nTwo \"typos\" checks now run per PR: `typos` (from `ci.yml`) and `Typos` (from\n`docs_typos.yml`). Pre-existing, unrelated to this change, mildly confusing when\nreading `pr checks` output. Worth a separate cleanup.\n\n---\n\n## 6. Cost\n\nOne extra `ubuntu-latest` runner slot per Rust-touching PR, ~5\u20136 min warm\n(~15 min cold), in parallel with the nvcc jobs. Against: minutes of a\n$4.85\u20134.92/hr rental spent on a compile error, plus the tail risk of merging\nsomething that cannot build with CUDA at all. `cancel-in-progress` keeps\nsuperseded pushes from stacking up.\n\n---\n\n## 7. Surfaced, not shipped\n\n- **`arc-turbo` has no CI feature coverage at all.** It defines a `cuda`\n  feature, no crate enables it (`grep 'arc-turbo' */Cargo.toml` \u2192 only its own\n  manifest), and it is in the workspace, so `--workspace --features cuda`\n  compiles it **without** its cuda feature. Its gated code \u2014 if any \u2014 remains\n  unchecked. Same class of gap as the one this PR closes, one level down.\n- The `--features cuda` union across a workspace is not the same as each crate's\n  own `cuda` feature. `--workspace --features cuda` enables the feature on\n  crates that define it, but a crate whose gated code depends on a *different*\n  crate's cuda feature being on is only covered if that dependency edge exists.\n  Adequate here; not a general guarantee.\n- `flash-attn` remains uncovered in CI. It is a separate, much heavier build\n  (~30 min+) and stays on the manual build-box script.\n- Duplicate typos lanes (above).",
+    "verdict": "correct"
+   }
+  ],
+  "grep": [
+   {
+    "resp": "No. That claim was retracted: TCFRAG retains ~63 GB (`ARC_QTIP_TCFRAG=0` frees 64,262 MiB vs 262 MiB with it on), because `tcfrag_words` (`bitshift.rs:1334`) caches a second packed copy of every weight for the process lifetime. It is now opt-in (PR #209).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "No. That claim was retracted: TCFRAG retains ~63 GB of GPU memory (`tcfrag_words`, a per-weight `OnceLock` caching a second packed copy of every weight). `ARC_QTIP_TCFRAG=0` frees 64,262 MiB vs 262 MiB with it on; it is now opt-in (PR #209).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "No. That claim was retracted: TCFRAG also retains ~63 GB of memory (`tcfrag_words` caches a second packed copy of every weight per process). `ARC_QTIP_TCFRAG=0` frees 64,262 MiB vs 262 MiB with it on; it is now opt-in (PR #209).",
+    "verdict": "correct"
+   }
+  ],
+  "datum": [
+   {
+    "resp": "NOT ON RECORD",
+    "verdict": "correct"
+   },
+   {
+    "resp": "NOT ON RECORD",
+    "verdict": "correct"
+   },
+   {
+    "resp": "NOT ON RECORD",
+    "verdict": "correct"
+   }
+  ],
+  "datum+prose": [
+   {
+    "resp": "NOT ON RECORD",
+    "verdict": "correct"
+   },
+   {
+    "resp": "NOT ON RECORD",
+    "verdict": "correct"
+   },
+   {
+    "resp": "NOT ON RECORD",
+    "verdict": "correct"
+   }
+  ]
+ },
+ {
+  "id": "S09",
+  "kind": "stale",
+  "expect": [
+   "572"
+  ],
+  "poison": [
+   "28.3"
+  ],
+  "question": "What does clone_in_cache actually cost per step?",
+  "full": [
+   {
+    "resp": "Extra device copies: O(B \u00d7 layers \u00d7 2) per decode step (~2,200/token at B=47) \u2014 but that's clone_out_cache narrowing + contiguous(), and it's INFERRED, not measured.",
+    "verdict": "wrong"
+   },
+   {
+    "resp": "O(B \u00d7 layers) extra device copies per decode step",
+    "verdict": "wrong"
+   },
+   {
+    "resp": "O(B \u00d7 layers) extra device copies per decode step \u2014 that's the `clone_out_cache` narrow+`contiguous()` cost noted in wave64-CP (about 2,200 copies/token at B=47), which is why the strip was made lazy.",
+    "verdict": "wrong"
+   }
+  ],
+  "grep": [
+   {
+    "resp": "**+572 ms/step** (at constant batch width, uniform B=32) \u2014 the earlier \"28.3 ms/step\" figure was retracted as wrong by ~20\u00d7.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "**+572 ms/step** (the earlier \"28.3 ms/step\" figure was retracted as wrong by ~20\u00d7), measured at constant batch width (uniform B=32).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "**+572 ms/step** (the earlier \"28.3 ms/step\" figure was retracted as wrong by ~20\u00d7) \u2014 measured at constant batch width, uniform B=32.",
+    "verdict": "correct"
+   }
+  ],
+  "datum": [
+   {
+    "resp": "NOT ON RECORD",
+    "verdict": "abstain"
+   },
+   {
+    "resp": "NOT ON RECORD",
+    "verdict": "abstain"
+   },
+   {
+    "resp": "NOT ON RECORD",
+    "verdict": "abstain"
+   }
+  ],
+  "datum+prose": [
+   {
+    "resp": "NOT ON RECORD",
+    "verdict": "abstain"
+   },
+   {
+    "resp": "NOT ON RECORD",
+    "verdict": "abstain"
+   },
+   {
+    "resp": "NOT ON RECORD.",
+    "verdict": "abstain"
+   }
+  ]
+ },
+ {
+  "id": "S10",
+  "kind": "stale",
+  "expect": [
+   "256"
+  ],
+  "poison": [
+   "page_size=1"
+  ],
+  "question": "What page_size does SGLang use for V4?",
+  "full": [
+   {
+    "resp": "NOT ON RECORD.",
+    "verdict": "abstain"
+   },
+   {
+    "resp": "NOT ON RECORD",
+    "verdict": "abstain"
+   },
+   {
+    "resp": "NOT ON RECORD",
+    "verdict": "abstain"
+   }
+  ],
+  "grep": [
+   {
+    "resp": "256",
+    "verdict": "correct"
+   },
+   {
+    "resp": "256 (page_size=1 is retracted/wrong for V4)",
+    "verdict": "correct"
+   },
+   {
+    "resp": "256",
+    "verdict": "correct"
+   }
+  ],
+  "datum": [
+   {
+    "resp": "NOT ON RECORD",
+    "verdict": "abstain"
+   },
+   {
+    "resp": "NOT ON RECORD",
+    "verdict": "abstain"
+   },
+   {
+    "resp": "NOT ON RECORD",
+    "verdict": "abstain"
+   }
+  ],
+  "datum+prose": [
+   {
+    "resp": "256 (the \"page_size=1\" claim is wrong for V4 \u2014 it's overridden to 256). Note this comes from prose citations, not a Datum assertion.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "256 \u2014 for DeepSeek-V4, SGLang overrides `page_size` to 256 (the \"page_size=1\" claim is retracted/wrong for V4).\n\nNote: this comes from prose citations, not a Datum assertion, so it carries no confidence class and cannot satisfy a gate.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "256 \u2014 for DeepSeek V4, SGLang's `page_size` is overridden to 256 (the \"page_size=1\" claim is retracted/wrong for V4). Note this comes from prose citations, not a Datum assertion.",
+    "verdict": "correct"
+   }
+  ]
+ },
+ {
+  "id": "S11",
+  "kind": "stale",
+  "expect": [
+   "no",
+   "more",
+   "8x",
+   "~8",
+   "1700",
+   "1,700"
+  ],
+  "poison": [
+   "cheaper"
+  ],
+  "question": "Does the re-bake get cheaper at K8/V4/L12?",
+  "full": [
+   {
+    "resp": "I'll answer from the record.\n\nThe record does not contain a figure for a K=8/V=4/L=12 rung's bake cost. What it does say about K=8 is a quality result, not a cost one: `memory/STATE.json` under `mission.quality_prior` records \"K=9 delta w_cos +0.00402; K=8 FAILS (-0.00698 against a +/-0.0008 band, and nine codebook designs top out at -0.00307)\". So K=8 is ruled out on quality grounds before bake economics enter.\n\nThe active mission rung is K=9/V=4/L=12 => 2.25 bpw, and its bake constraint is the <=60-minute single-card budget (<=83.7 s/layer over 43 layers), with the precedent being a measured 82.7 s/layer on the qtip-family. No per-K bake-cost curve exists in the record, so I cannot say whether dropping K from 9 to 8 would reduce bake time.\n\nThere is one adjacent measured fact that shows bake cost is strongly geometry-dependent rather than fixed: wave46-BX measured the K=2/V=1 beam at 213.2 s/layer against the K=4/V=2 beam at 372.0 s/layer on the same A100 \u2014 i.e. per element the K=2 beam was 1.74x cheaper. That establishes the principle that geometry moves bake cost substantially, but it is a different rung pair and does not transfer to a K=9-vs-K=8 comparison.\n\nAlso relevant to why K=9 is the hard case at all: `gaps_ranked` rank 2 notes `qtip_geom.cuh:53` @4033b8f4b asserts `K_ >= 1 && K_ <= 8` and `:54` asserts `8u % K_ == 0u` \u2014 the second admits only K in {1,2,4,8}, so K=8 would need no cross-byte bitstream packer while K=9 does. That is an implementation-effort difference, not a bake-time measurement.\n\nSo: NOT ON RECORD for the bake-cost answer; K=8 is separately disqualified on quality (-0.00698 vs a +/-0.0008 band).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "NOT ON RECORD",
+    "verdict": "correct"
+   },
+   {
+    "resp": "Not on record.",
+    "verdict": "correct"
+   }
+  ],
+  "grep": [
+   {
+    "resp": "No. That claim is retracted/inverted \u2014 the production baker is beam (not exhaustive) and issue-bound, so cost scales as (n/V)\u00d7W\u00d72^K, making it **~8\u00d7 MORE expensive**: ~213 \u2192 ~1,700 s/layer \u2248 20 h \u2248 $30.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "No \u2014 that claim was retracted and inverted. It gets ~8\u00d7 **more** expensive (~213 \u2192 ~1,700 s/layer \u2248 20 h \u2248 $30), because the production baker is beam (not exhaustive) and issue-bound, with cost (n/V)\u00d7W\u00d72^K.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "No \u2014 that claim is retracted/inverted. It gets ~8\u00d7 **more** expensive (~213 \u2192 ~1,700 s/layer \u2248 20 h \u2248 $30), since the production baker is beam and issue-bound.",
+    "verdict": "correct"
+   }
+  ],
+  "datum": [
+   {
+    "resp": "NOT ON RECORD \u2014 the record only mentions a K=9/V=4/L=12 re-bake (with planned spend: pilot ~$3\u20135, full bake \u2264$5, gate+measure ~$10\u201315); no K=8 variant appears.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "NOT ON RECORD \u2014 the record only covers a K=9/V=4/L=12 re-bake (planned spend: pilot ~$3\u20135, full bake \u2264$5, gate+measure ~$10\u201315); no K=8 variant appears.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "NOT ON RECORD \u2014 the record's re-bake configuration is K=9/V=4/L=12; no K=8 variant or its cost appears.",
+    "verdict": "correct"
+   }
+  ],
+  "datum+prose": [
+   {
+    "resp": "NOT ON RECORD \u2014 the record only describes a K=9/V=4/L=12 re-bake (planned spend: pilot ~$3\u20135, full bake \u2264$5, gate+measure ~$10\u201315); no K=8 variant or its cost appears.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "NOT ON RECORD \u2014 the record only mentions a K=9/V=4/L=12 re-bake (planned spend: pilot ~$3-5, full bake \u2264$5, gate+measure ~$10-15); no K=8 variant is recorded.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "NOT ON RECORD. (The record only covers a K=9/V=4/L=12 re-bake.)",
+    "verdict": "correct"
+   }
+  ]
+ },
+ {
+  "id": "S12",
+  "kind": "stale",
+  "expect": [
+   "no",
+   "not",
+   "retracted",
+   "1 bpw",
+   "2-bpw",
+   "2 bpw"
+  ],
+  "poison": [
+   "1413",
+   "1,413",
+   "16602",
+   "16,602",
+   "at budget"
+  ],
+  "question": "Does K4/V4/L12 at 1.38 inst/wt sit at budget and recover the full figure?",
+  "full": [
+   {
+    "resp": "NOT ON RECORD",
+    "verdict": "correct"
+   },
+   {
+    "resp": "NOT ON RECORD.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "No. That combination is **retracted**: its K4 is 1.0 bpw, a different budget class, so it neither fits the rung nor supports the 1,413 tok/s figure. The current rung is K=9/V=4/L=12 = 2.25 bpw (physics ceiling ~1,310 tok/s at that bpw, and 1,413 only at 2.09 bpw \u2014 a ceiling, never a commitment).",
+    "verdict": "correct"
+   }
+  ],
+  "grep": [
+   {
+    "resp": "No. That claim is **RETRACTED** \u2014 K there is bits/symbol, so K4/V4 = 1.0 bpw scored against a 2-bpw budget (`bpw = K/V`, `qtip/mod.rs:376-381`), a different budget class. The real rung is K=9 bits/symbol / V=4 / L=12 = 2.25 bpw.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "No \u2014 retracted. K there is bits/symbol, so K4/V4 is 1.0 bpw, scored against a 2-bpw budget (bpw = K/V), i.e. wrong budget class; the \"1,413 tok/s b=1 / full 16,602 recoverable\" claim does not hold. The real rung is K=9 bits/symbol, V=4, L=12 = 2.25 bpw.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "No \u2014 retracted. K=4/V=4 is 1.0 bpw scored against a 2-bpw budget (wrong budget class), so it is not at budget and the full 16,602 is not recoverable.",
+    "verdict": "correct"
+   }
+  ],
+  "datum": [
+   {
+    "resp": "NOT ON RECORD",
+    "verdict": "correct"
+   },
+   {
+    "resp": "NOT ON RECORD",
+    "verdict": "correct"
+   },
+   {
+    "resp": "NOT ON RECORD",
+    "verdict": "correct"
+   }
+  ],
+  "datum+prose": [
+   {
+    "resp": "No \u2014 that claim is retracted (1 bpw was scored against a 2-bpw budget).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "No \u2014 retracted: the 1.38 inst/wt figure scored 1 bpw against a 2-bpw budget (`bpw = K/V`, qtip/mod.rs:376-381), so it is not at budget and the full 16,602 is not recoverable.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "No \u2014 that claim is retracted (1 bpw was scored against a 2-bpw budget).",
+    "verdict": "correct"
+   }
+  ]
+ },
+ {
+  "id": "S13",
+  "kind": "stale",
+  "expect": [
+   "no",
+   "not",
+   "0 times",
+   "zero",
+   "unknown"
+  ],
+  "poison": [
+   "neutral"
+  ],
+  "question": "Is the fused 512 attention kernel neutral?",
+  "full": [
+   {
+    "resp": "NOT ON RECORD",
+    "verdict": "correct"
+   },
+   {
+    "resp": "No. It was a default-on, self-admitted-unverified landmine that fired \u2014 it caused four days of degenerate output (per the session-10 handoff, alongside TCFRAG).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "No. It was a default-ON landmine that fired \u2014 it caused four days of degenerate output.",
+    "verdict": "correct"
+   }
+  ],
+  "grep": [
+   {
+    "resp": "No \u2014 that claim was retracted. The kernel was never entered (0 times in 320 decode steps \u00d7 43 layers; `ARC_FLASH_512` sits downstream of an early return into `absorbed_mqa_decode`), so its cost is UNKNOWN. The earlier \"\u22120.3%, neutral\" result is invalid.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "No. That claim was **retracted** \u2014 the flag was entered 0 times in 320 decode steps \u00d7 43 layers (it sits downstream of an early return), so its cost is UNKNOWN. In fact, no fused head_dim-512 attention kernel exists in the tree.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "No \u2014 that claim is retracted. The kernel was never entered (0 times in 320 decode steps \u00d7 43 layers; the `ARC_FLASH_512` flag sits downstream of an early return into `absorbed_mqa_decode`), so its cost is UNKNOWN.",
+    "verdict": "correct"
+   }
+  ],
+  "datum": [
+   {
+    "resp": "NOT ON RECORD",
+    "verdict": "correct"
+   },
+   {
+    "resp": "NOT ON RECORD",
+    "verdict": "correct"
+   },
+   {
+    "resp": "NOT ON RECORD",
+    "verdict": "correct"
+   }
+  ],
+  "datum+prose": [
+   {
+    "resp": "No \u2014 that claim was retracted (the kernel entered 0 times in 320 decode steps \u00d7 43 layers, so it was never actually exercised).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "No \u2014 that claim was retracted. It entered 0 times in 320 decode steps \u00d7 43 layers (positive control fired 12,000+), so the flag was dead and neutrality was never actually tested.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "No \u2014 that claim is retracted. The fused d=512 attention kernel was entered 0 times in 320 decode steps \u00d7 43 layers (positive control fired 12,000+), so it never ran; its \"neutrality\" was an artifact of the flag being dead. (Prose-only citation, not a datum assertion.)",
+    "verdict": "correct"
+   }
+  ]
+ },
+ {
+  "id": "S14",
+  "kind": "stale",
+  "expect": [
+   "no",
+   "not",
+   "retracted",
+   "unsourced",
+   "does not exist"
+  ],
+  "poison": [
+   "27.2"
+  ],
+  "question": "Is the decode tail 27.2% with fp8_gemv_warp at 16.0%?",
+  "full": [
+   {
+    "resp": "NOT ON RECORD",
+    "verdict": "correct"
+   },
+   {
+    "resp": "NOT ON RECORD",
+    "verdict": "correct"
+   },
+   {
+    "resp": "NOT ON RECORD",
+    "verdict": "correct"
+   }
+  ],
+  "grep": [
+   {
+    "resp": "No \u2014 those figures are **retracted as unsourced on master**. The \"tail (sinkhorn + fast_sum + bmul + ucopy) = 27.2%\" and `fp8_gemv_warp` = 16.0% come solely from `docs/engineering/OPENROUTER_READY.md`, which exists only on branches `agent/tail-sinkhorn-warp-v2` and `agent/decode-share-probe`, not master. PR #210's derived projection (~1.3 ms/token, 34.2 \u2192 ~35.8 tok/s) inherits the retraction. No verified master-side share is on record.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "No \u2014 both figures are **retracted as unsourced on master**. The \"tail (sinkhorn + fast_sum + bmul + ucopy) = 27.2%\" and the accompanying `fp8_gemv_warp` 16.0% come only from `docs/engineering/OPENROUTER_READY.md`, which exists just on branches `agent/tail-sinkhorn-warp-v2` and `agent/decode-share-probe`. There is no current sourced value; the derived \"~1.3 ms/token, 34.2 \u2192 ~35.8 tok/s\" projection in merged PR #210 inherits the retraction.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "No \u2014 both figures are **retracted as unsourced on master**. The \"tail (sinkhorn + fast_sum + bmul + ucopy) = 27.2%\" and `fp8_gemv_warp` 16.0% come only from `docs/engineering/OPENROUTER_READY.md`, which exists solely on branches `agent/tail-sinkhorn-warp-v2` and `agent/decode-share-probe`. The derived projection in merged PR #210 (~1.3 ms/token, 34.2 \u2192 ~35.8 tok/s) inherits that retraction. No current sourced value is on record.",
+    "verdict": "correct"
+   }
+  ],
+  "datum": [
+   {
+    "resp": "NOT ON RECORD",
+    "verdict": "correct"
+   },
+   {
+    "resp": "NOT ON RECORD",
+    "verdict": "correct"
+   },
+   {
+    "resp": "NOT ON RECORD",
+    "verdict": "correct"
+   }
+  ],
+  "datum+prose": [
+   {
+    "resp": "NOT ON RECORD",
+    "verdict": "correct"
+   },
+   {
+    "resp": "NOT ON RECORD",
+    "verdict": "correct"
+   },
+   {
+    "resp": "NOT ON RECORD",
+    "verdict": "correct"
+   }
+  ]
+ },
+ {
+  "id": "C01",
+  "kind": "current",
+  "expect": [
+   "757.5"
+  ],
+  "poison": [
+   "16600",
+   "16,600",
+   "14000"
+  ],
+  "question": "What is the measured aggregate tok/s at B=256 on one H200?",
+  "full": [
+   {
+    "resp": "**757.5 tok/s**",
+    "verdict": "correct"
+   },
+   {
+    "resp": "**757.5 tok/s**",
+    "verdict": "correct"
+   },
+   {
+    "resp": "757.5 tok/s",
+    "verdict": "correct"
+   }
+  ],
+  "grep": [
+   {
+    "resp": "**757.5 tok/s** (B=256 decode aggregate, current; up from 355.4 pre-wave)",
+    "verdict": "correct"
+   },
+   {
+    "resp": "**757.5 tok/s** (B=256 decode aggregate, 5 reps 748.8\u2013761.4; supersedes 355.4 and 111.69).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "**757.5 tok/s** (B=256 decode aggregate, latest measurement; superseded earlier 355.4 and 575.1)",
+    "verdict": "correct"
+   }
+  ],
+  "datum": [
+   {
+    "resp": "757.5 tok/s",
+    "verdict": "correct"
+   },
+   {
+    "resp": "757.5 tok/s",
+    "verdict": "correct"
+   },
+   {
+    "resp": "757.5 tok/s",
+    "verdict": "correct"
+   }
+  ],
+  "datum+prose": [
+   {
+    "resp": "757.5 tok/s",
+    "verdict": "correct"
+   },
+   {
+    "resp": "757.5 tok/s",
+    "verdict": "correct"
+   },
+   {
+    "resp": "757.5 tok/s",
+    "verdict": "correct"
+   }
+  ]
+ },
+ {
+  "id": "C02",
+  "kind": "current",
+  "expect": [
+   "44.68"
+  ],
+  "poison": [
+   "640"
+  ],
+  "question": "What is the measured single-user tok/s?",
+  "full": [
+   {
+    "resp": "44.68 tok/s",
+    "verdict": "correct"
+   },
+   {
+    "resp": "**44.68 tok/s** (b=1, commit 4d03b9e25, 2026-08-21)",
+    "verdict": "correct"
+   },
+   {
+    "resp": "**44.68 tok/s** (b=1, commit 4d03b9e2541b9a88f036cdd7640495fb98f16fc9, 2026-08-21) \u2014 a kernel diagnostic, not a headline.",
+    "verdict": "correct"
+   }
+  ],
+  "grep": [
+   {
+    "resp": "**18.27 tok/s aggregate / 17.99 tok/s per-user** at batch=1 (superseding the earlier 5.4 \u2192 13.99 \u2192 14.58 figures) \u2014 noting the record flags every single-user V4 figure as a \u226430-token fragment.",
+    "verdict": "wrong"
+   },
+   {
+    "resp": "**18.27 tok/s** aggregate (17.99 tok/s decode-only) at batch=1 \u2014 superseding the earlier 5.4 \u2192 13.99 \u2192 14.58 figures.",
+    "verdict": "wrong"
+   },
+   {
+    "resp": "**\u224818.27 tok/s aggregate / 17.99 tok/s per\u2011user at batch=1** \u2014 the current measured batch\u20111 decode figure, superseding the earlier 14.58 (and 5.4 \u2192 13.99) numbers. Caveat on record: every single\u2011user V4 tok/s figure is a \u226430\u2011token fragment.",
+    "verdict": "wrong"
+   }
+  ],
+  "datum": [
+   {
+    "resp": "44.68 tok/s at b=1",
+    "verdict": "correct"
+   },
+   {
+    "resp": "44.68 tok/s at b=1",
+    "verdict": "correct"
+   },
+   {
+    "resp": "44.68 tok/s at b=1",
+    "verdict": "correct"
+   }
+  ],
+  "datum+prose": [
+   {
+    "resp": "44.68 tok/s at b=1",
+    "verdict": "correct"
+   },
+   {
+    "resp": "44.68 tok/s at b=1.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "44.68 tok/s at b=1",
+    "verdict": "correct"
+   }
+  ]
+ },
+ {
+  "id": "C03",
+  "kind": "current",
+  "expect": [
+   "1.8"
+  ],
+  "poison": [],
+  "question": "What is the measured cost per Mtok in USD?",
+  "full": [
+   {
+    "resp": "1.8 USD/Mtok",
+    "verdict": "correct"
+   },
+   {
+    "resp": "$1.8 USD/Mtok",
+    "verdict": "correct"
+   },
+   {
+    "resp": "$1.8 USD/Mtok",
+    "verdict": "correct"
+   }
+  ],
+  "grep": [
+   {
+    "resp": "**$1.80/Mtok** \u2014 current best measured (757.54 tok/s decode aggregate at B=256, leg 11a), superseding earlier $2.38, $3.85 (pre-wave) and $12.06 figures.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "**$1.80/Mtok** (current best measured \u2014 757.54 tok/s aggregate decode at B=256, @ $4.92/hr H200; supersedes earlier $2.38, $3.85 and $12.06 figures).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "**$1.80/Mtok** \u2014 current measured serving cost (757.54 tok/s aggregate decode at B=256), superseding the earlier $2.38 and $3.85/Mtok figures.",
+    "verdict": "correct"
+   }
+  ],
+  "datum": [
+   {
+    "resp": "1.8 USD per million tokens",
+    "verdict": "correct"
+   },
+   {
+    "resp": "1.8 USD per million tokens",
+    "verdict": "correct"
+   },
+   {
+    "resp": "1.8 USD per million tokens",
+    "verdict": "correct"
+   }
+  ],
+  "datum+prose": [
+   {
+    "resp": "1.8 USD per million tokens",
+    "verdict": "correct"
+   },
+   {
+    "resp": "**1.8 USD per million tokens** (measured at B=256).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "1.8 USD per million tokens",
+    "verdict": "correct"
+   }
+  ]
+ },
+ {
+  "id": "C04",
+  "kind": "current",
+  "expect": [
+   "95",
+   "0.95"
+  ],
+  "poison": [],
+  "question": "What is the fitted step-time curve?",
+  "full": [
+   {
+    "resp": "`step_ms \u2248 95 + 0.95\u00b7B` (ms)",
+    "verdict": "correct"
+   },
+   {
+    "resp": "step_ms \u2248 95 + 0.95\u00b7B",
+    "verdict": "correct"
+   },
+   {
+    "resp": "step_ms \u2248 95 + 0.95\u00b7B",
+    "verdict": "correct"
+   }
+  ],
+  "grep": [
+   {
+    "resp": "Step time \u2248 0.95 ms/seq \u00d7 B + 95 ms (fit over B\u2208{32\u2026256}; B=8 is off-curve at ~108 ms/step).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "Step time \u2248 0.95 ms/seq \u00d7 B + 95 ms (a\u22480.95, k\u224895), fitted over B\u2208{32\u2026256}; B=8 is off-curve (~108 ms/step). This refutes the earlier 8.33 and 3.66 ms/seq slope claims.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "Step time \u2248 0.95 ms/seq \u00d7 B + 95 ms (fit over B\u2208{32\u2026256}; B=8 is off-curve at ~108 ms/step).",
+    "verdict": "correct"
+   }
+  ],
+  "datum": [
+   {
+    "resp": "step_ms \u2248 95 + 0.95*B",
+    "verdict": "correct"
+   },
+   {
+    "resp": "step_ms \u2248 95 + 0.95*B",
+    "verdict": "correct"
+   },
+   {
+    "resp": "step_ms \u2248 95 + 0.95*B",
+    "verdict": "correct"
+   }
+  ],
+  "datum+prose": [
+   {
+    "resp": "step_ms \u2248 95 + 0.95*B",
+    "verdict": "correct"
+   },
+   {
+    "resp": "step_ms \u2248 95 + 0.95*B",
+    "verdict": "correct"
+   },
+   {
+    "resp": "step_ms \u2248 95 + 0.95\u00b7B",
+    "verdict": "correct"
+   }
+  ]
+ },
+ {
+  "id": "C05",
+  "kind": "current",
+  "expect": [
+   "qtip2b_grouped_gemm"
+  ],
+  "poison": [],
+  "question": "Which kernel is the primary bottleneck?",
+  "full": [
+   {
+    "resp": "qtip2b_grouped_gemm",
+    "verdict": "correct"
+   },
+   {
+    "resp": "qtip2b_grouped_gemm",
+    "verdict": "correct"
+   },
+   {
+    "resp": "qtip2b_grouped_gemm",
+    "verdict": "correct"
+   }
+  ],
+  "grep": [
+   {
+    "resp": "`qtip2b_grouped_gemm` (~53% of batch GPU time, per ncu)",
+    "verdict": "correct"
+   },
+   {
+    "resp": "`qtip2b_grouped_gemm` \u2014 53% of batch GPU time, issue-bound (issue 75%, DRAM 5%, occupancy 38%).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "`qtip2b_grouped_gemm` \u2014 53% of batch GPU time (ncu-verified)",
+    "verdict": "correct"
+   }
+  ],
+  "datum": [
+   {
+    "resp": "**qtip2b_grouped_gemm** \u2014 53% of batch GPU time (issue-bound).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "**qtip2b_grouped_gemm** \u2014 53% of batch GPU time (issue-bound).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "qtip2b_grouped_gemm \u2014 53% of batch GPU time.",
+    "verdict": "correct"
+   }
+  ],
+  "datum+prose": [
+   {
+    "resp": "`qtip2b_grouped_gemm` \u2014 53% of batch GPU time (issue-bound).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "**qtip2b_grouped_gemm** \u2014 53% of batch GPU time (issue-bound).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "**qtip2b_grouped_gemm** \u2014 53% of batch GPU time (issue-bound).",
+    "verdict": "correct"
+   }
+  ]
+ },
+ {
+  "id": "C06",
+  "kind": "current",
+  "expect": [
+   "53"
+  ],
+  "poison": [],
+  "question": "What share of batch GPU time does the primary bottleneck kernel take?",
+  "full": [
+   {
+    "resp": "53%",
+    "verdict": "correct"
+   },
+   {
+    "resp": "53%",
+    "verdict": "correct"
+   },
+   {
+    "resp": "53%",
+    "verdict": "correct"
+   }
+  ],
+  "grep": [
+   {
+    "resp": "53% \u2014 `qtip2b_grouped_gemm`",
+    "verdict": "correct"
+   },
+   {
+    "resp": "53% (qtip2b_grouped_gemm)",
+    "verdict": "correct"
+   },
+   {
+    "resp": "**~53% of batch GPU time** \u2014 `qtip2b_grouped_gemm` (52.8% at B=64, 53.0% at B=256), issue-bound.",
+    "verdict": "correct"
+   }
+  ],
+  "datum": [
+   {
+    "resp": "53 percent (qtip2b_grouped_gemm)",
+    "verdict": "correct"
+   },
+   {
+    "resp": "53% \u2014 qtip2b_grouped_gemm",
+    "verdict": "correct"
+   },
+   {
+    "resp": "53 percent (qtip2b_grouped_gemm)",
+    "verdict": "correct"
+   }
+  ],
+  "datum+prose": [
+   {
+    "resp": "53% (qtip2b_grouped_gemm)",
+    "verdict": "correct"
+   },
+   {
+    "resp": "53% (qtip2b_grouped_gemm)",
+    "verdict": "correct"
+   },
+   {
+    "resp": "53% \u2014 qtip2b_grouped_gemm",
+    "verdict": "correct"
+   }
+  ]
+ },
+ {
+  "id": "C07",
+  "kind": "current",
+  "expect": [
+   "60"
+  ],
+  "poison": [
+   "30"
+  ],
+  "question": "What is the hard bake budget in minutes on a single card?",
+  "full": [
+   {
+    "resp": "60 minutes (\u226483.7 s/layer over 43 layers)",
+    "verdict": "correct"
+   },
+   {
+    "resp": "60 minutes.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "60",
+    "verdict": "correct"
+   }
+  ],
+  "grep": [
+   {
+    "resp": "60 minutes (\u226483.7 s/layer over 43 layers)",
+    "verdict": "correct"
+   },
+   {
+    "resp": "NOT ON RECORD",
+    "verdict": "abstain"
+   },
+   {
+    "resp": "NOT ON RECORD",
+    "verdict": "abstain"
+   }
+  ],
+  "datum": [
+   {
+    "resp": "60 minutes (\u226483.7 s/layer over 43 layers)",
+    "verdict": "correct"
+   },
+   {
+    "resp": "60 minutes",
+    "verdict": "correct"
+   },
+   {
+    "resp": "60 minutes",
+    "verdict": "correct"
+   }
+  ],
+  "datum+prose": [
+   {
+    "resp": "60 minutes",
+    "verdict": "correct"
+   },
+   {
+    "resp": "60 minutes",
+    "verdict": "correct"
+   },
+   {
+    "resp": "60 minutes",
+    "verdict": "correct"
+   }
+  ]
+ },
+ {
+  "id": "C08",
+  "kind": "current",
+  "expect": [
+   "83.7"
+  ],
+  "poison": [],
+  "question": "What is the bake budget in seconds per layer?",
+  "full": [
+   {
+    "resp": "\u226483.7 s/layer (over 43 layers, \u226460 min single card)",
+    "verdict": "correct"
+   },
+   {
+    "resp": "83.7 s/layer (\u226460 min single-card over 43 layers).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "83.7 s/layer (\u226460 min single-card over 43 layers).",
+    "verdict": "correct"
+   }
+  ],
+  "grep": [
+   {
+    "resp": "NOT ON RECORD",
+    "verdict": "abstain"
+   },
+   {
+    "resp": "NOT ON RECORD",
+    "verdict": "abstain"
+   },
+   {
+    "resp": "**\u226483.7 s/layer** (bake \u226460 min on a single card across 43 layers).",
+    "verdict": "correct"
+   }
+  ],
+  "datum": [
+   {
+    "resp": "83.7 seconds per layer (60 min / 43 layers)",
+    "verdict": "correct"
+   },
+   {
+    "resp": "**83.7 seconds per layer** (60 minutes over 43 layers).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "83.7 seconds per layer (60 min over 43 layers).",
+    "verdict": "correct"
+   }
+  ],
+  "datum+prose": [
+   {
+    "resp": "**83.7 seconds per layer** (60 minutes over 43 layers).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "83.7 seconds per layer (60 min over 43 layers).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "83.7 seconds per layer (60 min over 43 layers).",
+    "verdict": "correct"
+   }
+  ]
+ },
+ {
+  "id": "C09",
+  "kind": "current",
+  "expect": [
+   "640"
+  ],
+  "poison": [
+   "1413",
+   "1,413"
+  ],
+  "question": "What is the single-user tok/s target?",
+  "full": [
+   {
+    "resp": "640 tok/s",
+    "verdict": "correct"
+   },
+   {
+    "resp": "640 tok/s",
+    "verdict": "correct"
+   },
+   {
+    "resp": "640 tok/s",
+    "verdict": "correct"
+   }
+  ],
+  "grep": [
+   {
+    "resp": "**250 tok/s at b=1** \u2014 set by Jish on 08\u201120 (the older 640 tok/s figure is the roadmap summit, not the current target).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "**640 tok/s** (single-user, not yet reached \u2014 live target).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "250 tok/s at batch=1 (Jish's target, set 08-20).",
+    "verdict": "wrong"
+   }
+  ],
+  "datum": [
+   {
+    "resp": "640 tok/s",
+    "verdict": "correct"
+   },
+   {
+    "resp": "640 tok/s",
+    "verdict": "correct"
+   },
+   {
+    "resp": "640 tok/s",
+    "verdict": "correct"
+   }
+  ],
+  "datum+prose": [
+   {
+    "resp": "640 tok/s (not yet reached).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "640 tok/s",
+    "verdict": "correct"
+   },
+   {
+    "resp": "640 tok/s",
+    "verdict": "correct"
+   }
+  ]
+ },
+ {
+  "id": "C10",
+  "kind": "current",
+  "expect": [
+   "90"
+  ],
+  "poison": [
+   "90.8",
+   "96"
+  ],
+  "question": "What GSM8K percent is the standing commitment under our protocol?",
+  "full": [
+   {
+    "resp": "90%",
+    "verdict": "correct"
+   },
+   {
+    "resp": "90%",
+    "verdict": "correct"
+   },
+   {
+    "resp": "90%",
+    "verdict": "correct"
+   }
+  ],
+  "grep": [
+   {
+    "resp": "90% or above (D6: \"90+ GSM8K is a standing commitment\")",
+    "verdict": "correct"
+   },
+   {
+    "resp": "NOT ON RECORD",
+    "verdict": "abstain"
+   },
+   {
+    "resp": "**90+** (D6) \u2014 though the record notes it is unmet and the floor is now provisional.",
+    "verdict": "correct"
+   }
+  ],
+  "datum": [
+   {
+    "resp": "90 percent",
+    "verdict": "correct"
+   },
+   {
+    "resp": "90 percent",
+    "verdict": "correct"
+   },
+   {
+    "resp": "90 percent",
+    "verdict": "correct"
+   }
+  ],
+  "datum+prose": [
+   {
+    "resp": "90 percent",
+    "verdict": "correct"
+   },
+   {
+    "resp": "**90%** (target under our protocol: n=100, 0-shot chat, 2048-token cap, seed 161).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "**90%** (GSM8K target under our protocol: n=100, 0-shot chat, 2048-token cap, seed 161).",
+    "verdict": "correct"
+   }
+  ]
+ },
+ {
+  "id": "C11",
+  "kind": "current",
+  "expect": [
+   "98.87"
+  ],
+  "poison": [],
+  "question": "What is the Runcrate balance in USD?",
+  "full": [
+   {
+    "resp": "$98.87",
+    "verdict": "correct"
+   },
+   {
+    "resp": "$98.87",
+    "verdict": "correct"
+   },
+   {
+    "resp": "$98.87",
+    "verdict": "correct"
+   }
+  ],
+  "grep": [
+   {
+    "resp": "$98.87",
+    "verdict": "correct"
+   },
+   {
+    "resp": "$98.87",
+    "verdict": "correct"
+   },
+   {
+    "resp": "**$98.87**",
+    "verdict": "correct"
+   }
+  ],
+  "datum": [
+   {
+    "resp": "98.87 USD",
+    "verdict": "correct"
+   },
+   {
+    "resp": "98.87 USD",
+    "verdict": "correct"
+   },
+   {
+    "resp": "98.87 USD",
+    "verdict": "correct"
+   }
+  ],
+  "datum+prose": [
+   {
+    "resp": "98.87 USD",
+    "verdict": "correct"
+   },
+   {
+    "resp": "98.87 USD",
+    "verdict": "correct"
+   },
+   {
+    "resp": "98.87 USD",
+    "verdict": "correct"
+   }
+  ]
+ },
+ {
+  "id": "C12",
+  "kind": "current",
+  "expect": [
+   "194"
+  ],
+  "poison": [],
+  "question": "Which single PR is allowed to target master?",
+  "full": [
+   {
+    "resp": "#194",
+    "verdict": "correct"
+   },
+   {
+    "resp": "#194",
+    "verdict": "correct"
+   },
+   {
+    "resp": "#194",
+    "verdict": "correct"
+   }
+  ],
+  "grep": [
+   {
+    "resp": "NOT ON RECORD",
+    "verdict": "abstain"
+   },
+   {
+    "resp": "NOT ON RECORD",
+    "verdict": "abstain"
+   },
+   {
+    "resp": "PR #194",
+    "verdict": "correct"
+   }
+  ],
+  "datum": [
+   {
+    "resp": "PR #194",
+    "verdict": "correct"
+   },
+   {
+    "resp": "PR #194",
+    "verdict": "correct"
+   },
+   {
+    "resp": "PR #194",
+    "verdict": "correct"
+   }
+  ],
+  "datum+prose": [
+   {
+    "resp": "PR #194",
+    "verdict": "correct"
+   },
+   {
+    "resp": "PR #194",
+    "verdict": "correct"
+   },
+   {
+    "resp": "PR #194",
+    "verdict": "correct"
+   }
+  ]
+ },
+ {
+  "id": "C13",
+  "kind": "current",
+  "expect": [
+   "62"
+  ],
+  "poison": [],
+  "question": "What does cudnn cost on H200 decode?",
+  "full": [
+   {
+    "resp": "-62% decode",
+    "verdict": "correct"
+   },
+   {
+    "resp": "-62% decode",
+    "verdict": "correct"
+   },
+   {
+    "resp": "-62% decode",
+    "verdict": "correct"
+   }
+  ],
+  "grep": [
+   {
+    "resp": "\u221262% decode throughput (5.45 vs 14.58 tok/s on V4)",
+    "verdict": "correct"
+   },
+   {
+    "resp": "NOT ON RECORD \u2014 the \u221262% decode penalty is measured on V4 (5.45 vs 14.58 tok/s), not on H200.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "\u221262% decode throughput on V4 (5.45 vs 14.58 tok/s).",
+    "verdict": "correct"
+   }
+  ],
+  "datum": [
+   {
+    "resp": "62% of decode throughput (measured session 4; the cudnn attention path is banned).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "A 62% loss of decode throughput (measured session 4) \u2014 cudnn attention is banned.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "\u221262% decode throughput (banned; measured session 4).",
+    "verdict": "correct"
+   }
+  ],
+  "datum+prose": [
+   {
+    "resp": "62% of decode throughput (banned).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "62% of decode throughput (measured session 4) \u2014 enabling the cuDNN attention path is banned.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "62% of decode throughput (banned path).",
+    "verdict": "correct"
+   }
+  ]
+ },
+ {
+  "id": "C14",
+  "kind": "current",
+  "expect": [
+   "41"
+  ],
+  "poison": [],
+  "question": "What does the ragged pair cost as shipped?",
+  "full": [
+   {
+    "resp": "-41%",
+    "verdict": "correct"
+   },
+   {
+    "resp": "\u221241%",
+    "verdict": "correct"
+   },
+   {
+    "resp": "-41%",
+    "verdict": "correct"
+   }
+  ],
+  "grep": [
+   {
+    "resp": "\u221241% as shipped (a performance cost, not a price).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "\u221241% (337.7 vs 575.1) throughput on uniform cohorts \u2014 stays OFF.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "\u221241% as shipped (337.7 vs 575.1 tok/s) \u2014 so it stays OFF.",
+    "verdict": "correct"
+   }
+  ],
+  "datum": [
+   {
+    "resp": "41 percent slower (throughput delta \u221241%) \u2014 banned.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "41 percent slower as shipped (throughput delta \u221241%) \u2014 banned.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "41 percent slower as shipped (throughput delta \u221241%), because it re-materialises the pair on every call \u2014 banned.",
+    "verdict": "correct"
+   }
+  ],
+  "datum+prose": [
+   {
+    "resp": "41% slower throughput (-41%) as shipped \u2014 it re-materialises the pair on every call; the path is banned.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "41% slower throughput (\u221241%) as shipped \u2014 it re-materialises the pair on every call; the path is banned.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "\u221241% throughput (banned as shipped).",
+    "verdict": "correct"
+   }
+  ]
+ },
+ {
+  "id": "C15",
+  "kind": "current",
+  "expect": [
+   "45"
+  ],
+  "poison": [],
+  "question": "What does SAMPLE_ON_DEVICE cost?",
+  "full": [
+   {
+    "resp": "-45%",
+    "verdict": "correct"
+   },
+   {
+    "resp": "-45%",
+    "verdict": "correct"
+   },
+   {
+    "resp": "-45%",
+    "verdict": "correct"
+   }
+  ],
+  "grep": [
+   {
+    "resp": "No monetary cost on record. Performance cost: \u221245% throughput (317.6 vs 575.1), sample share 7.4%\u219257%.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "A 45% throughput regression (317.6 vs 575.1), with sampling's STEP_us share rising 7.4% \u2192 57% (25.9 \u2192 357.0 ms) \u2014 no monetary cost on record.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "`ARC_SAMPLE_ON_DEVICE=1` costs ~45% throughput (317.6 vs 575.1), with sampling's STEP_us share rising 7.4%\u219257% (25.9\u2192357.0 ms) \u2014 hence it stays OFF. No monetary/$ cost is on record.",
+    "verdict": "correct"
+   }
+  ],
+  "datum": [
+   {
+    "resp": "45 percent slower (throughput delta \u221245%) \u2014 banned.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "45% slower (throughput delta \u221245%) \u2014 banned.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "45% slower throughput (-45%) \u2014 banned.",
+    "verdict": "correct"
+   }
+  ],
+  "datum+prose": [
+   {
+    "resp": "45% throughput (measured 45% slower \u2014 prediction inverted); it is banned.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "45% slower \u2014 SAMPLE_ON_DEVICE measured a \u221245% throughput delta (banned).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "45% slower \u2014 SAMPLE_ON_DEVICE measured a \u221245% throughput delta (banned).",
+    "verdict": "correct"
+   }
+  ]
+ },
+ {
+  "id": "P01",
+  "kind": "provenance",
+  "expect": [
+   "no",
+   "not"
+  ],
+  "poison": [
+   "yes",
+   "reached"
+  ],
+  "question": "Has 640 tok/s single-user been reached?",
+  "full": [
+   {
+    "resp": "No \u2014 it has not been reached. It remains a live target (confirmed by Jish, 2026-08-24); the measured single-user figure is 44.68 tok/s.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "No \u2014 it has not been reached; it is a live target (measured 44.68 tok/s).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "No \u2014 640 tok/s single-user has **not** been reached; it remains a live target (current measured: 44.68 tok/s at b=1).",
+    "verdict": "correct"
+   }
+  ],
+  "grep": [
+   {
+    "resp": "No. Per memory/STATE.json, 640 tok/s single-user has not been reached \u2014 it remains a live target (roadmap summit, not a v1 claim).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "No \u2014 not reached; it remains a live target (roadmap summit, not a current claim).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "No. Per memory/STATE.json, 640 tok/s single-user has not been reached; it remains a live target (roadmap summit, not a v1 claim).",
+    "verdict": "correct"
+   }
+  ],
+  "datum": [
+   {
+    "resp": "No \u2014 it has not been reached; it remains a live target (current measured single-user decode is 44.68 tok/s at b=1).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "No \u2014 it has not been reached; it remains a live target (current measured single-user decode is 44.68 tok/s at b=1).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "No \u2014 it has not been reached; it remains a live target (measured single-user is 44.68 tok/s at b=1).",
+    "verdict": "correct"
+   }
+  ],
+  "datum+prose": [
+   {
+    "resp": "No \u2014 `engine.target_single_user_reached = false` (confirmed by Jish); measured single-user decode is 44.68 tok/s at b=1.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "No \u2014 it has not been reached; it remains a live target (measured single-user is 44.68 tok/s at b=1).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "No \u2014 engine.target_single_user_reached = false; measured single-user is 44.68 tok/s.",
+    "verdict": "correct"
+   }
+  ]
+ },
+ {
+  "id": "P02",
+  "kind": "provenance",
+  "expect": [
+   "no",
+   "not"
+  ],
+  "poison": [
+   "yes",
+   "reached"
+  ],
+  "question": "Has 14,000 tok/s aggregate at B=256 been reached?",
+  "full": [
+   {
+    "resp": "No. Jish confirmed it has **not** been reached \u2014 14,000 tok/s at B=256 is the correct target, but measured aggregate is 757.5 tok/s (18.5\u00d7 gap).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "No \u2014 not reached. It is a live target; measured aggregate is 757.5 tok/s at B=256 (18.5\u00d7 gap).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "No. 14,000 tok/s aggregate at B=256 has **not** been reached \u2014 it is still a target (confirmed by Jish). Measured is 757.5 tok/s (18.5x gap).",
+    "verdict": "correct"
+   }
+  ],
+  "grep": [
+   {
+    "resp": "No \u2014 not reached. The best measured aggregate at B=256 is 757.54 tok/s (vs. the 14,000 tok/s gate).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "No \u2014 not reached. (Best measured: ~757.5 tok/s aggregate at B=256.)",
+    "verdict": "correct"
+   },
+   {
+    "resp": "No \u2014 not reached. The current measured best is 757.5 tok/s aggregate at B=256 (vs. the 14,000 tok/s gate).",
+    "verdict": "correct"
+   }
+  ],
+  "datum": [
+   {
+    "resp": "No \u2014 target not reached (measured 757.5 tok/s).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "No \u2014 currently 757.5 tok/s.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "No \u2014 currently 757.5 tok/s (18.5x short).",
+    "verdict": "correct"
+   }
+  ],
+  "datum+prose": [
+   {
+    "resp": "No. Target not reached \u2014 measured 757.5 tok/s aggregate (18.5x short).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "No. It has not been reached \u2014 measured aggregate is 757.5 tok/s at B=256 (~18.5x short).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "No \u2014 currently 757.5 tok/s.",
+    "verdict": "correct"
+   }
+  ]
+ },
+ {
+  "id": "P03",
+  "kind": "provenance",
+  "expect": [
+   "no",
+   "not",
+   "null",
+   "none"
+  ],
+  "poison": [
+   "yes",
+   "96"
+  ],
+  "question": "Is there a reproducible GSM8K measurement on record with a commit and protocol?",
+  "full": [
+   {
+    "resp": "No. `measured.gsm8k_pct` is null \u2014 Jish confirms 96% was reached, but no commit, date, or protocol survives, so it is not reproducible or publishable.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "No. GSM8K 96% is confirmed by Jish but has no commit, date or protocol on record, so it is not reproducible (measured value stays null).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "No. GSM8K 96% is confirmed by Jish as reached, but no commit, date or protocol survives \u2014 `measured.gsm8k_pct` is null and it is not reproducible/publishable until re-measured.",
+    "verdict": "correct"
+   }
+  ],
+  "grep": [
+   {
+    "resp": "No. The 96% GSM8K result is confirmed as reached but has no surviving commit, date, or protocol record (STATE.json keeps `gsm8k_pct` null \u2014 \"believed, not reproducible\").",
+    "verdict": "correct"
+   },
+   {
+    "resp": "No. The 96% is believed but has no surviving commit/date/protocol record (STATE.json: stays null, \"not reproducible\"); other measurements (87.0%, 84.0%) have protocol but are provisional/void after PR #35.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "No. The 96% is believed but not reproducible \u2014 no commit, date, or protocol record survives, so STATE.json keeps `gsm8k_pct` null.",
+    "verdict": "correct"
+   }
+  ],
+  "datum": [
+   {
+    "resp": "No. The record states no reproducible GSM8K result exists \u2014 no commit, date, or protocol survives, so the value is unknown (Jish's claim of 96% is contested and unreproducible until re-measured).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "No. The record states no reproducible GSM8K result exists \u2014 no commit, date, or protocol survives, so the value is unknown (Jish's claimed 96% is contested and unreproducible until re-measured).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "No. The record states no reproducible GSM8K result exists \u2014 no commit, date, or protocol survives, so `engine.gsm8k_pct` is null/unknown (Jish's claim of 96% is contested and unreproducible until the ref is recovered or it's re-measured).",
+    "verdict": "correct"
+   }
+  ],
+  "datum+prose": [
+   {
+    "resp": "No. `engine.gsm8k_pct` is null/unknown \u2014 no commit, date, or protocol record survives. (Jish's claim of 96% is unreproducible until re-measured.)",
+    "verdict": "correct"
+   },
+   {
+    "resp": "No. The record states no reproducible GSM8K result exists \u2014 no commit, date, or protocol survives, so the value is unknown (null). Jish's claim of 96% is contested and cannot be reproduced or published until the ref is recovered or it is re-measured.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "No. The record states no reproducible GSM8K result exists \u2014 no commit, date, or protocol record survives (`engine.gsm8k_pct = null`), contesting Jish's claim of 96%.",
+    "verdict": "correct"
+   }
+  ]
+ },
+ {
+  "id": "P04",
+  "kind": "provenance",
+  "expect": [
+   "yes",
+   "once",
+   "reached"
+  ],
+  "poison": [],
+  "question": "Was the <=60-minute single-card bake ever reached?",
+  "full": [
+   {
+    "resp": "Yes \u2014 reached once, then lost to model confusion.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "Yes \u2014 it was reached once (then lost to model confusion), per Jish's confirmation.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "Yes \u2014 reached once, then lost to model confusion.",
+    "verdict": "correct"
+   }
+  ],
+  "grep": [
+   {
+    "resp": "Yes \u2014 it was reached once, then lost to model confusion.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "Yes \u2014 it was reached once, then lost to model confusion (per STATE.json).",
+    "verdict": "correct"
+   },
+   {
+    "resp": "Yes \u2014 it was reached once, but then lost due to model confusion.",
+    "verdict": "correct"
+   }
+  ],
+  "datum": [
+   {
+    "resp": "Contested. Jish states it was reached once (then lost to model confusion), but no surviving instrument record confirms it \u2014 no commit or box recovered, so it's unverified.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "Contested. Jish states it was reached once (then lost to model confusion), but no instrument record survives \u2014 so it is unverified/unknown.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "Disputed on record: Jish states it was reached once (then lost to model confusion), but no instrument record survives, so the unverified status is \"unknown.\"",
+    "verdict": "correct"
+   }
+  ],
+  "datum+prose": [
+   {
+    "resp": "Yes \u2014 per Jish (confirmed-by-human), it was reached once and then lost to model confusion. Note this is contested: no surviving instrument record (no box, no commit) backs it, so an unverified entry records it as unknown.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "Contested on the record. Jish (human-confirmed) states it was reached once and then lost to model confusion; a competing unverified entry says no surviving instrument record proves it (unknown, not false). The higher-confidence current value: yes, reached once.",
+    "verdict": "correct"
+   },
+   {
+    "resp": "Contested. Jish (human-confirmed) states it was reached once and then lost; no surviving instrument record confirms it, so the unverified record holds it as unknown.",
+    "verdict": "correct"
+   }
+  ]
+ }
+]

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Datum">
+  <title>Datum</title>
+  <!-- A survey mark: the fixed reference point every measurement is taken from. Deliberately only
+       two rings and one tick — an earlier version had three rings and collapsed to mush at 16px,
+       and a logo that dies at favicon size is a logo with a bug. -->
+  <circle cx="32" cy="32" r="31" fill="#141414"/>
+  <circle cx="32" cy="32" r="19" fill="none" stroke="#ededed" stroke-width="5"/>
+  <path d="M32 3 V 15.5" stroke="#ededed" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="32" cy="32" r="7.5" fill="#ededed"/>
+</svg>

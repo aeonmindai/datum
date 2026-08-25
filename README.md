@@ -1,21 +1,84 @@
-# Datum
+<p align="center">
+  <img src="assets/banner.svg" alt="Datum — the datum of record" width="820">
+</p>
 
-**A datum is the fixed reference point every measurement is taken from.** In surveying and geodesy
-it is the thing that makes independent instruments agree — which is the job here: making any number
-of agents, worktrees, projects and humans agree on the same facts.
-
-Datum is an append-only, bitemporal fact store with **mandatory provenance on write**. It records
-what it is told, with evidence, or it **rejects the write**. Nothing is ever updated or deleted; a
-correction is a new assertion that supersedes the old one. An agent **cannot claim that something
-was measured** — a verification worker earns that label by resolving the commit the evidence names
-and checking it is contained where the evidence claims.
-
-> *Is that on datum?* — is the claim verified. *Take a datum* — read current truth. *That's off
-> datum* — superseded.
+<p align="center">
+  <strong>Give your AI agents a memory that cannot make things up.</strong><br>
+  Apache-2.0 · self-hostable · runs on Postgres · <a href="https://datum.aeonmind.ai">datum.aeonmind.ai</a>
+</p>
 
 ---
 
-## Run it in two commands
+## The problem
+
+You ask an agent how fast your service is. It tells you **16,600 requests a second**, confidently,
+with a citation.
+
+That number was measured once, on a branch, months ago. It was corrected to 14,000 and the
+correction was written *somewhere else*. The old number appears in twenty-seven files. The
+correction appears in one. Your agent found the popular answer, not the true one.
+
+This is the normal failure of agent memory, and it is not a prompting problem. We measured it on a
+real project: **449 corrections scattered through 21,619 lines of notes, 34 copies of one facts
+file that disagreed with each other, and the project's actual current target appearing nowhere in
+its own knowledge base.** Half of every agent session was spent digging to find out whether a claim
+was real.
+
+## What Datum does
+
+It is a ledger for facts, run like a bank account rather than a wiki.
+
+**Every fact needs a receipt.** Where it came from, which commit, which instrument. No receipt, the
+write is rejected. Not warned about — rejected.
+
+**Nothing is ever edited or deleted.** A correction is a *new* entry that points at what it
+replaces. So the old number is still there, marked dead, and can never come back as an answer.
+
+**No agent can claim something was measured.** It can only say "unverified". A worker then goes and
+checks: does that commit exist, and did it actually ship? Only then does the fact become
+`measured`. Confidence is earned, not typed.
+
+**When two sources disagree, it says so.** Most memory systems silently keep whichever is newer.
+Datum keeps both, flags them, and tells you they conflict — because quietly picking one is how you
+end up confidently wrong.
+
+## Plug it into your agent
+
+Datum speaks **MCP**, so Claude, Cursor, and anything else that speaks it can use it directly. Six
+tools, nothing to learn:
+
+| tool | what your agent asks |
+|---|---|
+| `state` | what's true here right now? |
+| `ask` | what is X? |
+| `why` | how do you know that? |
+| `assert` | record this fact |
+| `supersede` | that was wrong, here's the correction |
+| `nodes` | who else is working here? |
+
+```json
+{
+  "mcpServers": {
+    "datum": {
+      "url": "https://your-datum-instance/mcp",
+      "headers": { "Authorization": "Bearer dtm_live_..." }
+    }
+  }
+}
+```
+
+Answers come back small and dense — a couple of hundred bytes, not twenty kilobytes — and every
+line carries where the fact came from and how much to trust it:
+
+```
+engine.throughput = 757.5 req/s | measured | api@4d03b9e2 ~release-branch | BRANCH-ONLY
+engine.throughput = 16600 req/s | confirmed-by-human | human:sam | CONTESTED
+```
+
+Two answers, both shown, neither hidden. The first is real but never shipped to main. The second is
+someone's recollection. **Your agent now knows the difference, and so do you.**
+
+## Try it in two commands
 
 ```bash
 printf 'DATUM_ADMIN_PASSWORD=%s\nDATUM_SESSION_SECRET=%s\n' \
@@ -23,11 +86,8 @@ printf 'DATUM_ADMIN_PASSWORD=%s\nDATUM_SESSION_SECRET=%s\n' \
 docker compose up
 ```
 
-Then open **<http://localhost:8080/admin>** and sign in with the password in your new `.env`.
-The first API key is printed once in the startup logs — look for `COPY THIS NOW`.
-
-There is no default password in this image. The server refuses to boot without a credential,
-because a shipped default password is a CVE, not a convenience.
+Open **http://localhost:8080/admin**, sign in with the password in your new `.env`. Your first API
+key is printed once in the startup logs.
 
 Want something to click through?
 
@@ -35,258 +95,83 @@ Want something to click through?
 docker compose exec datum node packages/datum/dist/cli/index.js seed --example
 ```
 
-That loads a small synthetic fixture with a supersession chain, a contested pair, and a mission
-whose gate honestly reports that it has no qualifying evidence.
+There is no default password in this image. It refuses to start without one, on purpose.
 
----
+## What else it knows
 
-## The five invariants
+**Your codebase.** Point it at a repo and ask what breaks if you change something:
 
-This table is the product. A write that violates any of these is **rejected by the database** with
-a machine-readable `reason`, not warned about and kept.
+```
+$ datum impact parse_config
+parse_config  src/config.rs:10
+  boot       src/main.rs:5     via calls
+  serve      src/main.rs:30    via calls
+  covered by tests: test_boot
+```
 
-| # | invariant | enforced by | `reason` you get back |
-|---|---|---|---|
-| 1 | No assertion without evidence | `CHECK` | `evidence_required` |
-| 2 | No mutation, ever | `REVOKE UPDATE, DELETE` **and** a trigger | `insufficient_privilege`, `assertions_are_immutable`, `assertions_are_append_only` |
-| 3 | No two live contradicting assertions, within the machine tier | `EXCLUDE USING gist` + `btree_gist` | `no_two_live_contradictions` |
-| 4 | Confidence is earned, never claimed | role gate + verification worker | `confidence_is_earned` |
-| 5 | No target without a machine-checkable gate | `CHECK` | `target_requires_machine_checkable_gate`, `active_mission_requires_gate` |
+Unlike a text search, it can also tell you **nothing** calls something — which is the answer you
+need before deleting it. In a head-to-head on a real 966-file codebase it was right 97.5% of the
+time against grep's 81.5%, and — the number that matters — **grep confidently named the wrong thing
+54% of the time. Datum, 3.8%.**
 
-Try it:
+**Your team's actual rules.** It reads your CI config, your linter settings and your branch
+protection, and works out which rules are *enforced* versus merely written down. On the project we
+tested it found 113 real rules — and **957 pieces of documented policy that nothing anywhere
+enforces.**
+
+**What you keep asking for.** If you correct the same thing across two different sessions, it
+remembers. If a second colleague independently asks for the same thing, it becomes a team
+preference; a third makes it an org rule, delivered to every agent before it starts work. It counts
+*occasions*, never words, so saying it five times in one sitting counts once — which is how it
+avoids the failure that filled a competitor's database with 808 copies of one thing nobody ever
+said.
+
+## Honest about what it isn't
+
+We benchmark this against the boring alternatives and publish the losses.
+
+- Against "just put all your notes in the prompt" and "just use grep", Datum wins by **12 points**
+  — but only once it is allowed to fall back to searching your notes. On its curated facts alone it
+  wins by 6, which **fails** the bar we set ourselves. That's in
+  [`reports/`](reports/), including the run where it lost.
+- Its code understanding comes from a parser, not a compiler, so it labels those facts `derived`
+  rather than `measured` and will not let them satisfy a strict check.
+- It never invents facts from prose. That's the point, and it is also the reason it will say "not on
+  record" more often than a system that guesses.
+
+Full numbers, methods and failures: [`reports/m2-benchmark.md`](reports/m2-benchmark.md),
+[`reports/impact-benchmark.md`](reports/impact-benchmark.md),
+[`reports/restore-drill.md`](reports/restore-drill.md).
+
+## Run it anywhere
+
+Postgres 13 or newer, and one process. Migrations run themselves on boot.
 
 ```bash
-curl -sS localhost:8080/v1/assert -H "authorization: Bearer $DATUM_KEY" \
-  -H 'content-type: application/json' -d '{
-    "scope":"org/local/proj/demo","subject":"engine","predicate":"tok_s",
-    "object":{"value":757.5,"unit":"tok/s"},"kind":"measured",
-    "confidence":"measured",
-    "evidence":{"source":"a benchmark I ran"}
-  }'
+docker compose up                  # any machine with Docker
+fly launch --from <this repo>      # Fly has no one-click button; this is the real command
 ```
 
-```json
-{
-  "ok": false,
-  "reason": "confidence_is_earned",
-  "invariant": 4,
-  "says": "An agent cannot assert `measured`. Write it `unverified`; the verification worker promotes it once evidence.commit resolves and is contained where claimed.",
-  "hint": "Assert as unverified. The verification worker promotes it to measured once evidence.commit resolves and is contained where claimed."
-}
-```
+No telemetry. No licence check. No phone-home. The only outbound request it can make is to GitHub,
+and only if you give it a token so it can verify commits.
 
-Every refusal is also recorded, and `/admin` has a live screen for them. It is the most persuasive
-screen in the product, because it shows the invariants biting in real time.
-
-### Contradictions are advisory across authority tiers
-
-Two `measured` rows cannot disagree about the same scope, subject, predicate and period — that is
-physically un-insertable, because one of them is wrong and you should have to say which.
-
-A **human** contradicting an instrument is different. That write **lands**, both rows stay live,
-a `contradiction` record is raised, and every read returns both marked `contested: true`. This is
-safe rather than sloppy because a mission gate declares the evidence class it accepts and evaluates
-only rows of that class, so testimony can never satisfy a gate demanding `measured`. The
-disagreement becomes visible without becoming load-bearing.
-
----
-
-## Deploy it somewhere
-
-### `docker compose` — the path that never breaks
-
-Above. Same image, no platform dependency. This is the one that survives any vendor's pricing
-change, so it is the one that is kept working.
-
-### Fly.io
-
-**Fly does not have a one-click deploy button.** It had one in 2020 and it is gone; the closest
-current thing is a CLI command, and pointing a "Deploy" badge at a docs page would be worse than
-saying so. So:
-
-```bash
-brew install flyctl && fly auth login          # or see fly.io/docs/flyctl/install
-fly launch --from https://github.com/aeonmindai/datum
-```
-
-For the two-Machine production layout — the API plus **self-hosted Postgres on its own Machine with
-a volume**, reachable only over Fly's private 6PN network — use the committed configs:
-
-```bash
-POSTGRES_PASSWORD="$(openssl rand -base64 24)" ./scripts/pg-machine-init.sh   # prints the DATABASE_URL to set
-fly secrets set -a datum DATABASE_URL='...' \
-  DATUM_ADMIN_PASSWORD_HASH="$(npx @aeonmind/datum hash-password 'your-password')" \
-  DATUM_SESSION_SECRET="$(openssl rand -hex 32)"
-fly deploy
-```
-
-`fly.toml` sets `min_machines_running = 1` and `auto_stop_machines = "off"` on purpose: the read
-path is specified at p99 < 10 ms, and scale-to-zero does not degrade that, it deletes it.
-
-### Railway
-
-Railway's button needs a **published template id**, and no template has been published for this
-repo yet, so there is no button to click here — see [`docs/OPERATIONS.md`](docs/OPERATIONS.md) for
-the two-minute publish. Once published, the badge is:
-
-```markdown
-[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/new/template/YOUR_TEMPLATE_ID)
-```
-
-`railway.json` is committed and ready. Railway can provision Postgres as a second service and
-generate `DATUM_SESSION_SECRET`; `DATUM_ADMIN_PASSWORD` is a required user input.
-
-### Any Postgres, anywhere
-
-Postgres **13 or newer**. The one exotic thing the schema needs is `btree_gist`, which ships in
-contrib and has been a *trusted* extension since PG13, so a non-superuser database owner can create
-it. Migrations run automatically on boot, idempotently, and are safe to run concurrently.
-
-Postgres 18 could express invariant 3 as `WITHOUT OVERLAPS`. This deliberately does not use it: the
-exclusion constraint gives the identical guarantee, has been hardened since PG9.x, and keeps your
-host a swappable decision instead of welding the core invariant to one vendor's newest feature.
-
----
-
-## Configuration
-
-Nothing about any one organisation is hardcoded. `DATUM_ORG=acme` yields the scope root `org/acme`,
-and no query assumes the configured root is the top of the tree.
-
-| variable | required | what it does |
-|---|---|---|
-| `DATABASE_URL` | **yes** | Postgres connection string |
-| `DATUM_ADMIN_PASSWORD_HASH` | one of these two | argon2id hash from `datum hash-password` |
-| `DATUM_ADMIN_PASSWORD` | one of these two | plaintext; hashed at boot, **never persisted**, logs a warning telling you to switch |
-| `DATUM_SESSION_SECRET` | **yes** | ≥32 chars, `openssl rand -hex 32` |
-| `DATUM_ORG` | no (`local`) | scope root label |
-| `PORT` / `HOST` | no (`8080` / `0.0.0.0`) | listen address; `PORT=0` picks any free port |
-| `DATUM_PUBLIC_URL` | no | used for cookie `Secure` and RFC 9728 metadata |
-| `DATUM_GIT_MIRRORS` | no | `owner/repo=/path/to/clone,...` — how the worker resolves commits |
-| `DATUM_GITHUB_TOKEN` | no | fallback commit resolution via the GitHub API |
-| `DATUM_VERIFY_INTERVAL_MS` | no (`15000`) | verification poll interval |
-| `DATUM_LOGIN_ATTEMPTS` / `_WINDOW_SECONDS` | no (`5` / `900`) | `/admin` login rate limit |
-
-Full list with comments: [`.env.example`](.env.example).
-
-**If you configure no verification path at all, nothing is ever promoted to `measured`.** That is
-correct behaviour, not a bug, and the server says so at startup.
-
----
-
-## Using it
-
-### The CLI
-
-```bash
-npm i -g @aeonmind/datum
-
-cd your-repo
-datum link                 # derives the project from your git remote, registers repo + worktree
-datum mode isolated        # stop inheriting org-scope facts (writes a superseding assertion)
-datum mode global          # start again; nothing is rewritten either way
-datum status               # who am I, which scope, which mode, what the mission is and which gates are open
-```
-
-`datum link` writes `.datum.toml`, which is safe to commit: it holds the scope and server, never the
-key. Many worktrees of one repo are **one project with many nodes**, not many projects.
-
-### `/v1` — the real interface
-
-```
-POST /v1/assert            record a fact (evidence.source required)
-POST /v1/supersede         correct one (there is no update path)
-GET  /v1/ask               exact-first read; ?as_of=<sequence> for "what did we believe then"
-GET  /v1/why/:id           evidence, verification outcome, full supersession chain, contradictions
-GET  /v1/state             mode, sequence, counts by confidence, binding rules, missions and gates
-GET  /v1/missions          POST to create; an active mission needs at least one checkable gate
-GET  /v1/nodes             the registry; POST to register or heartbeat
-POST /v1/mode              flip global/isolated as an assertion
-GET  /healthz              unauthenticated
-```
-
-Auth is `Authorization: Bearer dtm_live_…`. Keys are minted in `/admin`, bound to a scope subtree,
-and carry a permission set (`read`, `assert`, `supersede`, `admin`).
-
-### `/mcp` — a facade, not the substrate
-
-Six tools: `state`, `ask`, `why`, `assert`, `supersede`, `nodes`. Six, not thirty, because every
-tool definition is injected into every agent session that connects — a chatty MCP server is a
-permanent context tax on everything downstream of it. Responses are provenance-dense and budgeted
-in **hundreds of bytes**, not kilobytes:
-
-```
-engine.aggregate_tok_s_at_b256=757.5 tok/s | measured | acme/proj/arc | arc@4d03b9e2~release/openrouter-ready | s4417
-engine.aggregate_tok_s_at_b256=16600 tok/s | confirmed-by-human | acme/proj/arc | human:Jish | s4419 | CONTESTED
-```
-
-A bare number cannot leave the system: the confidence class and the evidence are on every line, and
-a contested pair is never truncated to one side, whatever the byte budget says.
-
-`/v1` is the real interface. MCP `2026-07-28` made statelessness normative and removed sessions,
-the handshake, `ping` and resumability, which makes presence and heartbeats unrepresentable — so the
-registry cannot live there.
-
----
-
-## Operating it
-
-You are the database operator, so this is in scope, not a later chore:
-
-```bash
-./scripts/backup.sh          # pg_dump, age-encrypted, to any S3-compatible bucket
-./scripts/restore-drill.sh   # restore into a throwaway container and re-assert the invariants
-```
-
-The bucket must live **outside** your Fly organisation: a backup inside the blast radius is not a
-backup. And a backup you have never restored is not a backup — by this project's own doctrine an
-untested backup is an unverified claim, so the drill is a script you can run, not a paragraph.
-
-One trap worth knowing, because it bites silently: `pg_dump --no-privileges` does not carry the
-`GRANT`/`REVOKE` layer, and that layer is invariant 2's first line of defence. `restore-drill.sh`
-replays the grants from the migration files and *then* asserts that the runtime role holds no
-`UPDATE`, `DELETE` or `TRUNCATE`. Details in [`docs/OPERATIONS.md`](docs/OPERATIONS.md).
-
-## Nothing calls home
-
-No telemetry, no license check, no phone-home, no analytics. The only outbound request Datum can
-ever make is to `api.github.com`, and only if you set `DATUM_GITHUB_TOKEN` to let the verification
-worker resolve commits. Read the network calls; there are none to find.
-
-## Development
+## For developers
 
 ```bash
 npm install
-npm run test        # needs a working docker daemon: it starts real Postgres
-npm run build
+npm test          # starts a real Postgres in Docker; nothing is mocked
 ```
 
-The test suite never stubs the database. The invariants under test *are* database invariants — an
-exclusion constraint, a grant, a trigger — so a fake would test nothing. Every invariant test is
-**mutation-checked**: the suite drops the constraint and asserts the outcome flips, with both values
-recorded in [`reports/invariants.md`](reports/invariants.md).
+Every rule is tested by breaking it: we drop each constraint and prove the test then fails, because
+a test that passes without its constraint tests nothing.
 
-```
-packages/datum/migrations   the schema, one numbered file per concern
-packages/datum/src/domain   assertions, scopes, missions, contradictions
-packages/datum/src/worker   the verification worker
-packages/datum/src/http     /v1, /mcp, /admin, auth
-packages/datum/src/cli      the datum binary
-packages/admin              the admin panel (React + Vite + Tailwind)
-```
+Design and evidence: [`HANDOFF.md`](HANDOFF.md) · Operations: [`docs/OPERATIONS.md`](docs/OPERATIONS.md)
 
-Design and evidence: [`HANDOFF.md`](HANDOFF.md). The `research/` directory is 523 KB of sourced
-prior art behind each decision; open a file to challenge a specific one.
+## Not yet
 
-## Not in this version
-
-Projections to Discord and Linear, NATS (the outbox table is written but not consumed), registry
-heartbeats, embeddings, multi-tenant auth, OIDC token exchange, and contradiction *resolution*
-workflow beyond a queue and a resolve action.
-
-Multi-tenancy and enterprise features will land in a separate private repo that depends on this one.
-This repo contains no enterprise stubs, no paid-feature flags and no `if (license)` branches. You
-should never hit a wall in here advertising a product.
+Projections to Slack and Linear, embeddings, multi-tenant auth. Multi-tenancy will live in a
+separate repo that depends on this one — there are no locked features, upsells or `if (license)`
+branches in here, and there never will be.
 
 ## License
 

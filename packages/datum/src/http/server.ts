@@ -1,4 +1,6 @@
 import { existsSync } from "node:fs";
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 import { sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import cookie from "@fastify/cookie";
@@ -27,6 +29,14 @@ import { resolveAdminHash } from "./auth.js";
  *   /healthz    liveness, unauthenticated
  *   /.well-known/oauth-protected-resource
  */
+
+/** Used only if the panel bundle is absent; the real mark lives in assets/logo.svg. */
+const FALLBACK_MARK =
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">' +
+  '<circle cx="32" cy="32" r="31" fill="#141414"/>' +
+  '<circle cx="32" cy="32" r="19" fill="none" stroke="#ededed" stroke-width="5"/>' +
+  '<path d="M32 3 V 15.5" stroke="#ededed" stroke-width="5" stroke-linecap="round"/>' +
+  '<circle cx="32" cy="32" r="7.5" fill="#ededed"/></svg>';
 
 const DEFAULT_ADMIN_DIST = fileURLToPath(new URL("../../public/admin", import.meta.url));
 
@@ -126,17 +136,13 @@ export async function buildServer(
 
     // Any page that is not the panel (an error body, the bare domain before the redirect)
     // still gets an icon rather than a 404 in the network log.
+    // Served from the same file the panel uses, rather than a hand-inlined copy: two drawings of
+    // one logo drift the moment either is touched.
     app.get("/favicon.ico", async (_request, reply) =>
       reply
         .type("image/svg+xml")
         .header("cache-control", "public, max-age=86400")
-        .send(
-          // A survey mark: the fixed reference point a measurement is taken from.
-          '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">' +
-            '<circle cx="16" cy="16" r="15" fill="#fff"/>' +
-            '<circle cx="16" cy="16" r="11" fill="none" stroke="#6028d9" stroke-width="2.5"/>' +
-            '<circle cx="16" cy="16" r="4" fill="#6028d9"/></svg>',
-        ),
+        .send(await readFile(join(adminDist, "logo.svg"), "utf8").catch(() => FALLBACK_MARK)),
     );
 
     app.setNotFoundHandler(async (request, reply) => {

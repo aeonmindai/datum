@@ -20,6 +20,7 @@ import {
 import { CONFIDENCE_CLASSES, KINDS, type AssertionRow } from "../domain/types.js";
 import { authenticateKey, requirePermission, requireScope, type AuthedKey } from "./auth.js";
 import { activePreferences } from "../preferences/index.js";
+import { searchProse } from "../prose/index.js";
 
 /**
  * `/v1` is the real interface. MCP is a facade over it.
@@ -166,6 +167,34 @@ export function registerV1(app: FastifyInstance, deps: V1Deps): void {
     return key;
   };
 
+  /**
+   * The trust-graded tail of a read.
+   *
+   * Only consulted when the store came back empty and only when prose roots are configured, so a
+   * deployment that wants the record and nothing else gets exactly that. Results are citations,
+   * retrieved live and never persisted: this is the difference between "Datum knows this" and
+   * "Datum found this written down somewhere", and collapsing the two would undo the reason the
+   * store is trustworthy in the first place.
+   */
+  const proseFallback = async (
+    probe: string,
+    storeHits: number,
+  ): Promise<{ from_prose?: unknown[]; from_prose_note?: string }> => {
+    if (storeHits > 0 || config.proseRoots.length === 0 || probe.trim() === "") return {};
+    const hits = await searchProse({
+      roots: [...config.proseRoots],
+      query: probe,
+      limit: 5,
+    }).catch(() => []);
+    if (hits.length === 0) return {};
+    return {
+      from_prose: hits,
+      from_prose_note:
+        "not on datum. these are citations from prose, retrieved live and never stored. " +
+        "they carry no confidence class and cannot satisfy a mission gate.",
+    };
+  };
+
   app.post("/v1/assert", async (request, reply) => {
     let actor: string | null = null;
     let body: z.output<typeof AssertBody> | null = null;
@@ -256,7 +285,12 @@ export function registerV1(app: FastifyInstance, deps: V1Deps): void {
       // a fact regardless.
       if (query.q) {
         const rows = await search(db, query.scope, query.q, query.limit ?? 25);
-        return reply.send({ ok: true, matched_by: "full-text", assertions: rows });
+        return reply.send({
+          ok: true,
+          matched_by: "full-text",
+          assertions: rows,
+          ...(await proseFallback(query.q, rows.length)),
+        });
       }
       const result = await take(db, {
         scope: query.scope,
@@ -266,7 +300,17 @@ export function registerV1(app: FastifyInstance, deps: V1Deps): void {
         asOf: query.as_of ?? null,
         limit: query.limit ?? 50,
       });
-      return reply.send({ ok: true, matched_by: "exact", ...result });
+      // The store answered, or it did not. Either way what comes back below is kept in its own
+      // key and is NEVER merged into `assertions` — nothing retrieved from prose is written to the
+      // store, so the store cannot rot, the confidence taxonomy stays at four classes, and a
+      // from_prose hit can no more satisfy a mission gate than testimony can.
+      const probe = [query.subject, query.predicate].filter(Boolean).join(" ");
+      return reply.send({
+        ok: true,
+        matched_by: "exact",
+        ...result,
+        ...(await proseFallback(probe, result.assertions.length)),
+      });
     } catch (err) {
       return sendRejection(deps, request, reply, err, { actor: null });
     }
