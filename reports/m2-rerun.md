@@ -24,6 +24,27 @@ out to matter.
 | datum, store only | +6.1 | +6.1 | **FAIL** |
 | datum + prose | +12.1 | +12.1 | **PASS** |
 
+## The cost of an answer, which turns out to be a result
+
+The run's wall-clock time made this visible: **90.3% of the entire benchmark's token spend is one
+arm.** Full-context re-sends the whole notes pile for every question and every repeat.
+
+| arm | context per answer | total input tokens for the run | share |
+|---|---|---|---|
+| full-context | **150,555** | 14,904,945 | **90.3%** |
+| grep | ~3,000 (×2 calls) | 594,000 | 3.6% |
+| datum, store only | **4,922** | 487,278 | 3.0% |
+| datum + prose | 5,322 | 526,878 | 3.2% |
+
+**Datum answers for 31× less context than full-context** — and the 150k-token arm still only saw
+**0.9%** of the corpus. This was sitting in the benchmark's runtime the whole time and was being
+treated as an inconvenience rather than measured as an outcome. It is the same claim the MCP facade
+makes at the response end, and it holds at the request end too.
+
+It also decides how this benchmark should be run in future: full-context showed **0.0 spread across
+three identical repeats**, so repeats buy nothing there and cost 10M tokens. grep is the only arm
+where repeats are load-bearing, because it is the only arm that is not deterministic.
+
 ## Read the passing number correctly
 
 The fallback closes the gap by letting Datum search prose it was previously forbidden to read. Of

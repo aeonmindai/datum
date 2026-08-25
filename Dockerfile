@@ -19,6 +19,10 @@ COPY package.json package-lock.json ./
 COPY packages/datum/package.json packages/datum/package.json
 COPY packages/admin/package.json packages/admin/package.json
 
+# Optional deps stay HERE. They are not all ours: rollup ships its platform binary as an optional
+# dependency, so omitting them silently removes the thing vite builds with and the admin bundle
+# fails to compile. They are dropped in the runtime stage instead, which is the stage that gets
+# pushed and the only place the weight matters.
 RUN npm ci --no-audit --no-fund
 
 # ---- build: admin bundle first, then the server -----------------------------------------
@@ -48,7 +52,12 @@ ENV NODE_ENV=production
 COPY package.json package-lock.json ./
 COPY packages/datum/package.json packages/datum/package.json
 COPY packages/admin/package.json packages/admin/package.json
-RUN npm ci --omit=dev --no-audit --no-fund \
+# --omit=optional here, and only here. The optional deps are rollup's build-time platform binary
+# and tree-sitter plus four grammars — native modules with a node-gyp-build install script. The
+# runtime needs none of them: the indexer is deliberately decoupled, so `datum index` emits JSON
+# where the code lives and `datum ingest-graph` needs no parser. Keeping them cost ~80 MB in every
+# layer push and a native install attempt on an image with no C++ toolchain.
+RUN npm ci --omit=dev --omit=optional --no-audit --no-fund \
  && npm cache clean --force
 
 # Normalise modes after copying, because git does not track the read bit. A contributor whose umask
