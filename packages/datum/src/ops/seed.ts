@@ -204,10 +204,16 @@ export async function loadSeed(
   }
 
   for (const n of seed.nodes ?? []) {
+    // Same upsert the registration route uses. A seed that cannot be re-run is not a seed, and
+    // two seed files naming the same human previously aborted the second one partway through -
+    // after its assertions and missions had already landed, which is the worst possible place
+    // to stop. Node identity is (kind, scope, label), so re-announcing is a heartbeat.
     await db.query(
       "app",
       `INSERT INTO datum.nodes (id, kind, scope, label, role, meta, last_seen)
-       VALUES ($1,$2,$3,$4,$5,$6::jsonb, now())`,
+       VALUES ($1,$2,$3,$4,$5,$6::jsonb, now())
+       ON CONFLICT (kind, scope, label) WHERE retired_at IS NULL DO UPDATE
+          SET last_seen = now(), role = excluded.role, meta = excluded.meta`,
       [newId("n"), n.kind, n.scope, n.label, n.role ?? null, JSON.stringify(n.meta ?? {})],
     );
     report.nodes += 1;

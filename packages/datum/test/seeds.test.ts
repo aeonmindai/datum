@@ -125,6 +125,36 @@ describe("deliverable 7 — the Arc seed", () => {
     expect(rows.rows[0]!.gates.length).toBeGreaterThanOrEqual(3);
   });
 
+  it("is safe to load twice — a seed that cannot be re-run is not a seed", async () => {
+    // Production hit this for real: `seeds/datum.json` names the same human as `seeds/arc.json`,
+    // and the node insert had no ON CONFLICT, so the second file aborted on a unique violation
+    // *after* its assertions and missions had already been written. Partway is the worst place
+    // to stop. Node identity is (kind, scope, label), so re-announcing must be a heartbeat.
+    const before = await db.one<{ n: string }>(
+      "app",
+      `SELECT count(*)::text AS n FROM datum.nodes WHERE retired_at IS NULL`,
+    );
+    const again = await loadSeed(db, resolve(SEEDS_DIR, "arc.json"), { log: () => {} });
+    const after = await db.one<{ n: string }>(
+      "app",
+      `SELECT count(*)::text AS n FROM datum.nodes WHERE retired_at IS NULL`,
+    );
+    expect(after!.n).toBe(before!.n);
+    expect(again.nodes).toBeGreaterThan(0);
+
+    // Identity stays unique: no duplicate live node for the same (kind, scope, label).
+    const dupes = await db.query<{ kind: string; scope: string; label: string }>(
+      "app",
+      `SELECT kind, scope, label FROM datum.nodes WHERE retired_at IS NULL
+        GROUP BY kind, scope, label HAVING count(*) > 1`,
+    );
+    expect(dupes.rows).toEqual([]);
+
+    // Re-applying a supersession chain is refused rather than duplicated, and the refusal is
+    // reported with the constraint name rather than thrown away.
+    for (const s of again.skipped) expect(s.reason).toBeTruthy();
+  });
+
   it("promotes real Arc measurements when the real repo is on disk", async () => {
     if (!existsSync(ARC_REPO)) {
       console.log("\n  arc repo not present on this machine; promotion path not exercised\n");
