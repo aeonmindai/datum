@@ -1,0 +1,1655 @@
+{
+  "org": "aeonmind",
+  "note": "Real state of the Arc engine project, lifted verbatim from memory/STATE.json and memory/RETRACTED.md (2026-08-24): live numbers load unverified with their real commits so the verification worker can promote them, retracted numbers load as dead rows wired under their replacements.",
+  "scopes": [
+    { "path": "org/aeonmind", "kind": "org", "label": "Aeonmind" },
+    { "path": "org/aeonmind/proj/arc", "kind": "proj", "label": "Arc" },
+    { "path": "org/aeonmind/proj/arc/mission/k9-rebake", "kind": "mission", "label": "K=9 / V=4 / L=12 re-bake" }
+  ],
+  "assertions": [
+    {
+      "scope": "org/aeonmind",
+      "subject": "datum",
+      "predicate": "auth_model_v0",
+      "object": {
+        "value": "bearer API keys",
+        "instead_of": "an OAuth 2.1 resource server (RFC 9728 Protected Resource Metadata + RFC 8707 resource indicators, required by MCP 2026-07-28)",
+        "mitigation": "serve a minimal /.well-known/oauth-protected-resource so spec-following clients get a coherent answer",
+        "next": "never issue refresh tokens to agents; one org-level grant, then RFC 8693 token exchange for 5-15 minute single-audience tokens"
+      },
+      "claim": "Datum v0 authenticates agents with bearer API keys rather than as an OAuth 2.1 resource server. This is a deliberate shortcut against the MCP 2026-07-28 standard, recorded here so it cannot be quietly forgotten.",
+      "kind": "state",
+      "binding": false,
+      "confidence": "unverified",
+      "evidence": {
+        "source": "HANDOFF.md §11",
+        "protocol": "design decision recorded at v0 scoping, not a measurement"
+      },
+      "valid_from": "2026-08-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "datum-auth-v0"
+    },
+    {
+      "scope": "org/aeonmind",
+      "subject": "runcrate",
+      "predicate": "balance_usd",
+      "object": { "value": 98.87, "unit": "USD", "as_of": "2026-08-22" },
+      "claim": "Runcrate GPU rental balance is 98.87 USD as of 2026-08-22, confirmed directly by Jish.",
+      "kind": "state",
+      "binding": false,
+      "confidence": "confirmed-by-human",
+      "evidence": {
+        "source": "memory/STATE.json money.runcrate_balance_usd; confirmed_by_jish.balance_true (2026-08-24)",
+        "human": "Jish"
+      },
+      "valid_from": "2026-08-22T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "money-balance"
+    },
+    {
+      "scope": "org/aeonmind",
+      "subject": "runcrate",
+      "predicate": "planned_spend",
+      "object": {
+        "value": "pilot ~$3-5, full bake <=$5, gate+measure ~$10-15",
+        "unit": "USD",
+        "pilot_usd": [3, 5],
+        "full_bake_usd_max": 5,
+        "gate_and_measure_usd": [10, 15]
+      },
+      "claim": "Planned GPU spend for the K=9 re-bake wave: pilot 3-5 USD, full bake at most 5 USD, quality gate plus measurement leg 10-15 USD.",
+      "kind": "state",
+      "binding": false,
+      "confidence": "unverified",
+      "evidence": { "source": "memory/STATE.json money.planned (2026-08-22)" },
+      "valid_from": "2026-08-22T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "money-planned"
+    },
+
+    {
+      "scope": "org/aeonmind/proj/arc",
+      "subject": "engine",
+      "predicate": "target_aggregate_tok_s_at_b256",
+      "object": { "value": 16600, "unit": "tok/s aggregate at B=256", "variants": [16600, 16602], "retracted_on": "2026-08-24" },
+      "claim": "Dead: the corpus's 16,600 and 16,602 tok/s aggregate figures at B=256.",
+      "kind": "dead",
+      "binding": false,
+      "confidence": "unverified",
+      "evidence": {
+        "source": "memory/RETRACTED.md; memory/STATE.json confirmed_by_jish.aggregate_14000_not_reached (2026-08-24)"
+      },
+      "valid_from": "2026-08-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": "Jish states the correct aggregate target is 14,000 tok/s at B=256 and that the corpus's 16,600 and 16,602 are dead. Both figures kept resurfacing from old briefs and compaction summaries because they were the most emphatic number in the corpus, not the most recent one. Superseded by the 14,000 target.",
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "dead-target-aggregate-16600"
+    },
+    {
+      "scope": "org/aeonmind/proj/arc",
+      "subject": "engine",
+      "predicate": "target_aggregate_tok_s_at_b256",
+      "object": {
+        "value": 14000,
+        "op": ">=",
+        "requires_confidence": "measured",
+        "unit": "tok/s aggregate on one H200 at B=256",
+        "basis": "1.2x the physics floor",
+        "gates": "engine/aggregate_tok_s_at_b256"
+      },
+      "claim": "Target: 14,000 tok/s aggregate on one H200 at B=256, and only a measured figure may close it.",
+      "kind": "target",
+      "binding": true,
+      "confidence": "confirmed-by-human",
+      "evidence": {
+        "source": "memory/STATE.json targets.aggregate_tok_s_at_b256 (Jish, session-10 close; memory/handoffs/00_HANDOFF_SESSION11.md); confirmed_by_jish.aggregate_14000_not_reached",
+        "human": "Jish"
+      },
+      "valid_from": "2026-08-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": "dead-target-aggregate-16600",
+      "ref": "target-aggregate-14000"
+    },
+    {
+      "scope": "org/aeonmind/proj/arc",
+      "subject": "engine",
+      "predicate": "target_single_user_tok_s",
+      "object": {
+        "value": 640,
+        "op": ">=",
+        "requires_confidence": "measured",
+        "unit": "tok/s for one user",
+        "ceiling": "1413 at 2.09 bpw; ~1310 at 2.25 bpw - a CEILING, never a commitment (D5)",
+        "gates": "engine/single_user_tok_s"
+      },
+      "claim": "Target: 640 tok/s for a single user, closable only by a measured figure. The 1,413 tok/s number is a ceiling at 2.09 bpw, never a commitment.",
+      "kind": "target",
+      "binding": true,
+      "confidence": "confirmed-by-human",
+      "evidence": {
+        "source": "memory/STATE.json targets.single_user_tok_s (Jish, session-10 close); confirmed_by_jish.single_user_640_not_reached",
+        "human": "Jish"
+      },
+      "valid_from": "2026-08-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "target-single-user-640"
+    },
+    {
+      "scope": "org/aeonmind/proj/arc",
+      "subject": "engine",
+      "predicate": "target_gsm8k_pct",
+      "object": {
+        "value": 90,
+        "op": ">=",
+        "requires_confidence": "measured",
+        "unit": "percent under OUR protocol: n=100, 0-shot chat, 2048-token cap, seed 161",
+        "note": "the published V4-Flash-Base 90.8 is 8-SHOT, a different and easier protocol; always say so when comparing",
+        "gates": "engine/gsm8k_pct"
+      },
+      "claim": "Target: GSM8K 90 percent under our own protocol (n=100, 0-shot chat, 2048-token cap, seed 161). A standing commitment from doctrine D6.",
+      "kind": "target",
+      "binding": true,
+      "confidence": "unverified",
+      "evidence": { "source": "memory/DOCTRINE.md D6; memory/mission/CEILINGS.json" },
+      "valid_from": "2026-08-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "target-gsm8k-90"
+    },
+    {
+      "scope": "org/aeonmind/proj/arc",
+      "subject": "engine",
+      "predicate": "target_aggregate_reached",
+      "object": { "value": false, "target": 14000, "unit": "boolean" },
+      "claim": "14,000 tok/s aggregate at B=256 has NOT been reached. Jish confirms both the gap and the number.",
+      "kind": "state",
+      "binding": false,
+      "confidence": "confirmed-by-human",
+      "evidence": {
+        "source": "memory/STATE.json confirmed_by_jish.aggregate_14000_not_reached (2026-08-24)",
+        "human": "Jish"
+      },
+      "valid_from": "2026-08-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "aggregate-not-reached"
+    },
+    {
+      "scope": "org/aeonmind/proj/arc",
+      "subject": "engine",
+      "predicate": "target_single_user_reached",
+      "object": { "value": false, "target": 640, "unit": "boolean" },
+      "claim": "640 tok/s single-user has NOT been reached. It is a live target, not an achieved result.",
+      "kind": "state",
+      "binding": false,
+      "confidence": "confirmed-by-human",
+      "evidence": {
+        "source": "memory/STATE.json confirmed_by_jish.single_user_640_not_reached (2026-08-24); supersedes DOCTRINE.md D5's framing of 640 as 'the roadmap summit'",
+        "human": "Jish"
+      },
+      "valid_from": "2026-08-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "single-user-not-reached"
+    },
+
+    {
+      "scope": "org/aeonmind/proj/arc",
+      "subject": "engine",
+      "predicate": "aggregate_tok_s_at_b256",
+      "object": { "value": 757.5, "unit": "tok/s aggregate on one H200 at B=256", "gap_to_target": "18.5x" },
+      "claim": "Arc serves 757.5 tok/s aggregate on one H200 at B=256 with DeepSeek-V4-Flash qtip2b, counting produced tokens only. That is 18.5x short of the 14,000 target.",
+      "kind": "measured",
+      "binding": false,
+      "confidence": "unverified",
+      "evidence": {
+        "source": "session 10; memory/handoffs/00_HANDOFF_SESSION11.md",
+        "repo": "aeonmindai/arc",
+        "commit": "4d03b9e2541b9a88f036cdd7640495fb98f16fc9",
+        "contained_in": ["release/openrouter-ready"],
+        "instrument": "arc bench harness",
+        "protocol": "B=256, DeepSeek-V4-Flash qtip2b, one H200, produced tokens only, >=256 floor"
+      },
+      "valid_from": "2026-08-21T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "measured-aggregate-757"
+    },
+    {
+      "scope": "org/aeonmind/proj/arc",
+      "subject": "engine",
+      "predicate": "single_user_tok_s",
+      "object": { "value": 44.68, "unit": "tok/s for one user at b=1", "status": "kernel diagnostic, never a headline (D2)" },
+      "claim": "Single-user decode is 44.68 tok/s at b=1 on the same binary and box as the B=256 leg. Doctrine D2: b=1 is a kernel diagnostic, never a headline.",
+      "kind": "measured",
+      "binding": false,
+      "confidence": "unverified",
+      "evidence": {
+        "source": "session 10",
+        "repo": "aeonmindai/arc",
+        "commit": "4d03b9e2541b9a88f036cdd7640495fb98f16fc9",
+        "contained_in": ["release/openrouter-ready"],
+        "instrument": "arc bench harness",
+        "protocol": "b=1, same binary and box as the B=256 leg"
+      },
+      "valid_from": "2026-08-21T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "measured-single-user-4468"
+    },
+    {
+      "scope": "org/aeonmind/proj/arc",
+      "subject": "engine",
+      "predicate": "cost_per_mtok_usd",
+      "object": { "value": 1.8, "unit": "USD per million tokens" },
+      "claim": "Serving cost is 1.8 USD per million tokens, computed from the B=256 leg at the rental hourly rate.",
+      "kind": "measured",
+      "binding": false,
+      "confidence": "unverified",
+      "evidence": {
+        "source": "session 10",
+        "repo": "aeonmindai/arc",
+        "commit": "4d03b9e2541b9a88f036cdd7640495fb98f16fc9",
+        "contained_in": ["release/openrouter-ready"],
+        "protocol": "derived from the B=256 leg at the rental hourly rate"
+      },
+      "valid_from": "2026-08-21T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "measured-cost-1p8"
+    },
+    {
+      "scope": "org/aeonmind/proj/arc",
+      "subject": "engine",
+      "predicate": "step_time_curve",
+      "object": { "value": "step_ms ~= 95 + 0.95*B", "unit": "ms", "intercept_ms": 95, "slope_ms_per_seq": 0.95 },
+      "claim": "Step time fits step_ms ~= 95 + 0.95*B across the measured batch sweep. Both prior slopes are refuted by this fit.",
+      "kind": "measured",
+      "binding": false,
+      "confidence": "unverified",
+      "evidence": {
+        "source": "session 10",
+        "repo": "aeonmindai/arc",
+        "commit": "4d03b9e2541b9a88f036cdd7640495fb98f16fc9",
+        "contained_in": ["release/openrouter-ready"],
+        "instrument": "arc bench harness",
+        "protocol": "fitted across the measured B sweep; both prior slopes refuted"
+      },
+      "valid_from": "2026-08-21T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "measured-step-curve"
+    },
+    {
+      "scope": "org/aeonmind/proj/arc",
+      "subject": "engine",
+      "predicate": "host_sampler_share_of_step_pct_at_b1",
+      "object": { "value": 30.5, "unit": "% of step wall time at b=1" },
+      "claim": "At b=1 the host sampler is 30.5 percent of step wall time - the CPU is inside the decode loop.",
+      "kind": "measured",
+      "binding": false,
+      "confidence": "unverified",
+      "evidence": {
+        "source": "memory/STATE.json bottleneck.second_tier[2]",
+        "repo": "aeonmindai/arc",
+        "commit": "4d03b9e2541b9a88f036cdd7640495fb98f16fc9",
+        "contained_in": ["release/openrouter-ready"],
+        "instrument": "arc-profiler",
+        "protocol": "b=1 decode, span tree over wall/device/sync channels"
+      },
+      "valid_from": "2026-08-21T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "measured-host-sampler-share"
+    },
+
+    {
+      "scope": "org/aeonmind/proj/arc",
+      "subject": "engine",
+      "predicate": "gsm8k_pct",
+      "object": {
+        "value": null,
+        "unit": "percent",
+        "record": "absent",
+        "protocol": "n=100, 0-shot chat, 2048-token cap, seed 161"
+      },
+      "claim": "No reproducible GSM8K result exists under our protocol: no commit, no date and no protocol record survives, so the value is unknown rather than low. Publishing needs the ref recovered or the measurement re-run.",
+      "kind": "state",
+      "binding": false,
+      "confidence": "unverified",
+      "evidence": {
+        "source": "memory/STATE.json measured.gsm8k_pct (value null, commit null, date null); memory/mission/CEILINGS.json",
+        "protocol": "n=100, 0-shot chat, 2048-token cap, seed 161"
+      },
+      "valid_from": "2026-08-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "gsm8k-record-absent"
+    },
+    {
+      "scope": "org/aeonmind/proj/arc",
+      "subject": "engine",
+      "predicate": "gsm8k_pct",
+      "object": { "value": 96, "unit": "percent", "provenance": "testimony; no commit, date or protocol on record" },
+      "claim": "Jish states GSM8K 96 percent was reached. It cannot be published or reproduced until the ref is recovered or the number is re-measured - the gap is the work, not an error.",
+      "kind": "measured",
+      "binding": false,
+      "confidence": "confirmed-by-human",
+      "evidence": {
+        "source": "memory/STATE.json confirmed_by_jish.gsm8k_96_reached (2026-08-24)",
+        "human": "Jish",
+        "protocol": "not on record - this is exactly what makes it unreproducible"
+      },
+      "valid_from": "2026-08-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "gsm8k-jish-96"
+    },
+
+    {
+      "scope": "org/aeonmind/proj/arc",
+      "subject": "artifact:qtip2b-uqff",
+      "predicate": "artifact_bytes",
+      "object": { "value": "68 GB over 7 shards", "shards": 7, "unit": "bytes (approximate, as published)", "retracted_on": "2026-08-24" },
+      "claim": "Dead: the 68 GB / 7-shard qtip2b UQFF artifact inventory.",
+      "kind": "dead",
+      "binding": false,
+      "confidence": "unverified",
+      "evidence": { "source": "memory/RETRACTED.md; memory/STATE.json measured.artifact_bytes.note" },
+      "valid_from": "2026-08-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": "The published qtip2b UQFF inventory at 8ae209008 is 74,190,197,268 bytes over 8 shards plus a residual, not 68 GB over 7. The smaller figure is what made '~1.9 bits/param' look arithmetically sound, so the two dead numbers propped each other up. Superseded by the 74,190,197,268-byte inventory.",
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "dead-artifact-68gb"
+    },
+    {
+      "scope": "org/aeonmind/proj/arc",
+      "subject": "artifact:qtip2b-uqff",
+      "predicate": "artifact_bytes",
+      "object": {
+        "value": 74190197268,
+        "unit": "bytes",
+        "human": "74.19 GB, 8 shards plus residual",
+        "implies_bits_per_param": 2.09,
+        "params": "284B"
+      },
+      "claim": "The published qtip2b UQFF artifact is 74,190,197,268 bytes across 8 shards plus a residual, which is 2.09 bits per parameter over 284B parameters.",
+      "kind": "measured",
+      "binding": false,
+      "confidence": "unverified",
+      "evidence": {
+        "source": "memory/mission/wave29-BD-rung-decision.md:360",
+        "repo": "aeonmindai/arc",
+        "commit": "8ae209008c153a1dcd7c134f235b7fe0eba2daf9",
+        "contained_in": ["master", "release/openrouter-ready"],
+        "protocol": "published qtip2b UQFF inventory"
+      },
+      "valid_from": "2026-08-16T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": "dead-artifact-68gb",
+      "ref": "measured-artifact-bytes"
+    },
+    {
+      "scope": "org/aeonmind/proj/arc",
+      "subject": "artifact:qtip2b-uqff",
+      "predicate": "bits_per_param",
+      "object": { "value": 1.9, "unit": "bits per parameter", "as_written": "~1.9 bits/param", "retracted_on": "2026-08-24" },
+      "claim": "Dead: the '~1.9 bits/param' figure for the shipped qtip2b artifact.",
+      "kind": "dead",
+      "binding": false,
+      "confidence": "unverified",
+      "evidence": {
+        "source": "memory/RETRACTED.md; memory/STATE.json confirmed_by_jish.bpw_operating_number (2026-08-24)",
+        "still_published_at": ["PR #55 model card line 5", "PR #55 model card line 246", "README"]
+      },
+      "valid_from": "2026-08-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": "We operate on 2.09 bpw (Jish, 2026-08-24), computed from the 74,190,197,268-byte inventory over 284B parameters. '~1.9 bits/param' is still published on PR #55's model card at lines 5 and 246 and in the README, which is where it keeps re-entering the corpus from. Superseded by the 2.09 bpw operating number.",
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "dead-bpw-19"
+    },
+    {
+      "scope": "org/aeonmind/proj/arc",
+      "subject": "artifact:qtip2b-uqff",
+      "predicate": "bits_per_param",
+      "object": { "value": 2.09, "unit": "bits per parameter", "params": "284B" },
+      "claim": "We operate on 2.09 bits per parameter. Jish states this directly and it is the number every ceiling is scored against.",
+      "kind": "measured",
+      "binding": false,
+      "confidence": "confirmed-by-human",
+      "evidence": {
+        "source": "memory/STATE.json confirmed_by_jish.bpw_operating_number (2026-08-24); arithmetic over measured.artifact_bytes",
+        "human": "Jish"
+      },
+      "valid_from": "2026-08-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": "dead-bpw-19",
+      "ref": "bpw-209"
+    },
+
+    {
+      "scope": "org/aeonmind/proj/arc",
+      "subject": "kernel:qtip2b_grouped_gemm",
+      "predicate": "share_of_batch_gpu_time_pct",
+      "object": {
+        "value": 53,
+        "unit": "% of batch GPU time",
+        "class": "ISSUE-BOUND",
+        "counters": { "issue_active_pct": 75, "dram_pct": 5, "occupancy_pct": 38 }
+      },
+      "claim": "qtip2b_grouped_gemm is 53 percent of batch GPU time and it is ISSUE-BOUND: 75 percent issue-active, 5 percent DRAM, 38 percent occupancy under ncu.",
+      "kind": "measured",
+      "binding": false,
+      "confidence": "unverified",
+      "evidence": {
+        "source": "memory/STATE.json bottleneck.primary",
+        "repo": "aeonmindai/arc",
+        "commit": "4d03b9e2541b9a88f036cdd7640495fb98f16fc9",
+        "contained_in": ["release/openrouter-ready"],
+        "instrument": "ncu",
+        "protocol": "B=256 decode step, per-kernel share of batch GPU time; counters read off the same profile"
+      },
+      "valid_from": "2026-08-21T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "bottleneck-primary-53"
+    },
+    {
+      "scope": "org/aeonmind/proj/arc",
+      "subject": "kernel:qtip2b_grouped_gemm",
+      "predicate": "remedy_class",
+      "object": {
+        "value": "a cheaper-to-decode weight format",
+        "excluded": "kernel-level optimisation",
+        "reason": "75% issue-active with 5% DRAM leaves no bandwidth or occupancy headroom to recover"
+      },
+      "claim": "No kernel fix reaches the 53 percent kernel. Only a cheaper-to-decode format does, which is why the active mission is the K=9/V=4/L=12 re-bake.",
+      "kind": "state",
+      "binding": false,
+      "confidence": "unverified",
+      "evidence": {
+        "source": "memory/STATE.json bottleneck.primary.verdict",
+        "repo": "aeonmindai/arc",
+        "commit": "4d03b9e2541b9a88f036cdd7640495fb98f16fc9",
+        "contained_in": ["release/openrouter-ready"],
+        "instrument": "ncu",
+        "protocol": "inference from the issue-bound counter profile; not itself a measurement"
+      },
+      "valid_from": "2026-08-21T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "bottleneck-remedy-class"
+    },
+    {
+      "scope": "org/aeonmind/proj/arc",
+      "subject": "kernel:ucopy_copy2d",
+      "predicate": "share_of_batch_gpu_time_pct",
+      "object": { "value": 22, "unit": "% of batch GPU time", "launches": 516000 },
+      "claim": "ucopy/copy2d is 22 percent of batch GPU time across 516,000 launches - the second-tier cost after the grouped GEMM.",
+      "kind": "measured",
+      "binding": false,
+      "confidence": "unverified",
+      "evidence": {
+        "source": "memory/STATE.json bottleneck.second_tier[0]",
+        "repo": "aeonmindai/arc",
+        "commit": "4d03b9e2541b9a88f036cdd7640495fb98f16fc9",
+        "contained_in": ["release/openrouter-ready"],
+        "instrument": "ncu",
+        "protocol": "B=256 decode step, per-kernel share of batch GPU time"
+      },
+      "valid_from": "2026-08-21T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "bottleneck-ucopy-22"
+    },
+    {
+      "scope": "org/aeonmind/proj/arc",
+      "subject": "kernel:wmma_path",
+      "predicate": "bank_conflicts_per_launch",
+      "object": { "value": 4900000, "unit": "shared-memory bank conflicts per launch", "status": "correct and fastest, stays ON" },
+      "claim": "The WMMA path is correct and the fastest arm, and it stays on - but it still costs 4.9 million shared-memory bank conflicts per launch.",
+      "kind": "measured",
+      "binding": false,
+      "confidence": "unverified",
+      "evidence": {
+        "source": "memory/STATE.json bottleneck.second_tier[1]",
+        "repo": "aeonmindai/arc",
+        "commit": "4d03b9e2541b9a88f036cdd7640495fb98f16fc9",
+        "contained_in": ["release/openrouter-ready"],
+        "instrument": "ncu",
+        "protocol": "per-launch shared-memory conflict counter on the WMMA arm"
+      },
+      "valid_from": "2026-08-21T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "bottleneck-wmma-conflicts"
+    },
+    {
+      "scope": "org/aeonmind/proj/arc",
+      "subject": "kernel:softmax_f32",
+      "predicate": "share_of_step_pct_at_b1",
+      "object": { "value": 9.5, "unit": "% of step wall time at b=1" },
+      "claim": "softmax_f32 is 9.5 percent of the b=1 step and has never been profiled at kernel level.",
+      "kind": "measured",
+      "binding": false,
+      "confidence": "unverified",
+      "evidence": {
+        "source": "memory/STATE.json bottleneck.second_tier[2]",
+        "repo": "aeonmindai/arc",
+        "commit": "4d03b9e2541b9a88f036cdd7640495fb98f16fc9",
+        "contained_in": ["release/openrouter-ready"],
+        "instrument": "arc-profiler",
+        "protocol": "b=1 decode, span tree share of step wall time"
+      },
+      "valid_from": "2026-08-21T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "measured-softmax-share"
+    },
+    {
+      "scope": "org/aeonmind/proj/arc",
+      "subject": "kernel:softmax_f32",
+      "predicate": "profiling_status",
+      "object": { "value": "unprofiled", "cost_to_close": "one ncu command, $0", "wave": "open, not this wave" },
+      "claim": "softmax_f32 has never been profiled with ncu. Closing that costs one command and no GPU money, and it is the cheapest open item on the board.",
+      "kind": "untried",
+      "binding": false,
+      "confidence": "unverified",
+      "evidence": { "source": "memory/STATE.json open_not_this_wave[0]" },
+      "valid_from": "2026-08-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "untried-softmax-probe"
+    },
+
+    {
+      "scope": "org/aeonmind/proj/arc",
+      "subject": "bake",
+      "predicate": "budget",
+      "object": { "value": 30, "unit": "minutes", "basis": "one node", "versions_superseded": 2, "retracted_on": "2026-08-24" },
+      "claim": "Dead: the 30-minute-per-node bake budget.",
+      "kind": "dead",
+      "binding": false,
+      "confidence": "unverified",
+      "evidence": { "source": "memory/STATE.json hard_constraints.bake_budget.authority (two earlier versions are SUPERSEDED)" },
+      "valid_from": "2026-08-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": "Superseded twice. Jish's FINAL version is <=60 minutes on a SINGLE card, i.e. <=83.7 s/layer over 43 layers. A per-node budget hides how many cards paid for it, so it can be met by adding hardware instead of by kernel engineering - which is exactly the trade the constraint exists to forbid.",
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "dead-bake-budget-30min-node"
+    },
+    {
+      "scope": "org/aeonmind/proj/arc",
+      "subject": "bake",
+      "predicate": "budget",
+      "object": {
+        "value": 60,
+        "unit": "minutes",
+        "basis": "one card",
+        "op": "<=",
+        "seconds_per_layer": 83.7,
+        "layers": 43,
+        "does_not_bend": "W=256 and the greedy ban; the budget is met by kernel engineering, never by a weaker search"
+      },
+      "claim": "Binding: a bake must take at most 60 minutes on a single card, which is at most 83.7 seconds per layer over 43 layers. If projection says it cannot fit, that is a loud finding for Jish, not a quiet miss.",
+      "kind": "rule",
+      "binding": true,
+      "confidence": "confirmed-by-human",
+      "evidence": {
+        "source": "memory/STATE.json hard_constraints.bake_budget (Jish - FINAL version)",
+        "human": "Jish",
+        "levers": [
+          "successor-dedup (~8x per audit arithmetic)",
+          "warp-parallel Viterbi over 4096 states",
+          "expert-level parallelism (256 independent experts per layer)"
+        ]
+      },
+      "valid_from": "2026-08-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": "dead-bake-budget-30min-node",
+      "ref": "rule-bake-budget-60min-card"
+    },
+    {
+      "scope": "org/aeonmind/proj/arc",
+      "subject": "bake",
+      "predicate": "bake_60min_single_card_reached",
+      "object": { "value": null, "unit": "boolean", "record": "absent", "protocol": "43-layer bake, single card, <=60 minutes wall" },
+      "claim": "No surviving instrument record shows a 43-layer bake completing inside 60 minutes on a single card. The answer is unknown, not false - no box and no commit has been recovered for it.",
+      "kind": "state",
+      "binding": false,
+      "confidence": "unverified",
+      "evidence": {
+        "source": "memory/STATE.json hard_constraints.bake_budget; confirmed_by_jish.bake_60min_reached_once ('Recover the box/commit it happened on if any record survives')",
+        "protocol": "43-layer bake, single card, wall clock"
+      },
+      "valid_from": "2026-08-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "bake-60min-record-absent"
+    },
+    {
+      "scope": "org/aeonmind/proj/arc",
+      "subject": "bake",
+      "predicate": "bake_60min_single_card_reached",
+      "object": { "value": true, "unit": "boolean", "occurrences": 1, "then": "lost to model confusion" },
+      "claim": "Jish states the 60-minute single-card bake was reached once and then lost to model confusion. The budget is therefore a demonstrated capability the system forgot, not a projection - plan the re-bake as recovery of a known-good result, not as research.",
+      "kind": "measured",
+      "binding": false,
+      "confidence": "confirmed-by-human",
+      "evidence": {
+        "source": "memory/STATE.json confirmed_by_jish.bake_60min_reached_once (2026-08-24)",
+        "human": "Jish",
+        "protocol": "not on record - the box and commit it happened on have not been recovered"
+      },
+      "valid_from": "2026-08-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "bake-60min-jish-reached-once"
+    },
+    {
+      "scope": "org/aeonmind/proj/arc",
+      "subject": "bake:qtip-family",
+      "predicate": "seconds_per_layer",
+      "object": { "value": 82.7, "unit": "s/layer", "context": "qtip-family, post-codebook-work" },
+      "claim": "The qtip-family baker measured 82.7 seconds per layer after the codebook work. This is the precedent the 83.7 s/layer budget was set against - it is not a measurement of the K=9 bake.",
+      "kind": "measured",
+      "binding": false,
+      "confidence": "unverified",
+      "evidence": {
+        "source": "memory/STATE.json hard_constraints.bake_budget.precedent",
+        "repo": "aeonmindai/arc",
+        "protocol": "qtip-family bake, per-layer wall clock, post-codebook-work; no commit on record for this figure"
+      },
+      "valid_from": "2026-08-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "measured-qtip-family-827"
+    },
+    {
+      "scope": "org/aeonmind/proj/arc",
+      "subject": "bake",
+      "predicate": "search_width",
+      "object": { "value": 256, "unit": "W (beam width)", "non_negotiable": true, "baker": "beam, not exhaustive" },
+      "claim": "Binding: the bake searches at W=256 with a beam search. The width does not bend, and the budget is never met by weakening the search.",
+      "kind": "rule",
+      "binding": true,
+      "confidence": "confirmed-by-human",
+      "evidence": {
+        "source": "memory/STATE.json hard_constraints.bake_budget.does_not_bend",
+        "human": "Jish"
+      },
+      "valid_from": "2026-08-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "rule-search-width-256"
+    },
+
+    {
+      "scope": "org/aeonmind/proj/arc",
+      "subject": "repo:aeonmindai/arc",
+      "predicate": "pr_policy_master",
+      "object": {
+        "value": "exactly one PR may target master",
+        "everything_else": "targets release/openrouter-ready",
+        "merge_cadence": "at the end of every WAVE",
+        "history": "the queue hit 26 twice because work was reported and never landed"
+      },
+      "claim": "Binding: exactly one PR may target master; everything else targets release/openrouter-ready and merges at the end of every wave. The queue reached 26 twice because work was reported as done and never landed.",
+      "kind": "rule",
+      "binding": true,
+      "confidence": "unverified",
+      "evidence": { "source": "memory/STATE.json hard_constraints.one_pr_to_master" },
+      "valid_from": "2026-08-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "rule-one-pr-to-master"
+    },
+    {
+      "scope": "org/aeonmind/proj/arc",
+      "subject": "repo:aeonmindai/arc",
+      "predicate": "open_pr_to_master",
+      "object": { "value": "#194", "count": 1 },
+      "claim": "PR #194 is still the one PR targeting master. Jish confirms it.",
+      "kind": "state",
+      "binding": false,
+      "confidence": "confirmed-by-human",
+      "evidence": {
+        "source": "memory/STATE.json confirmed_by_jish.one_pr_194_true (2026-08-24); refs.master.note",
+        "human": "Jish"
+      },
+      "valid_from": "2026-08-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "state-open-pr-194"
+    },
+    {
+      "scope": "org/aeonmind/proj/arc",
+      "subject": "gpu",
+      "predicate": "access_policy",
+      "object": {
+        "value": "arcgpu wrapper only",
+        "rules": [
+          "arcgpu wrapper only, ONE caller - the token is single-use and was burned TWICE in session 10",
+          "read the output, never the exit code",
+          "never cudnn (-62% decode)",
+          "CUDA 12.4 or 13.0",
+          "no persistent volumes",
+          "never debug on a paid box",
+          "self-destruct armed at creation",
+          "delete the box and state the balance either side"
+        ]
+      },
+      "claim": "Binding: GPUs are reached only through the arcgpu wrapper, with one caller, self-destruct armed at creation, output read instead of exit codes, and the balance stated either side of every run.",
+      "kind": "rule",
+      "binding": true,
+      "confidence": "unverified",
+      "evidence": { "source": "memory/STATE.json hard_constraints.gpu" },
+      "valid_from": "2026-08-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "rule-gpu-access"
+    },
+    {
+      "scope": "org/aeonmind/proj/arc",
+      "subject": "worktrees",
+      "predicate": "cleanup_policy",
+      "object": {
+        "value": "prove orphaned before deleting",
+        "method": "per branch, list the commits absent from master and release, then check whether their content exists elsewhere by cherry-equivalence",
+        "caveat": "one worktree holds the 493 MB session-10 harvest"
+      },
+      "claim": "Binding: orphan branches and worktrees are to be cleaned, but each must be proven orphaned first - list the commits absent from master and release, then check cherry-equivalence before deleting anything.",
+      "kind": "rule",
+      "binding": true,
+      "confidence": "confirmed-by-human",
+      "evidence": {
+        "source": "memory/STATE.json confirmed_by_jish.orphans_clean_after_proof (2026-08-24)",
+        "human": "Jish"
+      },
+      "valid_from": "2026-08-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "rule-orphan-cleanup"
+    },
+    {
+      "scope": "org/aeonmind/proj/arc",
+      "subject": "product",
+      "predicate": "triad_priority",
+      "object": {
+        "value": "equal",
+        "members": ["capacity per node", "per-user speed", "quality"],
+        "rule": "none may be traded for another to make a number look better; a wave that wins one by losing another has not won"
+      },
+      "claim": "Binding: capacity per node, per-user speed and quality hold equal priority. None may be traded for another to make a number look better.",
+      "kind": "rule",
+      "binding": true,
+      "confidence": "confirmed-by-human",
+      "evidence": {
+        "source": "memory/STATE.json confirmed_by_jish.triad_equal_priority (2026-08-24); targets.product",
+        "human": "Jish"
+      },
+      "valid_from": "2026-08-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "rule-triad"
+    },
+
+    {
+      "scope": "org/aeonmind/proj/arc",
+      "subject": "cudnn",
+      "predicate": "decode_throughput_delta_pct",
+      "object": { "value": -62, "unit": "% change in decode throughput" },
+      "claim": "Banned: cudnn attention costs 62 percent of decode throughput, measured in session 4.",
+      "kind": "failed",
+      "binding": true,
+      "confidence": "unverified",
+      "evidence": {
+        "source": "memory/STATE.json banned[2]; hard_constraints.gpu ('never cudnn (-62% decode)')",
+        "instrument": "arc bench harness",
+        "protocol": "A/B against the WMMA path, session 4"
+      },
+      "valid_from": "2026-08-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": "Enabling the cudnn attention path cost 62 percent of decode throughput when measured in session 4. It is not a fallback, not a debugging convenience and not a build flag anyone may flip.",
+      "reopen_if": "a cudnn release ships a fused decode attention path AND a fresh A/B on one H200 at B=256, same binary both arms, shows a delta of zero or better against the WMMA path.",
+      "supersedes_ref": null,
+      "ref": "failed-cudnn"
+    },
+    {
+      "scope": "org/aeonmind/proj/arc",
+      "subject": "ragged_pair",
+      "predicate": "throughput_delta_pct",
+      "object": { "value": -41, "unit": "% change in throughput", "status": "as shipped" },
+      "claim": "Banned: the ragged pair path is 41 percent slower as shipped.",
+      "kind": "failed",
+      "binding": true,
+      "confidence": "unverified",
+      "evidence": {
+        "source": "memory/STATE.json banned[4]; open_not_this_wave[3] ('ragged rework (-41% as shipped)')",
+        "instrument": "arc bench harness",
+        "protocol": "A/B of the ragged pair path as shipped"
+      },
+      "valid_from": "2026-08-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": "The ragged pair path measured -41 percent as shipped. The cost is in the path re-materialising the pair on every call, so the idea cannot be re-proposed on the strength of the design alone.",
+      "reopen_if": "the ragged path stops re-materialising the pair, and a fresh A/B on one H200 shows a delta of zero or better against the shipped arm.",
+      "supersedes_ref": null,
+      "ref": "failed-ragged-pair"
+    },
+    {
+      "scope": "org/aeonmind/proj/arc",
+      "subject": "SAMPLE_ON_DEVICE",
+      "predicate": "throughput_delta_pct",
+      "object": { "value": -45, "unit": "% change in throughput", "status": "prediction inverted" },
+      "claim": "Banned: SAMPLE_ON_DEVICE measured 45 percent slower - the prediction inverted.",
+      "kind": "failed",
+      "binding": true,
+      "confidence": "unverified",
+      "evidence": {
+        "source": "memory/STATE.json banned[5]",
+        "instrument": "arc bench harness",
+        "protocol": "A/B with SAMPLE_ON_DEVICE on and off, same binary"
+      },
+      "valid_from": "2026-08-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": "Moving sampling onto the device measured -45 percent: the prediction inverted. Whatever the host sampler costs, the device arm as written costs more.",
+      "reopen_if": "the b=1 host sampler's 30.5 percent step share is re-profiled at kernel level, and a device sampler is shown to remove the 4-byte device-to-host round trip without introducing a per-step synchronise.",
+      "supersedes_ref": null,
+      "ref": "failed-sample-on-device"
+    },
+    {
+      "scope": "org/aeonmind/proj/arc",
+      "subject": "cuda_graph_capture",
+      "predicate": "capture_verify",
+      "object": { "value": "verify_failed", "at": "replay step 10" },
+      "claim": "Banned: CUDA graph capture fails verification at replay step 10.",
+      "kind": "failed",
+      "binding": true,
+      "confidence": "unverified",
+      "evidence": {
+        "source": "memory/STATE.json banned[6]; open_not_this_wave[2] ('cuda-graph capture +1-step divergence - bisect recipe in memory/mission/STATUS.md')",
+        "protocol": "capture then replay with per-step verification against the eager arm"
+      },
+      "valid_from": "2026-08-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": "Capture verification fails at replay step 10 with a one-step divergence, so a captured graph produces different tokens than the eager path. Separately, the ~8 percent that capture appeared to win priced 3,961 launches plus two host round trips against one launch plus the same two round trips - the replay's own cudaStreamSynchronize (graph.rs:362) and the sampler's 4-byte device-to-host copy (sampler.rs:1479) both survive capture, so the CPU never left the loop.",
+      "reopen_if": "the +1-step divergence bisect recipe in memory/mission/STATUS.md names the diverging kernel, and a capture then passes verification for at least 100 consecutive replay steps.",
+      "supersedes_ref": null,
+      "ref": "failed-cuda-graph-capture"
+    },
+    {
+      "scope": "org/aeonmind/proj/arc",
+      "subject": "search:greedy",
+      "predicate": "weight_cos",
+      "object": { "value": 0.675, "unit": "matmul cosine similarity", "viterbi": 0.963, "side_effect": "silently disables rotation" },
+      "claim": "Dead forever: greedy search reaches 0.675 matmul cosine against Viterbi's 0.963, and it silently disables rotation so a greedy artifact reports inflated speed.",
+      "kind": "dead",
+      "binding": true,
+      "confidence": "unverified",
+      "evidence": {
+        "source": "memory/STATE.json banned[0]; memory/DOCTRINE.md D4",
+        "protocol": "matmul cosine similarity of reconstructed weights, greedy arm vs Viterbi arm"
+      },
+      "valid_from": "2026-08-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": "Doctrine D4 bans greedy search forever: not a default, not a flag, not a test convenience that can leak. It costs 0.675 matmul cosine against Viterbi's 0.963, and because it silently disables rotation a greedy artifact also reports an inflated speed - so the cheaper search corrupts the quality number and the performance number at the same time. There is no falsifier: a faster bake that needs greedy is out of scope by construction.",
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "dead-greedy-search"
+    },
+    {
+      "scope": "org/aeonmind/proj/arc",
+      "subject": "artifact:degraded",
+      "predicate": "admissibility",
+      "object": { "value": "inadmissible", "requires": "W=256 or no bake", "action": "tear down, respin, loop" },
+      "claim": "Dead: a degraded artifact is never served. W=256 or no bake - tear it down, respin, loop.",
+      "kind": "dead",
+      "binding": true,
+      "confidence": "unverified",
+      "evidence": { "source": "memory/STATE.json banned[1]; memory/DOCTRINE.md D4b" },
+      "valid_from": "2026-08-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": "Doctrine D4b: an artifact baked below W=256 is degraded, and every number measured on it is unattributable - a speed win on a degraded artifact cannot be told apart from the degradation. The exit is to tear down, respin and loop, never to serve it with a caveat.",
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "dead-degraded-artifacts"
+    },
+    {
+      "scope": "org/aeonmind/proj/arc",
+      "subject": "validation:cpu_only",
+      "predicate": "result_status",
+      "object": { "value": "not a result", "correct_label": "code-validation" },
+      "claim": "Dead: CPU-only validation is never a result. Label it code-validation; nothing is a result until a GPU ran it.",
+      "kind": "dead",
+      "binding": true,
+      "confidence": "unverified",
+      "evidence": { "source": "memory/STATE.json banned[3]; memory/DOCTRINE.md D14" },
+      "valid_from": "2026-08-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": "Doctrine D14: nothing is a result until a GPU ran it. Quoting CPU-only validation as a result is precisely how branch work got reported as shipped - three of four retracted premises in session 8 were branch work quoted as landed. The label 'code-validation' exists so the claim can still be recorded without being promotable.",
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "dead-cpu-only-validation"
+    },
+
+    {
+      "scope": "org/aeonmind/proj/arc",
+      "subject": "mtp",
+      "predicate": "acceptance_p",
+      "object": { "value": 0.485, "unit": "acceptance probability", "retracted_on": "2026-08-24" },
+      "claim": "Dead: MTP acceptance p = 0.485.",
+      "kind": "dead",
+      "binding": false,
+      "confidence": "unverified",
+      "evidence": { "source": "memory/RETRACTED.md (FACTS.md:329; COMPETITIVE_TEARDOWN.md:24)" },
+      "valid_from": "2026-08-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": "The figure 0.485 appears nowhere in the tree - it was never measured. The measured acceptance is 0.4194 at B=1 only. Superseded by that measurement.",
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "dead-mtp-acceptance-0485"
+    },
+    {
+      "scope": "org/aeonmind/proj/arc",
+      "subject": "mtp",
+      "predicate": "acceptance_p",
+      "object": { "value": 0.4194, "unit": "acceptance probability", "batch": "B=1 only" },
+      "claim": "MTP acceptance is 0.4194 at B=1. It has never been measured at batch, and the cohort min-rollback is what makes the batch figure collapse.",
+      "kind": "measured",
+      "binding": false,
+      "confidence": "unverified",
+      "evidence": {
+        "source": "memory/mission/wave51-CB-the-measurement.md:166-186",
+        "repo": "aeonmindai/arc",
+        "protocol": "B=1 draft acceptance over the measurement run; no batch figure exists"
+      },
+      "valid_from": "2026-08-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": "dead-mtp-acceptance-0485",
+      "ref": "measured-mtp-acceptance-04194"
+    },
+    {
+      "scope": "org/aeonmind/proj/arc",
+      "subject": "mtp",
+      "predicate": "acceptance_fix_multiplier",
+      "object": { "value": 5.53, "unit": "x speedup if acceptance is fixed", "retracted_on": "2026-08-24" },
+      "claim": "Dead: fixing MTP acceptance is worth 5.53x.",
+      "kind": "dead",
+      "binding": false,
+      "confidence": "unverified",
+      "evidence": { "source": "memory/RETRACTED.md (FACTS.md:331; COMPETITIVE_TEARDOWN.md:26)" },
+      "valid_from": "2026-08-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": "Scored against the wrong base. Against the measured base it is 1.55x - a multiplier on a 6x problem, not a fix for it. The 2-bit draft head does not explain the gap either: the floor_mtp_isq fix 07766cfa1 is an ancestor of the measured binary 46ea6948d, so the gap was measured with the fix already in. Superseded by the 1.55x figure.",
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "dead-mtp-fix-553"
+    },
+    {
+      "scope": "org/aeonmind/proj/arc",
+      "subject": "mtp",
+      "predicate": "acceptance_fix_multiplier",
+      "object": { "value": 1.55, "unit": "x speedup if acceptance is fixed", "against": "the measured base" },
+      "claim": "Fixing MTP acceptance is worth 1.55x against the measured base - a multiplier on a 6x problem, not a fix for it.",
+      "kind": "measured",
+      "binding": false,
+      "confidence": "unverified",
+      "evidence": {
+        "source": "memory/RETRACTED.md (FACTS.md:331) - the arithmetic that replaced the 5.53x claim",
+        "repo": "aeonmindai/arc",
+        "protocol": "recomputed against the measured acceptance base rather than the projected one"
+      },
+      "valid_from": "2026-08-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": "dead-mtp-fix-553",
+      "ref": "measured-mtp-fix-155"
+    },
+    {
+      "scope": "org/aeonmind/proj/arc",
+      "subject": "mhc",
+      "predicate": "casts_per_token",
+      "object": {
+        "value": 1571,
+        "unit": "bf16<->f32 round trips per token",
+        "of_total_casts_copies": 5300,
+        "profiled_at": "05af600e7",
+        "retracted_on": "2026-08-24"
+      },
+      "claim": "Dead: ~5,300 casts and copies per token, 1,571 of them bf16-f32 round trips originating in MHC.",
+      "kind": "dead",
+      "binding": false,
+      "confidence": "unverified",
+      "evidence": { "source": "memory/RETRACTED.md (FACTS.md:198); PR #206" },
+      "valid_from": "2026-08-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": "Stale baseline. It was profiled at 05af600e7, and the three commits that retired it (9f110905b, 1f6ef9da9, 179e405ac) are ancestors of HEAD but not of that ref. MHC's whole remaining b=1 cast budget is 86 launches per token. The 08-19 row 'Casts: 1,571 -> 1,141' is scored against this stale baseline and must never be quoted as a delta. Superseded by the 86 launches/token budget.",
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "dead-mhc-casts-1571"
+    },
+    {
+      "scope": "org/aeonmind/proj/arc",
+      "subject": "mhc",
+      "predicate": "casts_per_token",
+      "object": { "value": 86, "unit": "cast launches per token", "at": "b=1", "scope_of_number": "MHC's whole remaining cast budget" },
+      "claim": "MHC's entire remaining b=1 cast budget is 86 launches per token.",
+      "kind": "measured",
+      "binding": false,
+      "confidence": "unverified",
+      "evidence": {
+        "source": "mistralrs-core/src/models/dsv4_mhc.rs:279 (memory/RETRACTED.md, FACTS.md:198)",
+        "repo": "aeonmindai/arc",
+        "protocol": "cast launch count per token at b=1, read from the current MHC path"
+      },
+      "valid_from": "2026-08-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": "dead-mhc-casts-1571",
+      "ref": "measured-mhc-casts-86"
+    },
+    {
+      "scope": "org/aeonmind/proj/arc",
+      "subject": "tcfrag",
+      "predicate": "retained_memory_mib",
+      "object": { "value": 0, "unit": "MiB retained (as claimed)", "as_written": "a pure win; costs only instructions", "retracted_on": "2026-08-24" },
+      "claim": "Dead: TCFRAG is a pure win that costs only instructions.",
+      "kind": "dead",
+      "binding": false,
+      "confidence": "unverified",
+      "evidence": { "source": "memory/RETRACTED.md (FACTS.md:201); PR #203" },
+      "valid_from": "2026-08-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": "It retains about 63 GB. tcfrag_words (bitshift.rs:1334) is a per-weight OnceLock caching a second, differently packed copy of every weight for the life of the process: ARC_QTIP_TCFRAG=0 frees 64,262 MiB where the same probe with it on frees 262 MiB. PR #203 costed instructions and not memory, and the .cu's own performance section still only costs instructions.",
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "dead-tcfrag-pure-win"
+    },
+    {
+      "scope": "org/aeonmind/proj/arc",
+      "subject": "tail",
+      "predicate": "share_of_step_pct",
+      "object": {
+        "value": 27.2,
+        "unit": "% of step",
+        "components": ["sinkhorn", "fast_sum", "bmul", "ucopy"],
+        "companion_claim": { "fp8_gemv_warp_pct": 16.0 },
+        "retracted_on": "2026-08-24"
+      },
+      "claim": "Dead: the tail (sinkhorn + fast_sum + bmul + ucopy) is 27.2 percent of the step, and fp8_gemv_warp beside it is 16.0 percent.",
+      "kind": "dead",
+      "binding": false,
+      "confidence": "unverified",
+      "evidence": { "source": "memory/RETRACTED.md (FACTS.md:200)" },
+      "valid_from": "2026-08-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": "Unsourced on master. The sole source, docs/engineering/OPENROUTER_READY.md, does not exist on master - it lives only on branches agent/tail-sinkhorn-warp-v2 and agent/decode-share-probe. PR #210 has since merged (f709872ab) with the 16.0 percent multiplied into a projected ~1.3 ms/token and 34.2 -> ~35.8 tok/s; that projection inherits the retraction and must not be quoted as an expected value. The kernel work stands on its own arithmetic; the sizing does not.",
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "dead-tail-share-272"
+    },
+    {
+      "scope": "org/aeonmind/proj/arc",
+      "subject": "worktree:agent-ae7b4164afaf6f190",
+      "predicate": "harvest_bytes",
+      "object": { "value": 493, "unit": "MB of nsys/ncu reports", "path": "arc-s10-results/" },
+      "claim": "The worktree agent-ae7b4164afaf6f190 holds 493 MB of session-10 nsys and ncu reports under arc-s10-results/. It must not be deleted as an orphan until that harvest is accounted for.",
+      "kind": "state",
+      "binding": false,
+      "confidence": "unverified",
+      "evidence": { "source": "memory/STATE.json open_not_this_wave[5]; confirmed_by_jish.orphans_clean_after_proof.method" },
+      "valid_from": "2026-08-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "state-s10-harvest"
+    },
+
+    {
+      "scope": "org/aeonmind/proj/arc/mission/k9-rebake",
+      "subject": "mission:k9-rebake",
+      "predicate": "audit_verdict",
+      "object": { "value": "NOT READY", "at": "4033b8f4b" },
+      "claim": "The K=9/V=4/L=12 re-bake audits as NOT READY at 4033b8f4b: serving, bake search, the b=1 GEMV and the quality fixture are all missing.",
+      "kind": "state",
+      "binding": false,
+      "confidence": "unverified",
+      "evidence": {
+        "source": "memory/STATE.json mission.audit_verdict",
+        "repo": "aeonmindai/arc",
+        "commit": "4033b8f4b94c351cd3349532d110e5b599752b88",
+        "contained_in": ["release/openrouter-ready"],
+        "protocol": "code audit of the four ranked gaps at the integration head"
+      },
+      "valid_from": "2026-08-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "mission-audit-verdict"
+    },
+    {
+      "scope": "org/aeonmind/proj/arc/mission/k9-rebake",
+      "subject": "mission:k9-rebake",
+      "predicate": "pilot_kill_criterion",
+      "object": {
+        "value": 83.7,
+        "unit": "s/layer",
+        "op": "<=",
+        "stage": "PILOT: 1-2 layers, one H200, ~$3-5",
+        "sequence": "code -> review -> merge -> PILOT -> full bake <=$5 -> quality gate (fixture cos -> canary -> ppl -> GSM8K n=100 0-shot seed 161) -> measurement leg (b=1 + B=256, S10 protocol, re-grep the 53%) -> THE NUMBERS"
+      },
+      "claim": "Binding: the pilot bake of 1-2 layers on one H200 is killed if it exceeds 83.7 seconds per layer. The full bake is not funded until the pilot clears that line.",
+      "kind": "rule",
+      "binding": true,
+      "confidence": "unverified",
+      "evidence": { "source": "memory/STATE.json mission.sequence" },
+      "valid_from": "2026-08-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "rule-pilot-kill-criterion"
+    },
+    {
+      "scope": "org/aeonmind/proj/arc/mission/k9-rebake",
+      "subject": "rung:K9V4L12",
+      "predicate": "bits_per_weight",
+      "object": {
+        "value": 2.25,
+        "unit": "bpw",
+        "K": 9,
+        "V": 4,
+        "L": 12,
+        "artifact_gb": "~80-83",
+        "fit": "H200 fits with ~60 GB context headroom; NO 80 GB-card fit"
+      },
+      "claim": "The K=9/V=4/L=12 rung is 2.25 bits per weight and an artifact of roughly 80-83 GB: an H200 fits it with about 60 GB of context headroom, and no 80 GB card fits it at all.",
+      "kind": "state",
+      "binding": false,
+      "confidence": "unverified",
+      "evidence": {
+        "source": "memory/STATE.json mission.rung",
+        "protocol": "bpw = K/V arithmetic (mistralrs-quant/src/qtip/mod.rs:376-381) plus artifact sizing over 284B parameters"
+      },
+      "valid_from": "2026-08-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "state-rung-k9v4l12"
+    },
+    {
+      "scope": "org/aeonmind/proj/arc/mission/k9-rebake",
+      "subject": "rung:V1",
+      "predicate": "instructions_per_weight",
+      "object": { "value": "~21-35", "unit": "instructions per weight decoded", "low": 21, "high": 35 },
+      "claim": "V=1 decode costs roughly 21 to 35 instructions per weight, which is what makes qtip2b_grouped_gemm 53 percent of batch GPU time. V=4 emits four weights per state reconstruction, which is the whole reason for the re-bake.",
+      "kind": "measured",
+      "binding": false,
+      "confidence": "unverified",
+      "evidence": {
+        "source": "memory/STATE.json mission.why",
+        "repo": "aeonmindai/arc",
+        "protocol": "instruction count per decoded weight on the V=1 trellis path"
+      },
+      "valid_from": "2026-08-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "measured-v1-inst-per-weight"
+    },
+    {
+      "scope": "org/aeonmind/proj/arc/mission/k9-rebake",
+      "subject": "rung:K9V4L12",
+      "predicate": "delta_w_cos",
+      "object": { "value": 0.00402, "unit": "delta w_cos against the baseline codebook", "provenance": "doc-comment", "machine_checked": false },
+      "claim": "The K=9 quality prior is a delta w_cos of +0.00402, but its provenance is a doc comment and it has never been machine-checked.",
+      "kind": "state",
+      "binding": false,
+      "confidence": "unverified",
+      "evidence": {
+        "source": "memory/STATE.json mission.quality_prior (status: doc-comment provenance, NOT machine-checked)",
+        "protocol": "delta w_cos against the baseline codebook; no fixture reproduces it"
+      },
+      "valid_from": "2026-08-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "k9-quality-doc-comment"
+    },
+    {
+      "scope": "org/aeonmind/proj/arc/mission/k9-rebake",
+      "subject": "rung:K9V4L12",
+      "predicate": "delta_w_cos",
+      "object": { "value": 0.00402, "unit": "delta w_cos against the baseline codebook", "provenance": "confirmed by Jish", "fixture_still_wanted": true },
+      "claim": "Jish states the K=9 quality result, delta w_cos +0.00402, was reached. It is a real result rather than doc-comment provenance - though a fixture that re-proves it is still worth having, and if lane K3 refutes it that is a first-class result, not a failure.",
+      "kind": "measured",
+      "binding": false,
+      "confidence": "confirmed-by-human",
+      "evidence": {
+        "source": "memory/STATE.json confirmed_by_jish.k9_quality_reached (2026-08-24)",
+        "human": "Jish",
+        "protocol": "delta w_cos against the baseline codebook; no machine-checked fixture exists yet"
+      },
+      "valid_from": "2026-08-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": "k9-quality-doc-comment",
+      "ref": "k9-quality-jish"
+    },
+    {
+      "scope": "org/aeonmind/proj/arc/mission/k9-rebake",
+      "subject": "rung:K8V4L12",
+      "predicate": "delta_w_cos",
+      "object": {
+        "value": -0.00698,
+        "unit": "delta w_cos against the baseline codebook",
+        "band": "+/-0.0008",
+        "best_of_nine_designs": -0.00307
+      },
+      "claim": "K=8 fails the quality band: delta w_cos -0.00698 against a +/-0.0008 band, and nine codebook designs top out at -0.00307. K=8 is not a cheaper substitute for K=9.",
+      "kind": "failed",
+      "binding": false,
+      "confidence": "unverified",
+      "evidence": {
+        "source": "memory/STATE.json mission.quality_prior.claim",
+        "protocol": "delta w_cos against the baseline codebook, nine candidate codebook designs"
+      },
+      "valid_from": "2026-08-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": "K=8 measures -0.00698 delta w_cos against a +/-0.0008 acceptance band, and the best of nine codebook designs only reaches -0.00307 - still four times outside the band. K=8 is attractive because qtip_geom.cuh's modulus assert already admits it; that is a packing convenience, not a quality argument.",
+      "reopen_if": "a codebook design lands inside the +/-0.0008 band at K=8 on the same fixture, or the band itself is re-derived from a downstream quality measurement rather than the codebook comparison.",
+      "supersedes_ref": null,
+      "ref": "failed-k8-quality"
+    },
+    {
+      "scope": "org/aeonmind/proj/arc/mission/k9-rebake",
+      "subject": "rung:K4V4L12",
+      "predicate": "single_user_tok_s",
+      "object": {
+        "value": 1413,
+        "unit": "tok/s for one user",
+        "also_claimed": { "inst_per_weight": 1.38, "aggregate_recoverable": 16602 },
+        "retracted_on": "2026-08-24"
+      },
+      "claim": "Dead: K=4/V=4/L=12 reaches 1,413 tok/s, is at the instruction budget at 1.38 inst/wt, and makes the full 16,602 aggregate recoverable.",
+      "kind": "dead",
+      "binding": false,
+      "confidence": "unverified",
+      "evidence": {
+        "source": "memory/RETRACTED.md (FACTS.md:328; COMPETITIVE_TEARDOWN.md:27); memory/STATE.json mission.retracted_rung"
+      },
+      "valid_from": "2026-08-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": "Scored against the wrong budget class. K=4/V=4 is 1.0 bpw because bpw = K/V (mistralrs-quant/src/qtip/mod.rs:376-381), and the rung was compared against a 2-bpw budget - so the 1,413 tok/s figure, the '1.38 inst/wt at budget' claim and the 'full 16,602 recoverable' corollary all describe a model we are not shipping. The live rung is K=9/V=4/L=12 at 2.25 bpw. Also note the re-bake does NOT get cheaper at higher K: the production baker is beam, not exhaustive (213 vs 8,257 s/layer on A100) and is issue-bound, so cost goes as (n/V) x W x 2^K, about 8x MORE at K=8/V=4/L=12 - roughly 1,700 s/layer, 20 hours, $30.",
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "dead-rung-k4v4l12-1413"
+    },
+    {
+      "scope": "org/aeonmind/proj/arc/mission/k9-rebake",
+      "subject": "gap:v4-grouped-gemm-serving",
+      "predicate": "status",
+      "object": {
+        "value": "blocked",
+        "rank": 1,
+        "size": "~800-1000 LOC CUDA + ~300 Rust",
+        "blocker": "self.require_k4v2l16(\"gather_forward\")?"
+      },
+      "claim": "Gap 1: V=4 grouped GEMM and MoE gather serving does not exist. At 4033b8f4b, gather_forward requires K4V2L16, so a V4L12 artifact could not be served at all.",
+      "kind": "untried",
+      "binding": false,
+      "confidence": "unverified",
+      "evidence": {
+        "source": "mistralrs-quant/src/qtip/mod.rs:4189 @4033b8f4b",
+        "repo": "aeonmindai/arc",
+        "commit": "4033b8f4b94c351cd3349532d110e5b599752b88",
+        "contained_in": ["release/openrouter-ready"],
+        "protocol": "code audit at the integration head, line-referenced with its commit"
+      },
+      "valid_from": "2026-08-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "gap-1-serving"
+    },
+    {
+      "scope": "org/aeonmind/proj/arc/mission/k9-rebake",
+      "subject": "gap:k9-bake-search",
+      "predicate": "status",
+      "object": {
+        "value": "blocked",
+        "rank": 2,
+        "static_asserts": ["K_ >= 1 && K_ <= 8", "8u % K_ == 0u"],
+        "harder_one": "the modulus admits only K in {1,2,4,8}, so K=9 needs a real cross-byte bitstream packer, not a widened bound",
+        "note": "QtipGeometry::from_env has ZERO callers"
+      },
+      "claim": "Gap 2: the K=9 bake search is blocked by two static asserts in qtip_geom.cuh at lines 53 and 54. The modulus assert is the harder one - it admits only K in {1,2,4,8}, so K=9 needs a real cross-byte bitstream packer rather than a widened bound. Verified 2026-08-24: the handoff said lines 54-55, the actual lines are 53-54.",
+      "kind": "untried",
+      "binding": false,
+      "confidence": "unverified",
+      "evidence": {
+        "source": "mistralrs-quant/kernels/qtip/qtip_geom.cuh:53-54 @4033b8f4b",
+        "repo": "aeonmindai/arc",
+        "commit": "4033b8f4b94c351cd3349532d110e5b599752b88",
+        "contained_in": ["release/openrouter-ready"],
+        "protocol": "code audit at the integration head; line numbers re-verified 2026-08-24"
+      },
+      "valid_from": "2026-08-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "gap-2-bake-search"
+    },
+    {
+      "scope": "org/aeonmind/proj/arc/mission/k9-rebake",
+      "subject": "gap:b1-gemv",
+      "predicate": "status",
+      "object": { "value": "unestablished", "rank": 3, "self_report": "This file has never been compiled with nvcc and never run on a GPU by its author. Its instruction count is UNESTABLISHED at every K." },
+      "claim": "Gap 3: the b=1 V4L12 GEMV admits in its own header that it has never been compiled with nvcc and never run on a GPU, so its instruction count is unestablished at every K.",
+      "kind": "untried",
+      "binding": false,
+      "confidence": "unverified",
+      "evidence": {
+        "source": "mistralrs-quant/kernels/qtip/qtip_gemv_v4l12.cu:47 @4033b8f4b",
+        "repo": "aeonmindai/arc",
+        "commit": "4033b8f4b94c351cd3349532d110e5b599752b88",
+        "contained_in": ["release/openrouter-ready"],
+        "protocol": "code audit at the integration head, quoting the file's own header"
+      },
+      "valid_from": "2026-08-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "gap-3-b1-gemv"
+    },
+    {
+      "scope": "org/aeonmind/proj/arc/mission/k9-rebake",
+      "subject": "gap:rung-quality-fixture",
+      "predicate": "status",
+      "object": { "value": "absent", "rank": 4, "owner": "lane K3" },
+      "claim": "Gap 4: there is no quality fixture for the rung. Nothing re-proves the K=9 delta w_cos, and if lane K3's fixture refutes +0.00402 that is a first-class result.",
+      "kind": "untried",
+      "binding": false,
+      "confidence": "unverified",
+      "evidence": { "source": "memory/STATE.json mission.gaps_ranked[3]; mission.quality_prior.owner" },
+      "valid_from": "2026-08-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "gap-4-quality-fixture"
+    },
+    {
+      "scope": "org/aeonmind/proj/arc/mission/k9-rebake",
+      "subject": "uqff_serde",
+      "predicate": "status",
+      "object": { "value": "finished", "wire_tag": 3, "behaviour": "fails closed" },
+      "claim": "The UQFF serde layer for the new rung is finished: wire tag 3, and it fails closed on an unknown tag.",
+      "kind": "state",
+      "binding": false,
+      "confidence": "unverified",
+      "evidence": { "source": "memory/STATE.json mission.finished_layers[0]" },
+      "valid_from": "2026-08-24T00:00:00Z",
+      "valid_to": null,
+      "asserted_by": "agent:seed",
+      "why": null,
+      "reopen_if": null,
+      "supersedes_ref": null,
+      "ref": "state-uqff-serde-done"
+    }
+  ],
+  "missions": [
+    {
+      "scope": "org/aeonmind/proj/arc",
+      "statement": "Bake DeepSeek-V4-Flash into K=9/V=4/L=12 and serve it.",
+      "state": "active",
+      "gates": [
+        {
+          "subject": "engine",
+          "predicate": "aggregate_tok_s_at_b256",
+          "op": ">=",
+          "target": 14000,
+          "requires_confidence": "measured",
+          "note": "1.2x the physics floor. The live measurement is 757.5 tok/s at 4d03b9e25, an 18.5x gap, and only a measured figure may close this gate."
+        },
+        {
+          "subject": "bake",
+          "predicate": "seconds_per_layer",
+          "op": "<=",
+          "target": 83.7,
+          "requires_confidence": "measured",
+          "note": "<=60 minutes on a single card over 43 layers. Jish states this was reached once and then lost to model confusion; no instrument record survives, so this gate reads null rather than false until a bake is measured. The qtip-family 82.7 s/layer precedent is a different subject and deliberately does not satisfy it."
+        },
+        {
+          "subject": "engine",
+          "predicate": "gsm8k_pct",
+          "op": ">=",
+          "target": 90,
+          "requires_confidence": "measured",
+          "note": "Our protocol: n=100, 0-shot chat, 2048-token cap, seed 161. Jish confirms 96 percent was reached, but testimony cannot satisfy a gate that demands a measurement, so this reads null until the ref is recovered or the number is re-measured."
+        }
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "kind": "human",
+      "scope": "org/aeonmind",
+      "label": "Jish",
+      "role": "authority",
+      "meta": {
+        "note": "The named human behind every confirmed-by-human row in this seed. Testimony from here outranks any document and is never machine-verified."
+      }
+    },
+    {
+      "kind": "repo",
+      "scope": "org/aeonmind/proj/arc",
+      "label": "aeonmindai/arc",
+      "role": "source",
+      "meta": { "host": "github", "default_branch": "master" }
+    },
+    {
+      "kind": "branch",
+      "scope": "org/aeonmind/proj/arc",
+      "label": "master",
+      "role": "release-gated trunk",
+      "meta": {
+        "commit": "8ae209008c153a1dcd7c134f235b7fe0eba2daf9",
+        "short": "8ae209008",
+        "note": "Release-gated trunk. Exactly ONE PR may target it: #194."
+      }
+    },
+    {
+      "kind": "branch",
+      "scope": "org/aeonmind/proj/arc",
+      "label": "release/openrouter-ready",
+      "role": "integration",
+      "meta": {
+        "commit": "4033b8f4b94c351cd3349532d110e5b599752b88",
+        "short": "4033b8f4b",
+        "ahead_of_master": 21,
+        "note": "All work PRs land here. The session-10 measurements were taken here, not on master."
+      }
+    },
+    {
+      "kind": "branch",
+      "scope": "org/aeonmind/proj/arc",
+      "label": "agent/tail-sinkhorn-warp-v2",
+      "role": "orphan-candidate",
+      "meta": {
+        "note": "One of only two places docs/engineering/OPENROUTER_READY.md exists; that file is the sole source of the retracted 27.2% tail and 16.0% fp8_gemv_warp shares. Prove orphaned by cherry-equivalence before deleting."
+      }
+    },
+    {
+      "kind": "branch",
+      "scope": "org/aeonmind/proj/arc",
+      "label": "agent/decode-share-probe",
+      "role": "orphan-candidate",
+      "meta": {
+        "note": "The other branch carrying docs/engineering/OPENROUTER_READY.md. Prove orphaned by cherry-equivalence before deleting."
+      }
+    },
+    {
+      "kind": "worktree",
+      "scope": "org/aeonmind/proj/arc",
+      "label": "agent-ae7b4164afaf6f190",
+      "role": "s10-harvest",
+      "meta": {
+        "holds": "arc-s10-results/ - 493 MB of session-10 nsys and ncu reports",
+        "cleanup": "must be accounted for before this worktree is treated as orphaned"
+      }
+    }
+  ]
+}

@@ -1,0 +1,3165 @@
+{
+  "generated_at": "2026-08-24T21:17:31.363Z",
+  "corpus": {
+    "repo": "/Users/jish/Documents/GitHub/arc",
+    "head_commit": "526c909986de48b13d4ae33964baf0451fb79270",
+    "secondary_commit": "4033b8f4b94c351cd3349532d110e5b599752b88",
+    "secondary_commit_is_ancestor_of_head": false,
+    "note": "The corpus is READ-ONLY. Every question except I40 is pinned to head_commit; I40 is pinned to secondary_commit and is the bitemporal case."
+  },
+  "artifact_stats": {
+    "wall_ms": 3371,
+    "bytes_parsed": 16588666,
+    "files_discovered": 966,
+    "files_indexed": 966,
+    "files_by_language": {
+      "rust": 681,
+      "cuda": 132,
+      "python": 148,
+      "c": 5
+    },
+    "files_skipped_large": 0,
+    "skipped_large_paths": [],
+    "directories_skipped": 5,
+    "unreadable": [],
+    "parse_failures": 0,
+    "parse_failure_paths": [],
+    "files_with_syntax_errors": 130,
+    "symbols_by_kind": {
+      "module": 1237,
+      "function": 3591,
+      "type": 2474,
+      "method": 7433,
+      "constant": 1674,
+      "trait": 102,
+      "test": 1576,
+      "kernel": 842,
+      "macro": 248
+    },
+    "edges_by_kind": {
+      "imports": 14401,
+      "calls": 63819,
+      "uses_type": 20215,
+      "instantiates": 2676,
+      "implements": 1128,
+      "tests": 211
+    },
+    "max_file_bytes": 2097152,
+    "resolutions": {
+      "compiler": 0,
+      "language-server": 0,
+      "unique-name": 47564,
+      "ambiguous-name": 10863,
+      "unresolved": 44023
+    },
+    "resolutions_by_kind": {
+      "imports": {
+        "unresolved": 4957,
+        "unique-name": 8798,
+        "ambiguous-name": 646
+      },
+      "calls": {
+        "unique-name": 25354,
+        "unresolved": 29761,
+        "ambiguous-name": 8704
+      },
+      "uses_type": {
+        "unique-name": 10829,
+        "unresolved": 7978,
+        "ambiguous-name": 1408
+      },
+      "instantiates": {
+        "unresolved": 701,
+        "unique-name": 1888,
+        "ambiguous-name": 87
+      },
+      "implements": {
+        "unresolved": 444,
+        "ambiguous-name": 7,
+        "unique-name": 677
+      },
+      "tests": {
+        "unique-name": 18,
+        "unresolved": 182,
+        "ambiguous-name": 11
+      }
+    },
+    "resolution_ambiguity_ceiling": 9413,
+    "declarations_shadowed": 135,
+    "edges_dropped_no_source": 125
+  },
+  "resolution_ambiguity_ceiling": 9413,
+  "edge_confidence": {
+    "unverified": 54886,
+    "derived": 47564
+  },
+  "questions": 40,
+  "arms": {
+    "datum": {
+      "scored": 39,
+      "macro_primary": {
+        "precision": 0.9901098901098901,
+        "recall": 0.9692307692307691,
+        "f1": 0.9747327945708512
+      },
+      "macro_strict": {
+        "f1": 0.9747327945708512
+      },
+      "micro": {
+        "precision": 0.9620253164556962,
+        "recall": 0.9382716049382716
+      },
+      "FCR": 0.0379746835443038,
+      "FCQ": 0.05,
+      "abstain_rate": 0.025,
+      "uncertain_rate": 0.15053763440860216,
+      "f1_by_difficulty": {
+        "easy": 0.9543269230769231,
+        "ambiguous": 1,
+        "trait": 0.9490696438064858,
+        "test-only": 1,
+        "zero-callers": 1
+      }
+    },
+    "grep-line": {
+      "scored": 40,
+      "macro_primary": {
+        "precision": 0.8189606227106226,
+        "recall": 0.975,
+        "f1": 0.8146801627334416
+      },
+      "macro_strict": {
+        "f1": 0.8146801627334416
+      },
+      "micro": {
+        "precision": 0.4576271186440678,
+        "recall": 0.9529411764705882
+      },
+      "FCR": 0.5423728813559322,
+      "FCQ": 0.25,
+      "abstain_rate": 0,
+      "uncertain_rate": 0,
+      "f1_by_difficulty": {
+        "easy": 0.9101809954751132,
+        "ambiguous": 0.36380952380952386,
+        "trait": 0.8590163934426229,
+        "test-only": 1,
+        "zero-callers": 0.8
+      }
+    },
+    "grep-file": {
+      "scored": 40,
+      "macro_primary": {
+        "precision": 0.21583845511132377,
+        "recall": 0.975,
+        "f1": 0.22079531516445403
+      },
+      "macro_strict": {
+        "f1": 0.22079531516445403
+      },
+      "micro": {
+        "precision": 0.01240998927531791,
+        "recall": 0.9529411764705882
+      },
+      "FCR": 0.9875900107246821,
+      "FCQ": 0.825,
+      "abstain_rate": 0,
+      "uncertain_rate": 0,
+      "f1_by_difficulty": {
+        "easy": 0.10276516642152292,
+        "ambiguous": 0.05128035709814427,
+        "trait": 0.0515406929822689,
+        "test-only": 0.1902331756700689,
+        "zero-callers": 0.6
+      }
+    }
+  },
+  "per_question": [
+    {
+      "id": "I01",
+      "difficulty": "easy",
+      "expect": 1,
+      "grep_hits": 1,
+      "datum": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 1,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-line": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 1,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-file": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 0.05,
+          "r": 1,
+          "f1": 0.09523809523809523,
+          "tp": 1,
+          "fp": 19,
+          "fn": 0
+        },
+        "strict": {
+          "p": 0.05,
+          "r": 1,
+          "f1": 0.09523809523809523,
+          "tp": 1,
+          "fp": 19,
+          "fn": 0
+        },
+        "certain": 20,
+        "uncertain": 0,
+        "fce": 19
+      }
+    },
+    {
+      "id": "I02",
+      "difficulty": "easy",
+      "expect": 1,
+      "grep_hits": 1,
+      "datum": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 1,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-line": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 1,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-file": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 0.027777777777777776,
+          "r": 1,
+          "f1": 0.05405405405405406,
+          "tp": 1,
+          "fp": 35,
+          "fn": 0
+        },
+        "strict": {
+          "p": 0.027777777777777776,
+          "r": 1,
+          "f1": 0.05405405405405406,
+          "tp": 1,
+          "fp": 35,
+          "fn": 0
+        },
+        "certain": 36,
+        "uncertain": 0,
+        "fce": 35
+      }
+    },
+    {
+      "id": "I03",
+      "difficulty": "easy",
+      "expect": 1,
+      "grep_hits": 1,
+      "datum": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 1,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-line": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 1,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-file": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 0.06666666666666667,
+          "r": 1,
+          "f1": 0.125,
+          "tp": 1,
+          "fp": 14,
+          "fn": 0
+        },
+        "strict": {
+          "p": 0.06666666666666667,
+          "r": 1,
+          "f1": 0.125,
+          "tp": 1,
+          "fp": 14,
+          "fn": 0
+        },
+        "certain": 15,
+        "uncertain": 0,
+        "fce": 14
+      }
+    },
+    {
+      "id": "I04",
+      "difficulty": "easy",
+      "expect": 1,
+      "grep_hits": 1,
+      "datum": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 1,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-line": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 1,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-file": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 0.03571428571428571,
+          "r": 1,
+          "f1": 0.0689655172413793,
+          "tp": 1,
+          "fp": 27,
+          "fn": 0
+        },
+        "strict": {
+          "p": 0.03571428571428571,
+          "r": 1,
+          "f1": 0.0689655172413793,
+          "tp": 1,
+          "fp": 27,
+          "fn": 0
+        },
+        "certain": 28,
+        "uncertain": 0,
+        "fce": 27
+      }
+    },
+    {
+      "id": "I05",
+      "difficulty": "easy",
+      "expect": 1,
+      "grep_hits": 1,
+      "datum": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 1,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-line": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 1,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-file": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 0.125,
+          "r": 1,
+          "f1": 0.2222222222222222,
+          "tp": 1,
+          "fp": 7,
+          "fn": 0
+        },
+        "strict": {
+          "p": 0.125,
+          "r": 1,
+          "f1": 0.2222222222222222,
+          "tp": 1,
+          "fp": 7,
+          "fn": 0
+        },
+        "certain": 8,
+        "uncertain": 0,
+        "fce": 7
+      }
+    },
+    {
+      "id": "I06",
+      "difficulty": "easy",
+      "expect": 1,
+      "grep_hits": 1,
+      "datum": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 1,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-line": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 1,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-file": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 0.047619047619047616,
+          "r": 1,
+          "f1": 0.0909090909090909,
+          "tp": 1,
+          "fp": 20,
+          "fn": 0
+        },
+        "strict": {
+          "p": 0.047619047619047616,
+          "r": 1,
+          "f1": 0.0909090909090909,
+          "tp": 1,
+          "fp": 20,
+          "fn": 0
+        },
+        "certain": 21,
+        "uncertain": 0,
+        "fce": 20
+      }
+    },
+    {
+      "id": "I07",
+      "difficulty": "easy",
+      "expect": 1,
+      "grep_hits": 1,
+      "datum": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 1,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-line": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 1,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-file": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 0.005988023952095809,
+          "r": 1,
+          "f1": 0.011904761904761906,
+          "tp": 1,
+          "fp": 166,
+          "fn": 0
+        },
+        "strict": {
+          "p": 0.005988023952095809,
+          "r": 1,
+          "f1": 0.011904761904761906,
+          "tp": 1,
+          "fp": 166,
+          "fn": 0
+        },
+        "certain": 167,
+        "uncertain": 0,
+        "fce": 166
+      }
+    },
+    {
+      "id": "I08",
+      "difficulty": "easy",
+      "expect": 1,
+      "grep_hits": 3,
+      "datum": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 1,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-line": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 1,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-file": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 0.014285714285714285,
+          "r": 1,
+          "f1": 0.028169014084507043,
+          "tp": 1,
+          "fp": 69,
+          "fn": 0
+        },
+        "strict": {
+          "p": 0.014285714285714285,
+          "r": 1,
+          "f1": 0.028169014084507043,
+          "tp": 1,
+          "fp": 69,
+          "fn": 0
+        },
+        "certain": 70,
+        "uncertain": 0,
+        "fce": 69
+      }
+    },
+    {
+      "id": "I09",
+      "difficulty": "easy",
+      "expect": 2,
+      "grep_hits": 3,
+      "datum": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 2,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 2,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 2,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-line": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 2,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 2,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 2,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-file": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 0.012121212121212121,
+          "r": 1,
+          "f1": 0.02395209580838323,
+          "tp": 2,
+          "fp": 163,
+          "fn": 0
+        },
+        "strict": {
+          "p": 0.012121212121212121,
+          "r": 1,
+          "f1": 0.02395209580838323,
+          "tp": 2,
+          "fp": 163,
+          "fn": 0
+        },
+        "certain": 165,
+        "uncertain": 0,
+        "fce": 163
+      }
+    },
+    {
+      "id": "I10",
+      "difficulty": "easy",
+      "expect": 2,
+      "grep_hits": 5,
+      "datum": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 2,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 2,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 2,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-line": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 0.6666666666666666,
+          "r": 1,
+          "f1": 0.8,
+          "tp": 2,
+          "fp": 1,
+          "fn": 0
+        },
+        "strict": {
+          "p": 0.6666666666666666,
+          "r": 1,
+          "f1": 0.8,
+          "tp": 2,
+          "fp": 1,
+          "fn": 0
+        },
+        "certain": 3,
+        "uncertain": 0,
+        "fce": 1
+      },
+      "grep-file": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 0.006289308176100629,
+          "r": 1,
+          "f1": 0.0125,
+          "tp": 2,
+          "fp": 316,
+          "fn": 0
+        },
+        "strict": {
+          "p": 0.006289308176100629,
+          "r": 1,
+          "f1": 0.0125,
+          "tp": 2,
+          "fp": 316,
+          "fn": 0
+        },
+        "certain": 318,
+        "uncertain": 0,
+        "fce": 316
+      }
+    },
+    {
+      "id": "I11",
+      "difficulty": "easy",
+      "expect": 3,
+      "grep_hits": 11,
+      "datum": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 0.3333333333333333,
+          "f1": 0.5,
+          "tp": 1,
+          "fp": 0,
+          "fn": 2
+        },
+        "strict": {
+          "p": 1,
+          "r": 0.3333333333333333,
+          "f1": 0.5,
+          "tp": 1,
+          "fp": 0,
+          "fn": 2
+        },
+        "certain": 1,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-line": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 0.6,
+          "r": 1,
+          "f1": 0.7499999999999999,
+          "tp": 3,
+          "fp": 2,
+          "fn": 0
+        },
+        "strict": {
+          "p": 0.6,
+          "r": 1,
+          "f1": 0.7499999999999999,
+          "tp": 3,
+          "fp": 2,
+          "fn": 0
+        },
+        "certain": 5,
+        "uncertain": 0,
+        "fce": 2
+      },
+      "grep-file": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 0.013215859030837005,
+          "r": 1,
+          "f1": 0.02608695652173913,
+          "tp": 3,
+          "fp": 224,
+          "fn": 0
+        },
+        "strict": {
+          "p": 0.013215859030837005,
+          "r": 1,
+          "f1": 0.02608695652173913,
+          "tp": 3,
+          "fp": 224,
+          "fn": 0
+        },
+        "certain": 227,
+        "uncertain": 0,
+        "fce": 224
+      }
+    },
+    {
+      "id": "I12",
+      "difficulty": "easy",
+      "expect": 6,
+      "grep_hits": 18,
+      "datum": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 0.7142857142857143,
+          "r": 0.8333333333333334,
+          "f1": 0.7692307692307692,
+          "tp": 5,
+          "fp": 2,
+          "fn": 1
+        },
+        "strict": {
+          "p": 0.7142857142857143,
+          "r": 0.8333333333333334,
+          "f1": 0.7692307692307692,
+          "tp": 5,
+          "fp": 2,
+          "fn": 1
+        },
+        "certain": 7,
+        "uncertain": 0,
+        "fce": 2
+      },
+      "grep-line": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 0.8571428571428571,
+          "r": 1,
+          "f1": 0.923076923076923,
+          "tp": 6,
+          "fp": 1,
+          "fn": 0
+        },
+        "strict": {
+          "p": 0.8571428571428571,
+          "r": 1,
+          "f1": 0.923076923076923,
+          "tp": 6,
+          "fp": 1,
+          "fn": 0
+        },
+        "certain": 7,
+        "uncertain": 0,
+        "fce": 1
+      },
+      "grep-file": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 0.022988505747126436,
+          "r": 1,
+          "f1": 0.0449438202247191,
+          "tp": 6,
+          "fp": 255,
+          "fn": 0
+        },
+        "strict": {
+          "p": 0.022988505747126436,
+          "r": 1,
+          "f1": 0.0449438202247191,
+          "tp": 6,
+          "fp": 255,
+          "fn": 0
+        },
+        "certain": 261,
+        "uncertain": 0,
+        "fce": 255
+      }
+    },
+    {
+      "id": "I13",
+      "difficulty": "easy",
+      "expect": 1,
+      "grep_hits": 2,
+      "datum": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 1,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-line": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 1,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-file": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 0.03125,
+          "r": 1,
+          "f1": 0.06060606060606061,
+          "tp": 1,
+          "fp": 31,
+          "fn": 0
+        },
+        "strict": {
+          "p": 0.03125,
+          "r": 1,
+          "f1": 0.06060606060606061,
+          "tp": 1,
+          "fp": 31,
+          "fn": 0
+        },
+        "certain": 32,
+        "uncertain": 0,
+        "fce": 31
+      }
+    },
+    {
+      "id": "I14",
+      "difficulty": "easy",
+      "expect": 1,
+      "grep_hits": 1,
+      "datum": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 1,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-line": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 1,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-file": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 0.25,
+          "r": 1,
+          "f1": 0.4,
+          "tp": 1,
+          "fp": 3,
+          "fn": 0
+        },
+        "strict": {
+          "p": 0.25,
+          "r": 1,
+          "f1": 0.4,
+          "tp": 1,
+          "fp": 3,
+          "fn": 0
+        },
+        "certain": 4,
+        "uncertain": 0,
+        "fce": 3
+      }
+    },
+    {
+      "id": "I15",
+      "difficulty": "easy",
+      "expect": 1,
+      "grep_hits": 2,
+      "datum": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 1,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-line": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 1,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-file": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 0.09090909090909091,
+          "r": 1,
+          "f1": 0.16666666666666669,
+          "tp": 1,
+          "fp": 10,
+          "fn": 0
+        },
+        "strict": {
+          "p": 0.09090909090909091,
+          "r": 1,
+          "f1": 0.16666666666666669,
+          "tp": 1,
+          "fp": 10,
+          "fn": 0
+        },
+        "certain": 11,
+        "uncertain": 0,
+        "fce": 10
+      }
+    },
+    {
+      "id": "I16",
+      "difficulty": "easy",
+      "expect": 3,
+      "grep_hits": 3,
+      "datum": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 3,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 3,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 3,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-line": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 3,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 3,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 3,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-file": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 0.1875,
+          "r": 1,
+          "f1": 0.3157894736842105,
+          "tp": 3,
+          "fp": 13,
+          "fn": 0
+        },
+        "strict": {
+          "p": 0.1875,
+          "r": 1,
+          "f1": 0.3157894736842105,
+          "tp": 3,
+          "fp": 13,
+          "fn": 0
+        },
+        "certain": 16,
+        "uncertain": 0,
+        "fce": 13
+      }
+    },
+    {
+      "id": "I17",
+      "difficulty": "ambiguous",
+      "expect": 1,
+      "grep_hits": 15,
+      "datum": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 1,
+        "uncertain": 3,
+        "fce": 0
+      },
+      "grep-line": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 0.07692307692307693,
+          "r": 1,
+          "f1": 0.14285714285714288,
+          "tp": 1,
+          "fp": 12,
+          "fn": 0
+        },
+        "strict": {
+          "p": 0.07692307692307693,
+          "r": 1,
+          "f1": 0.14285714285714288,
+          "tp": 1,
+          "fp": 12,
+          "fn": 0
+        },
+        "certain": 13,
+        "uncertain": 0,
+        "fce": 12
+      },
+      "grep-file": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 0.0017064846416382253,
+          "r": 1,
+          "f1": 0.003407155025553663,
+          "tp": 1,
+          "fp": 585,
+          "fn": 0
+        },
+        "strict": {
+          "p": 0.0017064846416382253,
+          "r": 1,
+          "f1": 0.003407155025553663,
+          "tp": 1,
+          "fp": 585,
+          "fn": 0
+        },
+        "certain": 586,
+        "uncertain": 0,
+        "fce": 585
+      }
+    },
+    {
+      "id": "I18",
+      "difficulty": "ambiguous",
+      "expect": 2,
+      "grep_hits": 15,
+      "datum": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 2,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 2,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 2,
+        "uncertain": 3,
+        "fce": 0
+      },
+      "grep-line": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 0.15384615384615385,
+          "r": 1,
+          "f1": 0.2666666666666667,
+          "tp": 2,
+          "fp": 11,
+          "fn": 0
+        },
+        "strict": {
+          "p": 0.15384615384615385,
+          "r": 1,
+          "f1": 0.2666666666666667,
+          "tp": 2,
+          "fp": 11,
+          "fn": 0
+        },
+        "certain": 13,
+        "uncertain": 0,
+        "fce": 11
+      },
+      "grep-file": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 0.0037593984962406013,
+          "r": 1,
+          "f1": 0.00749063670411985,
+          "tp": 2,
+          "fp": 530,
+          "fn": 0
+        },
+        "strict": {
+          "p": 0.0037593984962406013,
+          "r": 1,
+          "f1": 0.00749063670411985,
+          "tp": 2,
+          "fp": 530,
+          "fn": 0
+        },
+        "certain": 532,
+        "uncertain": 0,
+        "fce": 530
+      }
+    },
+    {
+      "id": "I19",
+      "difficulty": "ambiguous",
+      "expect": 2,
+      "grep_hits": 15,
+      "datum": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 2,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 2,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 2,
+        "uncertain": 3,
+        "fce": 0
+      },
+      "grep-line": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 0.15384615384615385,
+          "r": 1,
+          "f1": 0.2666666666666667,
+          "tp": 2,
+          "fp": 11,
+          "fn": 0
+        },
+        "strict": {
+          "p": 0.15384615384615385,
+          "r": 1,
+          "f1": 0.2666666666666667,
+          "tp": 2,
+          "fp": 11,
+          "fn": 0
+        },
+        "certain": 13,
+        "uncertain": 0,
+        "fce": 11
+      },
+      "grep-file": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 0.0034129692832764505,
+          "r": 1,
+          "f1": 0.006802721088435374,
+          "tp": 2,
+          "fp": 584,
+          "fn": 0
+        },
+        "strict": {
+          "p": 0.0034129692832764505,
+          "r": 1,
+          "f1": 0.006802721088435374,
+          "tp": 2,
+          "fp": 584,
+          "fn": 0
+        },
+        "certain": 586,
+        "uncertain": 0,
+        "fce": 584
+      }
+    },
+    {
+      "id": "I20",
+      "difficulty": "ambiguous",
+      "expect": 1,
+      "grep_hits": 15,
+      "datum": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 1,
+        "uncertain": 3,
+        "fce": 0
+      },
+      "grep-line": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 0.07692307692307693,
+          "r": 1,
+          "f1": 0.14285714285714288,
+          "tp": 1,
+          "fp": 12,
+          "fn": 0
+        },
+        "strict": {
+          "p": 0.07692307692307693,
+          "r": 1,
+          "f1": 0.14285714285714288,
+          "tp": 1,
+          "fp": 12,
+          "fn": 0
+        },
+        "certain": 13,
+        "uncertain": 0,
+        "fce": 12
+      },
+      "grep-file": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 0.0017064846416382253,
+          "r": 1,
+          "f1": 0.003407155025553663,
+          "tp": 1,
+          "fp": 585,
+          "fn": 0
+        },
+        "strict": {
+          "p": 0.0017064846416382253,
+          "r": 1,
+          "f1": 0.003407155025553663,
+          "tp": 1,
+          "fp": 585,
+          "fn": 0
+        },
+        "certain": 586,
+        "uncertain": 0,
+        "fce": 585
+      }
+    },
+    {
+      "id": "I21",
+      "difficulty": "ambiguous",
+      "expect": 6,
+      "grep_hits": 6,
+      "datum": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 6,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 6,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 6,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-line": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 6,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 6,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 6,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-file": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 0.13333333333333333,
+          "r": 1,
+          "f1": 0.23529411764705882,
+          "tp": 6,
+          "fp": 39,
+          "fn": 0
+        },
+        "strict": {
+          "p": 0.13333333333333333,
+          "r": 1,
+          "f1": 0.23529411764705882,
+          "tp": 6,
+          "fp": 39,
+          "fn": 0
+        },
+        "certain": 45,
+        "uncertain": 0,
+        "fce": 39
+      }
+    },
+    {
+      "id": "I22",
+      "difficulty": "trait",
+      "expect": 9,
+      "grep_hits": 145,
+      "datum": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 0.9,
+          "r": 1,
+          "f1": 0.9473684210526316,
+          "tp": 9,
+          "fp": 1,
+          "fn": 0
+        },
+        "strict": {
+          "p": 0.9,
+          "r": 1,
+          "f1": 0.9473684210526316,
+          "tp": 9,
+          "fp": 1,
+          "fn": 0
+        },
+        "certain": 10,
+        "uncertain": 0,
+        "fce": 1
+      },
+      "grep-line": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 0.17307692307692307,
+          "r": 1,
+          "f1": 0.29508196721311475,
+          "tp": 9,
+          "fp": 43,
+          "fn": 0
+        },
+        "strict": {
+          "p": 0.17307692307692307,
+          "r": 1,
+          "f1": 0.29508196721311475,
+          "tp": 9,
+          "fp": 43,
+          "fn": 0
+        },
+        "certain": 52,
+        "uncertain": 0,
+        "fce": 43
+      },
+      "grep-file": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 0.010112359550561797,
+          "r": 1,
+          "f1": 0.020022246941045603,
+          "tp": 9,
+          "fp": 881,
+          "fn": 0
+        },
+        "strict": {
+          "p": 0.010112359550561797,
+          "r": 1,
+          "f1": 0.020022246941045603,
+          "tp": 9,
+          "fp": 881,
+          "fn": 0
+        },
+        "certain": 890,
+        "uncertain": 0,
+        "fce": 881
+      }
+    },
+    {
+      "id": "I23",
+      "difficulty": "trait",
+      "expect": 9,
+      "grep_hits": 11,
+      "datum": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 9,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 9,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 9,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-line": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 9,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 9,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 9,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-file": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 0.027607361963190184,
+          "r": 1,
+          "f1": 0.05373134328358209,
+          "tp": 9,
+          "fp": 317,
+          "fn": 0
+        },
+        "strict": {
+          "p": 0.027607361963190184,
+          "r": 1,
+          "f1": 0.05373134328358209,
+          "tp": 9,
+          "fp": 317,
+          "fn": 0
+        },
+        "certain": 326,
+        "uncertain": 0,
+        "fce": 317
+      }
+    },
+    {
+      "id": "I24",
+      "difficulty": "trait",
+      "expect": 6,
+      "grep_hits": 8,
+      "datum": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 0.8333333333333334,
+          "f1": 0.9090909090909091,
+          "tp": 5,
+          "fp": 0,
+          "fn": 1
+        },
+        "strict": {
+          "p": 1,
+          "r": 0.8333333333333334,
+          "f1": 0.9090909090909091,
+          "tp": 5,
+          "fp": 0,
+          "fn": 1
+        },
+        "certain": 5,
+        "uncertain": 1,
+        "fce": 0
+      },
+      "grep-line": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 6,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 6,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 6,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-file": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 0.037037037037037035,
+          "r": 1,
+          "f1": 0.07142857142857142,
+          "tp": 6,
+          "fp": 156,
+          "fn": 0
+        },
+        "strict": {
+          "p": 0.037037037037037035,
+          "r": 1,
+          "f1": 0.07142857142857142,
+          "tp": 6,
+          "fp": 156,
+          "fn": 0
+        },
+        "certain": 162,
+        "uncertain": 0,
+        "fce": 156
+      }
+    },
+    {
+      "id": "I25",
+      "difficulty": "trait",
+      "expect": 5,
+      "grep_hits": 8,
+      "datum": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 0.8,
+          "f1": 0.888888888888889,
+          "tp": 4,
+          "fp": 0,
+          "fn": 1
+        },
+        "strict": {
+          "p": 1,
+          "r": 0.8,
+          "f1": 0.888888888888889,
+          "tp": 4,
+          "fp": 0,
+          "fn": 1
+        },
+        "certain": 4,
+        "uncertain": 1,
+        "fce": 0
+      },
+      "grep-line": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 5,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 5,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 5,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-file": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 0.0390625,
+          "r": 1,
+          "f1": 0.07518796992481203,
+          "tp": 5,
+          "fp": 123,
+          "fn": 0
+        },
+        "strict": {
+          "p": 0.0390625,
+          "r": 1,
+          "f1": 0.07518796992481203,
+          "tp": 5,
+          "fp": 123,
+          "fn": 0
+        },
+        "certain": 128,
+        "uncertain": 0,
+        "fce": 123
+      }
+    },
+    {
+      "id": "I26",
+      "difficulty": "trait",
+      "expect": 7,
+      "grep_hits": 7,
+      "datum": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 7,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 7,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 7,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-line": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 7,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 7,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 7,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-file": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 0.019021739130434784,
+          "r": 1,
+          "f1": 0.037333333333333336,
+          "tp": 7,
+          "fp": 361,
+          "fn": 0
+        },
+        "strict": {
+          "p": 0.019021739130434784,
+          "r": 1,
+          "f1": 0.037333333333333336,
+          "tp": 7,
+          "fp": 361,
+          "fn": 0
+        },
+        "certain": 368,
+        "uncertain": 0,
+        "fce": 361
+      }
+    },
+    {
+      "id": "I27",
+      "difficulty": "test-only",
+      "expect": 2,
+      "grep_hits": 5,
+      "datum": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 2,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 2,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 2,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-line": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 2,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 2,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 2,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-file": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 0.00980392156862745,
+          "r": 1,
+          "f1": 0.01941747572815534,
+          "tp": 2,
+          "fp": 202,
+          "fn": 0
+        },
+        "strict": {
+          "p": 0.00980392156862745,
+          "r": 1,
+          "f1": 0.01941747572815534,
+          "tp": 2,
+          "fp": 202,
+          "fn": 0
+        },
+        "certain": 204,
+        "uncertain": 0,
+        "fce": 202
+      }
+    },
+    {
+      "id": "I28",
+      "difficulty": "test-only",
+      "expect": 2,
+      "grep_hits": 5,
+      "datum": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 2,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 2,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 2,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-line": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 2,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 2,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 2,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-file": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 0.02631578947368421,
+          "r": 1,
+          "f1": 0.05128205128205127,
+          "tp": 2,
+          "fp": 74,
+          "fn": 0
+        },
+        "strict": {
+          "p": 0.02631578947368421,
+          "r": 1,
+          "f1": 0.05128205128205127,
+          "tp": 2,
+          "fp": 74,
+          "fn": 0
+        },
+        "certain": 76,
+        "uncertain": 0,
+        "fce": 74
+      }
+    },
+    {
+      "id": "I29",
+      "difficulty": "test-only",
+      "expect": 2,
+      "grep_hits": 3,
+      "datum": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 2,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 2,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 2,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-line": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 2,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 2,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 2,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-file": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 0.3333333333333333,
+          "r": 1,
+          "f1": 0.5,
+          "tp": 2,
+          "fp": 4,
+          "fn": 0
+        },
+        "strict": {
+          "p": 0.3333333333333333,
+          "r": 1,
+          "f1": 0.5,
+          "tp": 2,
+          "fp": 4,
+          "fn": 0
+        },
+        "certain": 6,
+        "uncertain": 0,
+        "fce": 4
+      }
+    },
+    {
+      "id": "I30",
+      "difficulty": "zero-callers",
+      "expect": 0,
+      "grep_hits": 6,
+      "datum": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 0,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-line": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 0,
+          "r": 1,
+          "f1": 0,
+          "tp": 0,
+          "fp": 1,
+          "fn": 0
+        },
+        "strict": {
+          "p": 0,
+          "r": 1,
+          "f1": 0,
+          "tp": 0,
+          "fp": 1,
+          "fn": 0
+        },
+        "certain": 1,
+        "uncertain": 0,
+        "fce": 1
+      },
+      "grep-file": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 0,
+          "r": 1,
+          "f1": 0,
+          "tp": 0,
+          "fp": 25,
+          "fn": 0
+        },
+        "strict": {
+          "p": 0,
+          "r": 1,
+          "f1": 0,
+          "tp": 0,
+          "fp": 25,
+          "fn": 0
+        },
+        "certain": 25,
+        "uncertain": 0,
+        "fce": 25
+      }
+    },
+    {
+      "id": "I31",
+      "difficulty": "zero-callers",
+      "expect": 0,
+      "grep_hits": 3,
+      "datum": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 0,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-line": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 0,
+          "r": 1,
+          "f1": 0,
+          "tp": 0,
+          "fp": 2,
+          "fn": 0
+        },
+        "strict": {
+          "p": 0,
+          "r": 1,
+          "f1": 0,
+          "tp": 0,
+          "fp": 2,
+          "fn": 0
+        },
+        "certain": 2,
+        "uncertain": 0,
+        "fce": 2
+      },
+      "grep-file": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 0,
+          "r": 1,
+          "f1": 0,
+          "tp": 0,
+          "fp": 66,
+          "fn": 0
+        },
+        "strict": {
+          "p": 0,
+          "r": 1,
+          "f1": 0,
+          "tp": 0,
+          "fp": 66,
+          "fn": 0
+        },
+        "certain": 66,
+        "uncertain": 0,
+        "fce": 66
+      }
+    },
+    {
+      "id": "I32",
+      "difficulty": "zero-callers",
+      "expect": 0,
+      "grep_hits": 3,
+      "datum": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 0,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-line": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 0,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-file": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 0,
+          "r": 1,
+          "f1": 0,
+          "tp": 0,
+          "fp": 271,
+          "fn": 0
+        },
+        "strict": {
+          "p": 0,
+          "r": 1,
+          "f1": 0,
+          "tp": 0,
+          "fp": 271,
+          "fn": 0
+        },
+        "certain": 271,
+        "uncertain": 0,
+        "fce": 271
+      }
+    },
+    {
+      "id": "I33",
+      "difficulty": "zero-callers",
+      "expect": 0,
+      "grep_hits": 3,
+      "datum": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 0,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-line": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 0,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-file": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 0,
+          "r": 1,
+          "f1": 0,
+          "tp": 0,
+          "fp": 271,
+          "fn": 0
+        },
+        "strict": {
+          "p": 0,
+          "r": 1,
+          "f1": 0,
+          "tp": 0,
+          "fp": 271,
+          "fn": 0
+        },
+        "certain": 271,
+        "uncertain": 0,
+        "fce": 271
+      }
+    },
+    {
+      "id": "I34",
+      "difficulty": "zero-callers",
+      "expect": 0,
+      "grep_hits": 0,
+      "datum": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 0,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-line": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 0,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-file": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 0,
+        "uncertain": 0,
+        "fce": 0
+      }
+    },
+    {
+      "id": "I35",
+      "difficulty": "zero-callers",
+      "expect": 0,
+      "grep_hits": 0,
+      "datum": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 0,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-line": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 0,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-file": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 0,
+        "uncertain": 0,
+        "fce": 0
+      }
+    },
+    {
+      "id": "I36",
+      "difficulty": "zero-callers",
+      "expect": 0,
+      "grep_hits": 0,
+      "datum": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 0,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-line": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 0,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-file": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 0,
+        "uncertain": 0,
+        "fce": 0
+      }
+    },
+    {
+      "id": "I37",
+      "difficulty": "zero-callers",
+      "expect": 0,
+      "grep_hits": 0,
+      "datum": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 0,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-line": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 0,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-file": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 0,
+        "uncertain": 0,
+        "fce": 0
+      }
+    },
+    {
+      "id": "I38",
+      "difficulty": "zero-callers",
+      "expect": 0,
+      "grep_hits": 0,
+      "datum": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 0,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-line": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 0,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-file": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 0,
+        "uncertain": 0,
+        "fce": 0
+      }
+    },
+    {
+      "id": "I39",
+      "difficulty": "zero-callers",
+      "expect": 0,
+      "grep_hits": 0,
+      "datum": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 0,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-line": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 0,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-file": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "strict": {
+          "p": 1,
+          "r": 1,
+          "f1": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "certain": 0,
+        "uncertain": 0,
+        "fce": 0
+      }
+    },
+    {
+      "id": "I40",
+      "difficulty": "easy",
+      "expect": 4,
+      "grep_hits": 0,
+      "datum": {
+        "abstained": true,
+        "error": null,
+        "primary": null,
+        "strict": null,
+        "certain": 0,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-line": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 0,
+          "f1": 0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 4
+        },
+        "strict": {
+          "p": 1,
+          "r": 0,
+          "f1": 0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 4
+        },
+        "certain": 0,
+        "uncertain": 0,
+        "fce": 0
+      },
+      "grep-file": {
+        "abstained": false,
+        "error": null,
+        "primary": {
+          "p": 1,
+          "r": 0,
+          "f1": 0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 4
+        },
+        "strict": {
+          "p": 1,
+          "r": 0,
+          "f1": 0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 4
+        },
+        "certain": 0,
+        "uncertain": 0,
+        "fce": 0
+      }
+    }
+  ]
+}

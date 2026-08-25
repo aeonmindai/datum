@@ -1,0 +1,466 @@
+@import "tailwindcss";
+
+/*
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Token set ported from runcrate_app.
+ *
+ *   src/styles/globals.css   :root (lines 87-152) and .dark (lines 165-227)
+ *                            → every triplet below, comments included.
+ *                            body rule (lines 251-258) → @layer base.
+ *                            viewport lock (lines 265-291) → @layer base.
+ *                            scrollbar rules (lines 32-68) → @layer base.
+ *                            .scrollbar-hide (lines 7-15) → @utility.
+ *   tailwind.config.js       fontSize (57-64), borderRadius (65-69),
+ *                            fontFamily (41-53), boxShadow (12-16) and the
+ *                            whole colors block (70-138) → @theme inline.
+ *
+ * runcrate is Tailwind v3; this package is Tailwind v4. The triplets and the
+ * class strings are identical — only the plumbing differs:
+ *
+ *   1. v3's `colors: { x: 'hsl(var(--x))' }` becomes
+ *      `@theme inline { --color-x: hsl(var(--x)) }`. `inline` is what makes the
+ *      .dark override reach the utility, so `bg-background`, `border-border/60`,
+ *      `bg-muted/50` and `text-muted-foreground` behave exactly as in runcrate.
+ *   2. v3's `darkMode: ['class']` becomes `@custom-variant dark`.
+ *   3. The three per-theme shadows are stored as `--elevation-*` rather than
+ *      `--shadow-*`: in v4 `--shadow-*` IS the theme namespace, so keeping
+ *      runcrate's names would make `@theme` self-referential. The values are
+ *      byte-identical; only the source variable is renamed.
+ *   4. runcrate hangs its viewport lock off `[data-slot="sidebar-wrapper"]` and
+ *      its scroll-container scrollbar off `[data-tour="welcome"]` — a product
+ *      tour hook. The first name is kept; the second becomes
+ *      `[data-slot="scroll-container"]`, which is what it actually is.
+ *
+ * No colour is added. runcrate's palette is pure neutral grey plus exactly two
+ * chromatic tokens — `--ring` (blue, focus only) and `--destructive` (red,
+ * alarm only) — and this panel stays inside that. DESIGN_NOTES.md records how
+ * the four confidence classes carry meaning without hue.
+ * ─────────────────────────────────────────────────────────────────────────────
+ */
+
+@custom-variant dark (&:is(.dark *));
+
+/* Font stacks. runcrate declares --font-geist in :root as the fallback for
+   next/font's injected variable; there is no next/font in a Vite SPA, so these
+   are the only definitions and index.html loads both families directly. */
+:root {
+  --font-geist: "Geist", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  --font-jetbrains-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo,
+    monospace;
+}
+
+/* ────────────────────────────────────────────────────────────────────
+   LIGHT THEME — off-white canvas, no pure white anywhere.
+   Surface === background. The one-big-card is defined only by its
+   ring-edge border, not a surface contrast. Muted, hover states, and
+   edge tiers step DOWN in lightness for visible elevation where needed.
+   ──────────────────────────────────────────────────────────────────── */
+:root {
+  /* Light theme — neutral grays, no warm/cool tints. No pure white, no
+     pure black. Hierarchy: bg === surface → muted → surface-hover, then
+     edge-subtle → edge → border for borders. */
+  --background: 0 0% 97.6%; /* #f9f9f9 — off-white canvas */
+  --foreground: 0 0% 10%; /* #1a1a1a — high-contrast text */
+  --card: 0 0% 99%; /* #fcfcfc — subtle lift for popovers/modals, never pure white */
+  --card-foreground: 0 0% 10%;
+  --popover: 0 0% 99%;
+  --popover-foreground: 0 0% 10%;
+  --primary: 0 0% 10%;
+  --primary-foreground: 0 0% 97.6%; /* matches --background (inverted theme) */
+  --secondary: 0 0% 94.5%;
+  --secondary-foreground: 0 0% 10%;
+  --muted: 0 0% 94.5%; /* #f1f1f1 — distinct from bg (97.6%) */
+  --muted-foreground: 0 0% 43%; /* #6e6e6e — low-contrast text */
+  --accent: 0 0% 92%; /* #ebebeb — hover state */
+  --accent-foreground: 0 0% 10%;
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 98%; /* #fafafa — no pure white */
+  /* Border hierarchy (solid neutrals):
+     border (#d4d4d4) > edge (#e0e0e0) > edge-subtle (#e8e8e8) */
+  --border: 0 0% 83.1%;
+  --input: 0 0% 83.1%;
+  --input-bg: 0 0% 96%;
+  --ring: 217 91% 60%;
+  --radius: 0.75rem;
+  /* Surface elevation — page bg === card surface so the one-big-card
+     reads as part of the page (defined only by its ring border), not
+     as a floating lifted card. Muted/hover step DOWN from there.
+     bg #f9f9f9 === surface #f9f9f9 → muted #f1f1f1 → surface-hover #ebebeb. */
+  --surface: 0 0% 97.6%; /* #f9f9f9 — matches bg */
+  --surface-hover: 0 0% 92%; /* #ebebeb — hover */
+  --edge: 0 0% 87.8%; /* #e0e0e0 — step 7 */
+  --edge-subtle: 0 0% 91%; /* #e8e8e8 — step 6 */
+  --overlay: 0 0% 0% / 0.4;
+  /* Brand accent — used by shaders, illustrations, and any literal-color
+     prop that can't read CSS vars directly. Slightly darker on light bg
+     so it carries the same visual weight as the dark-mode accent. */
+  --brand: 225 50% 55%;
+  --brand-dim: 225 45% 42%;
+  /* Per-theme shadows — light shadows are soft and short */
+  --elevation-card: 0 1px 2px 0 hsl(0 0% 0% / 0.04),
+    0 2px 8px -2px hsl(0 0% 0% / 0.05);
+  --elevation-floating: 0 12px 32px -12px hsl(0 0% 0% / 0.18),
+    0 4px 12px -4px hsl(0 0% 0% / 0.08);
+  --elevation-hero: 0 30px 80px -20px hsl(0 0% 0% / 0.12),
+    0 10px 30px -10px hsl(0 0% 0% / 0.06);
+
+  --sidebar: 0 0% 97.6%; /* matches --background */
+  --sidebar-foreground: 0 0% 10%; /* matches --foreground */
+  --sidebar-primary: 0 0% 10%;
+  --sidebar-primary-foreground: 0 0% 98%;
+  --sidebar-accent: 0 0% 94.5%; /* matches --muted */
+  --sidebar-accent-foreground: 0 0% 10%;
+  --sidebar-border: 0 0% 87.8%; /* matches --edge */
+  --sidebar-ring: 217 91% 60%;
+}
+
+/* ────────────────────────────────────────────────────────────────────
+   DARK THEME — easy-on-the-eyes dark canvas.
+   Background is #121212 (Material Design's canonical dark surface,
+   used by Linear, Notion, Discord). Foreground is #ebebeb, softer than
+   near-white. Text contrast is ~12.8:1 — well above WCAG AAA (7:1)
+   while avoiding the eye burn of pure-black + pure-white combos.
+   Surface === background. Card defined by ring-edge, not contrast.
+   ──────────────────────────────────────────────────────────────────── */
+.dark {
+  /* Dark theme — neutral grays, lifted off pure black. Bg at 7% and fg
+     at 92% keeps high legibility without harsh contrast. Hierarchy:
+     bg === surface → muted/secondary → surface-hover, with edge tiers
+     at symmetric deltas from bg (+4/+7/+10%). */
+  --radius: 0.75rem;
+  --background: 0 0% 7%; /* #121212 — Material-style dark canvas */
+  --foreground: 0 0% 92%; /* #ebebeb — softer than near-white */
+  --card: 0 0% 8%; /* #141414 — subtle lift for popovers/modals */
+  --card-foreground: 0 0% 92%;
+  --popover: 0 0% 8%;
+  --popover-foreground: 0 0% 92%;
+  --primary: 0 0% 92%;
+  --primary-foreground: 0 0% 7%;
+  --secondary: 0 0% 15%; /* #262626 — distinct from edge (14%) */
+  --secondary-foreground: 0 0% 92%;
+  --muted: 0 0% 15%; /* #262626 — inline fills */
+  --muted-foreground: 0 0% 60%; /* #999 — ~7:1 contrast, good for secondary text */
+  --accent: 0 0% 12%; /* #1f1f1f — hover state */
+  --accent-foreground: 0 0% 92%;
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 92%; /* no pure white */
+  /* Border hierarchy — soft but visible.
+     border (#2b2b2b) > edge (#242424) > edge-subtle (#1c1c1c)
+     Deltas from bg: +10% / +7% / +4%. Enough to distinguish a card
+     outline without feeling harsh. Mirrors light mode's border deltas. */
+  --border: 0 0% 17%; /* #2b2b2b — strongest tier */
+  --input: 0 0% 17%;
+  --input-bg: 0 0% 7%;
+  --ring: 217 91% 60%;
+  /* Surface === background. No explicit card color — the one-big-card is
+     defined entirely by its ring-edge outline, not by a surface contrast.
+     Cards read as "cut into the page", not "laid on top of it". */
+  --surface: 0 0% 7%; /* matches --background */
+  --surface-hover: 0 0% 12%; /* #1f1f1f — clear hover lift */
+  --edge: 0 0% 14%; /* #242424 — card outline */
+  --edge-subtle: 0 0% 11%; /* #1c1c1c — internal dividers */
+  --overlay: 0 0% 0% / 0.72;
+  /* Brand accent — see :root for rationale */
+  --brand: 225 55% 62%;
+  --brand-dim: 225 50% 45%;
+  /* Per-theme shadows — dark shadows are heavy to register on dark canvas */
+  --elevation-card: 0 1px 2px 0 hsl(0 0% 0% / 0.4),
+    0 4px 16px -4px hsl(0 0% 0% / 0.3);
+  --elevation-floating: 0 20px 50px -15px hsl(0 0% 0% / 0.6),
+    0 8px 20px -8px hsl(0 0% 0% / 0.4);
+  --elevation-hero: 0 30px 80px -20px hsl(0 0% 0% / 0.7),
+    0 10px 30px -10px hsl(0 0% 0% / 0.5);
+
+  --sidebar: 0 0% 7%; /* matches --surface === --background */
+  --sidebar-foreground: 0 0% 82%;
+  --sidebar-primary: 0 0% 88%;
+  --sidebar-primary-foreground: 0 0% 7%;
+  --sidebar-accent: 0 0% 15%; /* matches --muted */
+  --sidebar-accent-foreground: 0 0% 92%;
+  --sidebar-border: 0 0% 14%; /* matches --edge */
+  --sidebar-ring: 217 91% 60%;
+}
+
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-surface: hsl(var(--surface));
+  --color-surface-hover: hsl(var(--surface-hover));
+  --color-edge: hsl(var(--edge));
+  --color-edge-subtle: hsl(var(--edge-subtle));
+  --color-brand: hsl(var(--brand));
+  --color-brand-dim: hsl(var(--brand-dim));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-input-bg: hsl(var(--input-bg));
+  --color-ring: hsl(var(--ring));
+  --color-overlay: hsl(var(--overlay));
+  --color-sidebar: hsl(var(--sidebar));
+  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --color-sidebar-primary: hsl(var(--sidebar-primary));
+  --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
+  --color-sidebar-accent: hsl(var(--sidebar-accent));
+  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
+  --color-sidebar-border: hsl(var(--sidebar-border));
+  --color-sidebar-ring: hsl(var(--sidebar-ring));
+
+  --font-sans: var(--font-geist), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), "JetBrains Mono", ui-monospace,
+    monospace;
+
+  /* runcrate overrides the whole ramp ~6% tighter than Tailwind's default.
+     This is why the interface reads dense and precise. 2xl and up are NOT
+     overridden and keep the framework default, same as runcrate. */
+  --text-2xs: 0.6875rem;
+  --text-2xs--line-height: 1rem;
+  --text-xs: 0.78125rem;
+  --text-xs--line-height: 1.125rem;
+  --text-sm: 0.84375rem;
+  --text-sm--line-height: 1.375rem;
+  --text-base: 0.9375rem;
+  --text-base--line-height: 1.5rem;
+  --text-lg: 1.03125rem;
+  --text-lg--line-height: 1.625rem;
+  --text-xl: 1.15625rem;
+  --text-xl--line-height: 1.75rem;
+
+  /* Derived from --radius, so rounded-lg is 12px here, not the framework's
+     8px. xl (0.75rem) and 2xl (1rem) are left at the framework default —
+     runcrate does not override them either, which is why buttons
+     (rounded-xl) read slightly rounder than a card's internals. */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+
+  --shadow-card: var(--elevation-card);
+  --shadow-floating: var(--elevation-floating);
+  --shadow-hero: var(--elevation-hero);
+}
+
+@utility scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@layer base {
+  html {
+    -moz-text-size-adjust: none;
+    -webkit-text-size-adjust: none;
+    text-size-adjust: none;
+  }
+
+  * {
+    @apply border-border;
+    outline: none;
+  }
+
+  /* Override browser autofill highlight */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  textarea:-webkit-autofill,
+  textarea:-webkit-autofill:hover,
+  textarea:-webkit-autofill:focus {
+    -webkit-text-fill-color: hsl(var(--foreground));
+    -webkit-box-shadow: 0 0 0 1000px hsl(var(--background)) inset !important;
+    box-shadow: 0 0 0 1000px hsl(var(--background)) inset !important;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-geist), system-ui, -apple-system,
+      BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-weight: 400;
+    font-synthesis: none;
+    font-feature-settings: "kern" 1, "liga" 1, "calt" 1, "case" 1, "cpsp" 1;
+    letter-spacing: -0.011em;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    text-rendering: optimizeLegibility;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: hsl(var(--muted-foreground));
+  }
+
+  /* Auto-disappearing */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+    background-color: transparent;
+  }
+
+  ::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: rgba(155, 155, 155, 0.5);
+    border-radius: 10px;
+    transition: opacity 0.3s ease;
+    opacity: 0;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(155, 155, 155, 0.7);
+  }
+
+  *:hover::-webkit-scrollbar-thumb,
+  *:focus::-webkit-scrollbar-thumb,
+  *:active::-webkit-scrollbar-thumb {
+    opacity: 1;
+  }
+
+  /* Firefox scrollbar styling */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(155, 155, 155, 0.5) transparent;
+  }
+
+  /* Lock viewport for the panel shell — prevent body scroll, let the inner
+     container scroll. Login and the 404 do not mount the shell, so they keep
+     normal document scrolling. */
+  html:has([data-slot="sidebar-wrapper"]),
+  html:has([data-slot="sidebar-wrapper"]) body {
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  /* Scroll container — thin scrollbar inset from the border */
+  [data-slot="scroll-container"] {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted-foreground) / 0.15) transparent;
+  }
+  [data-slot="scroll-container"]::-webkit-scrollbar {
+    width: 8px;
+  }
+  [data-slot="scroll-container"]::-webkit-scrollbar-track {
+    background: transparent;
+    border-right: 4px solid transparent;
+    margin: 12px 0;
+  }
+  [data-slot="scroll-container"]::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.15);
+    border-radius: 4px;
+  }
+  [data-slot="scroll-container"]::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.25);
+  }
+}
+
+@layer components {
+  /*
+   * runcrate gets its enter/exit animations from `tailwindcss-animate` driven
+   * by Radix data attributes. There is no Radix here, so the four keyframes the
+   * hand-rolled dialog / menu / hover-card / toast actually need are written
+   * out. Durations match runcrate's `duration-200` and use ease-out — no
+   * bounce, no elastic.
+   */
+  @keyframes datum-overlay-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes datum-dialog-in {
+    from {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+  }
+
+  @keyframes datum-pop-in {
+    from {
+      opacity: 0;
+      transform: translateY(-4px) scale(0.97);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes datum-toast-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .datum-overlay {
+    animation: datum-overlay-in 200ms ease-out;
+  }
+
+  .datum-dialog {
+    animation: datum-dialog-in 200ms ease-out;
+  }
+
+  .datum-pop {
+    animation: datum-pop-in 140ms ease-out;
+  }
+
+  .datum-toast {
+    animation: datum-toast-in 200ms ease-out;
+  }
+
+  /* Sequence numbers, counts and ids must not jitter while polling. */
+  .datum-num {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /*
+   * runcrate's column-header treatment, lifted from the data tables in
+   * src/pages/dashboard/audit-log.tsx (`text-2xs font-medium
+   * text-muted-foreground uppercase tracking-wider`). Used for table headers
+   * and for field names inside detail panels, which is the same job.
+   */
+  .datum-microlabel {
+    @apply text-2xs font-medium text-muted-foreground uppercase tracking-wider;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

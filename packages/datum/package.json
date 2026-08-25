@@ -1,0 +1,51 @@
+{
+  "name": "@aeonmind/datum",
+  "version": "0.1.0",
+  "description": "The datum of record: an append-only, provenance-enforcing fact store for fleets of agents.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "bin": {
+    "datum": "./dist/cli/index.js"
+  },
+  "files": [
+    "dist",
+    "migrations",
+    "seeds",
+    "README.md"
+  ],
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "dev": "tsx watch src/cli/index.ts serve",
+    "test": "vitest run",
+    "test:invariants": "vitest run test/invariants.test.ts",
+    "cli": "tsx src/cli/index.ts"
+  },
+  "dependencies": {
+    "@fastify/cookie": "11.1.2",
+    "@fastify/static": "10.1.3",
+    "@node-rs/argon2": "2.1.0",
+    "fastify": "5.12.1",
+    "pg": "8.23.0",
+    "ulid": "3.0.2",
+    "zod": "4.4.3"
+  },
+  "//optionalDependencies": "Parsers are a build-time concern: `datum index` needs them, the server does not. Keeping them optional is what lets the runtime image ship without a native toolchain — the indexer imports them lazily and fails with an actionable message when absent.",
+  "optionalDependencies": {
+    "tree-sitter": "0.25.1",
+    "tree-sitter-c": "0.24.1",
+    "tree-sitter-cpp": "0.23.4",
+    "tree-sitter-python": "0.25.0",
+    "tree-sitter-rust": "0.24.0"
+  },
+  "devDependencies": {
+    "@types/node": "24.10.3",
+    "@types/pg": "8.23.1",
+    "tsx": "4.23.12",
+    "typescript": "5.9.3",
+    "vitest": "4.1.11"
+  }
+}

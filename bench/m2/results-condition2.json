@@ -1,0 +1,1059 @@
+[
+  {
+    "id": "S01",
+    "kind": "stale",
+    "question": "What is the measured MTP acceptance probability p?",
+    "expect": [
+      "0.4194"
+    ],
+    "poison": [
+      "0.485"
+    ],
+    "full": {
+      "resp": "NOT ON RECORD.",
+      "verdict": "abstain",
+      "dead": false
+    },
+    "grep": {
+      "resp": "0.4194 (26/62 accepted, B=1) \u2014 the \"p \u2248 0.485\" figure was retracted.",
+      "verdict": "correct",
+      "dead": true
+    },
+    "datum": {
+      "resp": "0.4194 (at B=1)",
+      "verdict": "correct",
+      "dead": false
+    },
+    "grep_patterns": [
+      "(MTP|multi[- ]token prediction)[^\\n]{0,80}accept",
+      "accept(ance|ed)?[ _-]?(rate|prob(ability)?|ratio)[^\\n]{0,40}[0-9]*\\.?[0-9]+",
+      "\\bp\\s*[=:]\\s*0?\\.[0-9]+"
+    ]
+  },
+  {
+    "id": "S02",
+    "kind": "stale",
+    "question": "How much is fixing MTP acceptance actually worth, as a multiplier?",
+    "expect": [
+      "1.55"
+    ],
+    "poison": [
+      "5.53"
+    ],
+    "full": {
+      "resp": "**~1.9\u00d7 at depth 2 (k=2), ~2.8\u00d7 at depth 3** \u2014 projected effective multipliers after draft overhead (k/(1+depth/43)); acceptance itself is UNMEASURED on Arc.",
+      "verdict": "wrong",
+      "dead": false
+    },
+    "grep": {
+      "resp": "**1.84\u00d7** \u2014 the measured best (accept_rate \u2248 0.42, ~1.84 tok/step at B=1); not the 2\u00d7 previously projected.",
+      "verdict": "wrong",
+      "dead": false
+    },
+    "datum": {
+      "resp": "1.55x (against the measured base)",
+      "verdict": "correct",
+      "dead": false
+    },
+    "grep_patterns": [
+      "(MTP|multi-token prediction).{0,80}(accept|speedup|multiplier|[0-9]+(\\.[0-9]+)?x)",
+      "accept(ance)?[- ]?(rate|len(gth)?).{0,80}([0-9]+(\\.[0-9]+)?\\s*[x\u00d7]|speedup|multiplier)",
+      "(speedup|multiplier|[0-9]+(\\.[0-9]+)?\\s*[x\u00d7]).{0,80}(MTP|specul|draft|accept)"
+    ]
+  },
+  {
+    "id": "S03",
+    "kind": "stale",
+    "question": "How many casts/launches per token does MHC's remaining b=1 budget actually cost?",
+    "expect": [
+      "86"
+    ],
+    "poison": [
+      "1571",
+      "1,571",
+      "5300",
+      "5,300"
+    ],
+    "full": {
+      "resp": "NOT ON RECORD",
+      "verdict": "abstain",
+      "dead": false
+    },
+    "grep": {
+      "resp": "86 launches/token",
+      "verdict": "correct",
+      "dead": false
+    },
+    "datum": {
+      "resp": "86 casts (launches) per token.",
+      "verdict": "correct",
+      "dead": false
+    },
+    "grep_patterns": [
+      "MHC.{0,40}\\b(b\\s*=\\s*1|budget)\\b",
+      "(casts?|launch(es)?|kernel launch(es)?)[^\\n]{0,40}per[- ]token",
+      "(remaining|residual|leftover)[^\\n]{0,30}budget[^\\n]{0,60}(cost|cast|launch)"
+    ]
+  },
+  {
+    "id": "S04",
+    "kind": "stale",
+    "question": "What is the aggregate tok/s target at B=256 on one H200?",
+    "expect": [
+      "14000",
+      "14,000"
+    ],
+    "poison": [
+      "16600",
+      "16,600",
+      "16602",
+      "16,602"
+    ],
+    "full": {
+      "resp": "14,000 tok/s",
+      "verdict": "correct",
+      "dead": false
+    },
+    "grep": {
+      "resp": "**14,000 tok/s** (aggregate at B=256, not yet reached).",
+      "verdict": "correct",
+      "dead": false
+    },
+    "datum": {
+      "resp": "14,000 tok/s",
+      "verdict": "correct",
+      "dead": false
+    },
+    "grep_patterns": [
+      "(?i)(aggregate|total).{0,30}tok(en)?s?[ _/-]*(per[ _-]*sec|/s|ps)",
+      "(?i)\\bB\\s*=\\s*256\\b|batch[ _-]*(size)?\\s*[=:]?\\s*256",
+      "(?i)h200.{0,60}(tok/s|tokens?/s|throughput|target)"
+    ]
+  },
+  {
+    "id": "S05",
+    "kind": "stale",
+    "question": "How many bits per parameter do we operate on?",
+    "expect": [
+      "2.09"
+    ],
+    "poison": [
+      "1.9"
+    ],
+    "full": {
+      "resp": "2.09 bpw",
+      "verdict": "correct",
+      "dead": false
+    },
+    "grep": {
+      "resp": "2.09 bits per weight.",
+      "verdict": "correct",
+      "dead": false
+    },
+    "datum": {
+      "resp": "2.09 bits per parameter.",
+      "verdict": "correct",
+      "dead": false
+    },
+    "grep_patterns": [
+      "(bits?[ _-]?per[ _-]?param(eter)?|bpp|bpw)",
+      "\\b([1-9]|1[0-6])[ -]?bit\\b.*(param|weight|quant)",
+      "(quantiz|precision|fp16|bf16|int8|int4|fp8)"
+    ]
+  },
+  {
+    "id": "S06",
+    "kind": "stale",
+    "question": "How many bytes is the published qtip2b artifact, and how many shards?",
+    "expect": [
+      "74190197268",
+      "74.19",
+      "8"
+    ],
+    "poison": [
+      "68",
+      "7 shard",
+      "7-shard"
+    ],
+    "full": {
+      "resp": "**74,120,991,328 bytes (74.12 GB), 8 shards + residual** \u2014 though note this artifact was never actually published (upload blocked; the HF repo `\u2026-qtip2b` is public but empty).",
+      "verdict": "correct",
+      "dead": false
+    },
+    "grep": {
+      "resp": "74,120,986,972 bytes (~74.12 GB) across 8 shards (plus residual.safetensors).",
+      "verdict": "correct",
+      "dead": false
+    },
+    "datum": {
+      "resp": "74,190,197,268 bytes across 8 shards plus a residual.",
+      "verdict": "correct",
+      "dead": false
+    },
+    "grep_patterns": [
+      "(qtip2b|qtip-2b|qtip_2b)",
+      "(qtip2b|qtip-2b).{0,80}(bytes?|size|shard|B\\b)",
+      "(total_size|total_bytes|size_bytes|num_shards|shard_count|shards?)[^a-z]{0,20}[0-9]"
+    ]
+  },
+  {
+    "id": "S07",
+    "kind": "stale",
+    "question": "Is b=1 latency-bound or instruction-bound?",
+    "expect": [
+      "instruction"
+    ],
+    "poison": [
+      "latency",
+      "memory-bound",
+      "4%"
+    ],
+    "full": {
+      "resp": "# Instruction-bound.\n\n`qtip2b_grouped_gemm` is **ISSUE-BOUND** \u2014 75% issue-active, only 5% DRAM, 38% occupancy \u2014 and the verdict on record is that no kernel fix reaches it; only a cheaper-to-decode format does.\n\nFor b=1 specifically, the same conclusion was reached separately for the FP8 GEMV: `fp8_gemv_warp` is **instruction-bound**, not memory-latency-bound, because of a per-4-byte integer divide (`k / block_size_x`, signed, non-const parameter). The ceiling works out to 1.5\u20133.0 TB/s against a ~4.0 TB/s achievable memory roof \u2014 under the roof at both ends, so instruction-bound *a fortiori*.\n\nNote the correction that came with it: the earlier \"4% memory-controller utilisation \u21d2 latency-bound\" story is **retracted**. And the b=1 step also carries a 30.5% host-sampler share plus an unprofiled 9.5% softmax_f32 \u2014 host overhead, not memory latency.",
+      "verdict": "correct",
+      "dead": true
+    },
+    "grep": {
+      "resp": "Instruction-bound (the \"latency-bound / 4% memory-controller\" claim was retracted).",
+      "verdict": "correct",
+      "dead": true
+    },
+    "datum": {
+      "resp": "NOT ON RECORD",
+      "verdict": "abstain",
+      "dead": false
+    },
+    "grep_patterns": [
+      "(?i)b\\s*=\\s*1.*(latency|instruction)[- ]bound",
+      "(?i)(latency|instruction)[- ]bound",
+      "(?i)batch(\\s*size)?\\s*(=|of)?\\s*1\\b.*(bound|bottleneck|memory[- ]bandwidth)"
+    ]
+  },
+  {
+    "id": "S08",
+    "kind": "stale",
+    "question": "Is TCFRAG a pure win that costs only instructions?",
+    "expect": [
+      "no",
+      "not",
+      "retain",
+      "63",
+      "64,262",
+      "64262"
+    ],
+    "poison": [
+      "pure win",
+      "only instructions"
+    ],
+    "full": {
+      "resp": "**No \u2014 measured on the box, TCFRAG retains ~63 GB** (`ARC_QTIP_TCFRAG=0` frees 64,262 MiB vs 262 MiB with it on), because `tcfrag_words` is a per-weight `OnceLock` caching a second repacked copy for the process lifetime. PR #203 costed only instructions, never that memory; the retention is what left decode at 844 MiB free and caused the ~22-token OOM. Fixed by making TCFRAG opt-in (PR #209).",
+      "verdict": "correct",
+      "dead": true
+    },
+    "grep": {
+      "resp": "No. That claim was retracted: TCFRAG retains ~63 GB (`tcfrag_words` OnceLock caches a second packed copy of every weight). `ARC_QTIP_TCFRAG=0` frees 64,262 MiB vs 262 MiB with it on; it's now opt-in (PR #209).",
+      "verdict": "correct",
+      "dead": false
+    },
+    "datum": {
+      "resp": "NOT ON RECORD",
+      "verdict": "correct",
+      "dead": false
+    },
+    "grep_patterns": [
+      "TCFRAG",
+      "TCFRAG.{0,200}(cost|overhead|tradeoff|trade-off|downside|penalt|regress|slow)",
+      "(cost|overhead|tradeoff|trade-off|downside|drawback|penalt|regress|memory|latency|fragment).{0,200}TCFRAG"
+    ]
+  },
+  {
+    "id": "S09",
+    "kind": "stale",
+    "question": "What does clone_in_cache actually cost per step?",
+    "expect": [
+      "572"
+    ],
+    "poison": [
+      "28.3"
+    ],
+    "full": {
+      "resp": "NOT ON RECORD",
+      "verdict": "abstain",
+      "dead": false
+    },
+    "grep": {
+      "resp": "**+572 ms/step** (the earlier \"28.3 ms/step\" figure was retracted as wrong by ~20\u00d7) \u2014 measured at constant batch width (uniform B=32).",
+      "verdict": "correct",
+      "dead": true
+    },
+    "datum": {
+      "resp": "NOT ON RECORD",
+      "verdict": "abstain",
+      "dead": false
+    },
+    "grep_patterns": [
+      "clone_in_cache",
+      "clone_in_cache.{0,80}(cost|overhead|ms|alloc|per[- ]step|latency)",
+      "(cost|overhead|latency|alloc(ation)?s?|copy|memcpy).{0,80}clone_in_cache"
+    ]
+  },
+  {
+    "id": "S10",
+    "kind": "stale",
+    "question": "What page_size does SGLang use for V4?",
+    "expect": [
+      "256"
+    ],
+    "poison": [
+      "page_size=1"
+    ],
+    "full": {
+      "resp": "NOT ON RECORD.",
+      "verdict": "abstain",
+      "dead": false
+    },
+    "grep": {
+      "resp": "**256** \u2014 for DeepSeek-V4 SGLang overrides `page_size` to 256 (the earlier \"page_size=1\" claim was retracted).",
+      "verdict": "correct",
+      "dead": true
+    },
+    "datum": {
+      "resp": "NOT ON RECORD",
+      "verdict": "abstain",
+      "dead": false
+    },
+    "grep_patterns": [
+      "",
+      "page_size",
+      ""
+    ]
+  },
+  {
+    "id": "S11",
+    "kind": "stale",
+    "question": "Does the re-bake get cheaper at K8/V4/L12?",
+    "expect": [
+      "no",
+      "more",
+      "8x",
+      "~8",
+      "1700",
+      "1,700"
+    ],
+    "poison": [
+      "cheaper"
+    ],
+    "full": {
+      "resp": "NOT ON RECORD",
+      "verdict": "correct",
+      "dead": false
+    },
+    "grep": {
+      "resp": "No. That claim is retracted/inverted \u2014 it's ~8\u00d7 **more** expensive (~213 \u2192 ~1,700 s/layer \u2248 20 h \u2248 $30), since the production baker is beam and issue-bound, with cost `(n/V)\u00d7W\u00d72^K`.",
+      "verdict": "correct",
+      "dead": false
+    },
+    "datum": {
+      "resp": "NOT ON RECORD \u2014 the record only references a K=9/V=4/L=12 re-bake; no K8 variant or its cost appears.",
+      "verdict": "correct",
+      "dead": false
+    },
+    "grep_patterns": [
+      "(re-?bake|rebake).{0,40}(cost|cheap|expens|price|time|budget)",
+      "(K8|V4|L12)[^\\n]{0,60}(re-?bake|rebake)",
+      "(cheap|cost|faster|speedup|reduc)[^\\n]{0,60}(K\\s*=?\\s*8|V\\s*=?\\s*4|L\\s*=?\\s*12)"
+    ]
+  },
+  {
+    "id": "S12",
+    "kind": "stale",
+    "question": "Does K4/V4/L12 at 1.38 inst/wt sit at budget and recover the full figure?",
+    "expect": [
+      "no",
+      "not",
+      "retracted",
+      "1 bpw",
+      "2-bpw",
+      "2 bpw"
+    ],
+    "poison": [
+      "1413",
+      "1,413",
+      "16602",
+      "16,602",
+      "at budget"
+    ],
+    "full": {
+      "resp": "NOT ON RECORD",
+      "verdict": "correct",
+      "dead": false
+    },
+    "grep": {
+      "resp": "No. That claim is **RETRACTED** \u2014 K=4/V=4 is 1.0 bpw (K = bits/symbol), scored against a 2\u2011bpw budget, so it is the wrong budget class and does not recover the full 16,602.",
+      "verdict": "correct",
+      "dead": true
+    },
+    "datum": {
+      "resp": "NOT ON RECORD",
+      "verdict": "correct",
+      "dead": false
+    },
+    "grep_patterns": [
+      "(K4|V4|L12)[^\\n]*1\\.38",
+      "1\\.38[^\\n]*(inst/wt|inst per wt|instructions?[ /-]?per[ -]?weight)",
+      "(at|on|within|under)[ -]?budget[^\\n]*(recover|full|complete)|recover[^\\n]*full[^\\n]*(figure|score|performance)"
+    ]
+  },
+  {
+    "id": "S13",
+    "kind": "stale",
+    "question": "Is the fused 512 attention kernel neutral?",
+    "expect": [
+      "no",
+      "not",
+      "0 times",
+      "zero",
+      "unknown"
+    ],
+    "poison": [
+      "neutral"
+    ],
+    "full": {
+      "resp": "No \u2014 it fired as a landmine, causing four days of degenerate output (default-ON, self-admitted unverified).",
+      "verdict": "correct",
+      "dead": false
+    },
+    "grep": {
+      "resp": "No \u2014 that claim was retracted. The flag never fired (0 entries in 320 decode steps \u00d7 43 layers; it sits downstream of an early return), and no fused head_dim-512 attention kernel exists in the tree. Its cost is UNKNOWN.",
+      "verdict": "correct",
+      "dead": false
+    },
+    "datum": {
+      "resp": "NOT ON RECORD",
+      "verdict": "correct",
+      "dead": false
+    },
+    "grep_patterns": [
+      "(fused|fusion).{0,40}(attn|attention).{0,40}kernel|kernel.{0,40}fused.{0,40}attention",
+      "(seq(uence)?[_ -]?len(gth)?|ctx|d[_ -]?model|head[_ -]?dim)?[^0-9]{0,20}512[^0-9]{0,40}(attn|attention|kernel|fused)",
+      "(neutral|no[_ -]?(change|regression|speedup)|parity|within noise|break[- ]?even|regress(ion|ed)?)"
+    ]
+  },
+  {
+    "id": "S14",
+    "kind": "stale",
+    "question": "Is the decode tail 27.2% with fp8_gemv_warp at 16.0%?",
+    "expect": [
+      "no",
+      "not",
+      "retracted",
+      "unsourced",
+      "does not exist"
+    ],
+    "poison": [
+      "27.2"
+    ],
+    "full": {
+      "resp": "NOT ON RECORD",
+      "verdict": "correct",
+      "dead": false
+    },
+    "grep": {
+      "resp": "No \u2014 both figures are **retracted as unsourced on master**. Their only source, `docs/engineering/OPENROUTER_READY.md`, exists only on branches (`agent/tail-sinkhorn-warp-v2`, `agent/decode-share-probe`), not master. No current verified value is on record (and PR #210's derived \"~1.3 ms/token, 34.2 \u2192 ~35.8 tok/s\" projection inherits the retraction).",
+      "verdict": "correct",
+      "dead": false
+    },
+    "datum": {
+      "resp": "NOT ON RECORD",
+      "verdict": "correct",
+      "dead": false
+    },
+    "grep_patterns": [
+      "(27\\.2|16\\.0)[[:space:]]*%",
+      "fp8_gemv_warp",
+      "decode[ _-]?tail"
+    ]
+  },
+  {
+    "id": "C01",
+    "kind": "current",
+    "question": "What is the measured aggregate tok/s at B=256 on one H200?",
+    "expect": [
+      "757.5"
+    ],
+    "poison": [
+      "16600",
+      "16,600",
+      "14000"
+    ],
+    "full": {
+      "resp": "757.5 tok/s",
+      "verdict": "correct",
+      "dead": false
+    },
+    "grep": {
+      "resp": "**757.54 tok/s** (5 reps, 748.8\u2013761.4) \u2014 the current post-flip figure, superseding 575.12 (candidate baseline), 355.42 (pre-wave), and the older 111.69.",
+      "verdict": "correct",
+      "dead": false
+    },
+    "datum": {
+      "resp": "757.5 tok/s",
+      "verdict": "correct",
+      "dead": false
+    },
+    "grep_patterns": [
+      "(?i)(aggregate|total).{0,20}tok(en)?s?[ _/-]*(per[ _-]*sec|/s|ps)",
+      "(?i)b\\s*=\\s*256|batch[ _-]*(size)?\\s*=?\\s*256",
+      "(?i)h200.{0,80}(tok/s|tokens/s|throughput)"
+    ]
+  },
+  {
+    "id": "C02",
+    "kind": "current",
+    "question": "What is the measured single-user tok/s?",
+    "expect": [
+      "44.68"
+    ],
+    "poison": [
+      "640"
+    ],
+    "full": {
+      "resp": "44.68 tok/s",
+      "verdict": "correct",
+      "dead": false
+    },
+    "grep": {
+      "resp": "**18.27 tok/s aggregate / 17.99 per-user p50** (session 7, `qtip2b`, b=1) \u2014 this supersedes the earlier 14.58 tok/s figure.",
+      "verdict": "wrong",
+      "dead": false
+    },
+    "datum": {
+      "resp": "44.68 tok/s (at b=1)",
+      "verdict": "correct",
+      "dead": false
+    },
+    "grep_patterns": [
+      "(tok(ens)?[ _/-]?(per|/)[ _-]?s(ec(ond)?)?|tok/s|tps)",
+      "single[ _-]?(user|stream|session|concurrency|client).{0,40}(tok|tps|throughput)",
+      "(throughput|decode|generation|gen)[ _-]?(speed|rate).{0,30}[0-9]+(\\.[0-9]+)?[ ]?tok"
+    ]
+  },
+  {
+    "id": "C03",
+    "kind": "current",
+    "question": "What is the measured cost per Mtok in USD?",
+    "expect": [
+      "1.8"
+    ],
+    "poison": [],
+    "full": {
+      "resp": "$1.8 USD/Mtok",
+      "verdict": "correct",
+      "dead": false
+    },
+    "grep": {
+      "resp": "**$1.80/Mtok** \u2014 current best measured (B=256, 757.54 tok/s decode aggregate); supersedes earlier $2.38, $3.85, and $12.06/Mtok figures.",
+      "verdict": "correct",
+      "dead": false
+    },
+    "datum": {
+      "resp": "1.8 USD per million tokens",
+      "verdict": "correct",
+      "dead": false
+    },
+    "grep_patterns": [
+      "(?i)cost[^\\n]{0,20}per[^\\n]{0,10}(mtok|million tokens)",
+      "(?i)\\$[0-9]+(\\.[0-9]+)?[^\\n]{0,20}/[^\\n]{0,5}mtok",
+      "(?i)(mtok|per million tokens)[^\\n]{0,40}\\$[0-9]+(\\.[0-9]+)?"
+    ]
+  },
+  {
+    "id": "C04",
+    "kind": "current",
+    "question": "What is the fitted step-time curve?",
+    "expect": [
+      "95",
+      "0.95"
+    ],
+    "poison": [],
+    "full": {
+      "resp": "step_ms \u2248 95 + 0.95\u00b7B",
+      "verdict": "correct",
+      "dead": false
+    },
+    "grep": {
+      "resp": "Linear in batch size: step_time \u2248 0.95 ms/seq \u00d7 B + 95 ms (fit over B\u2208{32\u2026256}; B=8 is off-curve at ~108 ms/step).",
+      "verdict": "correct",
+      "dead": false
+    },
+    "datum": {
+      "resp": "step_ms \u2248 95 + 0.95*B",
+      "verdict": "correct",
+      "dead": false
+    },
+    "grep_patterns": [
+      "(fitted|fit).{0,20}(step[- ]?time|step time).{0,20}(curve|model|law)",
+      "step[- ]?time.{0,30}(curve|fit|regression|scaling)",
+      "(power[- ]?law|exponential|linear|log(arithmic)?).{0,40}step[- ]?time"
+    ]
+  },
+  {
+    "id": "C05",
+    "kind": "current",
+    "question": "Which kernel is the primary bottleneck?",
+    "expect": [
+      "qtip2b_grouped_gemm"
+    ],
+    "poison": [],
+    "full": {
+      "resp": "qtip2b_grouped_gemm",
+      "verdict": "correct",
+      "dead": false
+    },
+    "grep": {
+      "resp": "`qtip2b_grouped_gemm` \u2014 53% of batch GPU time (issue-bound).",
+      "verdict": "correct",
+      "dead": false
+    },
+    "datum": {
+      "resp": "**qtip2b_grouped_gemm** \u2014 53% of batch GPU time (issue-bound).",
+      "verdict": "correct",
+      "dead": false
+    },
+    "grep_patterns": [
+      "(bottleneck|hotspot|hot spot|dominat(es|ed|ing)|critical path)",
+      "(kernel|gpu kernel|cuda kernel).{0,40}(bottleneck|slowest|dominat|[0-9]+(\\.[0-9]+)?\\s*%)",
+      "(profil(e|ing)|nsight|nvprof|nsys|ncu|perf report).{0,60}(kernel|time|%)"
+    ]
+  },
+  {
+    "id": "C06",
+    "kind": "current",
+    "question": "What share of batch GPU time does the primary bottleneck kernel take?",
+    "expect": [
+      "53"
+    ],
+    "poison": [],
+    "full": {
+      "resp": "53%",
+      "verdict": "correct",
+      "dead": false
+    },
+    "grep": {
+      "resp": "53% \u2014 `qtip2b_grouped_gemm`",
+      "verdict": "correct",
+      "dead": false
+    },
+    "datum": {
+      "resp": "53 percent (qtip2b_grouped_gemm)",
+      "verdict": "correct",
+      "dead": false
+    },
+    "grep_patterns": [
+      "(bottleneck|hotspot|dominat(es|ed|ing)).{0,60}kernel|kernel.{0,60}(bottleneck|hotspot|dominat)",
+      "[0-9]{1,3}(\\.[0-9]+)?\\s?%\\s?(of\\s+)?(total\\s+|batch\\s+|overall\\s+)?(gpu|kernel|batch)\\s*(time|duration|runtime)",
+      "(gpu|kernel)\\s*time\\s*(share|breakdown|profile|percent(age)?)|nsys|nvprof|torch\\.profiler"
+    ]
+  },
+  {
+    "id": "C07",
+    "kind": "current",
+    "question": "What is the hard bake budget in minutes on a single card?",
+    "expect": [
+      "60"
+    ],
+    "poison": [
+      "30"
+    ],
+    "full": {
+      "resp": "60",
+      "verdict": "correct",
+      "dead": false
+    },
+    "grep": {
+      "resp": "NOT ON RECORD",
+      "verdict": "abstain",
+      "dead": false
+    },
+    "datum": {
+      "resp": "60 minutes",
+      "verdict": "correct",
+      "dead": false
+    },
+    "grep_patterns": [
+      "(hard[ -]?bake).{0,80}(budget|minutes|min\\b)",
+      "(budget|minutes|min\\b).{0,80}(hard[ -]?bake)",
+      "hard[ -]?bake.{0,120}(single|one)[ -]card"
+    ]
+  },
+  {
+    "id": "C08",
+    "kind": "current",
+    "question": "What is the bake budget in seconds per layer?",
+    "expect": [
+      "83.7"
+    ],
+    "poison": [],
+    "full": {
+      "resp": "83.7 s/layer (\u226460 min single-card over 43 layers)",
+      "verdict": "correct",
+      "dead": false
+    },
+    "grep": {
+      "resp": "NOT ON RECORD",
+      "verdict": "abstain",
+      "dead": false
+    },
+    "datum": {
+      "resp": "**83.7 seconds per layer** (60 minutes over 43 layers).",
+      "verdict": "correct",
+      "dead": false
+    },
+    "grep_patterns": [
+      "bake\\s*budget",
+      "budget.{0,20}(seconds?|sec|s)\\s*(per|/)\\s*layer",
+      "(seconds?|sec|ms)\\s*(per|/)\\s*layer"
+    ]
+  },
+  {
+    "id": "C09",
+    "kind": "current",
+    "question": "What is the single-user tok/s target?",
+    "expect": [
+      "640"
+    ],
+    "poison": [
+      "1413",
+      "1,413"
+    ],
+    "full": {
+      "resp": "**640 tok/s** (not yet reached \u2014 live target).",
+      "verdict": "correct",
+      "dead": false
+    },
+    "grep": {
+      "resp": "**250 tok/s at b=1** (Jish, set 2026\u201108\u201120).",
+      "verdict": "wrong",
+      "dead": false
+    },
+    "datum": {
+      "resp": "640 tok/s (not yet reached)",
+      "verdict": "correct",
+      "dead": false
+    },
+    "grep_patterns": [
+      "tok(en)?s?[ _/-]*(per[ _-]*)?s(ec(ond)?)?[^a-z]{0,12}(target|goal|budget|slo|>=|\u2265|[0-9])",
+      "(single[ _-]?user|per[ _-]?user|1[ _-]?user|interactive|solo)[^\\n]{0,80}tok",
+      "(target|goal|slo|budget|requirement)[^\\n]{0,80}(tok/s|tokens?[ _/-]per[ _-]?s|tps)"
+    ]
+  },
+  {
+    "id": "C10",
+    "kind": "current",
+    "question": "What GSM8K percent is the standing commitment under our protocol?",
+    "expect": [
+      "90"
+    ],
+    "poison": [
+      "90.8",
+      "96"
+    ],
+    "full": {
+      "resp": "90%",
+      "verdict": "correct",
+      "dead": true
+    },
+    "grep": {
+      "resp": "**90%** (D6 \u2014 \"90+ GSM8K\", though the record notes the floor is now provisional/not met)",
+      "verdict": "correct",
+      "dead": true
+    },
+    "datum": {
+      "resp": "90 percent",
+      "verdict": "correct",
+      "dead": true
+    },
+    "grep_patterns": [
+      "GSM8K.{0,40}(commit|standing|threshold|floor|minimum|baseline)",
+      "(standing|committed?|guaranteed|minimum|floor).{0,40}GSM8K.{0,40}[0-9]{1,3}(\\.[0-9]+)?[[:space:]]*%",
+      "GSM8K[^\\n]{0,60}[0-9]{1,3}(\\.[0-9]+)?[[:space:]]*%"
+    ]
+  },
+  {
+    "id": "C11",
+    "kind": "current",
+    "question": "What is the Runcrate balance in USD?",
+    "expect": [
+      "98.87"
+    ],
+    "poison": [],
+    "full": {
+      "resp": "$98.87",
+      "verdict": "correct",
+      "dead": false
+    },
+    "grep": {
+      "resp": "**$98.87**",
+      "verdict": "correct",
+      "dead": false
+    },
+    "datum": {
+      "resp": "98.87 USD",
+      "verdict": "correct",
+      "dead": false
+    },
+    "grep_patterns": [
+      "(?i)runcrate.{0,80}(balance|usd|\\$[0-9])",
+      "(?i)(balance|usd)[^\\n]{0,80}runcrate",
+      "(?i)runcrate[^\\n]{0,120}[\\$\u20ac\u00a3]?\\s?[0-9][0-9,\\.]*(\\s?(usd|dollars))?"
+    ]
+  },
+  {
+    "id": "C12",
+    "kind": "current",
+    "question": "Which single PR is allowed to target master?",
+    "expect": [
+      "194"
+    ],
+    "poison": [],
+    "full": {
+      "resp": "#194",
+      "verdict": "correct",
+      "dead": false
+    },
+    "grep": {
+      "resp": "PR #194",
+      "verdict": "correct",
+      "dead": false
+    },
+    "datum": {
+      "resp": "PR #194",
+      "verdict": "correct",
+      "dead": false
+    },
+    "grep_patterns": [
+      "(only|single).{0,40}PR.{0,40}(target|against|into|to).{0,20}master",
+      "target(s|ing)? +master",
+      "(direct|allowed|exception).{0,60}master"
+    ]
+  },
+  {
+    "id": "C13",
+    "kind": "current",
+    "question": "What does cudnn cost on H200 decode?",
+    "expect": [
+      "62"
+    ],
+    "poison": [],
+    "full": {
+      "resp": "-62% decode",
+      "verdict": "correct",
+      "dead": false
+    },
+    "grep": {
+      "resp": "\u221262% decode throughput (5.45 vs 14.58 tok/s on V4, session-4) \u2014 the record does not tie that measurement to an H200 specifically.",
+      "verdict": "correct",
+      "dead": false
+    },
+    "datum": {
+      "resp": "A 62% loss of decode throughput (measured in session 4) \u2014 the cudnn attention path is banned.",
+      "verdict": "correct",
+      "dead": false
+    },
+    "grep_patterns": [
+      "(?i)cudnn.{0,80}(h200|decode)",
+      "(?i)h200.{0,80}(cudnn|decode).{0,80}(cost|latency|ms|us|overhead)",
+      "(?i)(cudnn|cudnn_attn|cudnn.?benchmark).{0,60}(cost|overhead|latency|ms|\u00b5s|us\\b)"
+    ]
+  },
+  {
+    "id": "C14",
+    "kind": "current",
+    "question": "What does the ragged pair cost as shipped?",
+    "expect": [
+      "41"
+    ],
+    "poison": [],
+    "full": {
+      "resp": "-41%",
+      "verdict": "correct",
+      "dead": false
+    },
+    "grep": {
+      "resp": "\u221241% as shipped (337.7 vs 575.1) \u2014 so it stays OFF.",
+      "verdict": "correct",
+      "dead": false
+    },
+    "datum": {
+      "resp": "**-41% throughput** as shipped \u2014 the path re-materialises the pair on every call (banned).",
+      "verdict": "correct",
+      "dead": false
+    },
+    "grep_patterns": [
+      "(ragged|distressed)[[:space:]]+pair",
+      "ragged pair.{0,80}(price|cost|\\$[0-9]+)",
+      "(shipping|shipped|delivered)[[:space:]]*(cost|price|total)?.{0,40}\\$[0-9]+"
+    ]
+  },
+  {
+    "id": "C15",
+    "kind": "current",
+    "question": "What does SAMPLE_ON_DEVICE cost?",
+    "expect": [
+      "45"
+    ],
+    "poison": [],
+    "full": {
+      "resp": "-45%",
+      "verdict": "correct",
+      "dead": false
+    },
+    "grep": {
+      "resp": "A \u221245% throughput regression (317.6 vs 575.1), with STEP_us sample time rising 25.9\u2192357.0 ms (7.4%\u219257% share). Monetary cost: NOT ON RECORD.",
+      "verdict": "correct",
+      "dead": false
+    },
+    "datum": {
+      "resp": "45% slower (throughput delta -45%).",
+      "verdict": "correct",
+      "dead": false
+    },
+    "grep_patterns": [
+      "(?i)SAMPLE_ON_DEVICE",
+      "(?i)SAMPLE_ON_DEVICE.{0,80}(cost|price|\\$|USD|fee|billing)",
+      "(?i)(cost|price|pricing|\\$[0-9]).{0,80}SAMPLE_ON_DEVICE"
+    ]
+  },
+  {
+    "id": "P01",
+    "kind": "provenance",
+    "question": "Has 640 tok/s single-user been reached?",
+    "expect": [
+      "no",
+      "not"
+    ],
+    "poison": [
+      "yes",
+      "reached"
+    ],
+    "full": {
+      "resp": "No \u2014 it has not been reached; it is a live target (measured 44.68 tok/s).",
+      "verdict": "correct",
+      "dead": true
+    },
+    "grep": {
+      "resp": "No \u2014 not reached; it remains a live target.",
+      "verdict": "correct",
+      "dead": true
+    },
+    "datum": {
+      "resp": "No \u2014 it has not been reached; it remains a live target (current measured single-user decode is 44.68 tok/s).",
+      "verdict": "correct",
+      "dead": true
+    },
+    "grep_patterns": [
+      "(640|6[0-9]{2})[[:space:]]*(tok|tokens?)[[:space:]]*/?[[:space:]]*(s|sec)",
+      "(tok|tokens?)[/ ]?s(ec)?.{0,40}(single|per)[- ]?user",
+      "single[- ]?user.{0,40}(throughput|tok|tokens?/s|latency|decode)"
+    ]
+  },
+  {
+    "id": "P02",
+    "kind": "provenance",
+    "question": "Has 14,000 tok/s aggregate at B=256 been reached?",
+    "expect": [
+      "no",
+      "not"
+    ],
+    "poison": [
+      "yes",
+      "reached"
+    ],
+    "full": {
+      "resp": "No \u2014 not reached. It is a live target (measured: 757.5 tok/s).",
+      "verdict": "correct",
+      "dead": true
+    },
+    "grep": {
+      "resp": "No \u2014 not reached (measured peak is 111.69 tok/s aggregate at B=256).",
+      "verdict": "correct",
+      "dead": true
+    },
+    "datum": {
+      "resp": "No \u2014 confirmed not reached (currently 757.5 tok/s).",
+      "verdict": "correct",
+      "dead": true
+    },
+    "grep_patterns": [
+      "",
+      "(14[,.]?000|14k)\\s*(tok|tokens?)[/ ]?s",
+      "(tok|tokens?)[/ ]?(s|sec)[^\\n]{0,40}\\b(B|batch)\\s*[=: ]\\s*256"
+    ]
+  },
+  {
+    "id": "P03",
+    "kind": "provenance",
+    "question": "Is there a reproducible GSM8K measurement on record with a commit and protocol?",
+    "expect": [
+      "no",
+      "not",
+      "null",
+      "none"
+    ],
+    "poison": [
+      "yes",
+      "96"
+    ],
+    "full": {
+      "resp": "No. `measured.gsm8k_pct` is null \u2014 96% is confirmed by Jish but has no commit, date, or protocol on record, so it is not reproducible or publishable.",
+      "verdict": "correct",
+      "dead": true
+    },
+    "grep": {
+      "resp": "No \u2014 the 96% is believed but unreproducible: `memory/STATE.json` keeps `gsm8k_pct` null because no commit, date or protocol record survives for it.",
+      "verdict": "correct",
+      "dead": true
+    },
+    "datum": {
+      "resp": "No. The record states no reproducible GSM8K result exists under the protocol \u2014 no commit, date, or protocol record survives, so the value is unknown (engine.gsm8k_pct = null). Jish's testimony of 96% is contested and unreproducible until the ref is recovered or it is re-measured.",
+      "verdict": "correct",
+      "dead": true
+    },
+    "grep_patterns": [
+      "(gsm8k|grade[- ]school math)",
+      "gsm8k.{0,80}(commit|sha|[0-9a-f]{7,40})|(commit|sha|[0-9a-f]{7,40}).{0,80}gsm8k",
+      "(gsm8k|eval).{0,120}(reproduc|protocol|seed|n[- ]shot|8[- ]shot|maj@|temperature|harness|lm[- ]eval)"
+    ]
+  },
+  {
+    "id": "P04",
+    "kind": "provenance",
+    "question": "Was the <=60-minute single-card bake ever reached?",
+    "expect": [
+      "yes",
+      "once",
+      "reached"
+    ],
+    "poison": [],
+    "full": {
+      "resp": "Yes \u2014 reached once, then lost to model confusion.",
+      "verdict": "correct",
+      "dead": false
+    },
+    "grep": {
+      "resp": "Yes \u2014 it was reached once, but then lost to model confusion (per STATE.json).",
+      "verdict": "correct",
+      "dead": false
+    },
+    "datum": {
+      "resp": "Contested / unresolved. Jish (confirmed-by-human) states it was reached once and then lost to model confusion; but no surviving instrument record or commit shows a 43-layer bake finishing under 60 minutes on one card, so the record also carries an \"unknown\" value. Both assertions are live.",
+      "verdict": "correct",
+      "dead": false
+    },
+    "grep_patterns": [
+      "(<=|\u2264|under |less than )\\s*60[- ]?min",
+      "(single[- ]card|one[- ]card).{0,40}(bake|render|compile)",
+      "bake.{0,30}(time|duration).{0,30}([0-9]{1,3})\\s*(min|m\\b)"
+    ]
+  }
+]

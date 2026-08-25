@@ -1,0 +1,465 @@
+[
+  {
+    "id": "S01",
+    "kind": "stale",
+    "question": "What is the measured MTP acceptance probability p?",
+    "expect": [
+      "0.4194"
+    ],
+    "poison": [
+      "0.485"
+    ],
+    "source": "memory/RETRACTED.md",
+    "note": "0.485 appears 11x in the corpus; 0.4194 is the measured value"
+  },
+  {
+    "id": "S02",
+    "kind": "stale",
+    "question": "How much is fixing MTP acceptance actually worth, as a multiplier?",
+    "expect": [
+      "1.55"
+    ],
+    "poison": [
+      "5.53"
+    ],
+    "source": "memory/RETRACTED.md",
+    "note": "x5.53 appears 27x in the corpus and is retracted"
+  },
+  {
+    "id": "S03",
+    "kind": "stale",
+    "question": "How many casts/launches per token does MHC's remaining b=1 budget actually cost?",
+    "expect": [
+      "86"
+    ],
+    "poison": [
+      "1571",
+      "1,571",
+      "5300",
+      "5,300"
+    ],
+    "source": "memory/RETRACTED.md",
+    "note": ""
+  },
+  {
+    "id": "S04",
+    "kind": "stale",
+    "question": "What is the aggregate tok/s target at B=256 on one H200?",
+    "expect": [
+      "14000",
+      "14,000"
+    ],
+    "poison": [
+      "16600",
+      "16,600",
+      "16602",
+      "16,602"
+    ],
+    "source": "memory/STATE.json targets.aggregate_tok_s_at_b256",
+    "note": ""
+  },
+  {
+    "id": "S05",
+    "kind": "stale",
+    "question": "How many bits per parameter do we operate on?",
+    "expect": [
+      "2.09"
+    ],
+    "poison": [
+      "1.9"
+    ],
+    "source": "memory/STATE.json confirmed_by_jish.bpw_operating_number",
+    "note": ""
+  },
+  {
+    "id": "S06",
+    "kind": "stale",
+    "question": "How many bytes is the published qtip2b artifact, and how many shards?",
+    "expect": [
+      "74190197268",
+      "74.19",
+      "8"
+    ],
+    "poison": [
+      "68",
+      "7 shard",
+      "7-shard"
+    ],
+    "source": "memory/STATE.json measured.artifact_bytes",
+    "note": ""
+  },
+  {
+    "id": "S07",
+    "kind": "stale",
+    "question": "Is b=1 latency-bound or instruction-bound?",
+    "expect": [
+      "instruction"
+    ],
+    "poison": [
+      "latency",
+      "memory-bound",
+      "4%"
+    ],
+    "source": "memory/RETRACTED.md",
+    "note": ""
+  },
+  {
+    "id": "S08",
+    "kind": "stale",
+    "question": "Is TCFRAG a pure win that costs only instructions?",
+    "expect": [
+      "no",
+      "not",
+      "retain",
+      "63",
+      "64,262",
+      "64262"
+    ],
+    "poison": [
+      "pure win",
+      "only instructions"
+    ],
+    "source": "memory/RETRACTED.md",
+    "note": ""
+  },
+  {
+    "id": "S09",
+    "kind": "stale",
+    "question": "What does clone_in_cache actually cost per step?",
+    "expect": [
+      "572"
+    ],
+    "poison": [
+      "28.3"
+    ],
+    "source": "memory/RETRACTED.md",
+    "note": "wrong by 20x"
+  },
+  {
+    "id": "S10",
+    "kind": "stale",
+    "question": "What page_size does SGLang use for V4?",
+    "expect": [
+      "256"
+    ],
+    "poison": [
+      "page_size=1"
+    ],
+    "source": "memory/RETRACTED.md",
+    "note": ""
+  },
+  {
+    "id": "S11",
+    "kind": "stale",
+    "question": "Does the re-bake get cheaper at K8/V4/L12?",
+    "expect": [
+      "no",
+      "more",
+      "8x",
+      "~8",
+      "1700",
+      "1,700"
+    ],
+    "poison": [
+      "cheaper"
+    ],
+    "source": "memory/RETRACTED.md",
+    "note": "inverted: ~8x MORE"
+  },
+  {
+    "id": "S12",
+    "kind": "stale",
+    "question": "Does K4/V4/L12 at 1.38 inst/wt sit at budget and recover the full figure?",
+    "expect": [
+      "no",
+      "not",
+      "retracted",
+      "1 bpw",
+      "2-bpw",
+      "2 bpw"
+    ],
+    "poison": [
+      "1413",
+      "1,413",
+      "16602",
+      "16,602",
+      "at budget"
+    ],
+    "source": "memory/RETRACTED.md",
+    "note": ""
+  },
+  {
+    "id": "S13",
+    "kind": "stale",
+    "question": "Is the fused 512 attention kernel neutral?",
+    "expect": [
+      "no",
+      "not",
+      "0 times",
+      "zero",
+      "unknown"
+    ],
+    "poison": [
+      "neutral"
+    ],
+    "source": "memory/RETRACTED.md",
+    "note": ""
+  },
+  {
+    "id": "S14",
+    "kind": "stale",
+    "question": "Is the decode tail 27.2% with fp8_gemv_warp at 16.0%?",
+    "expect": [
+      "no",
+      "not",
+      "retracted",
+      "unsourced",
+      "does not exist"
+    ],
+    "poison": [
+      "27.2"
+    ],
+    "source": "memory/RETRACTED.md",
+    "note": ""
+  },
+  {
+    "id": "C01",
+    "kind": "current",
+    "question": "What is the measured aggregate tok/s at B=256 on one H200?",
+    "expect": [
+      "757.5"
+    ],
+    "poison": [
+      "16600",
+      "16,600",
+      "14000"
+    ],
+    "source": "memory/STATE.json measured.aggregate_tok_s_at_b256",
+    "note": ""
+  },
+  {
+    "id": "C02",
+    "kind": "current",
+    "question": "What is the measured single-user tok/s?",
+    "expect": [
+      "44.68"
+    ],
+    "poison": [
+      "640"
+    ],
+    "source": "memory/STATE.json measured.single_user_tok_s",
+    "note": ""
+  },
+  {
+    "id": "C03",
+    "kind": "current",
+    "question": "What is the measured cost per Mtok in USD?",
+    "expect": [
+      "1.8"
+    ],
+    "poison": [],
+    "source": "memory/STATE.json measured.cost_per_mtok_usd",
+    "note": ""
+  },
+  {
+    "id": "C04",
+    "kind": "current",
+    "question": "What is the fitted step-time curve?",
+    "expect": [
+      "95",
+      "0.95"
+    ],
+    "poison": [],
+    "source": "memory/STATE.json measured.step_time_curve",
+    "note": ""
+  },
+  {
+    "id": "C05",
+    "kind": "current",
+    "question": "Which kernel is the primary bottleneck?",
+    "expect": [
+      "qtip2b_grouped_gemm"
+    ],
+    "poison": [],
+    "source": "memory/STATE.json bottleneck.primary.kernel",
+    "note": ""
+  },
+  {
+    "id": "C06",
+    "kind": "current",
+    "question": "What share of batch GPU time does the primary bottleneck kernel take?",
+    "expect": [
+      "53"
+    ],
+    "poison": [],
+    "source": "memory/STATE.json bottleneck.primary.share_of_batch_gpu_time_pct",
+    "note": ""
+  },
+  {
+    "id": "C07",
+    "kind": "current",
+    "question": "What is the hard bake budget in minutes on a single card?",
+    "expect": [
+      "60"
+    ],
+    "poison": [
+      "30"
+    ],
+    "source": "memory/STATE.json hard_constraints.bake_budget",
+    "note": ""
+  },
+  {
+    "id": "C08",
+    "kind": "current",
+    "question": "What is the bake budget in seconds per layer?",
+    "expect": [
+      "83.7"
+    ],
+    "poison": [],
+    "source": "memory/STATE.json hard_constraints.bake_budget",
+    "note": ""
+  },
+  {
+    "id": "C09",
+    "kind": "current",
+    "question": "What is the single-user tok/s target?",
+    "expect": [
+      "640"
+    ],
+    "poison": [
+      "1413",
+      "1,413"
+    ],
+    "source": "memory/STATE.json targets.single_user_tok_s",
+    "note": ""
+  },
+  {
+    "id": "C10",
+    "kind": "current",
+    "question": "What GSM8K percent is the standing commitment under our protocol?",
+    "expect": [
+      "90"
+    ],
+    "poison": [
+      "90.8",
+      "96"
+    ],
+    "source": "memory/STATE.json targets.gsm8k_pct",
+    "note": ""
+  },
+  {
+    "id": "C11",
+    "kind": "current",
+    "question": "What is the Runcrate balance in USD?",
+    "expect": [
+      "98.87"
+    ],
+    "poison": [],
+    "source": "memory/STATE.json money.runcrate_balance_usd",
+    "note": ""
+  },
+  {
+    "id": "C12",
+    "kind": "current",
+    "question": "Which single PR is allowed to target master?",
+    "expect": [
+      "194"
+    ],
+    "poison": [],
+    "source": "memory/STATE.json hard_constraints.one_pr_to_master",
+    "note": ""
+  },
+  {
+    "id": "C13",
+    "kind": "current",
+    "question": "What does cudnn cost on H200 decode?",
+    "expect": [
+      "62"
+    ],
+    "poison": [],
+    "source": "memory/STATE.json banned",
+    "note": ""
+  },
+  {
+    "id": "C14",
+    "kind": "current",
+    "question": "What does the ragged pair cost as shipped?",
+    "expect": [
+      "41"
+    ],
+    "poison": [],
+    "source": "memory/STATE.json banned",
+    "note": ""
+  },
+  {
+    "id": "C15",
+    "kind": "current",
+    "question": "What does SAMPLE_ON_DEVICE cost?",
+    "expect": [
+      "45"
+    ],
+    "poison": [],
+    "source": "memory/STATE.json banned",
+    "note": ""
+  },
+  {
+    "id": "P01",
+    "kind": "provenance",
+    "question": "Has 640 tok/s single-user been reached?",
+    "expect": [
+      "no",
+      "not"
+    ],
+    "poison": [
+      "yes",
+      "reached"
+    ],
+    "source": "memory/STATE.json confirmed_by_jish.single_user_640_not_reached",
+    "note": ""
+  },
+  {
+    "id": "P02",
+    "kind": "provenance",
+    "question": "Has 14,000 tok/s aggregate at B=256 been reached?",
+    "expect": [
+      "no",
+      "not"
+    ],
+    "poison": [
+      "yes",
+      "reached"
+    ],
+    "source": "memory/STATE.json confirmed_by_jish.aggregate_14000_not_reached",
+    "note": ""
+  },
+  {
+    "id": "P03",
+    "kind": "provenance",
+    "question": "Is there a reproducible GSM8K measurement on record with a commit and protocol?",
+    "expect": [
+      "no",
+      "not",
+      "null",
+      "none"
+    ],
+    "poison": [
+      "yes",
+      "96"
+    ],
+    "source": "memory/STATE.json measured.gsm8k_pct",
+    "note": ""
+  },
+  {
+    "id": "P04",
+    "kind": "provenance",
+    "question": "Was the <=60-minute single-card bake ever reached?",
+    "expect": [
+      "yes",
+      "once",
+      "reached"
+    ],
+    "poison": [],
+    "source": "memory/STATE.json confirmed_by_jish.bake_60min_reached_once",
+    "note": "contested: Jish says once, no instrument record survives"
+  }
+]

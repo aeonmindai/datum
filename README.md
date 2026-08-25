@@ -1,96 +1,180 @@
-# Datum
+<p align="center">
+  <img src="assets/banner.svg" alt="Datum — the datum of record" width="820">
+</p>
 
-**The reference every agent measures from.**
+<p align="center">
+  <strong>A memory for your AI agents that cannot make things up.</strong><br>
+  Connect it over MCP in one minute. Apache-2.0, self-hosted, runs on Postgres.
+</p>
 
-A datum is the fixed point measurements are taken from. In surveying it is specifically what makes
-independent instruments agree — the job here, for independent agents. From Latin *datum*, "that
-which is given."
+---
 
-*Is that **on datum**?* — is the claim verified. *Take a datum* — read current truth.
-*That's **off datum*** — superseded. *The **datum of record*** — this system.
+## Connect it to your agent
 
-Datum is a self-hostable store of **assertions** — facts, numbers, rules, missions and failures —
-that any number of agents, worktrees, branches and humans can read and correct, where:
+Datum is an **MCP server**. Point Claude, Cursor, or anything else that speaks MCP at it:
 
-- **Nothing is written without evidence.** No provenance, no write. Rejected server-side.
-- **Nothing is ever mutated.** A correction is a new assertion superseding an old one, so *"what did
-  we believe on 19 August?"* is a query, not an archaeology project.
-- **Two contradicting measurements cannot both be live.** Physically un-insertable. A *human*
-  contradicting a measurement is allowed, loudly, and surfaces as a conflict needing resolution —
-  never a silent last-write-wins.
-- **Confidence is earned.** Nothing may be asserted as `measured`; a worker promotes it only after
-  confirming the commit resolves and is contained where claimed.
-- **Retrieval is exact-first.** Structured, then full-text. Embeddings are a separate, labelled,
-  fuzzy channel and never returned as fact.
-- **Facts inherit across projects.** `org → project → mission → agent`, nearest scope wins. Each
-  repo is `global` or `isolated`, toggled whenever you like.
-- **Humans read projections.** Linear and Discord are downstream read models, never the source.
-
-## Status
-
-**Design complete, not yet implemented.** Start at [`START_HERE.md`](./START_HERE.md), then
-[`HANDOFF.md`](./HANDOFF.md) — written to be built from with no prior context.
-
-## Self-host it
-
-[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/template/datum)
-
-One click, or one command:
-
-```bash
-# fly.io
-fly launch --from https://github.com/aeonmindai/datum
-
-# anywhere
-docker compose up -d
+```json
+{
+  "mcpServers": {
+    "datum": {
+      "url": "https://your-datum/mcp",
+      "headers": { "Authorization": "Bearer dtm_live_..." }
+    }
+  }
+}
 ```
 
-Migrations and first-run setup happen on boot. Your org scope, first admin and first API key are
-created automatically — **the key is printed once in the deploy logs, so copy it.**
+That's it. Your agent gets six tools and nothing to learn:
 
-One org per deployment, no tenant setup, nothing phoning home. Set `DATUM_ORG` to your own name;
-nothing about the authors is hardcoded. Set `DATUM_ADMIN_PASSWORD` (or a pre-computed
-`DATUM_ADMIN_PASSWORD_HASH` — see `datum hash-password`) and the server **refuses to boot without
-one**, because a self-hostable product that ships a default password is a vulnerability, not a
-convenience.
+| tool | what your agent asks |
+|---|---|
+| **`state`** | what's true here right now? |
+| **`ask`** | what is X? |
+| **`why`** | how do you know that? |
+| **`assert`** | record this |
+| **`supersede`** | that was wrong, here's the correction |
+| **`nodes`** | who else is working here? |
 
-Then point an agent at it:
+Six, not thirty — every tool description is injected into every conversation, so a chatty MCP server
+is a tax you pay on every message forever.
 
-```bash
-datum link                 # register this repo
-datum mode global          # or: isolated
-datum status
+## What your agent gets back
+
+Small, and impossible to misread:
+
+```
+engine.throughput = 757.5 req/s | measured | api@4d03b9e2 ~release-branch | BRANCH-ONLY
+engine.throughput = 16600 req/s | confirmed-by-human | human:sam | CONTESTED
 ```
 
-MCP lives at `/mcp`, the real API at `/v1`, the admin panel at `/admin`.
+Two answers. Both shown. Neither hidden.
 
-## Why
+The first is a **real measurement** that never shipped to your main branch. The second is **someone's
+recollection**. Your agent can now tell those apart, and so can you. Most memory systems would have
+returned one number with no idea which.
 
-Measured from 11 days of one agentic project: mean context **538,820 tokens** per turn, **8**
-compaction events, **4.17 billion** cache-read tokens for 11.3 M output, **52%** of shell calls spent
-on provenance archaeology and **2.9%** on compiling. Two divergent copies of the same knowledge base,
-449 retractions struck in place, 435 commits stranded on branches. All substrate problems, and none
-of them fixable by prompting.
+About **200 bytes** per answer, not twenty kilobytes. In our own benchmark Datum answered questions
+using **31× less context** than stuffing your notes into the prompt — while being right more often.
 
-## The bar
+## Why you'd want this
 
-A plain file plus `grep` scores **74.0%** on LOCOMO; Mem0's graph variant scores 68.5%. Datum must
-beat both full-context and file-plus-grep by **≥10 points** on real data, or it should not exist.
-That gate comes before any feature work, and it is allowed to kill the project.
+You ask an agent how fast your service is. It says **16,600 requests a second**, confidently, with a
+citation.
 
-## What the field has not solved
+That number was measured once, on a branch, months ago. It was corrected to 14,000 — and the
+correction was written somewhere else. The old number appears in twenty-seven files. The correction
+appears in one. Your agent found the *popular* answer, not the true one.
 
-- No published memory architecture enforces provenance on write.
-- The best multi-hop contradiction score anywhere is **7.0%**, and no system raises a contradiction
-  for resolution — every one resolves silently by recency.
-- Naive append-only is *worse than no memory* under fact reversal (0.210 vs 0.309).
-- Zero of 19 surveyed products treat a human tracker as a downstream projection.
-- Nobody implements nearest-scope-wins, and nobody gates a goal on a machine-checkable predicate.
+We measured this on a real project: **449 corrections scattered through 21,619 lines of notes, 34
+copies of one facts file that disagreed with each other,** and the project's actual current target
+appearing nowhere in its own knowledge base. Half of every agent session went on digging to find out
+whether a claim was real.
 
-Evidence, ~200 URLs, in [`research/`](./research).
+Datum fixes it with four rules that are enforced by the database, not by good intentions:
+
+**Every fact needs a receipt.** Where it came from, which commit, which instrument. No receipt, the
+write is rejected — not warned about, rejected.
+
+**Nothing is ever edited or deleted.** A correction is a *new* entry pointing at what it replaces.
+The old number stays, marked dead, and can never come back as an answer.
+
+**No agent can claim it measured something.** It can only say "unverified". A worker then checks
+whether that commit exists and actually shipped. Only then does it become `measured`. Confidence is
+earned, never typed.
+
+**Disagreements are shown, not resolved for you.** Two sources conflict, you see both, flagged.
+Quietly picking the newer one is how you end up confidently wrong.
+
+## Run it in two commands
+
+```bash
+printf 'DATUM_ADMIN_PASSWORD=%s\nDATUM_SESSION_SECRET=%s\n' \
+  "$(openssl rand -base64 18)" "$(openssl rand -hex 32)" > .env
+docker compose up
+```
+
+Open **http://localhost:8080/admin** and sign in with the password in your new `.env`. Your first API
+key is printed once in the startup logs — paste it into the MCP config above.
+
+Something to click through:
+
+```bash
+docker compose exec datum node packages/datum/dist/cli/index.js seed --example
+```
+
+There is no default password in this image. It refuses to start without one, deliberately.
+
+## It also knows your code and your rules
+
+**Ask what breaks before you change it:**
+
+```
+$ datum impact parse_config
+parse_config  src/config.rs:10
+  boot       src/main.rs:5     via calls
+  serve      src/main.rs:30    via calls
+  covered by tests: test_boot
+```
+
+Unlike a text search it can also tell you that **nothing** calls something — the answer you need
+before deleting it. Head-to-head on a real 966-file codebase: right **97.5%** of the time against
+grep's 81.5%, and grep confidently named the wrong thing **54%** of the time against Datum's **3.8%**.
+
+**Which of your rules are real.** Datum reads your CI config, linter settings and branch protection
+and works out which rules are actually *enforced* versus merely written down. On the project we
+tested: 113 real rules, and **957 pieces of documented policy that nothing anywhere enforces.**
+
+**What you keep asking for.** Correct the same thing in two different sessions and it remembers. A
+second colleague asking independently makes it a team preference; a third makes it an org rule,
+delivered to every agent before it starts work. It counts *occasions*, never words — so saying it
+five times in one sitting counts once, which is how it avoids the bug that filled a competitor's
+database with 808 copies of one thing nobody ever said.
+
+## We publish the losses
+
+- Against "put all your notes in the prompt" and "just use grep", Datum wins by **12 points** — but
+  only once allowed to fall back to searching your notes. On its curated facts alone it wins by 6,
+  which **fails** the bar we set ourselves.
+- Its code understanding comes from a parser, not a compiler, so those facts are labelled `derived`
+  and are not allowed to satisfy a strict check. We also found that label is **not independently
+  auditable**, and said so.
+- It never invents facts from prose. That's the point, and it's also why it will say "not on record"
+  more often than something that guesses.
+
+[`reports/m2-rerun.md`](reports/m2-rerun.md) · [`reports/impact-benchmark.md`](reports/impact-benchmark.md) · [`reports/restore-drill.md`](reports/restore-drill.md)
+
+## Anywhere it runs
+
+Postgres 13+, one process, migrations apply themselves on boot.
+
+```bash
+docker compose up                  # any machine with Docker
+fly launch --from <this repo>      # Fly has no one-click button; this is the real command
+```
+
+No telemetry, no licence check, no phone-home. The only outbound call it can make is to GitHub, and
+only if you give it a token so it can verify commits.
+
+## Developing
+
+```bash
+npm install
+npm test          # starts a real Postgres in Docker; nothing is mocked
+```
+
+Every rule is tested by breaking it — we drop each constraint and prove the test then fails, because
+a test that passes without its constraint tests nothing.
+
+[`HANDOFF.md`](HANDOFF.md) for the design · [`docs/OPERATIONS.md`](docs/OPERATIONS.md) for running it
+
+## Not yet
+
+Slack and Linear digests, embeddings, multi-tenant auth. Multi-tenancy will live in a separate repo
+that depends on this one — there are no locked features, upsells or `if (license)` branches in here,
+and there never will be.
 
 ## License
 
-Apache-2.0. This repo is the complete single-tenant server — no enterprise stubs, no paid-feature
-walls. Multi-tenancy and enterprise features will live in a separate private repo that depends on
-this one.
+Apache-2.0 · Copyright Aeonmind AI
+
+<p align="center"><img src="assets/logo.svg" width="40" alt=""></p>

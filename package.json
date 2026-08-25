@@ -1,0 +1,19 @@
+{
+  "name": "datum-workspace",
+  "private": true,
+  "license": "Apache-2.0",
+  "workspaces": [
+    "packages/datum",
+    "packages/admin"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "npm run build --workspace @aeonmind/datum-admin && npm run build --workspace @aeonmind/datum",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspace @aeonmind/datum",
+    "test:invariants": "npm run test:invariants --workspace @aeonmind/datum",
+    "dev": "npm run dev --workspace @aeonmind/datum"
+  }
+}
