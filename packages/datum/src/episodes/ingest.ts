@@ -89,6 +89,130 @@ function requireActor(label: string, actor: string): string {
  * the tool did. A record whose blocks are all `tool_use` is the agent operating, not talking.
  * Both return null and are counted as skipped rather than silently vanishing.
  */
+
+/**
+ * Does this utterance look like something a machine wrote?
+ *
+ * Purely structural, and deliberately so: no model, nothing to drift, and it reports a ratio
+ * rather than a verdict so a reader can disagree with the threshold. A person typing a sentence
+ * produces none of these shapes - the median human turn in the measured corpus is 60 characters.
+ * A pasted agent answer produces several at once.
+ */
+function machineProse(text: string): { ratio: number; markers: string[] } | null {
+  // Short turns are speech. Applying structure tests to "yes, do that" only produces noise.
+  if (text.length < 900) return null;
+  const lines = text.split("\n");
+  const markers = new Set<string>();
+  let machineLines = 0;
+  for (const raw of lines) {
+    const l = raw.trim();
+    if (l.length === 0) continue;
+    if (/^\|.*\|$/.test(l) || /^[+|][-+|\s]{6,}$/.test(l) || /^[┌├└│]/.test(l)) {
+      markers.add("table");
+      machineLines += 1;
+    } else if (/(->|→|=>)/.test(l) && l.length < 200) {
+      markers.add("arrows");
+      machineLines += 1;
+    } else if (/^\s*(?:[-*]|\d+\.)\s+\*\*/.test(l)) {
+      markers.add("bulleted-bold");
+      machineLines += 1;
+    } else if (/^```/.test(l)) {
+      markers.add("fence");
+      machineLines += 1;
+    } else if (/^#{1,4}\s/.test(l)) {
+      markers.add("headings");
+      machineLines += 1;
+    }
+  }
+  const counted = lines.filter((l) => l.trim().length > 0).length || 1;
+  const ratio = machineLines / counted;
+  // Two independent shapes, or a third of the lines: one stray arrow in a long message is a
+  // person writing an arrow, not a paste.
+  if (markers.size < 2 && ratio < 0.34) return null;
+  return { ratio: Number(ratio.toFixed(3)), markers: [...markers].sort() };
+}
+
+/**
+ * Verbatim overlap with what the machine said earlier in this same conversation.
+ *
+ * Structure catches pasted tables. It cannot catch the dangerous case, which is flowing prose:
+ * the largest human utterance in the measured corpus is 24,726 characters of the agent's own
+ * paragraphs pasted back in, with no table, no arrow and no heading in it. One such paste carries
+ * an invented "9,000 GPU instructions issued per token", and stored naively it comes back as
+ * testimony from a named human.
+ *
+ * So the real test is the exact one: has the machine already written these words? Assistant text
+ * is streamed past anyway, so its shingles are free to collect. Sampling one in sixteen keeps the
+ * set to a few hundred thousand entries on an 82 MB transcript while still lighting up on any
+ * paste longer than a sentence - a verbatim run of a hundred words contributes roughly six
+ * sampled shingles, and a person does not reproduce six of those by coincidence.
+ */
+const SHINGLE = 10;
+const SAMPLE_MASK = 0xf;
+const SHINGLE_CAP = 2_000_000;
+
+function shingles(text: string): number[] {
+  const words = text.toLowerCase().replace(/\s+/g, " ").trim().split(" ");
+  if (words.length < SHINGLE) return [];
+  const out: number[] = [];
+  for (let i = 0; i + SHINGLE <= words.length; i += 1) {
+    // FNV-1a over the window. Cheap, and collisions only ever cost a false positive on a
+    // ratio that is reported rather than acted on.
+    let h = 0x811c9dc5;
+    for (let j = i; j < i + SHINGLE; j += 1) {
+      const w = words[j] as string;
+      for (let k = 0; k < w.length; k += 1) {
+        h ^= w.charCodeAt(k);
+        h = Math.imul(h, 0x01000193);
+      }
+      h ^= 32;
+      h = Math.imul(h, 0x01000193);
+    }
+    h >>>= 0;
+    if ((h & SAMPLE_MASK) === 0) out.push(h);
+  }
+  return out;
+}
+
+function quotedRatio(text: string, seen: Set<number>): number | null {
+  if (text.length < 900 || seen.size === 0) return null;
+  const s = shingles(text);
+  if (s.length < 4) return null;
+  let hits = 0;
+  for (const h of s) if (seen.has(h)) hits += 1;
+  const ratio = hits / s.length;
+  return ratio >= 0.2 ? Number(ratio.toFixed(3)) : null;
+}
+
+/**
+ * Exact containment against recent machine output, for utterances too short to winnow.
+ *
+ * The record that proves this is needed is 203 characters long: "9,000 GPU instructions issued per
+ * token where the competition issues 10-30" - the human quoting a figure the agent invented, which
+ * the store would otherwise hand back as a named human's testimony. Thirty-five words sample to one
+ * or two shingles, so the statistical test has no power there. Exact containment does, because a
+ * twelve-word run reproduced verbatim is not a coincidence, and a person paraphrasing does not
+ * reproduce one.
+ *
+ * Bounded to the last `RECENT_TURNS` assistant turns and a fixed prefix of each, so this stays a
+ * constant-memory check on an 82 MB file rather than a growing one.
+ */
+const RECENT_TURNS = 40;
+const RECENT_CHARS = 4_000;
+const RUN_WORDS = 12;
+
+const norm = (t: string): string => t.toLowerCase().replace(/\s+/g, " ").trim();
+
+function quotesRecent(text: string, recent: string[]): boolean {
+  const words = norm(text).split(" ");
+  if (words.length < RUN_WORDS) return false;
+  for (let i = 0; i + RUN_WORDS <= words.length; i += 1) {
+    const run = words.slice(i, i + RUN_WORDS).join(" ");
+    for (const r of recent) if (r.includes(run)) return true;
+  }
+  return false;
+}
+
 function utterance(content: unknown): string | null {
   if (typeof content === "string") return content;
   if (!Array.isArray(content)) return null;
@@ -120,6 +244,9 @@ export async function ingestClaudeTranscript(db: Db, opts: IngestOptions): Promi
   // actually recorded are in here: a parent that was filtered out (a tool result, an injected
   // wrapper) leaves the child unthreaded rather than pointing at the wrong ancestor.
   const threads = new Map<string, string>();
+  // Bounded: an 82 MB transcript samples to a few hundred thousand entries.
+  const agentSeen = new Set<number>();
+  const recentAgent: string[] = [];
   // sessionId -> how many of its records have gone past, recorded or not. `seq` is the record's
   // ordinal in its session, not a counter of episodes, so flipping `includeAgent` or re-running
   // with a different `limit` does not renumber — and therefore does not re-hash — anything.
@@ -151,6 +278,22 @@ export async function ingestClaudeTranscript(db: Db, opts: IngestOptions): Promi
       const type = record.type;
       const isHuman = type === "user";
       const isAgent = type === "assistant";
+
+      // Every assistant turn contributes to the quote-back index whether or not it is stored.
+      // Skipping agent prose is about what belongs in the record; knowing what the machine said
+      // is about being able to tell later whether a human turn is really the human's words.
+      if (isAgent && agentSeen.size < SHINGLE_CAP) {
+        const said = utterance(record.message?.content);
+        // Floor is low on purpose. A short agent claim - "throughput is 757.5 tok/s" - is the
+        // most dangerous thing to have quoted back, because it is exactly the shape that reads as
+        // a fact. A 200-character floor made those invisible, which a test caught.
+        if (said !== null && said.length >= 80) {
+          for (const h of shingles(said)) agentSeen.add(h);
+          recentAgent.push(norm(said).slice(0, RECENT_CHARS));
+          if (recentAgent.length > RECENT_TURNS) recentAgent.shift();
+        }
+      }
+
       if (!isHuman && !(isAgent && includeAgent)) continue;
 
       // `isCompactSummary` is the single most important exclusion in this file, and it is not
@@ -189,6 +332,29 @@ export async function ingestClaudeTranscript(db: Db, opts: IngestOptions): Promi
         continue;
       }
 
+      // Who typed it is not the same question as who wrote it.
+      //
+      // Measured on this corpus: 23 of 550 human utterances carry 83.4% of its entire volume,
+      // and all 23 are machine-authored prose arriving in the user's slot. Eight are compaction
+      // summaries, excluded above by flag. The other fifteen are pasted tables and quote-backs -
+      // the human copying the agent's own output back into the conversation to argue with it.
+      //
+      // Those must NOT be dropped: the human really did type them, and the act of quoting is
+      // itself part of the record. But the WORDS are the machine's, and one of them is a verbatim
+      // paste of an invented "9,000 GPU instructions issued per token" that the store would
+      // otherwise return as testimony from a named human. That is the 808-duplicate mechanism
+      // with a human in the middle of the loop instead of a re-extractor, and attribution alone
+      // cannot see it: `actor` is correct and the provenance is still wrong.
+      //
+      // So the signal is recorded rather than the row discarded, and read paths label it. A
+      // caller can then tell "Jish decided X" from "Jish pasted the agent saying X", which is
+      // the whole distinction. Structural rather than semantic on purpose: it needs no model and
+      // cannot drift.
+      const machine = machineProse(text);
+      const quoted = isHuman ? quotedRatio(text, agentSeen) : null;
+      // Only when winnowing declined to judge, so the two mechanisms never disagree on one row.
+      const echoes = isHuman && quoted === null ? quotesRecent(text, recentAgent) : false;
+
       const occurredAt = str(record.timestamp);
       if (!occurredAt) {
         report.skipped += 1;
@@ -213,6 +379,10 @@ export async function ingestClaudeTranscript(db: Db, opts: IngestOptions): Promi
           file: opts.file,
           line: lineNo,
           uuid: str(record.uuid),
+          // Present only when it fired, so its absence is not a claim either way.
+          ...(machine ? { machine_prose: machine } : {}),
+          ...(quoted === null ? {} : { quoted_from_agent: quoted }),
+          ...(echoes ? { echoes_agent_verbatim: true } : {}),
         },
       };
 

@@ -100,11 +100,18 @@ A response is an **abstention** when both hold:
    `\b(not on record|no record|not recorded|nothing on record|not stated|never stated|no evidence|
    not in the (transcript|corpus|record|episodes)|insufficient (evidence|information)|
    (can not|cannot|can't|unable to) (say|tell|determine|answer|find)|(do not|don't|dont) know|abstain)\b`
-2. It contains **no** numeric token that appears in any `expect` or `forbid` entry of the question.
+2. It neither satisfies any `expect` entry nor trips `forbid` — tested with the **same** matchers
+   scoring uses, so clause 2 inherits the §5 anchoring rather than running its own looser check.
 
 Clause 2 is load-bearing. Without it, `I can't say for certain, but it was 84%` scores as a refusal
 and the arm collects abstention credit for a confident wrong answer. With it, that string is an
 answer and is graded as one.
+
+It must reuse the scoring matchers and not a bare numeric scan, which is what it originally did. A
+bare scan rejected `Not on record. Nearby the log reads: 84 explainer terms, 3 crash fixes, 85
+unmeasured claims` as a smuggled answer on `E38`, because a list index happened to equal a forbidden
+value — a correct refusal scored as a hallucination by the metric built to find hallucinations. Two
+adversarial cases in §7 hold this in both directions.
 
 ## 5. The verdict
 
@@ -116,8 +123,15 @@ Per question, per arm, exactly one of `correct` / `wrong` / `abstained`.
 |---|---|
 | `forbid` trips | `wrong` |
 | `expect` satisfied, `forbid` clean | `correct` |
-| is an abstention (§4) | `abstained` |
+| is an abstention (§4), `llm` mode only | `abstained` |
 | anything else | `wrong` |
+
+The abstention row is **`llm` mode only**. In `evidence` mode the response is a retrieved context,
+which can no more *be* a refusal than a trap's context can — and testing it for one produced
+abstentions by accident of corpus vocabulary: the phrase `I don't know` is something Jish actually
+says, so an arm returning irrelevant records containing it was credited with a refusal it never made.
+Every such row had non-zero units. In `evidence` mode the only abstention is an **empty result**,
+assigned by the runner when an arm returns nothing.
 
 `forbid` is tested first and beats a satisfied `expect`. A response naming both the live number and a
 superseded one has not answered the question, it has recited the file; and reciting the file is the
@@ -125,16 +139,58 @@ failure mode this whole product exists to attack. Every `forbid` entry in `quest
 that a *correct* answer has no reason to state — verified by hand, question by question, and the two
 places where that was arguable had the `forbid` removed rather than argued for.
 
-**Abstention trap** (`abstain: true`, `expect: []`):
+### A bare number is not evidence of anything: anchored `forbid`
 
-| response | verdict |
-|---|---|
-| is an abstention (§4) | `correct` |
-| anything else | `wrong` |
+A `forbid` entry consisting **only of numeric tokens** does not trip on a bare match. It trips only
+when the value occurs **within 12 tokens** of at least one of the question's `forbid_subject` tokens.
+Entries containing a non-numeric token — `us-east`, `$44 per million` — are self-anchoring and are
+matched by §3 unchanged.
 
-An empty `expect` is vacuously satisfied, so traps are graded on §4 and `forbid` alone and never fall
-through to the answerable table. Answering a trap is `wrong`, never `abstained`: the system asserted
-something about a question the record does not answer, which is the definition of a hallucination.
+This is a correction, and the thing it corrects is the exact failure this project exists to catch: a
+clean-looking number that means something else. Measured over the 550-utterance corpus, the
+unanchored rule fired on
+
+- `44` in *"est bake **44** layers"* and *"PR 43 **44**"* — a layer count and a pull-request number,
+  scored as an OpenRouter token price;
+- `85` in *"**85** unmeasured claims"* and *"spent **85** on gpu"* — a numbered list item and a
+  dollar figure, scored as an MTP acceptance rate;
+- `48` in *"was at **48** gb"* — a memory reading, scored as an acceptance rate;
+- `55` in *"54 scheduler coalescing **55** indexer loader"* — another list index, scored as a B200
+  throughput figure.
+
+Every one of those is a false positive, and between them they cost `datum` two of its four traps and
+`grep` and `full-context` three each. A benchmark whose headline anti-hallucination metric fires on a
+list index is measuring its own grader.
+
+**Any trap carrying an all-numeric `forbid` entry must declare `forbid_subject`**, asserted by
+`verify.mts`. The subject tokens are drawn from the *question's* subject, never from the answer:
+`E37` anchors on `million|price|pricing|charge`, `E38` on `acceptance|mtp`, `E40` on
+`b200|b300|aggregate`. `E39` needs none — `us-east` cannot float.
+
+Twelve tokens is chosen as roughly a clause of English prose. It is wide enough to hold
+*"`4eba13905`, 55 tok/s, +46% on B200"*, where the subject sits five tokens from the value, and narrow
+enough to exclude the list-index cases above, where the nearest subject token is not in the sentence
+at all. §7 carries the pair of adversarial cases that hold this line in both directions.
+
+**Abstention trap** (`abstain: true`, `expect: []`). The rule differs by answerer mode, because the
+two modes grade two different things:
+
+| mode | `correct` | `wrong` |
+|---|---|---|
+| `llm` | the response is an abstention (§4) | anything else |
+| `evidence` | no `forbid` entry appears in the retrieved context | a `forbid` entry appears |
+
+In `llm` mode a system has asserted something and the trap is won by refusing. In `evidence` mode
+the response is a pile of retrieved records, which can never *be* a refusal — so grading traps by
+looking for one makes all four unwinnable for every arm, which would be a fact about the grader and
+not about any system. The first run of this benchmark did exactly that and reported `traps 0.0%`
+across all three arms. In evidence mode a trap is therefore won by **not surfacing the tempting
+value**, which is the thing actually being measured: whether the arm puts a number in front of an
+agent that the human never said.
+
+An empty `expect` is vacuously satisfied, so traps never fall through to the answerable table.
+Answering a trap is `wrong`, never `abstained`: the system asserted something about a question the
+record does not answer, which is the definition of a hallucination.
 
 **`wrong` versus `abstained`.** `wrong` means content was asserted and the assertion fails. `abstained`
 means no content was asserted. They are never the same number, they are never summed, and neither is
@@ -184,6 +240,11 @@ pass, and asserts each one is **not** graded `correct`. The suite covers, at min
   abstention;
 - a response that answers a **trap** confidently;
 - a response naming the superseded and the live value together (`he moved from 84% to 96%`);
+- a **forbidden value that is not its subject** — `85 unmeasured claims, 3 crash fixes` on `E38`,
+  where `85` is a list index. Must **not** contaminate, and the trap must score `correct`;
+- the same forbidden value **attached to its subject** — `the acceptance rate came back at 85%` on
+  `E38`. Must contaminate, and the trap must score `wrong`. The pair is what proves the ±12-token
+  anchor works in both directions rather than merely being lenient;
 - the **question restated** as the answer;
 - an empty string and a whitespace-only string;
 - a partial answer missing one of several required entries;
@@ -209,9 +270,51 @@ All three arms answer the same 40 questions with the same grader.
 - **`full-context`** — all 550 human utterances, in transcript order, handed over whole. Its input
   token count is measured and reported per question; the cost is part of the result, not a footnote.
 - **`datum`** — `GET /v1/episodes?scope=&q=&limit=` with a bearer token, expecting
-  `{ ok: true, episodes: [...] }`. Endpoint and token come from `DATUM_BASE_URL`,
-  `DATUM_EPISODES_PATH` and `DATUM_TOKEN`, so a differing route costs one environment variable and
-  no code change.
+  `{ ok: true, episodes: [...] }` where each episode carries `matched` in
+  `phrase | fts | trigram | filter`. Endpoint, scope and token come from `DATUM_BASE_URL`,
+  `DATUM_EPISODES_PATH`, `DATUM_SCOPE` and `DATUM_TOKEN`, so a differing route costs one environment
+  variable and no code change. The `matched` tier is recorded and reported per arm-run: an answer
+  reached only by trigram is a fuzzy hit and is worth knowing about separately.
+
+  **One request per query term, unioned.** The arm issues the query terms *individually* and unions
+  the episodes, capped at `limit`. This is not a detail — the first run of this benchmark sent all
+  four terms as one `q`, which the endpoint resolves as a single FTS query requiring every term,
+  while `grep` got four independent searches unioned. Datum returned nothing on 28 of 40 questions
+  and scored 15.0%; the number measured a query-shape mismatch and nothing else. Equalising the
+  semantics is what makes the comparison mean anything, and it raised datum's score, which is
+  precisely why it is written down here rather than left in a commit message.
+
+### The two query regimes
+
+Both are mechanical, both are applied identically to all three arms, and which one produced a number
+must appear beside it. `results.json` records `query_regime` and a note explaining it.
+
+- **`derived`** (default, the headline). Content terms taken from the **question** text: stopwords
+  and sub-4-character tokens dropped, digits-initial tokens dropped, deduplicated, sorted by
+  ascending document frequency over the 550-utterance corpus, first four kept. Rarest-first because a
+  term in two utterances locates a conversation and a term in two hundred does not.
+
+  This regime is hard, and it is hard for an honest reason: the questions **deliberately paraphrase**
+  the corpus. A question that reuses the corpus's own words leaks its answer into the query and
+  measures nothing. The consequence is that both lexical arms are working against a vocabulary gap,
+  and that gap is a real property of the problem — the person asking "what did I decide about the
+  bit width" does not remember that they typed "why 2.25 bits".
+
+- **`topic`** (`--query=topic`), an **oracle-topic upper bound** and labelled as one everywhere it
+  appears. Terms are the rarest content terms of the ground-truth utterance with every token
+  occurring in an `expect` or `forbid` entry removed. It models the person who remembers roughly what
+  the conversation was about but not the value, which is the person this product is for. It never
+  contains the answer.
+
+  It is an upper bound and not a result, because it is built from the answer's own record: it
+  guarantees the target utterance contains the query terms, reducing the task to ranking one record
+  out of 542. Report it next to `derived`, never instead of it.
+
+  Two questions are **unanswerable by construction** in this regime and it must be said rather than
+  smoothed: `E14` ("Ban greedy forever") and `E33` ("Three agents died.") are so short that removing
+  their answer tokens leaves no term of four characters or more, so the query is empty and every
+  retrieval arm abstains. That is an artifact of the regime, not a property of any arm, and it caps
+  `topic` at 38/40 for `grep` and `datum` alike.
 
 **The answerer.** Grading needs an answer string. Two modes, and which one produced a number must
 appear next to it:

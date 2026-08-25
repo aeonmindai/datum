@@ -563,9 +563,17 @@ async function main(): Promise<void> {
           const e = h.episode;
           // The tier is printed, always. An exact quote and a rescued typo are different evidence
           // and a reader who cannot tell them apart has been handed a guess.
+          const src = e.source as Record<string, unknown> | null;
+          const relayed =
+            src &&
+            (src["quoted_from_agent"] !== undefined ||
+              src["echoes_agent_verbatim"] === true ||
+              src["machine_prose"] !== undefined)
+              ? "  RELAYED-AGENT-PROSE"
+              : "";
           process.stdout.write(
             `\n${new Date(e.occurred_at).toISOString().slice(0, 16)} ${e.actor}` +
-              `${e.git_branch ? `@${e.git_branch}` : ""} [${h.matched} ${h.rank.toFixed(2)}]\n  ${e.text.replace(/\s+/g, " ").slice(0, 400)}\n`,
+              `${e.git_branch ? `@${e.git_branch}` : ""} [${h.matched} ${h.rank.toFixed(2)}]${relayed}\n  ${e.text.replace(/\s+/g, " ").slice(0, 400)}\n`,
           );
         }
       });

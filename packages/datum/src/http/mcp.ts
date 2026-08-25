@@ -605,7 +605,15 @@ export function registerMcp(app: FastifyInstance, deps: { db: Db; config: Config
                 : String(e.occurred_at).slice(0, 16);
             // `matched` travels with every quote. A rescued typo and an exact hit look identical
             // otherwise, and the caller has no way to weigh what it was handed.
-            return `${when} ${e.actor}${e.git_branch ? `@${e.git_branch}` : ""} [${h.matched}] "${short(e.text, 170)}"`;
+            // A quote-back is still something the human typed, and its words are still the
+            // machine's. Both facts have to survive to the caller or the store hands back an
+            // invented number as a named human's testimony - which is the failure it exists for.
+            const src = e.source as Record<string, unknown> | null;
+            const relayed =
+              src && (src["quoted_from_agent"] !== undefined || src["echoes_agent_verbatim"] === true || src["machine_prose"] !== undefined)
+                ? " RELAYED-AGENT-PROSE"
+                : "";
+            return `${when} ${e.actor}${e.git_branch ? `@${e.git_branch}` : ""} [${h.matched}]${relayed} "${short(e.text, 170)}"`;
           }),
           budget,
           `nothing on record was said about that in ${parsed.scope}`,

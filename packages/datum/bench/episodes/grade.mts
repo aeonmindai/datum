@@ -15,6 +15,8 @@ export interface Question {
   kind: "decision" | "correction" | "preference" | "target-change" | "abandoned" | "who-said" | "when";
   difficulty: "easy" | "medium" | "hard";
   abstain?: boolean;
+  /** Required when a `forbid` entry is all-numeric: the subject that anchors it. grade.md §5. */
+  forbid_subject?: string[];
   spans_utterances?: boolean;
   source: {
     file: string;
@@ -102,26 +104,70 @@ function tokenSatisfies(resp: string, want: string): boolean {
   return resp.startsWith(want);
 }
 
-/** One `expect`/`forbid` entry against a response: contiguous token subsequence. */
-export function entryHits(response: string, entry: string): boolean {
+/** Every start index at which an entry's token run occurs. grade.md §3. */
+function matchPositions(have: string[], entry: string): number[] {
   const want = tokens(entry);
-  if (want.length === 0) return false;
-  const have = tokens(response);
+  const at: number[] = [];
+  if (want.length === 0) return at;
   outer: for (let i = 0; i + want.length <= have.length; i += 1) {
     for (let j = 0; j < want.length; j += 1) {
       if (!tokenSatisfies(have[i + j]!, want[j]!)) continue outer;
     }
-    return true;
+    at.push(i);
   }
-  return false;
+  return at;
+}
+
+/** One `expect`/`forbid` entry against a response: contiguous token subsequence. */
+export function entryHits(response: string, entry: string): boolean {
+  return matchPositions(tokens(response), entry).length > 0;
 }
 
 export function expectSatisfied(response: string, expect: string[]): boolean {
   return expect.every((e) => entryHits(response, e));
 }
 
-export function forbidTrips(response: string, forbid: string[]): boolean {
-  return forbid.some((f) => entryHits(response, f));
+/** grade.md §5. How far from a bare number its subject may sit and still anchor it. */
+export const ANCHOR_WINDOW = 12;
+
+/**
+ * grade.md §5, anchored `forbid`.
+ *
+ * An entry made only of numeric tokens carries no subject of its own, so a bare match proves
+ * nothing: measured over this corpus the unanchored rule scored `44` in "est bake 44 layers" as an
+ * OpenRouter price and `85` in "85 unmeasured claims" as an MTP acceptance rate. Such an entry now
+ * trips only with a `forbid_subject` token within `ANCHOR_WINDOW` tokens. Entries carrying a
+ * non-numeric token — `us-east`, `$44 per million` — anchor themselves and are unchanged.
+ */
+export function forbidTrips(response: string, forbid: string[], subjects: string[] = []): boolean {
+  const have = tokens(response);
+  const subjectAt: number[] = [];
+  if (subjects.length) {
+    const wants = subjects.map((s) => tokens(s)).filter((t) => t.length > 0);
+    for (let i = 0; i < have.length; i += 1) {
+      if (wants.some((w) => w.every((t, j) => have[i + j] !== undefined && tokenSatisfies(have[i + j]!, t)))) {
+        subjectAt.push(i);
+      }
+    }
+  }
+  for (const entry of forbid) {
+    const want = tokens(entry);
+    if (want.length === 0) continue;
+    const positions = matchPositions(have, entry);
+    if (positions.length === 0) continue;
+    // Anchoring applies only where a subject was declared. Without one an all-numeric entry keeps
+    // the unanchored §3 behaviour, which is correct for an answerable question: its `forbid` is only
+    // ever applied to a one-sentence assertion (grade.md §8), never to a retrieved context, so a
+    // bare number in it is an answer attempt rather than a passing digit. Traps are the case that
+    // needs anchoring and `verify.mts` requires them to declare it.
+    const floats = want.every((t) => NUMERIC.test(t)) && subjects.length > 0;
+    if (!floats) return true;
+    const end = want.length - 1;
+    if (positions.some((p) => subjectAt.some((s) => s >= p - ANCHOR_WINDOW && s <= p + end + ANCHOR_WINDOW))) {
+      return true;
+    }
+  }
+  return false;
 }
 
 const ABSTAIN_RE = new RegExp(
@@ -138,15 +184,13 @@ const ABSTAIN_RE = new RegExp(
 
 /** grade.md §4. An abstention is a refusal that smuggles in no candidate value. */
 export function isAbstention(response: string, q: Question): boolean {
-  const n = norm(response);
-  if (!ABSTAIN_RE.test(n)) return false;
-  const respNums = new Set(tokens(response).filter((t) => NUMERIC.test(t)).map((t) => String(Number(t))));
-  for (const entry of [...q.expect, ...q.forbid]) {
-    for (const t of tokens(entry)) {
-      if (NUMERIC.test(t) && respNums.has(String(Number(t)))) return false;
-    }
-  }
-  return true;
+  if (!ABSTAIN_RE.test(norm(response))) return false;
+  // Clause 2, grade.md §4: a refusal that smuggles in a candidate value is an answer, not a refusal.
+  // It reuses the *same* matchers as scoring rather than a loose numeric scan, so it inherits the
+  // §5 anchoring. A loose scan disqualified "Not on record. ... 85 unmeasured claims ..." because a
+  // list index happened to equal a forbidden value, which is the very confusion §5 exists to end.
+  if (q.expect.length > 0 && q.expect.some((e) => entryHits(response, e))) return false;
+  return !forbidTrips(response, q.forbid, q.forbid_subject ?? []);
 }
 
 export interface Graded {
@@ -157,18 +201,34 @@ export interface Graded {
 }
 
 /**
- * grade.md §5. `applyForbid` false is evidence mode on an answerable question, where a stale value
- * in the retrieved context is contamination rather than a false assertion. Traps always apply it.
+ * grade.md §5 and §8.
+ *
+ * `mode` is not a convenience flag, it is which of two different things is being graded.
+ *
+ * In `llm` mode a system has *asserted* something, so `forbid` is fatal on an answerable question
+ * and a trap is won by refusing.
+ *
+ * In `evidence` mode the response is the retrieved context and nobody has asserted anything yet, so
+ * a stale value alongside the live one is contamination rather than a false claim — and a trap is
+ * won by *not surfacing* the tempting value, because a retrieved context is a pile of records and
+ * can never be a refusal. Grading a trap by looking for a refusal in evidence mode makes all four
+ * traps unwinnable for every arm, which is a property of the grader and not a fact about any system.
+ * That is exactly the bug this signature exists to prevent.
  */
-export function grade(q: Question, response: string, applyForbid = true): Graded {
-  const contaminated = forbidTrips(response, q.forbid);
+export function grade(q: Question, response: string, mode: "evidence" | "llm" = "llm"): Graded {
+  const contaminated = forbidTrips(response, q.forbid, q.forbid_subject ?? []);
   if (q.abstain) {
-    const abstained = isAbstention(response, q);
-    return { verdict: abstained ? "correct" : "wrong", contaminated, missing: [] };
+    const won = mode === "llm" ? isAbstention(response, q) : !contaminated;
+    return { verdict: won ? "correct" : "wrong", contaminated, missing: [] };
   }
   const missing = q.expect.filter((e) => !entryHits(response, e));
-  if (applyForbid && contaminated) return { verdict: "wrong", contaminated, missing };
+  if (mode === "llm" && contaminated) return { verdict: "wrong", contaminated, missing };
   if (missing.length === 0) return { verdict: "correct", contaminated, missing };
-  if (isAbstention(response, q)) return { verdict: "abstained", contaminated, missing };
+  // A retrieved context is never a refusal, so evidence mode must not look for one here either. It
+  // found them: `abstain` fired on Jish's own "I don't know what the fuck you're talking about"
+  // sitting in an otherwise irrelevant retrieved record, and credited the arm with a refusal it
+  // never made. Every such row had non-zero units. In evidence mode the only abstention is an empty
+  // result, which the runner assigns.
+  if (mode === "llm" && isAbstention(response, q)) return { verdict: "abstained", contaminated, missing };
   return { verdict: "wrong", contaminated, missing };
 }

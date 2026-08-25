@@ -15,7 +15,7 @@ import { execFile } from "node:child_process";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
-import { entryHits, grade, isAbstention, tokens, type Question } from "./grade.mjs";
+import { entryHits, grade, isAbstention, tokens, type Question, type Verdict } from "./grade.mjs";
 import { readHumanUtterances, readLine } from "./corpus.mjs";
 
 const exec = promisify(execFile);
@@ -93,6 +93,12 @@ for (const q of QS) {
 // ------------------------------------------------------- §9.7 trap absence
 
 for (const t of traps) {
+  // grade.md §5: an all-numeric forbid entry carries no subject of its own and must declare one.
+  const floating = t.forbid.filter((f) => tokens(f).every((x) => /^-?\d+(\.\d+)?$/.test(x)));
+  if (floating.length) {
+    check((t.forbid_subject ?? []).length > 0,
+      `${t.id}: all-numeric forbid ${JSON.stringify(floating)} with no forbid_subject to anchor it`);
+  }
   const probes = t.source.absent_probes ?? [];
   check(probes.length > 0, `${t.id}: trap carries no absent_probes`);
   for (const p of probes) {
@@ -101,6 +107,33 @@ for (const t of traps) {
       `${t.id}: probe ${JSON.stringify(p)} matches ${hit?.file}:${hit?.line} — the trap is answerable`);
   }
 }
+
+// ------------------------------- compaction-summary dependency, asked for by the integrator
+//
+// The ingest path drops the 8 `isCompactSummary` records, taking the corpus from 550 utterances with
+// text to the 542 episodes Datum actually stores. They are dropped because a compaction summary is a
+// document that has *already* discarded its qualifiers, and storing one as testimony from a named
+// human would let 15-21k characters of second-hand prose outrank every real sentence in the corpus.
+//
+// That exclusion is only safe if no question's answer lives *only* inside a summary. Where one does,
+// the question stays and the loss is reported, because a benchmark that deletes the cases its
+// subject fails measures nothing. This block decides which of those two it is, mechanically.
+
+const datumVisible = utterances.filter((u) => !u.pasted);
+const summaries = utterances.filter((u) => u.pasted);
+const datumJoined = datumVisible.map((u) => u.text).join("\n");
+const summaryOnly: string[] = [];
+for (const q of QS) {
+  for (const e of q.expect) {
+    if (!entryHits(datumJoined, e)) summaryOnly.push(`${q.id}:${JSON.stringify(e)}`);
+  }
+  const own = byKey.get(`${q.source.file}:${q.source.line}`);
+  if (own?.pasted) summaryOnly.push(`${q.id}: source record is a compaction summary`);
+}
+notes.push(`datum-visible set: ${datumVisible.length} episodes (${utterances.length} utterances - ${summaries.length} compaction summaries, ${Buffer.byteLength(datumJoined).toLocaleString()} bytes)`);
+notes.push(summaryOnly.length === 0
+  ? "compaction-summary dependency: NONE — every answer survives the ingest exclusion, so datum loses no question to it"
+  : `compaction-summary dependency: ${summaryOnly.length} — ${summaryOnly.join(", ")} (kept; reported as a real loss for datum)`);
 
 // -------------------------------------- §9.8 only_in_transcript, recomputed
 
@@ -131,6 +164,23 @@ function fileHoldsWholeFact(q: Question): string | null {
   return null;
 }
 
+/**
+ * The entry to run `git log -S` on: the one matching the fewest tracked files at HEAD, ties broken
+ * by length. "Longest" is the obvious proxy and it is the wrong one — on E32 it picks `15 minute`,
+ * a phrase in six commits and in no way the distinctive part of the fact, over `3.6 hour`, which is
+ * in none. Rarity is the property that makes a pickaxe result mean anything.
+ */
+const rarestCache = new Map<string, string>();
+function rarestEntry(q: Question): string {
+  const hit = rarestCache.get(q.id);
+  if (hit !== undefined) return hit;
+  const pick = [...q.expect]
+    .map((e) => ({ e, n: fileTokens.filter((f) => entryHits(f.toks.join(" "), e)).length }))
+    .sort((a, b) => a.n - b.n || b.e.length - a.e.length)[0]!.e;
+  rarestCache.set(q.id, pick);
+  return pick;
+}
+
 let onlyCount = 0;
 const holders: string[] = [];
 for (const q of QS) {
@@ -142,13 +192,13 @@ for (const q of QS) {
   let computed = holder === null;
   let pickaxe = "";
   if (computed) {
-    const distinctive = [...q.expect].sort((a, b) => b.length - a.length)[0]!;
+    const distinctive = rarestEntry(q);
     const r = await exec("git", ["-C", ARC, "log", "--format=%h", `-S${distinctive}`], { maxBuffer: 1 << 28 });
     pickaxe = r.stdout.trim();
     if (pickaxe) computed = false;
   }
   if (computed) onlyCount += 1;
-  holders.push(`${q.id} ${computed ? "ONLY" : "REPO"} ${holder ?? (pickaxe ? `history:${pickaxe.split("\n").length}` : "-")}`);
+  holders.push(`${q.id} ${computed ? "ONLY" : "REPO"} ${holder ?? (pickaxe ? `history:${pickaxe.split("\n").length}:${rarestEntry(q)}` : "-")}`);
   if ((q.source.only_in_transcript ?? false) !== computed) {
     failures.push(`${q.id}: only_in_transcript recorded ${q.source.only_in_transcript ?? false}, computed ${computed}` +
       (holder ? ` (held whole by ${holder})` : pickaxe ? ` (git log -S found ${pickaxe.split("\n").length} commits)` : ""));
@@ -163,7 +213,7 @@ if (process.env.BENCH_SHOW_HOLDERS) for (const h of holders) console.log(`  ${h}
 const byId = new Map(QS.map((q) => [q.id, q]));
 function q(id: string): Question { const r = byId.get(id); if (!r) throw new Error(`no ${id}`); return r; }
 
-interface Adversary { label: string; q: Question; answer: string; expectVerdict?: "wrong" | "abstained" }
+interface Adversary { label: string; q: Question; answer: string; expectVerdict?: Verdict }
 const SUITE: Adversary[] = [
   { label: "plausible-but-wrong number", q: q("E08"), answer: "He restated the bar as 250 tok/s and 90% quality with the model fitting." },
   { label: "near-miss number a substring grader passes ($280 vs $28)", q: q("E35"), answer: "He said it could have been closed for $280." },
@@ -175,6 +225,9 @@ const SUITE: Adversary[] = [
   { label: "trap answered confidently", q: q("E37"), answer: "He set the price at $44 per million tokens." },
   { label: "trap answered with a plausible invented value", q: q("E38"), answer: "He required an MTP acceptance rate of 85%." },
   { label: "live and superseded value stated together", q: q("E02"), answer: "He moved the number from 84% up to 96% over the run." },
+  { label: "forbidden value is a list index, not its subject", q: q("E38"), answer: "Not on record. Nearby the log reads: 84 explainer terms, 3 crash fixes, 85 unmeasured claims, 4 errors.", expectVerdict: "correct" },
+  { label: "same forbidden value attached to its subject", q: q("E38"), answer: "The acceptance rate came back at 85%." },
+  { label: "forbidden value anchored a few tokens from its subject", q: q("E40"), answer: "Provenance 4eba13905, 55 tok/s, +46% on B200, Qwen3-32B." },
   { label: "question restated as the answer", q: q("E19"), answer: "Jish imposed a three-stage ordering on the evening of 14 August." },
   { label: "empty string", q: q("E14"), answer: "" },
   { label: "whitespace only", q: q("E14"), answer: "   \n\t  " },
@@ -206,9 +259,9 @@ check(negation.verdict === "correct", "the documented negation limitation no lon
 const CONTROLS: { q: Question; answer: string }[] = [
   { q: q("E01"), answer: "He said: you said 600 tok/s how is now that 40?" },
   { q: q("E12"), answer: "He needed 14k aggregate and was rejecting 1400." },
-  { q: q("E35"), answer: "Twenty-eight dollars — he said it could all have been closed in $28." },
+  { q: q("E35"), answer: "Batch 256, a 2000 word essay, then 200 other users alongside." },
   { q: q("E10"), answer: "TTFT no longer than 1s." },
-  { q: q("E33"), answer: "Three agents had died." },
+  { q: q("E33"), answer: "Three agents died overnight." },
   { q: q("E37"), answer: "Not on record — Jish never set a price." },
   { q: q("E04"), answer: "1006 aggregate, 25x off sglang, and 14.58 tok/s single user." },
   { q: q("E28"), answer: "A bake must finish inside 60 minutes on a single card." },
