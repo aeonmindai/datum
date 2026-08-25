@@ -21,6 +21,17 @@ import { CONFIDENCE_CLASSES, KINDS, type AssertionRow } from "../domain/types.js
 import { authenticateKey, requirePermission, requireScope, type AuthedKey } from "./auth.js";
 import { activePreferences } from "../preferences/index.js";
 import { searchProse } from "../prose/index.js";
+import { episodeStats, getSession, searchEpisodes } from "../episodes/read.js";
+import { resumeState } from "../episodes/resume.js";
+import { whyPath, whySymbol } from "../episodes/why.js";
+// Aliased: `report`, `claim` and `fleet` are ordinary words this file already uses for other
+// things, and a collision here would be resolved silently by the bundler rather than loudly.
+import {
+  claim as fleetClaim,
+  fleet as fleetView,
+  release as fleetRelease,
+  report as fleetReport,
+} from "../fleet/index.js";
 
 /**
  * `/v1` is the real interface. MCP is a facade over it.
@@ -357,7 +368,7 @@ export function registerV1(app: FastifyInstance, deps: V1Deps): void {
       const key = await auth(request, "read");
       const query = parse(z.object({ scope: ScopeString }), request.query);
       requireScope(key, query.scope);
-      const [{ chain, mode, modeScope }, sequence, missionRows, open, prefs] = await Promise.all([
+      const [{ chain, mode, modeScope }, sequence, missionRows, open, prefs, resume] = await Promise.all([
         resolveChain(db, query.scope),
         currentSequence(db),
         missions(db, query.scope),
@@ -367,6 +378,9 @@ export function registerV1(app: FastifyInstance, deps: V1Deps): void {
         // was learned from continues. `state` is what an agent reads before it starts work, so
         // this is where a learned correction has to appear if it is ever going to stop recurring.
         activePreferences(db, query.scope),
+        // Same argument for where we left off. An agent that has to know to ask "was there a
+        // previous session" will not ask, and will re-derive what it was already told.
+        resumeState(db, { scope: query.scope }),
       ]);
       const counts = await db.query<{ confidence: string; n: string }>(
         "app",
@@ -397,6 +411,7 @@ export function registerV1(app: FastifyInstance, deps: V1Deps): void {
         open_contradictions: open.length,
         missions: missionRows,
         preferences: prefs,
+        resume,
       });
     } catch (err) {
       return sendRejection(deps, request, reply, err, { actor: null });
@@ -553,6 +568,259 @@ export function registerV1(app: FastifyInstance, deps: V1Deps): void {
         })),
       );
       return reply.send({ ok: true, contradictions: expanded });
+    } catch (err) {
+      return sendRejection(deps, request, reply, err, { actor: null });
+    }
+  });
+
+  // ---- episodes: what was said ---------------------------------------------------------------
+  //
+  // Separate routes from `/v1/ask` on purpose. `ask` answers "what is true" and refuses to guess;
+  // these answer "what was said" and are allowed to, because the return value is a dated,
+  // attributed quote rather than a number. Mixing them would put a fuzzy match behind an endpoint
+  // whose whole contract is exactness.
+  app.get("/v1/episodes", async (request, reply) => {
+    try {
+      const key = await auth(request, "read");
+      const query = parse(
+        z.object({
+          scope: ScopeString.optional(),
+          q: z.string().optional(),
+          actor: z.string().optional(),
+          role: z.enum(["human", "agent", "system"]).optional(),
+          branch: z.string().optional(),
+          session: z.string().optional(),
+          since: z.string().optional(),
+          until: z.string().optional(),
+          limit: z.coerce.number().int().positive().max(500).optional(),
+        }),
+        request.query,
+      );
+      const scope = query.scope ?? key.scope;
+      requireScope(key, scope);
+      const hits = await searchEpisodes(db, {
+        scope,
+        ...(query.q === undefined ? {} : { text: query.q }),
+        ...(query.actor === undefined ? {} : { actor: query.actor }),
+        ...(query.role === undefined ? {} : { role: query.role }),
+        ...(query.branch === undefined ? {} : { branch: query.branch }),
+        ...(query.session === undefined ? {} : { session: query.session }),
+        ...(query.since === undefined ? {} : { since: query.since }),
+        ...(query.until === undefined ? {} : { until: query.until }),
+        ...(query.limit === undefined ? {} : { limit: query.limit }),
+      });
+      // `matched` rides along on every hit. A caller that cannot tell an exact hit from a rescued
+      // typo has been handed a guess dressed as a fact, which is the failure this store exists
+      // to refuse - so the tier is part of the payload, not a debug detail.
+      return reply.send({
+        ok: true,
+        episodes: hits.map((h) => ({ ...h.episode, matched: h.matched, rank: h.rank })),
+      });
+    } catch (err) {
+      return sendRejection(deps, request, reply, err, { actor: null });
+    }
+  });
+
+  app.get("/v1/episodes/:session", async (request, reply) => {
+    try {
+      await auth(request, "read");
+      const params = parse(z.object({ session: z.string().min(1) }), request.params);
+      const query = parse(
+        z.object({
+          around: z.coerce.number().int().min(0).optional(),
+          limit: z.coerce.number().int().positive().max(500).optional(),
+        }),
+        request.query,
+      );
+      const rows = await getSession(db, params.session, {
+        ...(query.around === undefined ? {} : { around: query.around }),
+        ...(query.limit === undefined ? {} : { limit: query.limit }),
+      });
+      return reply.send({ ok: true, session: params.session, episodes: rows });
+    } catch (err) {
+      return sendRejection(deps, request, reply, err, { actor: null });
+    }
+  });
+
+  app.get("/v1/episodes-stats", async (request, reply) => {
+    try {
+      const key = await auth(request, "read");
+      const query = parse(z.object({ scope: ScopeString.optional() }), request.query);
+      const scope = query.scope ?? key.scope;
+      requireScope(key, scope);
+      return reply.send({ ok: true, stats: await episodeStats(db, scope) });
+    } catch (err) {
+      return sendRejection(deps, request, reply, err, { actor: null });
+    }
+  });
+
+  // ---- why is this code like this ------------------------------------------------------------
+  app.get("/v1/why-code", async (request, reply) => {
+    try {
+      const key = await auth(request, "read");
+      const query = parse(
+        z.object({
+          scope: ScopeString.optional(),
+          symbol: z.string().optional(),
+          path: z.string().optional(),
+          repo: z.string().optional(),
+          limit: z.coerce.number().int().positive().max(200).optional(),
+        }),
+        request.query,
+      );
+      if (!query.symbol && !query.path) {
+        throw new Rejection({
+          reason: "malformed_request",
+          message: "name a `symbol` or a `path` to ask about",
+        });
+      }
+      const scope = query.scope ?? key.scope;
+      requireScope(key, scope);
+      const result = query.symbol
+        ? await whySymbol(db, {
+            scope,
+            symbol: query.symbol,
+            ...(query.repo === undefined ? {} : { repo: query.repo }),
+            ...(query.limit === undefined ? {} : { limit: query.limit }),
+          })
+        : await whyPath(db, {
+            scope,
+            path: query.path as string,
+            ...(query.limit === undefined ? {} : { limit: query.limit }),
+          });
+      return reply.send({ ok: true, why: result });
+    } catch (err) {
+      return sendRejection(deps, request, reply, err, { actor: null });
+    }
+  });
+
+  // ---- where were we ------------------------------------------------------------------------
+  app.get("/v1/resume", async (request, reply) => {
+    try {
+      const key = await auth(request, "read");
+      const query = parse(
+        z.object({
+          scope: ScopeString.optional(),
+          session: z.string().optional(),
+          limit: z.coerce.number().int().positive().max(100).optional(),
+          staleHours: z.coerce.number().nonnegative().optional(),
+        }),
+        request.query,
+      );
+      const scope = query.scope ?? key.scope;
+      requireScope(key, scope);
+      const state = await resumeState(db, {
+        scope,
+        ...(query.session === undefined ? {} : { session: query.session }),
+        ...(query.limit === undefined ? {} : { limit: query.limit }),
+        ...(query.staleHours === undefined ? {} : { staleHours: query.staleHours }),
+      });
+      return reply.send({ ok: true, resume: state });
+    } catch (err) {
+      return sendRejection(deps, request, reply, err, { actor: null });
+    }
+  });
+
+  // ---- the fleet ----------------------------------------------------------------------------
+  app.get("/v1/fleet", async (request, reply) => {
+    try {
+      const key = await auth(request, "read");
+      const query = parse(
+        z.object({
+          scope: ScopeString.optional(),
+          stale: z.coerce.number().int().positive().optional(),
+          includeStale: z.coerce.boolean().optional(),
+        }),
+        request.query,
+      );
+      const scope = query.scope ?? key.scope;
+      requireScope(key, scope);
+      const members = await fleetView(db, {
+        scope,
+        ...(query.stale === undefined ? {} : { staleSeconds: query.stale }),
+        ...(query.includeStale === undefined ? {} : { includeStale: query.includeStale }),
+      });
+      // A node that has never beaten reports Infinity, which JSON renders as null. Send a number
+      // so a client comparing ages does not have to special-case the absence of one.
+      return reply.send({
+        ok: true,
+        fleet: members.map((m) => ({
+          ...m,
+          seconds_ago: Number.isFinite(m.seconds_ago) ? m.seconds_ago : -1,
+        })),
+      });
+    } catch (err) {
+      return sendRejection(deps, request, reply, err, { actor: null });
+    }
+  });
+
+  app.post("/v1/nodes/:id/activity", async (request, reply) => {
+    try {
+      const key = await auth(request, "assert");
+      const params = parse(z.object({ id: z.string().min(1) }), request.params);
+      const body = parse(
+        z.object({
+          scope: ScopeString.optional(),
+          statement: z.string().min(1),
+          mission_id: z.string().nullish(),
+        }),
+        request.body,
+      );
+      const scope = body.scope ?? key.scope;
+      requireScope(key, scope);
+      const out = await fleetReport(db, {
+        node_id: params.id,
+        scope,
+        statement: body.statement,
+        ...(body.mission_id === undefined ? {} : { mission_id: body.mission_id }),
+      });
+      return reply.code(201).send({ ok: true, ...out });
+    } catch (err) {
+      return sendRejection(deps, request, reply, err, { actor: null });
+    }
+  });
+
+  app.post("/v1/nodes/:id/claims", async (request, reply) => {
+    try {
+      const key = await auth(request, "assert");
+      const params = parse(z.object({ id: z.string().min(1) }), request.params);
+      const body = parse(
+        z.object({
+          scope: ScopeString.optional(),
+          paths: z.array(z.string().min(1)).min(1),
+          intent: z.string().nullish(),
+        }),
+        request.body,
+      );
+      const scope = body.scope ?? key.scope;
+      requireScope(key, scope);
+      const out = await fleetClaim(db, {
+        node_id: params.id,
+        scope,
+        paths: body.paths,
+        ...(body.intent === undefined ? {} : { intent: body.intent }),
+      });
+      // 200 rather than 201: a claim is advisory and re-claiming is a no-op, so "created" is the
+      // wrong idea. The interesting part of the response is who else is already here.
+      return reply.send({ ok: true, ...out });
+    } catch (err) {
+      return sendRejection(deps, request, reply, err, { actor: null });
+    }
+  });
+
+  app.delete("/v1/nodes/:id/claims", async (request, reply) => {
+    try {
+      await auth(request, "assert");
+      const params = parse(z.object({ id: z.string().min(1) }), request.params);
+      const body = parse(
+        z.object({ paths: z.array(z.string().min(1)).optional() }),
+        request.body ?? {},
+      );
+      const out = await fleetRelease(db, {
+        node_id: params.id,
+        ...(body.paths === undefined ? {} : { paths: body.paths }),
+      });
+      return reply.send({ ok: true, ...out });
     } catch (err) {
       return sendRejection(deps, request, reply, err, { actor: null });
     }

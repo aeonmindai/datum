@@ -20,7 +20,11 @@ import { CONFIDENCE_CLASSES, KINDS } from "../domain/types.js";
 import { authenticateKey, requirePermission, requireScope } from "./auth.js";
 import { activePreferences, recordFeedback } from "../preferences/index.js";
 import { impact } from "../graph/index.js";
-import { compactAssertion, compactState, pack, DEFAULT_BUDGET_BYTES } from "./compact.js";
+import { compactAssertion, compactState, pack, short, DEFAULT_BUDGET_BYTES } from "./compact.js";
+import { searchEpisodes } from "../episodes/read.js";
+import { whyPath, whySymbol } from "../episodes/why.js";
+import { fleet as fleetView } from "../fleet/index.js";
+import { resumeState } from "../episodes/resume.js";
 
 /**
  * `/mcp` — the facade. Six tools, not thirty.
@@ -154,11 +158,45 @@ const TOOLS = [
   {
     name: "nodes",
     description:
-      "Who is out there: agents, worktrees, branches, repos and humans registered in a scope, " +
-      "with last_seen. This is what makes a hundred worktrees legible instead of frightening.",
+      "Who is out there and what are they doing: agents, worktrees, branches, repos and humans " +
+      "registered in a scope, each with whether it is still alive, its last reported activity, " +
+      "and which paths it has claimed. Call it before you start editing — if another worktree " +
+      "has claimed the file, you find out now instead of in a merge. This is what makes a " +
+      "hundred worktrees legible instead of frightening.",
     inputSchema: {
       type: "object",
-      properties: { scope: { type: "string" }, kind: { type: "string" }, max_bytes: { type: "number" } },
+      properties: {
+        scope: { type: "string" },
+        kind: { type: "string" },
+        stale_seconds: { type: "number", description: "older heartbeat than this counts as not live; default 300" },
+        max_bytes: { type: "number" },
+      },
+    },
+  },
+  {
+    name: "recall",
+    description:
+      "What was SAID, as opposed to what is true. Returns dated, attributed quotes from past " +
+      "sessions — the decision nobody wrote down, the correction you were given, the approach " +
+      "that was abandoned and why. Pass `symbol` or `path` instead of `q` to ask why a piece of " +
+      "code is the way it is, which git blame cannot tell you because the reason was in a " +
+      "conversation. Every hit says how it matched, so an exact quote is never confused with a " +
+      "fuzzy one. A quote is NOT a fact: it can support what a person said and can never satisfy " +
+      "a target. Use `ask` for numbers, this for reasons.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        scope: { type: "string" },
+        q: { type: "string", description: "words to look for in what was said" },
+        symbol: { type: "string", description: "ask why this symbol is the way it is" },
+        path: { type: "string", description: "ask why this file is the way it is" },
+        actor: { type: "string", description: "only what this person or agent said" },
+        branch: { type: "string", description: "only what was said while on this branch" },
+        since: { type: "string", description: "ISO timestamp lower bound" },
+        limit: { type: "number" },
+        max_bytes: { type: "number" },
+      },
+      required: ["scope"],
     },
   },
   {
@@ -279,12 +317,13 @@ export function registerMcp(app: FastifyInstance, deps: { db: Db; config: Config
         const parsed = AskArgs.pick({ scope: true, max_bytes: true }).parse(args);
         requirePermission(key, "read");
         requireScope(key, parsed.scope);
-        const [{ chain, mode }, sequence, missionRows, open, prefs] = await Promise.all([
+        const [{ chain, mode }, sequence, missionRows, open, prefs, resume] = await Promise.all([
           resolveChain(db, parsed.scope),
           currentSequence(db),
           missions(db, parsed.scope),
           contradictions(db, { status: "open", limit: 500 }),
           activePreferences(db, parsed.scope),
+          resumeState(db, { scope: parsed.scope, limit: 1 }),
         ]);
         const counts = await db.query<{ confidence: string; n: string }>(
           "app",
@@ -317,6 +356,17 @@ export function registerMcp(app: FastifyInstance, deps: { db: Db; config: Config
               distinct_humans: p.distinct_humans,
               binding: p.tier === "org",
             })),
+            resume:
+              resume.last_session === null || resume.age_hours === null
+                ? null
+                : {
+                    session: resume.last_session.id,
+                    age_hours: resume.age_hours,
+                    turns: resume.last_session.episodes,
+                    branch: resume.last_session.branches[0] ?? null,
+                    open_question: resume.open_questions[0]?.text ?? null,
+                    stale_note: resume.drift?.note ?? null,
+                  },
           },
           budget,
         );
@@ -457,34 +507,108 @@ export function registerMcp(app: FastifyInstance, deps: { db: Db; config: Config
           .object({
             scope: z.string().optional(),
             kind: z.string().optional(),
+            stale_seconds: z.number().int().positive().optional(),
             max_bytes: z.number().optional(),
           })
           .parse(args);
         requirePermission(key, "read");
         const scope = parsed.scope ?? key.scope;
         requireScope(key, scope);
-        const { rows } = await db.query<{
-          kind: string;
-          label: string;
-          scope: string;
-          role: string | null;
-          last_seen: string | null;
-        }>(
-          "app",
-          `SELECT kind, label, scope, role, last_seen FROM datum.nodes
-            WHERE retired_at IS NULL AND (scope = $1 OR scope LIKE $1 || '/%')
-              AND ($2::text IS NULL OR kind = $2)
-            ORDER BY last_seen DESC NULLS LAST LIMIT 100`,
-          [scope, parsed.kind ?? null],
-        );
+        const members = await fleetView(db, {
+          scope,
+          ...(parsed.stale_seconds === undefined ? {} : { staleSeconds: parsed.stale_seconds }),
+        });
+        const shown = parsed.kind ? members.filter((m) => m.kind === parsed.kind) : members;
+        // A claimed path is mandatory, for the same reason a contested pair is: it is the one line
+        // that stops two agents editing one file, and a line dropped to save bytes stops nothing.
+        const mandatory: string[] = [];
+        const optional: string[] = [];
+        for (const m of shown) {
+          const age = Number.isFinite(m.seconds_ago) ? `${Math.round(m.seconds_ago)}s` : "never";
+          const line =
+            `${m.live ? "" : "STALE "}${m.kind}:${m.label}${m.role ? `(${m.role})` : ""} ` +
+            `${m.scope} beat=${age}` +
+            (m.activity ? ` doing="${short(m.activity, 60)}"` : "") +
+            (m.claims.length > 0 ? ` holds=${m.claims.slice(0, 4).join(",")}` : "");
+          if (m.claims.length > 0 && m.live) mandatory.push(line);
+          else optional.push(line);
+        }
+        return pack(optional, budget, `no nodes registered under ${scope}`, mandatory);
+      }
+
+      case "recall": {
+        const parsed = z
+          .object({
+            scope: z.string(),
+            q: z.string().optional(),
+            symbol: z.string().optional(),
+            path: z.string().optional(),
+            actor: z.string().optional(),
+            branch: z.string().optional(),
+            since: z.string().optional(),
+            limit: z.number().int().positive().max(100).optional(),
+            max_bytes: z.number().optional(),
+          })
+          .parse(args);
+        requirePermission(key, "read");
+        requireScope(key, parsed.scope);
+
+        // A code target is a recall with a different needle, not a different product. Routing it
+        // here keeps one tool where an agent would otherwise have to know which of two to reach
+        // for, and choosing between two data sources is the thing agents get wrong.
+        if (parsed.symbol || parsed.path) {
+          const why = parsed.symbol
+            ? await whySymbol(db, {
+                scope: parsed.scope,
+                symbol: parsed.symbol,
+                ...(parsed.limit === undefined ? {} : { limit: parsed.limit }),
+              })
+            : await whyPath(db, {
+                scope: parsed.scope,
+                path: parsed.path as string,
+                ...(parsed.limit === undefined ? {} : { limit: parsed.limit }),
+              });
+          const header =
+            `${why.target}` +
+            (why.resolved?.path ? ` -> ${why.resolved.path}:${why.resolved.line_start ?? "?"}` : "") +
+            ` mentions=${why.mentions.length} facts=${why.facts.length}`;
+          // The note is mandatory. It is where ambiguity and basename-only matches are admitted,
+          // and an answer that drops its own caveat to fit a budget is worse than no answer.
+          const head = why.note ? [header, `note: ${short(why.note, 200)}`] : [header];
+          return pack(
+            why.mentions.map(
+              (m) =>
+                `${m.episode.occurred_at instanceof Date ? m.episode.occurred_at.toISOString().slice(0, 16) : String(m.episode.occurred_at).slice(0, 16)} ` +
+                `${m.episode.actor}${m.episode.git_branch ? `@${m.episode.git_branch}` : ""} ` +
+                `[${m.why}] "${short(m.excerpt, 180)}"`,
+            ),
+            budget,
+            `nothing was ever said about ${why.target}`,
+            head,
+          );
+        }
+
+        const hits = await searchEpisodes(db, {
+          scope: parsed.scope,
+          ...(parsed.q === undefined ? {} : { text: parsed.q }),
+          ...(parsed.actor === undefined ? {} : { actor: parsed.actor }),
+          ...(parsed.branch === undefined ? {} : { branch: parsed.branch }),
+          ...(parsed.since === undefined ? {} : { since: parsed.since }),
+          ...(parsed.limit === undefined ? {} : { limit: parsed.limit }),
+        });
         return pack(
-          rows.map(
-            (n) =>
-              `${n.kind}:${n.label}${n.role ? `(${n.role})` : ""} ${n.scope} ` +
-              `last_seen=${n.last_seen ? new Date(n.last_seen).toISOString().slice(0, 16) : "never"}`,
-          ),
+          hits.map((h) => {
+            const e = h.episode;
+            const when =
+              e.occurred_at instanceof Date
+                ? e.occurred_at.toISOString().slice(0, 16)
+                : String(e.occurred_at).slice(0, 16);
+            // `matched` travels with every quote. A rescued typo and an exact hit look identical
+            // otherwise, and the caller has no way to weigh what it was handed.
+            return `${when} ${e.actor}${e.git_branch ? `@${e.git_branch}` : ""} [${h.matched}] "${short(e.text, 170)}"`;
+          }),
           budget,
-          `no nodes registered under ${scope}`,
+          `nothing on record was said about that in ${parsed.scope}`,
         );
       }
 

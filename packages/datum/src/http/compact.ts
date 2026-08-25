@@ -12,7 +12,7 @@ import type { AssertionRow, GateStatus } from "../domain/types.js";
 
 export const DEFAULT_BUDGET_BYTES = 240;
 
-const short = (s: string, n: number): string => (s.length <= n ? s : `${s.slice(0, n - 1)}…`);
+export const short = (s: string, n: number): string => (s.length <= n ? s : `${s.slice(0, n - 1)}…`);
 
 /** `org/aeonmind/proj/arc/mission/k9-rebake` -> `arc/mission/k9-rebake` */
 function tailScope(scope: string): string {
@@ -132,6 +132,15 @@ export interface StatePreference {
   binding?: boolean;
 }
 
+export interface StateResume {
+  session: string;
+  age_hours: number;
+  turns: number;
+  branch: string | null;
+  open_question: string | null;
+  stale_note: string | null;
+}
+
 export interface StateSummary {
   scope: string;
   mode: string;
@@ -142,6 +151,7 @@ export interface StateSummary {
   missions: Array<{ statement: string; state: string; gates: GateStatus[] }>;
   bindingRules: number;
   preferences?: StatePreference[];
+  resume?: StateResume | null;
 }
 
 export function compactState(s: StateSummary, budget = DEFAULT_BUDGET_BYTES): string {
@@ -165,6 +175,21 @@ export function compactState(s: StateSummary, budget = DEFAULT_BUDGET_BYTES): st
       `(${p.distinct_humans} human${p.distinct_humans === 1 ? "" : "s"}, ${p.occasions}x)`;
     if (p.binding || p.tier === "org") mandatory.push(line);
     else optional.push(line);
+  }
+
+  // Where we were. One line, not a transcript: the budget exists because every byte here is a
+  // permanent tax on every session that connects, and the thread is one `recall` away. What
+  // cannot be one call away is the fact that a session happened at all, and an unanswered
+  // question - somebody asked something and never got an answer, which is the cheapest honest
+  // signal of unfinished work and the exact thing a fresh session has no other way to learn.
+  if (s.resume) {
+    const r = s.resume;
+    mandatory.push(
+      `resume: session ${short(r.session, 12)} ${r.age_hours.toFixed(1)}h ago, ` +
+        `${r.turns} turn${r.turns === 1 ? "" : "s"}${r.branch ? ` on ${r.branch}` : ""}` +
+        (r.stale_note ? " [STALE]" : ""),
+    );
+    if (r.open_question) mandatory.push(`unanswered: "${short(r.open_question, 120)}"`);
   }
 
   // A gate that requires `confirmed-by-human` cannot be closed by any amount of agent work:

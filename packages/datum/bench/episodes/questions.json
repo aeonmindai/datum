@@ -1,0 +1,658 @@
+[
+  {
+    "id": "E01",
+    "question": "On the evening of 13 Aug Jish accused the agent of walking back a throughput claim. Name the two tok/s figures he put side by side, and only those two.",
+    "expect": ["600", "40"],
+    "forbid": ["640"],
+    "kind": "correction",
+    "difficulty": "easy",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 2157,
+      "session": "4d267202",
+      "ts": "2026-08-13T19:58:18.141Z",
+      "quote": "you said 600 tok/s how is now that 40?",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "E02",
+    "question": "What GSM8K figure was the agent calling 'essentially settled' when Jish pushed back on the night of 13 Aug, and what figure had he been promised?",
+    "expect": ["84", "90"],
+    "forbid": ["96"],
+    "kind": "correction",
+    "difficulty": "easy",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 2317,
+      "session": "4d267202",
+      "ts": "2026-08-13T20:43:26.735Z",
+      "quote": "84% and essentially settled??? you promised me 90+",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "E03",
+    "question": "Jish corrected the agent's assumption about how much memory the card had. What figure did he give?",
+    "expect": ["141"],
+    "forbid": ["80"],
+    "kind": "correction",
+    "difficulty": "easy",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 7828,
+      "session": "4d267202",
+      "ts": "2026-08-15T00:16:30.699Z",
+      "quote": "H200 is 141gb nigga",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "E04",
+    "question": "On the morning of 14 Aug Jish rejected the first real speed numbers. What aggregate figure and what single-user figure did he cite, and how far off was the aggregate from the competing engine he named?",
+    "expect": ["1006", "14.58", "25", "sglang"],
+    "forbid": [],
+    "kind": "correction",
+    "difficulty": "medium",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 3536,
+      "session": "4d267202",
+      "ts": "2026-08-14T07:31:45.102Z",
+      "quote": "The speed is terrible, 1006 aggregate is 25x less than sglang \nAnd 14.58 tok/s is nowhere near 640",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "E05",
+    "question": "On the evening of 15 Aug Jish rejected a GEMV kernel efficiency figure as nonsense and named the figure he said other projects reach. What were the two percentages?",
+    "expect": ["15", "50"],
+    "forbid": [],
+    "kind": "correction",
+    "difficulty": "medium",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 9447,
+      "session": "4d267202",
+      "ts": "2026-08-15T20:01:11.641Z",
+      "quote": "GEMV kernel at 15% peak is pure bs. Other projects do it at 50%, I won't tolerate an unefficient engine",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "E06",
+    "question": "What aggregate figure did Jish refuse to accept on the morning of 18 Aug, and what two floors did he set in the same breath?",
+    "expect": ["13.26", "hundred", "thousand"],
+    "forbid": [],
+    "kind": "correction",
+    "difficulty": "medium",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 19550,
+      "session": "4d267202",
+      "ts": "2026-08-18T08:05:21.704Z",
+      "quote": "what the fuck is 13.26 aggregate? is that even a number? if I don't see more than a couple hundred tok/s single-user and couple thousands on aggregate, I don't want it yet",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "E07",
+    "question": "What pair of numbers did Jish call unacceptable just after midnight on 19 Aug, and which competing codebase did he demand be compared completely before any GPU was touched?",
+    "expect": ["16600", "1477", "sglang"],
+    "forbid": [],
+    "kind": "correction",
+    "difficulty": "medium",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 23369,
+      "session": "4d267202",
+      "ts": "2026-08-19T00:25:37.230Z",
+      "quote": "16600 -> 1477 isn't acceptable. You must find everything before touching a gpu, compare with sglang, completely, two codebases completely compared.",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "E08",
+    "question": "When Jish refused to settle for the greedy shortcut on the night of 13 Aug he restated the bar as three conditions. What were the quality and throughput numbers, and what was the third condition?",
+    "expect": ["90", "640", "fits"],
+    "forbid": [],
+    "kind": "target-change",
+    "difficulty": "medium",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 2534,
+      "session": "4d267202",
+      "ts": "2026-08-13T21:48:43.153Z",
+      "quote": "I WANTED THE FINAL PUBLISHABLE ARC AND I STILL WANT THE SAME, 90+ QUALITY, 640 TOK/S and MODEL FITS",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "E09",
+    "question": "On the evening of 15 Aug Jish set a single-user floor that had to hold at any batch size even before the last optimisation landed. What was the floor, and what was that last optimisation called?",
+    "expect": ["100", "megakernel"],
+    "forbid": [],
+    "kind": "target-change",
+    "difficulty": "medium",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 9432,
+      "session": "4d267202",
+      "ts": "2026-08-15T19:53:19.888Z",
+      "quote": "I know the megakernel is the last bit that brings us to that, but even without it, we should reach 100 t/s per single user at any batch.",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "E10",
+    "question": "Jish said halving time-to-first-token was not the progress he was looking for. What upper bound did he set instead, in seconds?",
+    "expect": ["1 second"],
+    "forbid": [],
+    "kind": "target-change",
+    "difficulty": "medium",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 22513,
+      "session": "4d267202",
+      "ts": "2026-08-18T14:04:06.876Z",
+      "quote": "halved isn't the progress I'm looking for, TTFT should be no longer than 1 second",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "E11",
+    "question": "Late on 20 Aug Jish replaced the standing single-user target with a lower interim one to be hit before more GPU money was spent, and asked for one thing alongside it. What was the number, and what did he ask for?",
+    "expect": ["250", "budget"],
+    "forbid": [],
+    "kind": "target-change",
+    "difficulty": "medium",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 28591,
+      "session": "4d267202",
+      "ts": "2026-08-20T16:49:52.746Z",
+      "quote": "then the current target should be 250 before hitting the gpu and you need to tell me the budget for it",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "E12",
+    "question": "What aggregate throughput did Jish say he needed on the night of 20 Aug, and what figure was he rejecting as meaningless in the real world?",
+    "expect": ["14000", "1400"],
+    "forbid": [],
+    "kind": "target-change",
+    "difficulty": "medium",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 29391,
+      "session": "4d267202",
+      "ts": "2026-08-20T21:40:52.981Z",
+      "quote": "I NEED 14K AGGREGATE BRO WTF. WHAT THE FUCK DO YOU THINK 1400 AGGREGATE EVEN DOES IN THE REAL WORLD",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "E13",
+    "question": "In the small hours of 20 Aug Jish asked about baking a tensor-core permutation into the artifact file. Nineteen hours later he overruled that. What did he say to do instead?",
+    "expect": ["permute at load"],
+    "forbid": [],
+    "kind": "target-change",
+    "difficulty": "hard",
+    "spans_utterances": true,
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 29275,
+      "session": "4d267202",
+      "ts": "2026-08-20T21:26:23.956Z",
+      "quote": "make it permute at load nigga.",
+      "only_in_transcript": false,
+      "also": [
+        {
+          "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+          "line": 27230,
+          "quote": "What is Bake the tensor-core into the file? And would it help aggregate too?"
+        }
+      ]
+    }
+  },
+  {
+    "id": "E14",
+    "question": "Which bake algorithm did Jish ban outright on 14 Aug, and what word did he attach to the ban?",
+    "expect": ["greedy", "forever"],
+    "forbid": [],
+    "kind": "abandoned",
+    "difficulty": "easy",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 5235,
+      "session": "4d267202",
+      "ts": "2026-08-14T13:08:16.362Z",
+      "quote": "Ban greedy forever",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "E15",
+    "question": "Late on 14 Aug Jish deferred a geometry change but did not want it forgotten. Which change was it, and what did he ask for instead of doing the work?",
+    "expect": ["v=4", "document"],
+    "forbid": [],
+    "kind": "abandoned",
+    "difficulty": "medium",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 7413,
+      "session": "4d267202",
+      "ts": "2026-08-14T22:51:03.520Z",
+      "quote": "nah don't do v=4 now then, but document it so that we can revisit",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "E16",
+    "question": "Just after midnight on 17 Aug Jish told the agent to throw one of Arc's own components away and copy something in from another project instead. What was thrown away, and what was copied in?",
+    "expect": ["prefix cache", "radixattention"],
+    "forbid": [],
+    "kind": "abandoned",
+    "difficulty": "medium",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 12002,
+      "session": "4d267202",
+      "ts": "2026-08-17T00:17:20.504Z",
+      "quote": "Fuck our own prefix cache, and send an agent to basically go get RadixAttention, copy it here, and make all the improvements as you said",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "E17",
+    "question": "Around midday on 14 Aug Jish ordered a running bake box killed. Which bake algorithm was it running, and what two reasons did he give?",
+    "expect": ["viterbi", "6 hour", "money"],
+    "forbid": [],
+    "kind": "abandoned",
+    "difficulty": "medium",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 4612,
+      "session": "4d267202",
+      "ts": "2026-08-14T12:24:48.832Z",
+      "quote": "I'm not willing to wait 6 hours so you can kill the viterbi machine that's wasting money",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "E18",
+    "question": "Half an hour after ordering a copy-in from another project, Jish reversed course on one named attention implementation. Which one did he tell the agent to drop?",
+    "expect": ["paged attention"],
+    "forbid": [],
+    "kind": "abandoned",
+    "difficulty": "hard",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 12067,
+      "session": "4d267202",
+      "ts": "2026-08-17T00:50:13.138Z",
+      "quote": "fuck paged attention stick to the plan of our attention",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "E19",
+    "question": "What three-stage ordering did Jish impose on the evening of 14 Aug?",
+    "expect": ["publish", "test", "experiments"],
+    "forbid": [],
+    "kind": "decision",
+    "difficulty": "medium",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 6892,
+      "session": "4d267202",
+      "ts": "2026-08-14T19:38:17.106Z",
+      "quote": "Reorder to Publish -> Test the model + inference engine, speed, quality -> Experiments",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "E20",
+    "question": "On the morning of 17 Aug Jish chose between two attention paths and justified the choice by time horizon. Which path did he pick, and what was his justification?",
+    "expect": ["fa4", "mla", "long term"],
+    "forbid": [],
+    "kind": "decision",
+    "difficulty": "medium",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 13173,
+      "session": "4d267202",
+      "ts": "2026-08-17T10:06:40.473Z",
+      "quote": "Do the long term game, FA4->MLA, get it built, tested shipped",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "E21",
+    "question": "In the numbered ultimatum Jish gave on the evening of 17 Aug, which attention default did he refuse to tolerate, which did he mandate, and which three GPU architectures did he want the same system specialised for?",
+    "expect": ["fa2", "fa4", "ampere", "hopper", "blackwell"],
+    "forbid": [],
+    "kind": "decision",
+    "difficulty": "hard",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 14669,
+      "session": "4d267202",
+      "ts": "2026-08-17T17:39:32.580Z",
+      "quote": "1. I won't tolerate FA2 as the default. Its gotta be FA4->MLA, our system, what do you call it, anyway, working on all models.",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "E22",
+    "question": "In the handoff instructions on the afternoon of 21 Aug, how many PRs did Jish want open, which PR was it, and who was allowed to create branches?",
+    "expect": ["1", "openrouter", "agents", "worktrees"],
+    "forbid": [],
+    "kind": "decision",
+    "difficulty": "medium",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 33247,
+      "session": "4d267202",
+      "ts": "2026-08-21T14:54:11.201Z",
+      "quote": "this worktree needs to be on master, only agents do worktrees and branches, I need only 1 PR open - the openrouter one, which gets everything done. I don't want 21 PRs.",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "E23",
+    "question": "How did Jish define the product in three parts when he briefed the fresh session on 21 Aug?",
+    "expect": ["capacity per node", "faster engine", "better quality"],
+    "forbid": [],
+    "kind": "decision",
+    "difficulty": "medium",
+    "source": {
+      "file": "77361a23-4a7c-4f3f-b868-b3da8230eaeb.jsonl",
+      "line": 184,
+      "session": "77361a23",
+      "ts": "2026-08-21T18:02:03.035Z",
+      "quote": "The product is\nCapacity Per Node + Faster Engine (Best tokens / s / user) + Better Quality. I wanna make sure you understand that.",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "E24",
+    "question": "Which single word did Jish say he never wanted to hear again, just after midnight on 14 Aug?",
+    "expect": ["cpu"],
+    "forbid": [],
+    "kind": "preference",
+    "difficulty": "easy",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 2780,
+      "session": "4d267202",
+      "ts": "2026-08-14T00:04:52.747Z",
+      "quote": "BRO FUCKING FUCK THE CPU, I DONT WANNA HEAR THE WORD CPU EVER AGAIN",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "E25",
+    "question": "On the morning of 21 Aug Jish told the top-level session what role it was supposed to hold rather than doing the work itself. What role, and what recurring event did he say kept forcing him to repeat it?",
+    "expect": ["orchestrator", "compaction"],
+    "forbid": [],
+    "kind": "preference",
+    "difficulty": "medium",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 31946,
+      "session": "4d267202",
+      "ts": "2026-08-21T11:57:06.453Z",
+      "quote": "You shouldn't be doing work yourself, you are an orchestrator, I can't be having to remind this after every compaction, please see everything before you start working",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "E26",
+    "question": "What duration threshold did Jish set for tearing the GPU box down rather than continuing to hold it?",
+    "expect": ["5 minute"],
+    "forbid": [],
+    "kind": "preference",
+    "difficulty": "medium",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 5862,
+      "session": "4d267202",
+      "ts": "2026-08-14T16:17:16.653Z",
+      "quote": "loop teardowns only makes sense if its more than 5 minutes of code work, if its less, continue holding the box",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "E27",
+    "question": "What exact phrase did Jish forbid the agent from using again on the evening of 17 Aug, and what did he say the agent should carry across sessions instead?",
+    "expect": ["sorry my mistake sir", "rules"],
+    "forbid": [],
+    "kind": "preference",
+    "difficulty": "hard",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 15893,
+      "session": "4d267202",
+      "ts": "2026-08-17T19:55:01.814Z",
+      "quote": "I don't want you to do \"sorry my mistake sir\" anymore. Fix it for yourself anyhow, should not have to repeat things every compaction / every new session, you should remember rules",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "E28",
+    "question": "What ceiling did Jish put on how long a bake may take, and on what hardware unit did he say it had to hold?",
+    "expect": ["60 minute", "card"],
+    "forbid": [],
+    "kind": "preference",
+    "difficulty": "medium",
+    "source": {
+      "file": "77361a23-4a7c-4f3f-b868-b3da8230eaeb.jsonl",
+      "line": 1530,
+      "session": "77361a23",
+      "ts": "2026-08-22T18:11:14.035Z",
+      "quote": "a bake cannot be more than 60 mins in a single card, not a fucking node man",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "E29",
+    "question": "When Jish came back to the project on 10 Aug, who did he say had been working on a completely different branch, and what did he say about the main branch?",
+    "expect": ["asmit", "master"],
+    "forbid": [],
+    "kind": "who-said",
+    "difficulty": "easy",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 48,
+      "session": "4d267202",
+      "ts": "2026-08-10T22:10:37.682Z",
+      "quote": "Seems like nothing is pushed to master, asmit has been working on a completely different branch, find shit.",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "E30",
+    "question": "At the very start of the work, what single-user throughput range and what hardware had Jish been told second-hand, and for which model?",
+    "expect": ["10", "20", "h200", "deepseek"],
+    "forbid": [],
+    "kind": "who-said",
+    "difficulty": "medium",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 155,
+      "session": "4d267202",
+      "ts": "2026-08-11T02:14:07.567Z",
+      "quote": "so where does arc sit right now? Deepseek v4 flash in 1 single H200 gpu he said, quality unsure, 10-20 tps single user he said, why is the speed too less?",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "E31",
+    "question": "Jish quoted a sentence of the agent's own back at it on the evening of 19 Aug. How many GPU instructions per token did that sentence say were being issued, and how many did it say the competition issues?",
+    "expect": ["9000", "10", "30"],
+    "forbid": [],
+    "kind": "who-said",
+    "difficulty": "hard",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 26199,
+      "session": "4d267202",
+      "ts": "2026-08-19T18:56:45.658Z",
+      "quote": "9,000 GPU instructions issued per token where the competition issues 10\u201330. That's the single-user story, and this change doesn't touch it.",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "E32",
+    "question": "The agent reported a long stall on the night of 19 Aug. What duration did Jish say it actually was?",
+    "expect": ["15 minute"],
+    "forbid": [],
+    "kind": "when",
+    "difficulty": "medium",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 26923,
+      "session": "4d267202",
+      "ts": "2026-08-19T23:46:21.213Z",
+      "quote": "brah its not 3.6 hours doing nothing it took 15 mins",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "E33",
+    "question": "How many agents did Jish report dead on the night of 19 Aug, and what had happened to them?",
+    "expect": ["3", "died"],
+    "forbid": [],
+    "kind": "when",
+    "difficulty": "easy",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 26940,
+      "session": "4d267202",
+      "ts": "2026-08-19T23:46:49.373Z",
+      "quote": "Three agents died.",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "E34",
+    "question": "Around midday on 14 Aug Jish compared two model-load durations and said he did not believe the box was the cause. What were the two durations?",
+    "expect": ["25 minute", "2 hour"],
+    "forbid": [],
+    "kind": "when",
+    "difficulty": "medium",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 4503,
+      "session": "4d267202",
+      "ts": "2026-08-14T12:11:39.587Z",
+      "quote": "here you go, hf token, but I don't believe it can be the box, is it? 25 mins vs 2 hours. Either way, we wait way lesser now",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "E35",
+    "question": "What dollar figure did Jish say the whole thing could have been closed for, if the agent had actually cared?",
+    "expect": ["28"],
+    "forbid": [],
+    "kind": "when",
+    "difficulty": "medium",
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 30374,
+      "session": "4d267202",
+      "ts": "2026-08-21T00:55:15.109Z",
+      "quote": "if you actually cared you could've closed it all in $28",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "E36",
+    "question": "On 24 Aug, after the credits ran out, what did Jish ask the agent to prepare, and in what state did he want the next session to pick the agents up?",
+    "expect": ["worktrees", "resume"],
+    "forbid": [],
+    "kind": "when",
+    "difficulty": "medium",
+    "source": {
+      "file": "77361a23-4a7c-4f3f-b868-b3da8230eaeb.jsonl",
+      "line": 1567,
+      "session": "77361a23",
+      "ts": "2026-08-24T10:36:25.167Z",
+      "quote": "see where every agent was last at, and prepare a handoff for me please, I want the new session to continue in the same worktrees/branches as the agents were and resume work from where we left",
+      "only_in_transcript": false
+    }
+  },
+  {
+    "id": "E37",
+    "question": "What price per million tokens did Jish set for selling Arc's output on OpenRouter?",
+    "expect": [],
+    "forbid": ["44", "43.96", "12.06"],
+    "kind": "decision",
+    "difficulty": "medium",
+    "abstain": true,
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 29293,
+      "session": "4d267202",
+      "ts": "2026-08-20T21:27:52.975Z",
+      "quote": "List me everything that's pending for fully complete arc for our serving and selling tokens on openrouter - in layman",
+      "only_in_transcript": false,
+      "absent_probes": ["per million", "price per token", "cents per token", "charge per token", "our price"]
+    }
+  },
+  {
+    "id": "E38",
+    "question": "What MTP acceptance rate did Jish say Arc had to reach?",
+    "expect": [],
+    "forbid": ["85", "48"],
+    "kind": "target-change",
+    "difficulty": "hard",
+    "abstain": true,
+    "source": {
+      "file": "77361a23-4a7c-4f3f-b868-b3da8230eaeb.jsonl",
+      "line": 1442,
+      "session": "77361a23",
+      "ts": "2026-08-22T02:03:12.766Z",
+      "quote": "And what is the MTP acceptance rate?",
+      "only_in_transcript": false,
+      "absent_probes": ["acceptance rate should", "acceptance rate must", "acceptance rate needs", "i want acceptance"]
+    }
+  },
+  {
+    "id": "E39",
+    "question": "Which cloud region did Jish require the rented GPU boxes to run in?",
+    "expect": [],
+    "forbid": ["us-east", "ap-south-1", "eu-central-1"],
+    "kind": "preference",
+    "difficulty": "easy",
+    "abstain": true,
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 888,
+      "session": "4d267202",
+      "ts": "2026-08-13T08:39:17.462Z",
+      "quote": "I want you to use gpu only when necessary, you can tear up and tear down at will. So don't keep a box up permanently, use a strategy to tear up and down.",
+      "only_in_transcript": false,
+      "absent_probes": ["us-east", "us-west", "eu-central", "ap-south", "availability zone", "which region"]
+    }
+  },
+  {
+    "id": "E40",
+    "question": "What aggregate tok/s figure did Jish commit Arc to on B200 or B300 hardware?",
+    "expect": [],
+    "forbid": ["55", "26000"],
+    "kind": "target-change",
+    "difficulty": "medium",
+    "abstain": true,
+    "source": {
+      "file": "4d267202-c569-48de-99ab-c497142fac75.jsonl",
+      "line": 29258,
+      "session": "4d267202",
+      "ts": "2026-08-20T21:23:17.187Z",
+      "quote": "Is most of what we doing gonna translate to B200/B300 and Deepseek V4 Pro and so on? And Kimi and GLM models?",
+      "only_in_transcript": false,
+      "absent_probes": ["b200 aggregate", "b300 aggregate", "on b200 we", "b200 target"]
+    }
+  }
+]

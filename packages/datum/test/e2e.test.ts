@@ -696,19 +696,27 @@ describe("deliverable 3 — contradictions are advisory across tiers", () => {
 });
 
 describe("deliverable 4 — /mcp is a facade, and it is quiet", () => {
-  it("advertises six tools, not thirty", async () => {
+  it("advertises nine tools, not thirty", async () => {
     const res = await mcp("tools/list");
     const tools = res.result?.tools as Array<{ name: string }>;
-    // Eight, not thirty. The original argument was against bloat, not against completeness: two
-    // capabilities that had no MCP surface were the impact query (which beat grep by 16 points)
-    // and recording feedback (without which the preference loop cannot close over MCP at all).
-    expect(tools).toHaveLength(8);
+    // Nine, not thirty. The original argument was against bloat, not against completeness, and
+    // each addition had to earn its line: `impact` beat grep by 16 points and had no surface,
+    // `feedback` is the only way the preference loop can close over MCP, and `recall` is the
+    // only way to reach what was SAID rather than what is true.
+    //
+    // Three capabilities were deliberately NOT given their own tool. "Where were we" rides on
+    // `state`, because that is the call an agent already makes first and a second orientation
+    // tool is a choice it can get wrong. "Why is this code like this" rides on `recall` with a
+    // code target, because it is the same question with a different needle. The fleet rides on
+    // `nodes`, because activity and claims are facts about a node, not a new object.
+    expect(tools).toHaveLength(9);
     expect(tools.map((t) => t.name).sort()).toEqual([
       "ask",
       "assert",
       "feedback",
       "impact",
       "nodes",
+      "recall",
       "state",
       "supersede",
       "why",

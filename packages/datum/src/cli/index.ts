@@ -5,6 +5,11 @@ import { resolve } from "node:path";
 import { ConfigError, loadConfig, type Config } from "../config.js";
 import { Db } from "../db/pool.js";
 import { migrate } from "../db/migrate.js";
+import { ingestClaudeDir, ingestClaudeTranscript } from "../episodes/ingest.js";
+import { searchEpisodes } from "../episodes/read.js";
+import { resumeState } from "../episodes/resume.js";
+import { whyPath, whySymbol } from "../episodes/why.js";
+import { fleet as fleetView } from "../fleet/index.js";
 import { initInstance } from "../ops/init.js";
 import { loadSeed, SEEDS_DIR } from "../ops/seed.js";
 import { hashPassword } from "../http/auth.js";
@@ -36,6 +41,13 @@ const USAGE = `datum — the datum of record
     datum index [--emit f.json]      parse this repo into a graph artifact (needs tree-sitter)
     datum ingest-graph <f.json>      load an artifact into the store (needs nothing)
     datum impact <symbol>            what else must I care about if I change this?
+
+  Memory of what was said (index where the sessions are, load where the database is):
+    datum ingest-sessions --dir D              parse Claude Code transcripts into episodes
+    datum recall <words>                       what was said about this, dated and attributed
+    datum recall --symbol S | --path P         why is this code the way it is
+    datum resume                               where were we, and what was left unanswered
+    datum fleet                                who else is working here, and on which files
 
   Project commands (need a running server):
     datum link [--server URL] [--scope PATH]   link this repo to its project scope
@@ -458,6 +470,167 @@ async function main(): Promise<void> {
           "",
         ].join("\n"),
       );
+      return;
+    }
+
+    case "ingest-sessions": {
+      const { values } = parseArgs({
+        args: rest,
+        options: {
+          dir: { type: "string" },
+          file: { type: "string" },
+          scope: { type: "string" },
+          human: { type: "string" },
+          "include-agent": { type: "boolean" },
+        },
+      });
+      if (!values.dir && !values.file) {
+        bail("usage: datum ingest-sessions --dir <transcripts/> | --file <one.jsonl> [--scope S] [--human human:name]");
+      }
+      await withDbOnly(async (db, config) => {
+        const scope = values.scope ?? config.orgScope;
+        const humanActor = values.human ?? "human:operator";
+        // Agent prose is excluded unless asked for. A human sentence is testimony; an agent
+        // restating its own conclusion is the raw material of the 808-duplicate failure.
+        const includeAgent = values["include-agent"] === true;
+        const reports = values.dir
+          ? await ingestClaudeDir(db, { dir: values.dir, scope, humanActor, includeAgent })
+          : [await ingestClaudeTranscript(db, { file: values.file as string, scope, humanActor, includeAgent })];
+        let episodes = 0;
+        let duplicates = 0;
+        for (const r of reports) {
+          episodes += r.episodes;
+          duplicates += r.duplicates;
+          process.stdout.write(
+            `${r.file.split("/").pop()}  sessions=${r.sessions} episodes=${r.episodes} ` +
+              `dupes=${r.duplicates} skipped=${r.skipped}\n`,
+          );
+        }
+        process.stdout.write(`\n${episodes} episode(s) into ${scope}; ${duplicates} already on record\n`);
+      });
+      return;
+    }
+
+    case "recall": {
+      const { values, positionals } = parseArgs({
+        args: rest,
+        options: {
+          scope: { type: "string" },
+          symbol: { type: "string" },
+          path: { type: "string" },
+          actor: { type: "string" },
+          branch: { type: "string" },
+          limit: { type: "string" },
+        },
+        allowPositionals: true,
+      });
+      const words = positionals.join(" ").trim();
+      if (!words && !values.symbol && !values.path) {
+        bail("usage: datum recall <words> | --symbol S | --path P  [--actor A] [--branch B] [--limit N]");
+      }
+      await withDbOnly(async (db, config) => {
+        const scope = values.scope ?? config.orgScope;
+        const limit = values.limit ? Number.parseInt(values.limit, 10) : undefined;
+        if (values.symbol || values.path) {
+          const r = values.symbol
+            ? await whySymbol(db, { scope, symbol: values.symbol, ...(limit ? { limit } : {}) })
+            : await whyPath(db, { scope, path: values.path as string, ...(limit ? { limit } : {}) });
+          const where = r.resolved?.path ? `  ${r.resolved.path}:${r.resolved.line_start ?? "?"}` : "";
+          process.stdout.write(`${r.target}${where}\n`);
+          if (r.note) process.stdout.write(`note: ${r.note}\n`);
+          if (r.mentions.length === 0) process.stdout.write("\nnobody ever said anything about this.\n");
+          for (const m of r.mentions) {
+            process.stdout.write(
+              `\n  ${new Date(m.episode.occurred_at).toISOString().slice(0, 16)} ` +
+                `${m.episode.actor}${m.episode.git_branch ? `@${m.episode.git_branch}` : ""} [${m.why}]\n` +
+                `    ${m.excerpt}\n`,
+            );
+          }
+          for (const f of r.facts) {
+            process.stdout.write(`\n  fact[${f.confidence}] ${f.subject}.${f.predicate}: ${f.claim ?? ""}\n`);
+          }
+          return;
+        }
+        const hits = await searchEpisodes(db, {
+          scope,
+          text: words,
+          ...(values.actor ? { actor: values.actor } : {}),
+          ...(values.branch ? { branch: values.branch } : {}),
+          ...(limit ? { limit } : {}),
+        });
+        if (hits.length === 0) process.stdout.write(`nothing on record was said about "${words}".\n`);
+        for (const h of hits) {
+          const e = h.episode;
+          // The tier is printed, always. An exact quote and a rescued typo are different evidence
+          // and a reader who cannot tell them apart has been handed a guess.
+          process.stdout.write(
+            `\n${new Date(e.occurred_at).toISOString().slice(0, 16)} ${e.actor}` +
+              `${e.git_branch ? `@${e.git_branch}` : ""} [${h.matched} ${h.rank.toFixed(2)}]\n  ${e.text.replace(/\s+/g, " ").slice(0, 400)}\n`,
+          );
+        }
+      });
+      return;
+    }
+
+    case "resume": {
+      const { values } = parseArgs({
+        args: rest,
+        options: { scope: { type: "string" }, session: { type: "string" }, limit: { type: "string" } },
+      });
+      await withDbOnly(async (db, config) => {
+        const scope = values.scope ?? config.orgScope;
+        const r = await resumeState(db, {
+          scope,
+          ...(values.session ? { session: values.session } : {}),
+          ...(values.limit ? { limit: Number.parseInt(values.limit, 10) } : {}),
+        });
+        if (r.note) process.stdout.write(`${r.note}\n\n`);
+        if (r.last_session) {
+          process.stdout.write(
+            `session ${r.last_session.id}  ${r.age_hours?.toFixed(1) ?? "?"}h ago  ` +
+              `${r.last_session.episodes} turns  ${r.last_session.branches.join(", ")}\n`,
+          );
+        }
+        if (r.drift) process.stdout.write(`DRIFT: ${r.drift.note}\n`);
+        for (const t of r.thread) {
+          process.stdout.write(`\n  ${t.actor}: ${t.text}`);
+        }
+        if (r.open_questions.length > 0) process.stdout.write("\n\nunanswered:");
+        for (const q of r.open_questions) process.stdout.write(`\n  ? ${q.text}`);
+        for (const m of r.missions) {
+          process.stdout.write(
+            `\n\nmission[${m.state}] ${m.statement}  gates ${m.gates_reached}/${m.gates_total}`,
+          );
+          if (m.awaiting_human.length > 0) {
+            process.stdout.write(`\n  awaiting you: ${m.awaiting_human.join(", ")}`);
+          }
+        }
+        process.stdout.write("\n");
+      });
+      return;
+    }
+
+    case "fleet": {
+      const { values } = parseArgs({
+        args: rest,
+        options: { scope: { type: "string" }, stale: { type: "string" } },
+      });
+      await withDbOnly(async (db, config) => {
+        const scope = values.scope ?? config.orgScope;
+        const members = await fleetView(db, {
+          scope,
+          ...(values.stale ? { staleSeconds: Number.parseInt(values.stale, 10) } : {}),
+        });
+        if (members.length === 0) process.stdout.write(`nobody registered under ${scope}.\n`);
+        for (const m of members) {
+          const age = Number.isFinite(m.seconds_ago) ? `${Math.round(m.seconds_ago)}s` : "never";
+          process.stdout.write(
+            `${m.live ? "  " : "! "}${m.kind}:${m.label}  ${m.scope}  beat=${age}\n` +
+              (m.activity ? `    doing: ${m.activity}\n` : "") +
+              (m.claims.length > 0 ? `    holds: ${m.claims.join(", ")}\n` : ""),
+          );
+        }
+      });
       return;
     }
 
