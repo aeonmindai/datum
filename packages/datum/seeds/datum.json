@@ -1,0 +1,366 @@
+{
+  "org": "aeonmind",
+  "note": "Datum's own state, as facts in Datum. Written because answering 'what is left, and what must the operator decide' required a forensic sweep of git, Fly's control plane, six reports and a todo list that had been overwritten - which is precisely the failure this store exists to abolish. Every open item is a mission with a machine-checkable gate. Every gate that only a human can close reads NO-EVIDENCE(confirmed-by-human), so 'what choices do I have to make' is one query and not an investigation.",
+  "scopes": [
+    {
+      "path": "org/aeonmind",
+      "kind": "org",
+      "label": "Aeonmind"
+    },
+    {
+      "path": "org/aeonmind/proj/datum",
+      "kind": "proj",
+      "label": "Datum"
+    }
+  ],
+  "assertions": [
+    {
+      "scope": "org/aeonmind/proj/datum",
+      "subject": "m2_store_only",
+      "predicate": "points_over_best_baseline",
+      "object": {
+        "value": 6.1,
+        "unit": "percentage points",
+        "arm": "store only, no prose fallback"
+      },
+      "claim": "On the M2 re-run, Datum reading only the store scored 6.1 points over the better of the two baselines. The gate wanted 10.",
+      "kind": "measured",
+      "evidence": {
+        "source": "reports/m2-rerun.md",
+        "repo": "aeonmindai/datum",
+        "commit": "b49c1da8af692747f3d4f9a589b7c718778eccf6",
+        "path": "reports/m2-rerun.md",
+        "method": "33 questions x 3 repeats x 4 arms, mechanical grader validated 26/26 on adversarial cases"
+      },
+      "why": "The store-only arm is the architecture's own number. It fails the gate."
+    },
+    {
+      "scope": "org/aeonmind/proj/datum",
+      "subject": "m2_with_prose",
+      "predicate": "points_over_best_baseline",
+      "object": {
+        "value": 12.1,
+        "unit": "percentage points",
+        "arm": "store plus prose fallback"
+      },
+      "claim": "With the prose fallback wired into the read path, Datum scored 12.1 points over the better baseline, clearing the 10-point gate.",
+      "kind": "measured",
+      "evidence": {
+        "source": "reports/m2-rerun.md",
+        "repo": "aeonmindai/datum",
+        "commit": "b49c1da8af692747f3d4f9a589b7c718778eccf6",
+        "path": "reports/m2-rerun.md",
+        "method": "same 33 questions, same grading, prose fallback answered the three questions the store abstained on"
+      },
+      "why": "The gate passes, but on an arm that reads material nobody asserted. Whether that counts is a decision, not a measurement."
+    },
+    {
+      "scope": "org/aeonmind/proj/datum",
+      "subject": "derived_edges",
+      "predicate": "externally_auditable_pct",
+      "object": {
+        "value": 72,
+        "unit": "percent of derived edges"
+      },
+      "claim": "28% of derived code-graph edges resolve by a suffix index that cannot be reproduced from the artifact, so 72% are externally checkable.",
+      "kind": "measured",
+      "evidence": {
+        "source": "reports/impact-benchmark.md",
+        "repo": "aeonmindai/datum",
+        "commit": "7d0a52300e0a29f7db9245196b9f1cefe252b6a4",
+        "path": "reports/impact-benchmark.md",
+        "method": "limit test A over 19,495 symbols; no edge in the index is `measured` because tree-sitter is not a compiler"
+      },
+      "why": "A label nobody outside Datum can check is a claim, not a derivation."
+    },
+    {
+      "scope": "org/aeonmind/proj/datum",
+      "subject": "symbol_identity",
+      "predicate": "line_drift_inflation_factor",
+      "object": {
+        "value": 37,
+        "unit": "multiple",
+        "baseline": "identity of (path, kind, fqn)"
+      },
+      "claim": "Symbol keys embed the starting line, so inserting one line changes the identity of every symbol below it - inflating the measured change per commit 37x on edges.",
+      "kind": "measured",
+      "evidence": {
+        "source": "reports/graph-staleness.md",
+        "repo": "aeonmindai/datum",
+        "commit": "89277deec1bd43efa4f4f6c12a5ae9386c57faa2",
+        "path": "reports/graph-staleness.md",
+        "method": "32 commits parsed at c^ and c under both identity rules: 887 edges vs 24"
+      },
+      "why": "Incremental indexing has to answer 'is this the same symbol as last commit'. Today it cannot."
+    },
+    {
+      "scope": "org/aeonmind/proj/datum",
+      "subject": "full_reindex",
+      "predicate": "seconds_for_median_commit",
+      "object": {
+        "value": 5.8,
+        "unit": "seconds",
+        "detail": "3.7s parse + 2.1s load, for a commit that changed 2 of 965 files"
+      },
+      "claim": "A two-file commit costs a full 5.8 second re-index of 966 files, repeating 99.6% of the work.",
+      "kind": "measured",
+      "evidence": {
+        "source": "reports/graph-staleness.md",
+        "repo": "aeonmindai/datum",
+        "commit": "89277deec1bd43efa4f4f6c12a5ae9386c57faa2",
+        "path": "reports/graph-staleness.md",
+        "method": "measured on real Arc at origin/master, 966 files, 19,177 symbols"
+      }
+    },
+    {
+      "scope": "org/aeonmind/proj/datum",
+      "subject": "content_addressing",
+      "predicate": "dedup_factor",
+      "object": {
+        "value": 53.5,
+        "unit": "multiple",
+        "detail": "57,623 commit-file pairs vs 1,077 distinct blobs over 60 commits"
+      },
+      "claim": "Storing the graph per file-version rather than per commit is 53.5x smaller on the real repository, and improves with history.",
+      "kind": "measured",
+      "evidence": {
+        "source": "reports/graph-staleness.md",
+        "repo": "aeonmindai/datum",
+        "commit": "89277deec1bd43efa4f4f6c12a5ae9386c57faa2",
+        "path": "reports/graph-staleness.md",
+        "method": "git ls-tree over the last 60 commits of origin/master, counting distinct blob shas"
+      }
+    },
+    {
+      "scope": "org/aeonmind/proj/datum",
+      "subject": "stale_answer",
+      "predicate": "pct_of_commits_changing_the_call_graph",
+      "object": {
+        "value": 88,
+        "unit": "percent of commits",
+        "detail": "median change is 7 symbols and 24 edges of 102,450"
+      },
+      "claim": "88% of commits change the call graph, so an answer from the last indexed commit is right about the repository and wrong about the code being edited.",
+      "kind": "measured",
+      "evidence": {
+        "source": "reports/graph-staleness.md",
+        "repo": "aeonmindai/datum",
+        "commit": "89277deec1bd43efa4f4f6c12a5ae9386c57faa2",
+        "path": "reports/graph-staleness.md",
+        "method": "32 commits, changed files parsed at c^ and at c, symbol and edge sets diffed under line-independent identity"
+      },
+      "why": "This is the size of the gap a working-tree channel would close."
+    },
+    {
+      "scope": "org/aeonmind/proj/datum",
+      "subject": "overlay_payload",
+      "predicate": "gzipped_kb_at_median_commit",
+      "object": {
+        "value": 1.3,
+        "unit": "kilobytes gzipped",
+        "detail": "5.4 KB at p90, 24.3 KB at the worst of 60 commits"
+      },
+      "claim": "Shipping parsed structure for the dirty files weighs 1.3 KB gzipped at the median, and Fly bills egress not ingress, so the remote-versus-local decision costs nothing either way.",
+      "kind": "measured",
+      "evidence": {
+        "source": "reports/graph-staleness.md",
+        "repo": "aeonmindai/datum",
+        "commit": "89277deec1bd43efa4f4f6c12a5ae9386c57faa2",
+        "path": "reports/graph-staleness.md",
+        "method": "indexer run over 2/4/8/26 real files, JSON serialised and gzipped"
+      },
+      "why": "It removes cost from the argument. What is left is trust."
+    },
+    {
+      "scope": "org/aeonmind/proj/datum",
+      "subject": "monthly_cost",
+      "predicate": "usd_per_month",
+      "object": {
+        "value": 12.1,
+        "unit": "USD per month",
+        "detail": "API 512MB $3.81 + DB 1GB $6.79 + 10GB volume $1.50, sjc rates"
+      },
+      "claim": "The deployment costs $12.10/month against Fly Managed Postgres' $38 floor. An earlier table understated it by crediting the volume with a free allowance that belongs to snapshots.",
+      "kind": "measured",
+      "evidence": {
+        "source": "docs/OPERATIONS.md",
+        "repo": "aeonmindai/datum",
+        "commit": "3b3e1c8e66fdf5515f60bb1362b8d4578e34b688",
+        "path": "docs/OPERATIONS.md",
+        "method": "rates read off Fly's pricing page for the sjc region on the day of the commit"
+      }
+    }
+  ],
+  "missions": [
+    {
+      "scope": "org/aeonmind/proj/datum",
+      "statement": "Backups run in production, to a bucket outside the Fly organisation.",
+      "state": "blocked",
+      "gates": [
+        {
+          "subject": "backup_bucket",
+          "predicate": "chosen",
+          "op": "=",
+          "target": true,
+          "requires_confidence": "confirmed-by-human",
+          "note": "Which vendor and which account. Tigris, B2, R2 or S3. Nobody but the operator can decide it, and a backup inside the blast radius is not a backup."
+        },
+        {
+          "subject": "backups",
+          "predicate": "hours_since_newest_object",
+          "op": "<=",
+          "target": 24,
+          "requires_confidence": "measured",
+          "note": "The scripts are proven end to end against a real S3 API with real age encryption, 43 checks and 0 failures. Nothing is scheduled in production: one Machine, no cron, no bucket."
+        }
+      ]
+    },
+    {
+      "scope": "org/aeonmind/proj/datum",
+      "statement": "The admin password is not the one that was shared over chat.",
+      "state": "blocked",
+      "gates": [
+        {
+          "subject": "admin_password",
+          "predicate": "rotated_since_handoff",
+          "op": "=",
+          "target": true,
+          "requires_confidence": "confirmed-by-human",
+          "note": "It arrived in a chat transcript, so treat it as public. `npx @aeonmind/datum hash-password` then `fly secrets set`. The first API key was already revoked."
+        }
+      ]
+    },
+    {
+      "scope": "org/aeonmind/proj/datum",
+      "statement": "Symbol identity survives line drift, so a whitespace edit does not rename every symbol below it.",
+      "state": "active",
+      "gates": [
+        {
+          "subject": "symbol_identity",
+          "predicate": "line_drift_inflation_factor",
+          "op": "<=",
+          "target": 1,
+          "requires_confidence": "measured",
+          "note": "Prerequisite for incremental indexing, not a follow-up. No decision needed: this one is unambiguously a defect."
+        }
+      ]
+    },
+    {
+      "scope": "org/aeonmind/proj/datum",
+      "statement": "A commit is indexed without re-parsing the whole repository.",
+      "state": "blocked",
+      "gates": [
+        {
+          "subject": "incremental_index",
+          "predicate": "design_approved",
+          "op": "=",
+          "target": true,
+          "requires_confidence": "confirmed-by-human",
+          "note": "Content-addressed blobs, a per-commit manifest, and an incremental resolver that can DEMOTE a derived edge to unverified when a new file makes its name ambiguous. Adding without demoting keeps serving a confident answer that is no longer justified."
+        },
+        {
+          "subject": "incremental_index",
+          "predicate": "seconds_for_median_commit",
+          "op": "<=",
+          "target": 1,
+          "requires_confidence": "measured",
+          "note": "Today a two-file commit costs 5.8 seconds and 46 MB. Naive per-commit storage fills the 10 GB volume in 11 days."
+        }
+      ]
+    },
+    {
+      "scope": "org/aeonmind/proj/datum",
+      "statement": "An answer names which of its own files are dirty on the caller's disk.",
+      "state": "blocked",
+      "gates": [
+        {
+          "subject": "staleness_channel",
+          "predicate": "channel_approved",
+          "op": "=",
+          "target": true,
+          "requires_confidence": "confirmed-by-human",
+          "note": "Three options. Send nothing: MCP answers stay stale on 88% of edits. Send parsed structure: accurate mid-edit, but the server starts taking a client's word about its own disk. Send the dirty filenames only: ~100 bytes, exact staleness, and nothing unverified enters the graph. Recommended: filenames only."
+        },
+        {
+          "subject": "staleness_channel",
+          "predicate": "stale_answers_flagged_pct",
+          "op": ">=",
+          "target": 100,
+          "requires_confidence": "measured",
+          "note": "A caveat that does not travel with the answer does not exist."
+        }
+      ]
+    },
+    {
+      "scope": "org/aeonmind/proj/datum",
+      "statement": "M2 passes on the store alone, without the prose fallback.",
+      "state": "blocked",
+      "gates": [
+        {
+          "subject": "m2_store_only",
+          "predicate": "chase_without_prose",
+          "op": "=",
+          "target": true,
+          "requires_confidence": "confirmed-by-human",
+          "note": "The gate already passes at +12.1 with prose. Store-only is +6.1. Whether the store alone must clear it is a decision about what the product claims, and §16 warns against rewriting the test after seeing the score."
+        },
+        {
+          "subject": "m2_store_only",
+          "predicate": "points_over_best_baseline",
+          "op": ">=",
+          "target": 10,
+          "requires_confidence": "measured",
+          "note": "It failed on coverage, never on correctness: zero wrong answers in 66 question-instances. Three of four misses were facts nobody had asserted."
+        }
+      ]
+    },
+    {
+      "scope": "org/aeonmind/proj/datum",
+      "statement": "A derived code edge can be checked by something other than Datum.",
+      "state": "blocked",
+      "gates": [
+        {
+          "subject": "derived_edges",
+          "predicate": "adopt_real_resolver",
+          "op": "=",
+          "target": true,
+          "requires_confidence": "confirmed-by-human",
+          "note": "tree-sitter is a parser, not a compiler, so no edge in the graph is `measured` and 28% of derived edges resolve by a suffix index an outsider cannot replicate. A compiler or LSP would produce the first genuinely measured edges. It is a real cost and a real dependency."
+        },
+        {
+          "subject": "derived_edges",
+          "predicate": "externally_auditable_pct",
+          "op": ">=",
+          "target": 100,
+          "requires_confidence": "measured"
+        }
+      ]
+    },
+    {
+      "scope": "org/aeonmind/proj/datum",
+      "statement": "Indexing happens on push, without a human running a command.",
+      "state": "proposed",
+      "gates": [
+        {
+          "subject": "indexing",
+          "predicate": "manual_commands_per_commit",
+          "op": "=",
+          "target": 0,
+          "requires_confidence": "measured",
+          "note": "Today it is `datum index` then `datum ingest-graph`, by hand, which means the graph is stale the moment anyone commits and nothing says so."
+        }
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "kind": "human",
+      "scope": "org/aeonmind",
+      "label": "Jish",
+      "role": "authority",
+      "meta": {
+        "note": "The only party who can close a confirmed-by-human gate on this project. Every mission blocked on a decision is blocked on this node."
+      }
+    }
+  ]
+}

@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_BUDGET_BYTES, pack } from "../src/http/compact.js";
+import {
+  compactGate,
+  compactState,
+  DEFAULT_BUDGET_BYTES,
+  pack,
+  type GateStatus,
+  type StateSummary,
+} from "../src/http/compact.js";
 
 /**
  * The MCP facade's byte budget is a contract, not an aspiration.
@@ -56,5 +63,84 @@ describe("pack — the byte budget is a real ceiling", () => {
   it("returns the empty message only when there is genuinely nothing", () => {
     expect(pack([], 200, "nothing on datum")).toBe("nothing on datum");
     expect(pack([], 200, "nothing on datum", [line(1)])).toContain(line(1));
+  });
+});
+
+describe("compactState — a decision only a human can close is never dropped", () => {
+  const gate = (over: Partial<GateStatus>): GateStatus =>
+    ({
+      subject: "s",
+      predicate: "p",
+      op: ">=",
+      target: 1,
+      requires_confidence: "measured",
+      reached: false,
+      actual: 0,
+      ...over,
+    }) as GateStatus;
+
+  const state = (missions: StateSummary["missions"]): StateSummary => ({
+    scope: "org/acme/proj/x",
+    mode: "global",
+    sequence: 1,
+    live: 1,
+    byConfidence: { measured: 1 },
+    contested: 0,
+    missions,
+    bindingRules: 0,
+  });
+
+  it("surfaces every human-gated blocker even when the budget cannot hold one mission", () => {
+    // Eight missions of prose cannot fit 200 bytes, and before this the packer dropped all of
+    // them - so an operator asking "what is waiting on me" got counts and a truncation note.
+    const missions = Array.from({ length: 8 }, (_, i) => ({
+      statement: `mission number ${i} with a deliberately long statement`.padEnd(90, "."),
+      state: "blocked",
+      gates: [gate({ subject: `d${i}`, predicate: "approved", requires_confidence: "confirmed-by-human", reached: null, actual: null })],
+    }));
+    const out = compactState(state(missions), 200);
+    for (let i = 0; i < 8; i++) expect(out, out).toContain(`d${i}.approved`);
+    expect(out).toContain("awaiting-you=8");
+  });
+
+  it("says nothing about blockers when every human gate is closed", () => {
+    const out = compactState(
+      state([
+        {
+          statement: "done thing",
+          state: "closed",
+          gates: [gate({ requires_confidence: "confirmed-by-human", reached: true, actual: 1 })],
+        },
+      ]),
+      200,
+    );
+    expect(out).not.toContain("awaiting-you");
+  });
+
+  it("counts a human gate that is open on the evidence, not only one with no evidence", () => {
+    // A person can assert a value that fails the comparison. That is still their gate.
+    const out = compactState(
+      state([
+        {
+          statement: "open on evidence",
+          state: "blocked",
+          gates: [gate({ subject: "bucket", predicate: "chosen", requires_confidence: "confirmed-by-human", reached: false, actual: 0 })],
+        },
+      ]),
+      200,
+    );
+    expect(out).toContain("awaiting-you=1");
+    expect(out).toContain("bucket.chosen");
+  });
+
+  it("names the human requirement on the gate line, so OPEN is not mistaken for actionable", () => {
+    expect(compactGate(gate({ requires_confidence: "confirmed-by-human" }))).toContain(
+      "OPEN(needs-human)",
+    );
+    expect(compactGate(gate({ requires_confidence: "measured" }))).toMatch(/ OPEN$/);
+    // No evidence at all already names the class it is waiting for.
+    expect(
+      compactGate(gate({ requires_confidence: "confirmed-by-human", reached: null, actual: null })),
+    ).toContain("NO-EVIDENCE(confirmed-by-human)");
   });
 });

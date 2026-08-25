@@ -108,8 +108,18 @@ export function pack(
 }
 
 export function compactGate(g: GateStatus): string {
+  // `NO-EVIDENCE(confirmed-by-human)` already names who is missing. An OPEN one does not, and it
+  // can happen: a human can assert a value that fails the comparison. Say so either way, because
+  // an agent reading `OPEN` will otherwise try to close a gate only a person can close.
+  const human = g.requires_confidence === "confirmed-by-human";
   const state =
-    g.reached === null ? `NO-EVIDENCE(${g.requires_confidence})` : g.reached ? "REACHED" : "OPEN";
+    g.reached === null
+      ? `NO-EVIDENCE(${g.requires_confidence})`
+      : g.reached
+        ? "REACHED"
+        : human
+          ? "OPEN(needs-human)"
+          : "OPEN";
   const actual = g.actual === null || g.actual === undefined ? "—" : String(g.actual);
   return `${g.subject}.${g.predicate} ${g.op}${String(g.target)} actual=${actual} ${state}`;
 }
@@ -157,6 +167,14 @@ export function compactState(s: StateSummary, budget = DEFAULT_BUDGET_BYTES): st
     else optional.push(line);
   }
 
+  // A gate that requires `confirmed-by-human` cannot be closed by any amount of agent work:
+  // `evaluate_gate` only reads rows at the gate's exact confidence class. So an unreached one is
+  // not a task, it is a decision someone is waiting on, and dropping it to save bytes means the
+  // person holding it never finds out. Same rule as a contested pair: it is mandatory.
+  //
+  // The summary is one line rather than two per mission, because the budget is a real constraint
+  // and the detail is a `missions` call away. What must never be lost is that blockers exist.
+  const awaiting: string[] = [];
   for (const m of s.missions) {
     const reached = m.gates.filter((g) => g.reached === true).length;
     const noEvidence = m.gates.filter((g) => g.reached === null).length;
@@ -164,7 +182,18 @@ export function compactState(s: StateSummary, budget = DEFAULT_BUDGET_BYTES): st
       `mission[${m.state}] ${short(m.statement, 60)} gates ${reached}/${m.gates.length} reached` +
         (noEvidence > 0 ? `, ${noEvidence} with no qualifying evidence` : ""),
     );
-    for (const g of m.gates) optional.push(`  ${compactGate(g)}`);
+    for (const g of m.gates) {
+      optional.push(`  ${compactGate(g)}`);
+      if (g.reached !== true && g.requires_confidence === "confirmed-by-human") {
+        awaiting.push(`${g.subject}.${g.predicate}`);
+      }
+    }
+  }
+  if (awaiting.length > 0) {
+    // Uncapped on purpose. Capping the list at some tidy number reintroduces exactly the bug
+    // being fixed - the seventh decision becomes invisible - and an operator holding fifty
+    // decisions is better served by a long line than by a count and another round trip.
+    mandatory.push(`awaiting-you=${awaiting.length}: ${awaiting.join(", ")}`);
   }
   return pack(optional, budget, `${s.scope}: nothing on datum yet`, mandatory);
 }
