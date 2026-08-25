@@ -43,7 +43,12 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await Promise.all(open.map((d) => d.close().catch(() => {})));
-  if (pg) {
+  // The report is regenerated only on request. Every run produces fresh ULIDs and a fresh
+  // timestamp, so writing it unconditionally left the working tree dirty after every `npm test`
+  // — with a diff whose substance never changes. A test suite that reports "modified files" on a
+  // clean checkout trains people to ignore `git status`, which is a bad habit to install.
+  //   npm run test:invariants -- and set DATUM_WRITE_REPORT=1 to refresh reports/invariants.*
+  if (pg && process.env.DATUM_WRITE_REPORT === "1") {
     await mkdir(REPORT_DIR, { recursive: true });
     await writeFile(
       `${REPORT_DIR}invariants.json`,
