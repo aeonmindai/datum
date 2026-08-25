@@ -304,20 +304,24 @@ three are cheap to add later and none of them are free to run badly now.
 
 ## 7. Cost
 
-**Reconfirm every figure at deploy. These are quotes, not measurements**, and cloud pricing
-changes without asking. Check `fly platform vm-sizes` and Fly's pricing page, then correct
-this table.
+Rates below were **read off Fly's pricing page and this deployment's actual region** rather
+than recalled, because a price is an external boundary. Region is `sjc` for both Machines;
+every other region has its own table and ours is not the cheapest. Re-read the page at deploy.
 
-| item | quoted rate | this deployment | note |
+| item | rate (`sjc`, verified) | this deployment | note |
 |---|---|---|---|
-| always-on `shared-cpu-1x` 256 MB | ~$2.02/mo, ~$2.32 in `sjc` | — | the anchor everything else is scaled from |
-| API Machine, `shared-cpu-1x` 512 MB | anchor + extra RAM | 1 Machine, always on | **estimate**; RAM above the 256 MB included with the preset is billed separately |
-| DB Machine, `shared-cpu-1x` 1 GB | anchor + extra RAM | 1 Machine, always on | **estimate**; size this one first if anything needs headroom |
-| volume | $0.15/GB-mo, **first 10 GB free** | 10 GB → $0 | billed even while the Machine is stopped |
-| volume snapshots | $0.08/GB-mo | 14 days retention | **estimate**, depends on churn |
+| API Machine, `shared-cpu-1x` 512 MB | $3.81/mo | 1 Machine, always on | `min_machines_running = 1`, so this is a floor, not an average |
+| DB Machine, `shared-cpu-1x` 1 GB | $6.79/mo | 1 Machine, always on | size this one first if anything needs headroom |
+| volume | $0.15/GB-mo, **no free allowance** | 10 GB → **$1.50** | billed for existing, not for being attached: a stopped Machine still pays |
+| volume snapshots | $0.08/GB-mo, **first 10 GB/mo free** | database is 10 MB → $0 | **charges began 2026-01-01**; free only while the database stays small |
 | object storage for dumps | provider's rate | outside the Fly org | Tigris, B2, R2, S3 — deliberately not Fly |
 | shared IPv4 + TLS cert | free | 1 domain | a dedicated IPv4 is ~$2/mo and is not needed |
-| **total** | | **low teens per month** | comfortably under Fly Managed Postgres' $38 floor, which is the whole point of running our own |
+| **total** | | **$12.10/mo** | against Fly Managed Postgres' $38 floor |
+
+> An earlier version of this table credited the **volume** with "first 10 GB free" and totalled
+> it at $0. The free allowance belongs to **snapshots**, not volumes — volumes are billed from
+> the first gigabyte. The error was 12% of the bill and survived because nobody re-read the
+> page. It is the same failure mode this product exists to catch, in the document describing it.
 
 The comparison that justifies the operational burden: MPG's floor is $38/mo for Postgres
 **16**, with version upgrades listed as not-yet-there. We pay roughly a quarter of that, run
