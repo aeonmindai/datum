@@ -23,6 +23,7 @@ import { activePreferences } from "../preferences/index.js";
 import { searchProse } from "../prose/index.js";
 import { episodeStats, getSession, searchEpisodes } from "../episodes/read.js";
 import { resumeState } from "../episodes/resume.js";
+import { recallEpisodes } from "../episodes/recall.js";
 import { whyPath, whySymbol } from "../episodes/why.js";
 // Aliased: `report`, `claim` and `fleet` are ordinary words this file already uses for other
 // things, and a collision here would be resolved silently by the bundler rather than loudly.
@@ -615,6 +616,44 @@ export function registerV1(app: FastifyInstance, deps: V1Deps): void {
       return reply.send({
         ok: true,
         episodes: hits.map((h) => ({ ...h.episode, matched: h.matched, rank: h.rank })),
+      });
+    } catch (err) {
+      return sendRejection(deps, request, reply, err, { actor: null });
+    }
+  });
+
+  // Separate from /v1/episodes on purpose. That route honours a query exactly, which is right for
+  // a caller that knows the words it wants. This one takes a QUESTION, phrased the way people
+  // phrase questions, and does the interpreting - including reading a date out of it, because a
+  // measured 14 of 14 retrieval failures named a time the search was ignoring.
+  app.get("/v1/recall", async (request, reply) => {
+    try {
+      const key = await auth(request, "read");
+      const query = parse(
+        z.object({
+          scope: ScopeString.optional(),
+          question: z.string().min(1),
+          limit: z.coerce.number().int().positive().max(100).optional(),
+        }),
+        request.query,
+      );
+      const scope = query.scope ?? key.scope;
+      requireScope(key, scope);
+      const r = await recallEpisodes(db, {
+        scope,
+        question: query.question,
+        ...(query.limit === undefined ? {} : { limit: query.limit }),
+      });
+      return reply.send({
+        ok: true,
+        note: r.note,
+        plan: r.plan,
+        episodes: r.hits.map((h) => ({
+          ...h.episode,
+          tier: h.tier,
+          score: h.score,
+          matched_terms: h.matched_terms,
+        })),
       });
     } catch (err) {
       return sendRejection(deps, request, reply, err, { actor: null });

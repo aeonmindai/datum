@@ -22,6 +22,7 @@ import { activePreferences, recordFeedback } from "../preferences/index.js";
 import { impact } from "../graph/index.js";
 import { compactAssertion, compactState, pack, short, DEFAULT_BUDGET_BYTES } from "./compact.js";
 import { searchEpisodes } from "../episodes/read.js";
+import { recallEpisodes } from "../episodes/recall.js";
 import { whyPath, whySymbol } from "../episodes/why.js";
 import { fleet as fleetView } from "../fleet/index.js";
 import { resumeState } from "../episodes/resume.js";
@@ -588,6 +589,41 @@ export function registerMcp(app: FastifyInstance, deps: { db: Db; config: Config
           );
         }
 
+        // Two paths, split on what the caller actually gave us. An explicit filter - this actor,
+        // this branch, this time - is an instruction to honour exactly. A bare question is a
+        // question, and interpreting it (reading the date out of it, weighting terms by how rare
+        // they really are here) is the difference between 62.5% and finding the answer.
+        const filtered =
+          parsed.actor !== undefined || parsed.branch !== undefined || parsed.since !== undefined;
+        if (!filtered && parsed.q !== undefined) {
+          const r = await recallEpisodes(db, {
+            scope: parsed.scope,
+            question: parsed.q,
+            ...(parsed.limit === undefined ? {} : { limit: parsed.limit }),
+          });
+          const lines = r.hits.map((h) => {
+            const e = h.episode;
+            const when =
+              e.occurred_at instanceof Date
+                ? e.occurred_at.toISOString().slice(0, 16)
+                : String(e.occurred_at).slice(0, 16);
+            const src = e.source as Record<string, unknown> | null;
+            const relayed =
+              src &&
+              (src["quoted_from_agent"] !== undefined ||
+                src["echoes_agent_verbatim"] === true ||
+                src["machine_prose"] !== undefined)
+                ? " RELAYED-AGENT-PROSE"
+                : "";
+            return `${when} ${e.actor}${e.git_branch ? `@${e.git_branch}` : ""} [${h.tier}]${relayed} "${short(e.text, 170)}"`;
+          });
+          // The note is mandatory. It is where "no term matched, this is the whole window" and
+          // "these words appear nowhere in this corpus" get said, and a caller that loses it
+          // cannot tell a targeted hit from a time-sliced guess.
+          return pack(lines, budget, `nothing on record was said about that in ${parsed.scope}`, [
+            r.note,
+          ]);
+        }
         const hits = await searchEpisodes(db, {
           scope: parsed.scope,
           ...(parsed.q === undefined ? {} : { text: parsed.q }),
