@@ -82,7 +82,25 @@ function parseGitMirrors(raw: string | undefined): Record<string, string> {
   return out;
 }
 
-export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
+/**
+ * `serving: false` is for commands that only ever touch the database — migrate, index,
+ * ingest-graph, ingest-sessions, seed, verify, recall, resume, fleet.
+ *
+ * Fail-closed exists so no default credential ships in the image and nothing can be reached
+ * anonymously over HTTP. Applying it to a migration buys none of that: whoever holds
+ * DATABASE_URL already has every row. What it does buy is an operator inventing a throwaway
+ * admin password in order to run `migrate`, which is friction with a security theatre smell,
+ * and it is the first thing anyone hits when wiring a real repository up. Found by writing the
+ * onboarding script and having step 1 of 4 fail on a fresh database.
+ *
+ * The rule that must not move: anything that SERVES still refuses to boot without a credential
+ * and a session secret.
+ */
+export function loadConfig(
+  env: NodeJS.ProcessEnv = process.env,
+  opts: { serving?: boolean } = {},
+): Config {
+  const serving = opts.serving ?? true;
   const org = (env.DATUM_ORG ?? "local").trim();
   if (!/^[A-Za-z0-9_.-]+$/.test(org)) {
     throw new ConfigError(
@@ -101,13 +119,17 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     // boot, and never persisted — the invariant that survives is "no default credential
     // ships in the image", which is the one that actually matters.
     adminCredential = { source: "plaintext", plaintext };
-  } else {
+  } else if (serving) {
     throw new ConfigError(FAIL_CLOSED);
+  } else {
+    // Unreachable as a credential: nothing consults it on a non-serving path, and any attempt to
+    // verify a password against it fails. It exists so the type stays honest.
+    adminCredential = { source: "hash", hash: "" };
   }
 
   const sessionSecret = env.DATUM_SESSION_SECRET?.trim();
-  if (!sessionSecret) throw new ConfigError(FAIL_CLOSED);
-  if (sessionSecret.length < 32) {
+  if (!sessionSecret && serving) throw new ConfigError(FAIL_CLOSED);
+  if (sessionSecret && sessionSecret.length < 32) {
     throw new ConfigError(
       "DATUM_SESSION_SECRET must be at least 32 characters. Generate one with: openssl rand -hex 32",
     );
@@ -127,7 +149,9 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     host: env.HOST ?? "0.0.0.0",
     publicUrl: (env.DATUM_PUBLIC_URL ?? `http://localhost:${port}`).replace(/\/+$/, ""),
     adminCredential,
-    sessionSecret,
+    // Empty only on a non-serving path, where nothing signs or verifies a cookie. `serving: true`
+    // has already refused to get here without one.
+    sessionSecret: sessionSecret ?? "",
     sessionTtlSeconds: Number.parseInt(env.DATUM_SESSION_TTL_SECONDS ?? "43200", 10),
     loginRateLimit: {
       attempts: Number.parseInt(env.DATUM_LOGIN_ATTEMPTS ?? "5", 10),

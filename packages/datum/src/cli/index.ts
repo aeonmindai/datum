@@ -82,18 +82,20 @@ async function withDb<T>(fn: (db: Db, config: Config) => Promise<T>): Promise<T>
   }
 }
 
-/** Operator commands need DATABASE_URL but not the admin credential, so they load a relaxed
- *  config rather than refusing to run before secrets are set. */
+/**
+ * Operator commands need DATABASE_URL and nothing else. Whoever holds it already has every row,
+ * so demanding an admin credential to run a migration is friction with no security behind it.
+ *
+ * This used to fake the credential by injecting placeholder strings, which broke on the one input
+ * that matters: `export DATUM_ADMIN_PASSWORD=` sets an EMPTY string, and `??` does not substitute
+ * for empty - only for null. So a half-configured shell, or a deploy with a blank secret, made
+ * `datum migrate` refuse to run with a message about serving. Found by writing the onboarding
+ * script and watching step 1 of 4 fail on a fresh database.
+ */
 async function withDbOnly<T>(fn: (db: Db, config: Config) => Promise<T>): Promise<T> {
-  const env = {
-    ...process.env,
-    DATUM_ADMIN_PASSWORD: process.env.DATUM_ADMIN_PASSWORD ?? "unused-by-this-command",
-    DATUM_SESSION_SECRET:
-      process.env.DATUM_SESSION_SECRET ?? "unused-by-this-command-0000000000000000",
-  };
   let config: Config;
   try {
-    config = loadConfig(env);
+    config = loadConfig(process.env, { serving: false });
   } catch (err) {
     if (err instanceof ConfigError) bail(`\n${err.message}\n`);
     throw err;
