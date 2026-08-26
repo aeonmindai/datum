@@ -150,17 +150,46 @@ function defaultScope(repo: string): string {
   return labels.length > 0 ? `code/${labels.join("/")}` : "code";
 }
 
+/**
+ * Where an index lands in the org's scope tree.
+ *
+ * `defaultScope` is deliberately org-blind, and that makes a graph ingested without a scope
+ * unreadable by exactly the keys that should read it: a project key is bound to
+ * `org/<org>/proj/<project>` and `code/<owner>/<repo>` is not under it. A caller that knows the
+ * org supplies this instead. `cli/index.ts` holds the same rule inline for `datum ingest-graph`
+ * and should adopt this function; this is the shared home for it.
+ */
+export function indexScope(orgScope: string, repo: string): string {
+  const project = (repo.split("/").pop() ?? "")
+    .replace(/[^A-Za-z0-9_.-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  // A repo name that sanitises away entirely still gets a valid scope rather than an invented
+  // label: the org's project tree, which a project key can reach and an operator can see.
+  return project.length > 0 ? `${orgScope}/proj/${project}` : `${orgScope}/proj`;
+}
+
 function refuse(message: string, detail: Record<string, unknown> = {}, hint?: string): Rejection {
   // `malformed_request` is the only 400 in the shared reason taxonomy, and `domain/reasons.ts` is
   // not this module's to extend. The message and detail carry the specifics.
   return new Rejection({ reason: "malformed_request", message, detail, hint: hint ?? null });
 }
 
+export interface IngestResult {
+  indexId: string;
+  symbols: number;
+  edges: number;
+  /** Indexes retention dropped once this one became the newest. Empty until `keep` is exceeded. */
+  pruned: string[];
+  /** Set only when retention failed *after* a committed load; see the call site for why that is
+   *  reported rather than thrown. */
+  pruneError?: string;
+}
+
 export async function ingestGraph(
   db: Db,
   artifact: GraphArtifact,
-  opts?: { scope: string },
-): Promise<{ indexId: string; symbols: number; edges: number }> {
+  opts?: { scope?: string; keep?: number },
+): Promise<IngestResult> {
   if (artifact.version !== 1) {
     throw refuse(
       `graph artifact version ${String(artifact.version)} is not understood; this loader reads version 1`,
@@ -294,7 +323,33 @@ export async function ingestGraph(
       return { symbols: artifact.symbols.length, edges: edgeRows };
     });
 
-    return { indexId, ...counts };
+    // Retention runs here rather than inside the transaction above, and the ordering is the
+    // safety property: `keep` counts *completed* indexes, so the index just loaded only becomes
+    // one of them at the UPDATE two statements up. A load that rolled back has therefore pruned
+    // nothing — a failed index can never cost an older, working one.
+    let pruned: string[] = [];
+    let pruneError: string | undefined;
+    try {
+      const prune = await pruneIndexes(db, {
+        repo: artifact.repo,
+        ...(opts?.keep === undefined ? {} : { keep: opts.keep }),
+      });
+      pruned = prune.deleted;
+    } catch (err) {
+      // A committed, readable index is not undone by a bookkeeping failure, and the failure is
+      // self-healing: the next ingest prunes the same rows. Reporting it beats both swallowing it
+      // (the volume fills quietly, which is the whole problem retention exists to solve) and
+      // throwing (the caller reads a good load as a failure, then cannot retry — the same commit
+      // twice is refused by `code_index_identity`).
+      pruneError = err instanceof Error ? err.message : String(err);
+    }
+
+    return {
+      indexId,
+      ...counts,
+      pruned,
+      ...(pruneError === undefined ? {} : { pruneError }),
+    };
   } catch (err) {
     // Two loaders racing on the same (repo, commit, indexer) — the constraint is the authority,
     // the pre-check above is only the good error message.
@@ -307,6 +362,109 @@ export async function ingestGraph(
     }
     throw err;
   }
+}
+
+// ---------------------------------------------------------------------------------------
+// Retention.
+
+/**
+ * How many completed indexes per repo survive a prune.
+ *
+ * One Arc index is 19,177 symbols and 126,897 edge rows — about 46 MB once the reverse-edge index
+ * is counted. Kept forever at twenty commits a day that is tens of gigabytes a month, so the
+ * question is not whether to bound it but where. Three is the smallest number that keeps the
+ * questions the graph is for: the commit being worked on, the one before it (so "what changed"
+ * has two sides), and one older to compare against. A fourth buys nothing that re-running the
+ * indexer over an older commit cannot.
+ */
+const DEFAULT_KEEP = 3;
+
+export interface PruneResult {
+  /** Newest-first, the indexes this call actually removed. */
+  deleted: string[];
+  /** The completed indexes left behind. An in-flight load is not in either list: see below. */
+  kept: string[];
+  freed_symbols: number;
+  freed_edges: number;
+}
+
+/**
+ * Drop everything but the newest `keep` completed indexes for one repo.
+ *
+ * The graph is the one part of this store that may be deleted, because it is the one part that is
+ * derived: re-running the indexer over the same commit reproduces it exactly. Migration 014 states
+ * that argument and grants DELETE on `code_index` alone — the symbols and edges go with it through
+ * the ON DELETE CASCADE declared in 008, which needs no grant of its own, and no ledger row
+ * references either table.
+ */
+export async function pruneIndexes(
+  db: Db,
+  opts: { repo: string; keep?: number },
+): Promise<PruneResult> {
+  // Floored at one, and `keep: 0` is not honoured. The newest completed index is what
+  // `datum.latest_index` returns and therefore what every unqualified query reads; deleting it
+  // would answer "what calls this" with a 404 on a repo that is fully indexed. There is no state
+  // in which that is the right answer, so the floor is here rather than left to a caller.
+  const keep = Math.max(1, Math.trunc(opts.keep ?? DEFAULT_KEEP));
+
+  return db.tx("app", async (client) => {
+    // Completed indexes only, ordered the way `datum.latest_index` orders them so that "newest"
+    // means the same thing to the reader and to the pruner. An index with completed_at IS NULL is
+    // an in-flight load, not garbage: deleting one would cascade its symbols out from under a
+    // transaction still writing them, and — since a partial index is invisible to every query —
+    // it frees nothing a reader could have used anyway.
+    const candidates = await client.query<{ id: string }>(
+      `SELECT id FROM datum.code_index
+        WHERE repo = $1 AND completed_at IS NOT NULL
+        ORDER BY indexed_at DESC, id DESC`,
+      [opts.repo],
+    );
+    const all = candidates.rows.map((row) => row.id);
+    const doomed = all.slice(keep);
+    if (doomed.length === 0) {
+      return { deleted: [], kept: all, freed_symbols: 0, freed_edges: 0 };
+    }
+
+    // Counted before the DELETE, because the cascade is exactly what makes them uncountable
+    // after it. Reporting freed rows is the point of a retention pass: an operator asking "did
+    // that reclaim anything" needs a number, not a row count of index rows.
+    const tally = await client.query<{ index_id: string; symbols: string; edges: string }>(
+      `SELECT i.id AS index_id,
+              (SELECT count(*) FROM datum.code_symbols s WHERE s.index_id = i.id) AS symbols,
+              (SELECT count(*) FROM datum.code_edges   e WHERE e.index_id = i.id) AS edges
+         FROM datum.code_index i
+        WHERE i.id = ANY($1::text[])`,
+      [doomed],
+    );
+
+    // The two guards restate the invariants in the statement that could violate them, so a future
+    // edit to the selection above cannot quietly widen what gets deleted.
+    const deleted = await client.query<{ id: string }>(
+      `DELETE FROM datum.code_index
+        WHERE id = ANY($1::text[])
+          AND completed_at IS NOT NULL
+          AND id IS DISTINCT FROM datum.latest_index($2)
+        RETURNING id`,
+      [doomed, opts.repo],
+    );
+
+    const gone = new Set(deleted.rows.map((row) => row.id));
+    let freedSymbols = 0;
+    let freedEdges = 0;
+    for (const row of tally.rows) {
+      if (!gone.has(row.index_id)) continue;
+      // count(*) is bigint, which pg hands back as a string rather than losing precision.
+      freedSymbols += Number(row.symbols);
+      freedEdges += Number(row.edges);
+    }
+
+    return {
+      deleted: doomed.filter((id) => gone.has(id)),
+      kept: all.filter((id) => !gone.has(id)),
+      freed_symbols: freedSymbols,
+      freed_edges: freedEdges,
+    };
+  });
 }
 
 /**

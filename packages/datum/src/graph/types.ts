@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 /**
  * The contract between the indexer and the store.
  *
@@ -108,6 +110,60 @@ export interface GraphArtifact {
   /** Free-form counters worth keeping: files skipped, parse failures, resolution histogram. */
   stats?: Record<string, unknown>;
 }
+
+/**
+ * The same contract, checked at runtime.
+ *
+ * The interfaces above are enough where the artifact arrives from the indexer in-process. Over
+ * HTTP it arrives from a git hook or a CI runner, and a cast would let a malformed one reach the
+ * loader as a stream of constraint violations rather than one 400 naming the field. It lives here
+ * beside the interfaces so the shape has a single home: `POST /v1/graph/index` hands the parsed
+ * value straight to `ingestGraph`, so if this schema and `GraphArtifact` ever disagree the route
+ * stops compiling.
+ *
+ * Every optional field carries `.default(...)` rather than `.optional()`. That is what keeps the
+ * output assignable under `exactOptionalPropertyTypes`, and it collapses "absent" and "null" to
+ * the one value the loader already treats them as.
+ */
+export const GraphSymbolSchema = z.object({
+  key: z.string().min(1),
+  kind: z.enum(SYMBOL_KINDS),
+  name: z.string().min(1),
+  fqn: z.string().nullable().default(null),
+  language: z.string().min(1),
+  path: z.string().min(1),
+  line_start: z.number().int().nonnegative(),
+  line_end: z.number().int().nonnegative(),
+  visibility: z.string().nullable().default(null),
+  signature: z.string().nullable().default(null),
+  signature_hash: z.string().nullable().default(null),
+});
+
+export const GraphEdgeSchema = z.object({
+  src: z.string().min(1),
+  dst: z.string().nullable().default(null),
+  dst_name: z.string().min(1),
+  kind: z.enum(EDGE_KINDS),
+  resolution: z.enum(RESOLUTIONS),
+  candidates: z.array(z.string()).default([]),
+  path: z.string().min(1),
+  line: z.number().int().nonnegative(),
+});
+
+export const GraphArtifactSchema = z.object({
+  version: z.literal(1),
+  repo: z.string().min(1),
+  // Shape-checked here as well as in the loader and in `code_index_commit_shape`. The loader is
+  // the authority; this one exists so a bad sha is a field-named 400 before 30 MB of symbols are
+  // walked.
+  commit_sha: z.string().regex(/^[0-9a-f]{7,40}$/, "commit_sha must be 7-40 lowercase hex"),
+  indexer: z.string().min(1),
+  languages: z.array(z.string()),
+  file_count: z.number().int().nonnegative(),
+  symbols: z.array(GraphSymbolSchema),
+  edges: z.array(GraphEdgeSchema),
+  stats: z.record(z.string(), z.unknown()).default({}),
+});
 
 export interface ImpactHop {
   symbol_id: string;

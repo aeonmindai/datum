@@ -10,6 +10,7 @@ import { searchEpisodes } from "../episodes/read.js";
 import { resumeState } from "../episodes/resume.js";
 import { whyPath, whySymbol } from "../episodes/why.js";
 import { fleet as fleetView } from "../fleet/index.js";
+import { hookStatus, installHooks, reindex, uninstallHooks } from "./reindex.js";
 import { initInstance } from "../ops/init.js";
 import { loadSeed, SEEDS_DIR } from "../ops/seed.js";
 import { hashPassword } from "../http/auth.js";
@@ -48,6 +49,11 @@ const USAGE = `datum — the datum of record
     datum recall --symbol S | --path P         why is this code the way it is
     datum resume                               where were we, and what was left unanswered
     datum fleet                                who else is working here, and on which files
+
+  Keeping the code graph current (needs a running server and a key):
+    datum reindex                              index this repo and push it over HTTP
+    datum watch --install                      run reindex automatically after every commit
+    datum watch --status | --uninstall         is it actually running, or stop it
 
   Project commands (need a running server):
     datum link [--server URL] [--scope PATH]   link this repo to its project scope
@@ -729,6 +735,89 @@ async function main(): Promise<void> {
         bail("usage: datum hash-password '<password>'   (or set DATUM_ADMIN_PASSWORD)");
       }
       process.stdout.write(`${await hashPassword(password)}\n`);
+      return;
+    }
+
+    case "reindex": {
+      const { values } = parseArgs({
+        args: rest,
+        options: {
+          server: { type: "string" },
+          scope: { type: "string" },
+          repo: { type: "string" },
+          quiet: { type: "boolean" },
+        },
+      });
+      const r = await reindex({
+        ...(values.server ? { server: values.server } : {}),
+        ...(values.scope ? { scope: values.scope } : {}),
+        ...(values.repo ? { repo: values.repo } : {}),
+      });
+      if (r === null) {
+        // Not an error. A second hook fired while the first was still working, and dropping the
+        // duplicate is the correct outcome - the first run indexes the same tree.
+        if (!values.quiet) process.stdout.write("another reindex is already running; skipped\n");
+        return;
+      }
+      const when = new Date().toISOString().slice(0, 19);
+      if (r.already) {
+        // The graph is already current for this commit. Say so in one line so the log shows the
+        // hook ran and found nothing to do, which is different from the hook not running.
+        if (!values.quiet) {
+          process.stdout.write(`${when} ${r.repo}@${r.commit.slice(0, 9)} already indexed\n`);
+        }
+        return;
+      }
+      process.stdout.write(
+        `${when} ${r.repo}@${r.commit.slice(0, 9)}${r.dirty ? " (DIRTY TREE)" : ""} ` +
+          `${r.symbols} symbols ${r.edges} edges ` +
+          `${(r.gzipped / 1024).toFixed(0)}KB gz of ${(r.bytes / 1024 / 1024).toFixed(1)}MB ` +
+          `${r.ms}ms${r.pruned.length > 0 ? ` pruned=${r.pruned.length}` : ""}\n`,
+      );
+      if (r.dirty && !values.quiet) {
+        // The artifact names a commit whose contents differ from what was parsed. Saying so is the
+        // difference between a stale answer and a wrong one.
+        process.stdout.write(
+          "  the working tree is dirty, so this artifact describes files that are not in that commit\n",
+        );
+      }
+      return;
+    }
+
+    case "watch": {
+      const { values } = parseArgs({
+        args: rest,
+        options: {
+          install: { type: "boolean" },
+          uninstall: { type: "boolean" },
+          status: { type: "boolean" },
+          cli: { type: "string" },
+        },
+      });
+      if (values.uninstall) {
+        const { removed, left } = await uninstallHooks({});
+        process.stdout.write(`removed: ${removed.join(", ") || "nothing"}\n`);
+        if (left.length > 0) process.stdout.write(`left alone (not ours): ${left.join(", ")}\n`);
+        return;
+      }
+      if (values.status) {
+        const s = await hookStatus({});
+        for (const h of s.hooks) {
+          process.stdout.write(
+            `  ${h.hook.padEnd(16)} ${h.present ? (h.ours ? "datum" : "someone else's") : "-"}\n`,
+          );
+        }
+        if (s.logTail) process.stdout.write(`\nlast runs:\n${s.logTail}\n`);
+        else process.stdout.write("\nno reindex has run yet in this clone.\n");
+        return;
+      }
+      if (!values.install) bail("usage: datum watch --install | --status | --uninstall [--cli PATH]");
+      const { installed, skipped, log } = await installHooks({
+        ...(values.cli ? { cli: values.cli } : {}),
+      });
+      process.stdout.write(`installed: ${installed.join(", ") || "nothing"}\n`);
+      for (const s of skipped) process.stdout.write(`skipped ${s.hook}: ${s.why}\n`);
+      process.stdout.write(`log: ${log}\n`);
       return;
     }
 

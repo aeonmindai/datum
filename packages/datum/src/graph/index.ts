@@ -8,7 +8,7 @@
  * of the runtime image.
  */
 
-export { ingestGraph, impact, resolveIndex, searchSymbols } from "./store.js";
+export { ingestGraph, impact, resolveIndex, searchSymbols , pruneIndexes, indexScope } from "./store.js";
 export type { ResolvedIndex, SymbolMatch } from "./store.js";
 export { registerGraphRoutes } from "./routes.js";
 export {
