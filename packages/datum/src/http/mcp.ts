@@ -617,12 +617,22 @@ export function registerMcp(app: FastifyInstance, deps: { db: Db; config: Config
                 : "";
             return `${when} ${e.actor}${e.git_branch ? `@${e.git_branch}` : ""} [${h.tier}]${relayed} "${short(e.text, 170)}"`;
           });
-          // The note is mandatory. It is where "no term matched, this is the whole window" and
+          // The note is mandatory: it is where "no term matched, this is the whole window" and
           // "these words appear nowhere in this corpus" get said, and a caller that loses it
           // cannot tell a targeted hit from a time-sliced guess.
-          return pack(lines, budget, `nothing on record was said about that in ${parsed.scope}`, [
-            r.note,
-          ]);
+          //
+          // But on real data the note measured 145 bytes against a 240-byte budget, so it
+          // consumed the whole response and all twelve quotes were dropped — a recall returning
+          // its own metadata and no evidence. So the first quote is mandatory too: an answer with
+          // no evidence in it is not an answer, and the note is a caveat ABOUT evidence that is
+          // not there. Same failure as dropping one side of a contested pair, one layer up.
+          const first = lines.length > 0 ? [lines[0] as string] : [];
+          return pack(
+            lines.slice(1),
+            budget,
+            `nothing on record was said about that in ${parsed.scope}`,
+            [short(r.note, 170), ...first],
+          );
         }
         const hits = await searchEpisodes(db, {
           scope: parsed.scope,
