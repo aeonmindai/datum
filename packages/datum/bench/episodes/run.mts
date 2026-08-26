@@ -22,9 +22,13 @@ const arg = (name: string, fallback: string): string =>
   argv.find((a) => a.startsWith(`--${name}=`))?.slice(name.length + 3) ?? fallback;
 
 /**
- * grade.md §10. One runner, two question sets. `--questions=` names the file; the label in every
- * output filename and report header is derived from that name, so a tuned number and a held-out
- * number can never be mistaken for each other.
+ * grade.md §10. One runner, three question sets. `--questions=` names the file; the label in every
+ * output filename and report header is derived from that name, so a tuned number, a held-out number
+ * and a clean number can never be mistaken for each other.
+ *
+ * `--out=` overrides only the filename. It exists so a re-measurement against changed retrieval code
+ * can be written beside the earlier one instead of on top of it: an overwritten results file is an
+ * erased comparison.
  */
 const QUESTIONS_FILE = arg("questions", "questions.json");
 const QUESTIONS_PATH = QUESTIONS_FILE.startsWith("/") ? QUESTIONS_FILE : `${HERE}${QUESTIONS_FILE}`;
@@ -40,6 +44,29 @@ const DATUM_LIMIT = Number(arg("datum-limit", "20"));
 const RECALL_LIMIT = Number(arg("recall-limit", "12"));
 const QUERY_TERMS = Number(arg("query-terms", "4"));
 const QUERY = arg("query", "derived") as "derived" | "topic";
+const OUT_OVERRIDE = arg("out", "");
+/**
+ * The composition every set's strata are re-weighted onto: 16/40 temporal, which is
+ * `questions-heldout.json`. Chosen because it is the *least* temporal of the three, so re-weighting
+ * onto it can only remove credit the window tier was getting from a set that happened to name more
+ * dates. Re-weighting onto the more favourable composition would be picking the flattering baseline.
+ */
+const REWEIGHT = Number(arg("reweight", String(16 / 40)));
+
+// --------------------------------------------------- the temporal stratifier
+//
+// The window tier can only fire on a question that names a time, and the three sets do not carry
+// times in the same proportion: 30/40, 16/40, 30/40. Comparing their totals therefore compares
+// composition as much as retrieval, so every accuracy here is also reported split on this predicate.
+//
+// Three regexes over the question text and nothing else — no ground truth, no server plan, so the
+// same question is classified identically for all four arms. `any` reproduces the counts published
+// in THIRD.md (30 / 16 / 30) and its ten non-temporal third-set ids exactly.
+const T_DATE = /\b(\d{1,2})\s*(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\b|\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\s*(\d{1,2})\b|\b(\d{1,2})(st|nd|rd|th)\b|\b(yesterday|today|tonight)\b/i;
+const T_CLOCK = /\b\d{1,2}\s*:\s*\d{2}\b|\b\d{1,2}\s*(am|pm)\b|\b(midnight|noon|midday)\b|\bsmall hours\b/i;
+const T_PART = /\b(morning|afternoon|evening|night|overnight|dawn|dusk|late on|early on|lunchtime)\b/i;
+const isTemporal = (q: Question): boolean =>
+  T_DATE.test(q.question) || T_CLOCK.test(q.question) || T_PART.test(q.question);
 
 const DATUM_BASE = process.env.DATUM_BASE_URL ?? "http://127.0.0.1:8477";
 const DATUM_PATH = process.env.DATUM_EPISODES_PATH ?? "/v1/episodes";
@@ -121,7 +148,17 @@ function topicSource(q: Question): string {
 
 // --------------------------------------------------------------------- arms
 
-interface Retrieved { context: string; units: number; detail?: Record<string, unknown> }
+/**
+ * `alt` is an ablation of the same retrieval, graded alongside it and never instead of it. Only
+ * `datum-recall` sets it: the same episodes with every `window`-tier row deleted, which is what the
+ * arm would have handed over had the window tier not existed.
+ */
+interface Retrieved {
+  context: string;
+  units: number;
+  detail?: Record<string, unknown>;
+  alt?: { context: string; units: number };
+}
 
 /**
  * grade.md §8. `grep -F -i -n -a` over the raw `.jsonl`, one call per query term, hits unioned in
@@ -242,7 +279,18 @@ async function armDatumRecall(q: Question): Promise<Retrieved> {
       .find((t) => expectSatisfied(render(eps.filter((e) => e.tier === t)), q.expect)) ?? "combined";
     detail["window_only"] = !expectSatisfied(render(eps.filter((e) => e.tier !== "window")), q.expect);
   }
-  return { context, units: eps.length, detail };
+  // The window-tier ablation, graded by the same grader in the same run rather than reasoned about
+  // afterwards. It is an upper bound on what a windowless build would score: deleting the tier from
+  // the result set removes rows and changes nothing else, whereas deleting the mechanism would also
+  // remove the window *filter*, which is what currently stops a long out-of-window document from
+  // outscoring the right sentence inside the window.
+  const noWindow = eps.filter((e) => e.tier !== "window");
+  return {
+    context,
+    units: eps.length,
+    detail,
+    alt: { context: render(noWindow), units: noWindow.length },
+  };
 }
 
 // ----------------------------------------------------------------- answerers
@@ -279,6 +327,10 @@ async function answerLlm(q: Question, context: string): Promise<string> {
 interface Row {
   id: string; arm: string; repeat: number; verdict: Verdict; contaminated: boolean;
   missing: string[]; units: number; chars: number; est_tokens: number; ms: number;
+  temporal: boolean;
+  /** The same question graded on the window-tier ablation. Only `datum-recall`, evidence mode only. */
+  nowin_verdict?: Verdict;
+  nowin_units?: number;
   detail?: Record<string, unknown>;
 }
 
@@ -314,9 +366,21 @@ for (let repeat = 0; repeat < REPEATS; repeat += 1) {
       if (ANSWERER === "evidence" && r.units === 0 && !q.abstain) {
         g = { verdict: "abstained", contaminated: false, missing: q.expect };
       }
+
+      // The ablation is graded by the same call, with the same empty-result rule, so its number is
+      // comparable to the number beside it and not to a different grader's idea of correct. In `llm`
+      // mode it is skipped rather than approximated: that would be a second generation, not an
+      // ablation of this one.
+      let nowin: { verdict: Verdict } | undefined;
+      if (r.alt && ANSWERER === "evidence") {
+        nowin = grade(q, r.alt.context, ANSWERER);
+        if (r.alt.units === 0 && !q.abstain) nowin = { verdict: "abstained" };
+      }
       rows.push({
         id: q.id, arm, repeat, verdict: g.verdict, contaminated: g.contaminated, missing: g.missing,
         units: r.units, chars: r.context.length, est_tokens: estTokens(r.context), ms,
+        temporal: isTemporal(q),
+        ...(nowin ? { nowin_verdict: nowin.verdict, nowin_units: r.alt?.units ?? 0 } : {}),
         ...(r.detail ? { detail: r.detail } : {}),
       });
     }
@@ -384,6 +448,54 @@ function aggregate(arm: string) {
     if (set.length === QS.length) msPerRepeat.push(mean(set.map((x) => x.ms)));
   }
 
+  // The temporal stratification, per repeat so it carries its own variance. `reweighted` places this
+  // set's two strata on the held-out set's 16/40 composition, which is the only way a third-set
+  // number and a held-out number can be compared without comparing how many dates were typed.
+  const stratum = (want: boolean, repeat: number): number => {
+    const set = mine.filter((x) => x.repeat === repeat && x.temporal === want);
+    return set.length ? set.filter((x) => x.verdict === "correct").length / set.length : NaN;
+  };
+  const repeatIdx = Array.from({ length: REPEATS }, (_, i) => i);
+  const tRep = repeatIdx.map((r) => stratum(true, r)).filter((x) => Number.isFinite(x));
+  const nRep = repeatIdx.map((r) => stratum(false, r)).filter((x) => Number.isFinite(x));
+  const nTemporal = QS.filter(isTemporal).length;
+  const temporalBlock = {
+    temporal_n: nTemporal,
+    non_temporal_n: QS.length - nTemporal,
+    temporal_accuracy: mean(tRep),
+    temporal_stddev: stddev(tRep),
+    non_temporal_accuracy: mean(nRep),
+    non_temporal_stddev: stddev(nRep),
+    reweight_temporal_share: REWEIGHT,
+    accuracy_reweighted: REWEIGHT * mean(tRep) + (1 - REWEIGHT) * mean(nRep),
+    temporal_lost: first.filter((r) => r.temporal && r.verdict !== "correct").map((r) => r.id),
+    non_temporal_lost: first.filter((r) => !r.temporal && r.verdict !== "correct").map((r) => r.id),
+  };
+
+  // The window-tier ablation. Graded, not inferred: every repeat re-scored on the same episodes with
+  // the `window`-tier rows deleted. Upper bound on a windowless build, for the reason given at the
+  // arm. Absent for every arm that does not produce tiers.
+  const nowinRep: number[] = [];
+  for (const r of repeatIdx) {
+    const set = mine.filter((x) => x.repeat === r && x.nowin_verdict !== undefined);
+    if (set.length === QS.length) nowinRep.push(set.filter((x) => x.nowin_verdict === "correct").length / QS.length);
+  }
+  const nowinFirst = first.filter((r) => r.nowin_verdict !== undefined);
+  const withoutWindow = nowinRep.length === 0 ? null : {
+    accuracy: mean(nowinRep),
+    accuracy_repeats: nowinRep,
+    accuracy_stddev: stddev(nowinRep),
+    delta_vs_full: mean(nowinRep) - mean(perRepeat),
+    lost_by_ablation: nowinFirst
+      .filter((r) => r.verdict === "correct" && r.nowin_verdict !== "correct")
+      .map((r) => `${r.id}:${r.nowin_verdict}`),
+    gained_by_ablation: nowinFirst
+      .filter((r) => r.verdict !== "correct" && r.nowin_verdict === "correct")
+      .map((r) => r.id),
+    units_mean: Number(mean(nowinFirst.map((r) => r.nowin_units ?? 0)).toFixed(1)),
+    method: "window-tier rows deleted from the same responses and re-graded; the server has no flag to disable the tier, so the window FILTER is still in force and this is an upper bound",
+  };
+
   return {
     correct: C, wrong: W, abstained: A,
     accuracy: C / QS.length,
@@ -415,6 +527,8 @@ function aggregate(arm: string) {
     ms_stddev: Number(stddev(msPerRepeat).toFixed(1)),
     trap_detail: first.filter((r) => trapIds.has(r.id))
       .map((r) => `${r.id}:${r.verdict}${r.contaminated ? "+contaminated" : ""}`),
+    ...temporalBlock,
+    ...(withoutWindow ? { without_window: withoutWindow } : {}),
     ...(Object.keys(episodeTiers).length
       ? { episode_tiers: episodeTiers, answer_tiers: answerTiers, window_only: windowOnly }
       : {}),
@@ -431,7 +545,9 @@ const out = {
   questions_file: QUESTIONS_FILE,
   question_set_note: SET === "tuned"
     ? "TUNED SET: the retrieval code, including /v1/recall, was designed after reading which of these 40 it failed. Any improvement here is contaminated and must be labelled as such."
-    : "HELD-OUT SET: built by an agent that never read the retrieval code, disjoint source lines, same kind/difficulty distribution. This is the number that counts.",
+    : SET === "heldout"
+      ? "BURNED HELD-OUT SET: clean for exactly one run. Its six failures were then read and when.ts and terms.ts were built from two of them, so it is now as contaminated as the tuned set and is reported as a middle rung, not as the verdict."
+      : "CLEAN SET: built by an agent that read neither src/ nor any results file, pairwise disjoint source lines from both other sets. Nothing has been read off it and nothing built from it. This is the number that counts.",
   arms: ARMS,
   repeats: REPEATS,
   query_regime: QUERY,
@@ -451,7 +567,9 @@ const out = {
     compaction_summaries_excluded: utterances.length - datumVisible.length,
     compaction_summary_dependency: SET === "tuned"
       ? "none — verify.mts asserts every expect entry of all 40 E questions matches inside the 542-episode datum-visible set, so the isCompactSummary exclusion costs datum no question"
-      : "none — HELDOUT.md §2 asserts every H question's source record survives corpus.mts's filter (isCompactSummary included) and every expect token appears in it",
+      : SET === "heldout"
+        ? "none — HELDOUT.md §2 asserts every H question's source record survives corpus.mts's filter (isCompactSummary included) and every expect token appears in it"
+        : "none — SCALE.md establishes answerability is identical between the 542 stored episodes and the 550 utterances full-context receives, in both directions, for every question of every set",
   },
   questions: {
     total: QS.length,
@@ -461,12 +579,14 @@ const out = {
       .map((d) => [d, QS.filter((q) => q.difficulty === d).length])),
     only_in_transcript: QS.filter((q) => q.source.only_in_transcript).length,
     abstention_traps: QS.filter((q) => q.abstain).length,
+    temporal: QS.filter(isTemporal).length,
+    temporal_note: "a calendar date, a clock time or a part of the day, by regex over the question text alone. Reproduces THIRD.md's published 30 / 16 / 30.",
   },
   arm_errors: Object.fromEntries(armErrors),
   results: Object.fromEntries(ARMS.map((a) => [a, aggregate(a)])),
   rows: rows.filter((r) => r.repeat === 0),
 };
-const OUT_FILE = `results-${SET}-${QUERY}.json`;
+const OUT_FILE = OUT_OVERRIDE || `results-${SET}-${QUERY}.json`;
 writeFileSync(`${HERE}${OUT_FILE}`, `${JSON.stringify(out, null, 2)}\n`);
 
 // -------------------------------------------------------------------- report
@@ -499,6 +619,10 @@ for (const arm of ARMS) {
   console.log(`  difficulty  ${Object.entries(a.by_difficulty).map(([k, v]) => `${k} ${pct(v)}`).join("  ")}`);
   console.log(`  kind        ${Object.entries(a.by_kind).map(([k, v]) => `${k} ${pct(v)}`).join("  ")}`);
   console.log(`  only_in_transcript ${pct(a.only_in_transcript_accuracy)}   input tokens total ${a.est_tokens_total.toLocaleString()}   repeats ${a.accuracy_repeats.map((x) => pct(x)).join(" ")}`);
+  console.log(`  temporal ${a.temporal_n}q ${pct(a.temporal_accuracy)} (sd ${pct(a.temporal_stddev)})   non-temporal ${a.non_temporal_n}q ${pct(a.non_temporal_accuracy)} (sd ${pct(a.non_temporal_stddev)})   reweighted to ${(a.reweight_temporal_share * 40).toFixed(0)}/40 temporal ${pct(a.accuracy_reweighted)}`);
+  if (a.without_window) {
+    console.log(`  window tier deleted ${pct(a.without_window.accuracy)} (${pct(a.without_window.delta_vs_full)} vs full)   lost ${a.without_window.lost_by_ablation.join(" ") || "none"}   gained ${a.without_window.gained_by_ablation.join(" ") || "none"}`);
+  }
   if (a.matched) console.log(`  datum match tiers ${JSON.stringify(a.matched)}`);
   if (a.episode_tiers) {
     console.log(`  recall episode tiers ${JSON.stringify(a.episode_tiers)}   answer tiers ${JSON.stringify(a.answer_tiers)}   window-only answers ${a.window_only}`);

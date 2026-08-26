@@ -1,0 +1,1704 @@
+{
+  "generated_at": "2026-08-26T15:38:17.889Z",
+  "answerer": "evidence",
+  "answerer_note": "verdicts measure retrieval sufficiency: the retrieved context IS the response, so a verdict is the arm's accuracy ceiling. grade.md §8.",
+  "question_set": "third",
+  "questions_file": "questions-third.json",
+  "question_set_note": "CLEAN SET: built by an agent that read neither src/ nor any results file, pairwise disjoint source lines from both other sets. Nothing has been read off it and nothing built from it. This is the number that counts.",
+  "arms": [
+    "datum-recall"
+  ],
+  "repeats": 3,
+  "query_regime": "derived",
+  "query_regime_note": "query terms lifted from the question text only. The questions paraphrase deliberately, so this is the hard regime and it is the realistic one.",
+  "config": {
+    "GREP_LINES": 40,
+    "GREP_WINDOW": 2000,
+    "DATUM_LIMIT": 20,
+    "RECALL_LIMIT": 30,
+    "QUERY_TERMS": 4,
+    "DATUM_BASE": "http://127.0.0.1:8481",
+    "DATUM_PATH": "/v1/episodes",
+    "RECALL_PATH": "/v1/recall",
+    "DATUM_SCOPE": "org/aeonmind/proj/arc"
+  },
+  "corpus": {
+    "utterances_with_text": 550,
+    "interrupt_markers": 49,
+    "human_records": 599,
+    "bytes": 264103,
+    "datum_visible_episodes": 542,
+    "compaction_summaries_excluded": 8,
+    "compaction_summary_dependency": "none — SCALE.md establishes answerability is identical between the 542 stored episodes and the 550 utterances full-context receives, in both directions, for every question of every set"
+  },
+  "questions": {
+    "total": 40,
+    "by_kind": {
+      "correction": 8,
+      "target-change": 8,
+      "decision": 6,
+      "abandoned": 5,
+      "preference": 5,
+      "who-said": 4,
+      "when": 4
+    },
+    "by_difficulty": {
+      "easy": 7,
+      "medium": 26,
+      "hard": 7
+    },
+    "only_in_transcript": 8,
+    "abstention_traps": 4,
+    "temporal": 30,
+    "temporal_note": "a calendar date, a clock time or a part of the day, by regex over the question text alone. Reproduces THIRD.md's published 30 / 16 / 30."
+  },
+  "arm_errors": {},
+  "results": {
+    "datum-recall": {
+      "correct": 35,
+      "wrong": 5,
+      "abstained": 0,
+      "accuracy": 0.875,
+      "error_rate": 0.125,
+      "abstain_rate": 0,
+      "trust": 0.75,
+      "over_abstain": 0,
+      "trap_accuracy": 0.25,
+      "contamination": 0.5,
+      "accuracy_repeats": [
+        0.875,
+        0.875,
+        0.875
+      ],
+      "accuracy_mean": 0.875,
+      "accuracy_stddev": 0,
+      "unstable": 0,
+      "unstable_ids": [],
+      "by_difficulty": {
+        "easy": 1,
+        "medium": 0.8846153846153846,
+        "hard": 0.7142857142857143
+      },
+      "by_kind": {
+        "correction": 1,
+        "target-change": 0.875,
+        "decision": 0.6666666666666666,
+        "abandoned": 1,
+        "preference": 0.8,
+        "who-said": 1,
+        "when": 0.75
+      },
+      "only_in_transcript_accuracy": 1,
+      "lost": [
+        "T16:wrong",
+        "T18:wrong(truck)",
+        "T22:wrong",
+        "T30:wrong(PR number)",
+        "T40:wrong"
+      ],
+      "est_tokens_mean": 5703,
+      "est_tokens_total": 228118,
+      "chars_mean": 22810,
+      "units_mean": 26.6,
+      "ms_mean": 28.2,
+      "ms_p95": 62.2,
+      "ms_mean_repeats": [
+        28.2,
+        27.4,
+        26.8
+      ],
+      "ms_stddev": 0.7,
+      "trap_detail": [
+        "T16:wrong+contaminated",
+        "T22:wrong+contaminated",
+        "T32:correct",
+        "T40:wrong+contaminated"
+      ],
+      "temporal_n": 30,
+      "non_temporal_n": 10,
+      "temporal_accuracy": 1,
+      "temporal_stddev": 0,
+      "non_temporal_accuracy": 0.5,
+      "non_temporal_stddev": 0,
+      "reweight_temporal_share": 0.4,
+      "accuracy_reweighted": 0.7,
+      "temporal_lost": [],
+      "non_temporal_lost": [
+        "T16",
+        "T18",
+        "T22",
+        "T30",
+        "T40"
+      ],
+      "without_window": {
+        "accuracy": 0.625,
+        "accuracy_repeats": [
+          0.625,
+          0.625,
+          0.625
+        ],
+        "accuracy_stddev": 0,
+        "delta_vs_full": -0.25,
+        "lost_by_ablation": [
+          "T02:abstained",
+          "T04:wrong",
+          "T05:wrong",
+          "T08:wrong",
+          "T11:wrong",
+          "T15:abstained",
+          "T21:wrong",
+          "T31:wrong",
+          "T33:abstained",
+          "T39:abstained"
+        ],
+        "gained_by_ablation": [],
+        "units_mean": 9.6,
+        "method": "window-tier rows deleted from the same responses and re-graded; the server has no flag to disable the tier, so the window FILTER is still in force and this is an upper bound"
+      },
+      "episode_tiers": {
+        "term+window": 95,
+        "window": 677,
+        "term": 290
+      },
+      "answer_tiers": {
+        "term+window": 19,
+        "window": 10,
+        "term": 5
+      },
+      "window_only": 10
+    }
+  },
+  "rows": [
+    {
+      "id": "T01",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 30,
+      "chars": 31690,
+      "est_tokens": 7923,
+      "ms": 52.689458,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 3,
+      "detail": {
+        "tiers": {
+          "term+window": 3,
+          "window": 27
+        },
+        "note": "window 2026-08-14 \"morning\" read as 05:00-13:00 UTC; terms objected(7.295) objecting(7.295) benchmarking(6.197) sizes(5.909) jish(5.504) size(5.504)",
+        "terms": [
+          "objected",
+          "objecting",
+          "benchmarking",
+          "sizes",
+          "jish",
+          "size",
+          "production",
+          "objected",
+          "objecting",
+          "say",
+          "actually",
+          "batch",
+          "benchmarking",
+          "sizes",
+          "run",
+          "actually",
+          "agent"
+        ],
+        "window": "2026-08-14 \"morning\" read as 05:00-13:00 UTC",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "T02",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 48,
+      "chars": 8113,
+      "est_tokens": 2029,
+      "ms": 20.736166999999966,
+      "temporal": true,
+      "nowin_verdict": "abstained",
+      "nowin_units": 0,
+      "detail": {
+        "tiers": {
+          "window": 48
+        },
+        "note": "window 2026-08-14 \"evening\" read as 16:00-23:00 UTC; terms many(5.909) jish(5.504) projection(4.993) many->mani[stem](4.136) bake-time->time[split](2.125) bake-time->bake[split](1.947); absent from corpus: refused, outright; no term matched — this is all 48 said in that window",
+        "terms": [
+          "many",
+          "jish",
+          "projection",
+          "many",
+          "bake-time",
+          "bake-time"
+        ],
+        "window": "2026-08-14 \"evening\" read as 16:00-23:00 UTC",
+        "answer_tier": "window",
+        "window_only": true
+      }
+    },
+    {
+      "id": "T03",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 30,
+      "chars": 7557,
+      "est_tokens": 1890,
+      "ms": 31.598833000000013,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 8,
+      "detail": {
+        "tiers": {
+          "term+window": 8,
+          "window": 22
+        },
+        "note": "window 2026-08-17 (whole day, 00:00-24:00 UTC); terms straight(7.295) help(6.602) kind(5.909) jish(5.504) missing(5.504) built(5.098); absent from corpus: 1am, rejected, him, terminology, technology",
+        "terms": [
+          "straight",
+          "help",
+          "kind",
+          "jish",
+          "missing",
+          "built",
+          "artifact",
+          "say",
+          "keep",
+          "something",
+          "agent",
+          "missing",
+          "something"
+        ],
+        "window": "2026-08-17 (whole day, 00:00-24:00 UTC)",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "T04",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 30,
+      "chars": 5844,
+      "est_tokens": 1461,
+      "ms": 26.256999999999948,
+      "temporal": true,
+      "nowin_verdict": "wrong",
+      "nowin_units": 1,
+      "detail": {
+        "tiers": {
+          "term+window": 1,
+          "window": 29
+        },
+        "note": "window 2026-08-17 \"morning\" read as 05:00-13:00 UTC; terms property(7.295) insist(7.295) leaving(5.686) jish(5.504) property->properti[stem](5.107) v4(4.656); absent from corpus: shouted, techniques, technique",
+        "terms": [
+          "property",
+          "insist",
+          "leaving",
+          "jish",
+          "property",
+          "v4",
+          "own",
+          "leaving",
+          "arc",
+          "agent"
+        ],
+        "window": "2026-08-17 \"morning\" read as 05:00-13:00 UTC",
+        "answer_tier": "window",
+        "window_only": true
+      }
+    },
+    {
+      "id": "T05",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 27,
+      "chars": 5978,
+      "est_tokens": 1495,
+      "ms": 37.8620830000001,
+      "temporal": true,
+      "nowin_verdict": "wrong",
+      "nowin_units": 2,
+      "detail": {
+        "tiers": {
+          "term+window": 2,
+          "window": 25
+        },
+        "note": "window 2026-08-17 \"evening\" read as 16:00-23:00 UTC; terms feature(7.295) insist(7.295) bad(6.197) stay(5.686) jish(5.504) switched(5.349); absent from corpus: overruled",
+        "terms": [
+          "feature",
+          "insist",
+          "bad",
+          "stay",
+          "jish",
+          "switched",
+          "line",
+          "feature",
+          "stay",
+          "number",
+          "off",
+          "switched",
+          "agent"
+        ],
+        "window": "2026-08-17 \"evening\" read as 16:00-23:00 UTC",
+        "answer_tier": "window",
+        "window_only": true
+      }
+    },
+    {
+      "id": "T06",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 5,
+      "chars": 1395,
+      "est_tokens": 349,
+      "ms": 24.78383299999996,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 3,
+      "detail": {
+        "tiers": {
+          "term+window": 3,
+          "window": 2
+        },
+        "note": "window 2026-08-19 \"just after midnight\" read as 00:00-06:00 UTC; terms told(7.295) comparison(7.295) compare(5.909) against(5.909) jish(5.504) codebases(5.216); absent from corpus: pair, unacceptable",
+        "terms": [
+          "told",
+          "comparison",
+          "compare",
+          "against",
+          "jish",
+          "codebases",
+          "touching",
+          "project",
+          "throughput",
+          "numbers",
+          "compare",
+          "codebases",
+          "touching",
+          "agent",
+          "gpu",
+          "numbers"
+        ],
+        "window": "2026-08-19 \"just after midnight\" read as 00:00-06:00 UTC",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "T07",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 30,
+      "chars": 48912,
+      "est_tokens": 12228,
+      "ms": 29.225832999999966,
+      "temporal": false,
+      "nowin_verdict": "correct",
+      "nowin_units": 30,
+      "detail": {
+        "tiers": {
+          "term": 30
+        },
+        "note": "terms figure(6.197) corrected(5.686) rebake(5.686) jish(5.504) actually(4.993) long(4.351)",
+        "terms": [
+          "figure",
+          "corrected",
+          "rebake",
+          "jish",
+          "actually",
+          "long",
+          "figure",
+          "takes",
+          "corrected",
+          "rebake",
+          "actually",
+          "agent",
+          "takes"
+        ],
+        "window": null,
+        "answer_tier": "term",
+        "window_only": false
+      }
+    },
+    {
+      "id": "T08",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 27,
+      "chars": 5996,
+      "est_tokens": 1499,
+      "ms": 16.240208000000052,
+      "temporal": true,
+      "nowin_verdict": "wrong",
+      "nowin_units": 4,
+      "detail": {
+        "tiers": {
+          "term+window": 4,
+          "window": 23
+        },
+        "note": "window 2026-08-17 \"evening\" read as 16:00-23:00 UTC; terms caught(7.295) itself(6.602) remind(6.602) job(6.602) instead(5.909) jish(5.504)",
+        "terms": [
+          "caught",
+          "itself",
+          "remind",
+          "job",
+          "instead",
+          "jish",
+          "say",
+          "doing",
+          "rule",
+          "agent",
+          "work"
+        ],
+        "window": "2026-08-17 \"evening\" read as 16:00-23:00 UTC",
+        "answer_tier": "window",
+        "window_only": true
+      }
+    },
+    {
+      "id": "T09",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 30,
+      "chars": 55157,
+      "est_tokens": 13790,
+      "ms": 64.35266700000011,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 30,
+      "detail": {
+        "tiers": {
+          "term": 30
+        },
+        "note": "terms beam-search(7.295) lifted(7.295) capped(6.197) validation(5.686) jish(5.504) lifted->lift[stem](5.107)",
+        "terms": [
+          "beam-search",
+          "lifted",
+          "capped",
+          "validation",
+          "jish",
+          "lifted",
+          "say",
+          "cap",
+          "under",
+          "long",
+          "kernel",
+          "hour",
+          "runs",
+          "validation",
+          "wanted",
+          "capped",
+          "agent",
+          "gpu",
+          "use",
+          "wanted",
+          "runs",
+          "beam-search",
+          "beam-search"
+        ],
+        "window": null,
+        "answer_tier": "term",
+        "window_only": false
+      }
+    },
+    {
+      "id": "T10",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 26,
+      "chars": 5419,
+      "est_tokens": 1355,
+      "ms": 23.250167000000033,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 2,
+      "detail": {
+        "tiers": {
+          "term+window": 2,
+          "window": 24
+        },
+        "note": "window 2026-08-16 (whole day, 00:00-24:00 UTC); terms features(7.295) mutually(7.295) exclusive(7.295) requirement(6.602) variant(6.197) claim(5.909); absent from corpus: around, 4am, rejected, breath, quantiser",
+        "terms": [
+          "features",
+          "mutually",
+          "exclusive",
+          "requirement",
+          "variant",
+          "claim",
+          "jish",
+          "added",
+          "features",
+          "mutually",
+          "exclusive",
+          "requirement",
+          "bake",
+          "added"
+        ],
+        "window": "2026-08-16 (whole day, 00:00-24:00 UTC)",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "T11",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 30,
+      "chars": 7856,
+      "est_tokens": 1964,
+      "ms": 14.138667000000055,
+      "temporal": true,
+      "nowin_verdict": "wrong",
+      "nowin_units": 1,
+      "detail": {
+        "tiers": {
+          "window": 29,
+          "term+window": 1
+        },
+        "note": "window 2026-08-20 \"evening\" read as 16:00-23:00 UTC; terms told(7.295) figure(6.197) jish(5.504) sweep(5.216) lock(5.098) tok/s(4.523); absent from corpus: swept",
+        "terms": [
+          "told",
+          "figure",
+          "jish",
+          "sweep",
+          "lock",
+          "tok/s",
+          "figure",
+          "want",
+          "agent",
+          "tok/s"
+        ],
+        "window": "2026-08-20 \"evening\" read as 16:00-23:00 UTC",
+        "answer_tier": "window",
+        "window_only": true
+      }
+    },
+    {
+      "id": "T12",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 30,
+      "chars": 54130,
+      "est_tokens": 13533,
+      "ms": 62.208167,
+      "temporal": false,
+      "nowin_verdict": "correct",
+      "nowin_units": 30,
+      "detail": {
+        "tiers": {
+          "term": 30
+        },
+        "note": "terms larger(7.295) asked(6.602) ported(5.909) head(5.686) jish(5.504) stopped(5.349); absent from corpus: dimension",
+        "terms": [
+          "larger",
+          "asked",
+          "ported",
+          "head",
+          "jish",
+          "stopped",
+          "pushed",
+          "flash",
+          "asked",
+          "reach",
+          "kernel",
+          "numbers",
+          "attention",
+          "want",
+          "stopped",
+          "pushed",
+          "ported",
+          "numbers"
+        ],
+        "window": null,
+        "answer_tier": "term",
+        "window_only": false
+      }
+    },
+    {
+      "id": "T13",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 5,
+      "chars": 1383,
+      "est_tokens": 346,
+      "ms": 18.358541999999943,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 1,
+      "detail": {
+        "tiers": {
+          "term+window": 1,
+          "window": 4
+        },
+        "note": "window 2026-08-19 \"small hours\" read as 00:00-06:00 UTC; terms released(6.602) spending(6.197) dollars(5.909) jish(5.504) back(5.098) cap(4.993); absent from corpus: attached",
+        "terms": [
+          "released",
+          "spending",
+          "dollars",
+          "jish",
+          "back",
+          "cap",
+          "boxes",
+          "released",
+          "spending",
+          "numbers",
+          "dollars",
+          "wanted",
+          "gpu",
+          "boxes",
+          "numbers",
+          "wanted"
+        ],
+        "window": "2026-08-19 \"small hours\" read as 00:00-06:00 UTC",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "T14",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 13,
+      "chars": 2230,
+      "est_tokens": 558,
+      "ms": 27.89570900000001,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 2,
+      "detail": {
+        "tiers": {
+          "term+window": 2,
+          "window": 11
+        },
+        "note": "window 2026-08-20 \"afternoon\" read as 12:00-19:00 UTC; terms refilled(6.602) jish(5.504) balance(5.504) limit(5.504) time(4.251) balance->balanc[stem](3.852); absent from corpus: attached",
+        "terms": [
+          "refilled",
+          "jish",
+          "balance",
+          "limit",
+          "time",
+          "balance",
+          "refilled"
+        ],
+        "window": "2026-08-20 \"afternoon\" read as 12:00-19:00 UTC",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "T15",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 18,
+      "chars": 3283,
+      "est_tokens": 821,
+      "ms": 14.809999999999945,
+      "temporal": true,
+      "nowin_verdict": "abstained",
+      "nowin_units": 0,
+      "detail": {
+        "tiers": {
+          "window": 18
+        },
+        "note": "window 2026-08-21 \"early on\" read as 00:00-12:00 UTC; terms sentence(7.295) banned(6.197) bar(5.909) jish(5.504) set(5.216) sentence->sentenc[stem](5.107); absent from corpus: resource; no term matched — this is all 18 said in that window",
+        "terms": [
+          "sentence",
+          "banned",
+          "bar",
+          "jish",
+          "set",
+          "sentence",
+          "new",
+          "banned"
+        ],
+        "window": "2026-08-21 \"early on\" read as 00:00-12:00 UTC",
+        "answer_tier": "window",
+        "window_only": true
+      }
+    },
+    {
+      "id": "T16",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": true,
+      "missing": [],
+      "units": 30,
+      "chars": 62541,
+      "est_tokens": 15636,
+      "ms": 24.545792000000006,
+      "temporal": false,
+      "nowin_verdict": "wrong",
+      "nowin_units": 9,
+      "detail": {
+        "tiers": {
+          "term": 9,
+          "window": 21
+        },
+        "note": "terms latency(7.295) time-to-first-token(7.295) jish(5.504) target(5.349) set(5.216) latency->latenci[stem](5.107); absent from corpus: p99",
+        "terms": [
+          "latency",
+          "time-to-first-token",
+          "jish",
+          "target",
+          "set",
+          "latency",
+          "time-to-first-token",
+          "time-to-first-token",
+          "time-to-first-token"
+        ],
+        "window": null
+      }
+    },
+    {
+      "id": "T17",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 30,
+      "chars": 31179,
+      "est_tokens": 7795,
+      "ms": 19.598291000000017,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 2,
+      "detail": {
+        "tiers": {
+          "term+window": 2,
+          "window": 28
+        },
+        "note": "window 2026-08-14 (whole day, 00:00-24:00 UTC); terms picked(7.295) tricks(7.295) worth(5.686) jish(5.504) term(5.504) picked->pick[stem](5.107); absent from corpus: 1pm, quantisation",
+        "terms": [
+          "picked",
+          "tricks",
+          "worth",
+          "jish",
+          "term",
+          "picked",
+          "tricks",
+          "keeping",
+          "long",
+          "keeping"
+        ],
+        "window": "2026-08-14 (whole day, 00:00-24:00 UTC)",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "T18",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": true,
+      "missing": [
+        "truck"
+      ],
+      "units": 30,
+      "chars": 62260,
+      "est_tokens": 15565,
+      "ms": 56.1010829999999,
+      "temporal": false,
+      "nowin_verdict": "wrong",
+      "nowin_units": 29,
+      "detail": {
+        "tiers": {
+          "term": 29,
+          "window": 1
+        },
+        "note": "terms pick(7.295) once(6.197) settled(5.909) instead(5.909) jish(5.504) names(5.216); absent from corpus: vehicles",
+        "terms": [
+          "pick",
+          "once",
+          "settled",
+          "instead",
+          "jish",
+          "names",
+          "serve",
+          "using",
+          "settled",
+          "model",
+          "names",
+          "arc"
+        ],
+        "window": null
+      }
+    },
+    {
+      "id": "T19",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 30,
+      "chars": 60410,
+      "est_tokens": 15103,
+      "ms": 52.930541000000176,
+      "temporal": false,
+      "nowin_verdict": "correct",
+      "nowin_units": 27,
+      "detail": {
+        "tiers": {
+          "term": 27,
+          "window": 3
+        },
+        "note": "terms sent(5.909) four(5.686) jish(5.504) inference(5.349) projects(4.993) engines(4.897); absent from corpus: survey, refused, shortlist",
+        "terms": [
+          "sent",
+          "four",
+          "jish",
+          "inference",
+          "projects",
+          "engines",
+          "hand",
+          "still",
+          "projects",
+          "agent",
+          "inference",
+          "engines"
+        ],
+        "window": null,
+        "answer_tier": "term",
+        "window_only": false
+      }
+    },
+    {
+      "id": "T20",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 30,
+      "chars": 7373,
+      "est_tokens": 1844,
+      "ms": 21.301083999999946,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 1,
+      "detail": {
+        "tiers": {
+          "term+window": 1,
+          "window": 29
+        },
+        "note": "window 2026-08-17 (whole day, 00:00-24:00 UTC); terms library(7.295) condition(6.602) packing(6.197) jish(5.504) set(5.216) weight(5.216); absent from corpus: adopting, bend",
+        "terms": [
+          "library",
+          "condition",
+          "packing",
+          "jish",
+          "set",
+          "weight",
+          "library",
+          "attention",
+          "packing",
+          "arc",
+          "third-party"
+        ],
+        "window": "2026-08-17 (whole day, 00:00-24:00 UTC)",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "T21",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 30,
+      "chars": 14948,
+      "est_tokens": 3737,
+      "ms": 13.685500000000047,
+      "temporal": true,
+      "nowin_verdict": "wrong",
+      "nowin_units": 4,
+      "detail": {
+        "tiers": {
+          "term+window": 4,
+          "window": 26
+        },
+        "note": "window 2026-08-21 \"afternoon\" read as 12:00-19:00 UTC; terms reason(6.602) decided(6.197) jish(5.504) say(5.098) decided->decid[stem](4.338) session(4.16)",
+        "terms": [
+          "reason",
+          "decided",
+          "jish",
+          "say",
+          "decided",
+          "session",
+          "going",
+          "work"
+        ],
+        "window": "2026-08-21 \"afternoon\" read as 12:00-19:00 UTC",
+        "answer_tier": "window",
+        "window_only": true
+      }
+    },
+    {
+      "id": "T22",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": true,
+      "missing": [],
+      "units": 30,
+      "chars": 53212,
+      "est_tokens": 13303,
+      "ms": 22.957083999999895,
+      "temporal": false,
+      "nowin_verdict": "wrong",
+      "nowin_units": 30,
+      "detail": {
+        "tiers": {
+          "term": 30
+        },
+        "note": "terms decide(6.197) jish(5.504) backed(5.504) artifacts(5.216) decide->decid[stem](4.338) baked(4.037)",
+        "terms": [
+          "decide",
+          "jish",
+          "backed",
+          "artifacts",
+          "decide",
+          "baked",
+          "artifacts",
+          "backed",
+          "baked"
+        ],
+        "window": null
+      }
+    },
+    {
+      "id": "T23",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 30,
+      "chars": 5580,
+      "est_tokens": 1395,
+      "ms": 31.410458000000062,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 3,
+      "detail": {
+        "tiers": {
+          "term+window": 3,
+          "window": 27
+        },
+        "note": "window 2026-08-14 \"evening\" read as 16:00-23:00 UTC; terms told(7.295) asked(6.602) pieces(6.197) instead(5.909) rather(5.686) jish(5.504)",
+        "terms": [
+          "told",
+          "asked",
+          "pieces",
+          "instead",
+          "rather",
+          "jish",
+          "tooling",
+          "kill",
+          "asked",
+          "pieces",
+          "finish",
+          "let",
+          "tooling",
+          "run",
+          "agent"
+        ],
+        "window": "2026-08-14 \"evening\" read as 16:00-23:00 UTC",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "T24",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 30,
+      "chars": 31836,
+      "est_tokens": 7959,
+      "ms": 27.06212500000015,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 9,
+      "detail": {
+        "tiers": {
+          "term+window": 9,
+          "window": 21
+        },
+        "note": "window 2026-08-14 (whole day, 00:00-24:00 UTC); terms beam-search(7.295) straight(7.295) jish(5.504) away(5.349) say(5.098) sit(4.656); absent from corpus: authorised, investigation",
+        "terms": [
+          "beam-search",
+          "straight",
+          "jish",
+          "away",
+          "say",
+          "sit",
+          "landing",
+          "merged",
+          "fix",
+          "want",
+          "landing",
+          "merged",
+          "beam-search",
+          "beam-search"
+        ],
+        "window": "2026-08-14 (whole day, 00:00-24:00 UTC)",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "T25",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 26,
+      "chars": 5811,
+      "est_tokens": 1453,
+      "ms": 14.376875000000155,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 2,
+      "detail": {
+        "tiers": {
+          "term+window": 2,
+          "window": 24
+        },
+        "note": "window 2026-08-15 \"late on\" read as 16:00-02:00 next day UTC; terms told(7.295) deferred(6.602) regardless(6.602) jish(5.504) block(5.349) deferred->defer[stem](4.621); absent from corpus: allowed",
+        "terms": [
+          "told",
+          "deferred",
+          "regardless",
+          "jish",
+          "block",
+          "deferred",
+          "fix",
+          "run",
+          "agent"
+        ],
+        "window": "2026-08-15 \"late on\" read as 16:00-02:00 next day UTC",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "T26",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 14,
+      "chars": 3573,
+      "est_tokens": 894,
+      "ms": 14.17145800000003,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 4,
+      "detail": {
+        "tiers": {
+          "term+window": 4,
+          "window": 10
+        },
+        "note": "window 2026-08-17 \"afternoon\" read as 12:00-19:00 UTC; terms meaningful(7.295) unusable(6.602) backlog(5.909) jish(5.504) clearing(5.504) rule(4.73)",
+        "terms": [
+          "meaningful",
+          "unusable",
+          "backlog",
+          "jish",
+          "clearing",
+          "rule",
+          "unusable",
+          "ones",
+          "happen",
+          "clearing",
+          "pr",
+          "ones"
+        ],
+        "window": "2026-08-17 \"afternoon\" read as 12:00-19:00 UTC",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "T27",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 30,
+      "chars": 14942,
+      "est_tokens": 3736,
+      "ms": 32.11416599999984,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 16,
+      "detail": {
+        "tiers": {
+          "term+window": 16,
+          "window": 14
+        },
+        "note": "window 2026-08-21 (whole day, 00:00-24:00 UTC); terms features(7.295) condition(6.602) carry(6.602) stay(5.686) jish(5.504) accepted(5.349); absent from corpus: unfinished",
+        "terms": [
+          "features",
+          "condition",
+          "carry",
+          "stay",
+          "jish",
+          "accepted",
+          "features",
+          "stay",
+          "carry",
+          "handoff",
+          "during",
+          "off",
+          "accepted",
+          "now",
+          "handoff"
+        ],
+        "window": "2026-08-21 (whole day, 00:00-24:00 UTC)",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "T28",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 30,
+      "chars": 31896,
+      "est_tokens": 7974,
+      "ms": 34.973209,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 4,
+      "detail": {
+        "tiers": {
+          "term+window": 4,
+          "window": 26
+        },
+        "note": "window 2026-08-14 \"afternoon\" read as 12:00-19:00 UTC; terms handling(7.295) worry(7.295) jish(5.504) loop(5.216) steps(5.216) handling->handl[stem](5.107); absent from corpus: restated",
+        "terms": [
+          "handling",
+          "worry",
+          "jish",
+          "loop",
+          "steps",
+          "handling",
+          "worry",
+          "say",
+          "problem",
+          "steps",
+          "gpu"
+        ],
+        "window": "2026-08-14 \"afternoon\" read as 12:00-19:00 UTC",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "T29",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 30,
+      "chars": 5545,
+      "est_tokens": 1387,
+      "ms": 14.641165999999885,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 1,
+      "detail": {
+        "tiers": {
+          "term+window": 1,
+          "window": 29
+        },
+        "note": "window 2026-08-17 \"morning\" read as 05:00-13:00 UTC; terms earlier(6.602) tolerance(6.602) jish(5.504) cpu(5.349) say(5.098) tolerance->toler[stem](4.621); absent from corpus: reversed, clause",
+        "terms": [
+          "earlier",
+          "tolerance",
+          "jish",
+          "cpu",
+          "say",
+          "tolerance",
+          "single",
+          "work"
+        ],
+        "window": "2026-08-17 \"morning\" read as 05:00-13:00 UTC",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "T30",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": true,
+      "missing": [
+        "PR number"
+      ],
+      "units": 30,
+      "chars": 60494,
+      "est_tokens": 15124,
+      "ms": 22.163874999999962,
+      "temporal": false,
+      "nowin_verdict": "wrong",
+      "nowin_units": 19,
+      "detail": {
+        "tiers": {
+          "term": 19,
+          "window": 11
+        },
+        "note": "terms told(7.295) report(5.909) instead(5.909) jish(5.504) care(5.504) part(4.81)",
+        "terms": [
+          "told",
+          "report",
+          "instead",
+          "jish",
+          "care",
+          "part",
+          "want",
+          "status",
+          "agent"
+        ],
+        "window": null
+      }
+    },
+    {
+      "id": "T31",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 30,
+      "chars": 14991,
+      "est_tokens": 3748,
+      "ms": 17.270125000000007,
+      "temporal": true,
+      "nowin_verdict": "wrong",
+      "nowin_units": 2,
+      "detail": {
+        "tiers": {
+          "term+window": 2,
+          "window": 28
+        },
+        "note": "window 2026-08-21 \"afternoon\" read as 12:00-19:00 UTC; terms delivered(7.295) format(5.686) jish(5.504) delivered->deliv[stem](4.621) map(4.587) agent(3.489); absent from corpus: rejected, refuse, demand",
+        "terms": [
+          "delivered",
+          "format",
+          "jish",
+          "delivered",
+          "map",
+          "agent"
+        ],
+        "window": "2026-08-21 \"afternoon\" read as 12:00-19:00 UTC",
+        "answer_tier": "window",
+        "window_only": true
+      }
+    },
+    {
+      "id": "T32",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 30,
+      "chars": 59381,
+      "est_tokens": 14846,
+      "ms": 60.414833000000044,
+      "temporal": false,
+      "nowin_verdict": "correct",
+      "nowin_units": 30,
+      "detail": {
+        "tiers": {
+          "term": 30
+        },
+        "note": "terms complained(7.295) stalls(7.295) jish(5.504) complained->complain[stem](5.107) stalls->stall[stem](5.107) notify->notifi[stem](5.107); absent from corpus: channel, him",
+        "terms": [
+          "complained",
+          "stalls",
+          "jish",
+          "complained",
+          "stalls",
+          "notify",
+          "say",
+          "never",
+          "through",
+          "finds",
+          "wanted",
+          "run",
+          "agent",
+          "finds",
+          "wanted"
+        ],
+        "window": null
+      }
+    },
+    {
+      "id": "T33",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 4,
+      "chars": 735,
+      "est_tokens": 184,
+      "ms": 16.10258399999998,
+      "temporal": true,
+      "nowin_verdict": "abstained",
+      "nowin_units": 0,
+      "detail": {
+        "tiers": {
+          "window": 4
+        },
+        "note": "window 2026-08-11 (whole day, 00:00-24:00 UTC); terms told(7.295) someone(6.602) asked(6.602) jish(5.504) look(5.504) opened(4.993); absent from corpus: 1am; no term matched — this is all 4 said in that window",
+        "terms": [
+          "told",
+          "someone",
+          "asked",
+          "jish",
+          "look",
+          "opened",
+          "someone",
+          "asked",
+          "agent",
+          "opened",
+          "pr"
+        ],
+        "window": "2026-08-11 (whole day, 00:00-24:00 UTC)",
+        "answer_tier": "window",
+        "window_only": true
+      }
+    },
+    {
+      "id": "T34",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 30,
+      "chars": 59444,
+      "est_tokens": 14861,
+      "ms": 56.0110830000001,
+      "temporal": false,
+      "nowin_verdict": "correct",
+      "nowin_units": 26,
+      "detail": {
+        "tiers": {
+          "term": 26,
+          "window": 4
+        },
+        "note": "terms reminded(6.602) flagged(6.197) jish(5.504) fa4(5.504) possibly(5.216) project(4.993)",
+        "terms": [
+          "reminded",
+          "flagged",
+          "jish",
+          "fa4",
+          "possibly",
+          "project",
+          "shipping",
+          "already",
+          "reminded",
+          "flagged",
+          "possibly",
+          "shipping",
+          "agent",
+          "already"
+        ],
+        "window": null,
+        "answer_tier": "term",
+        "window_only": false
+      }
+    },
+    {
+      "id": "T35",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 30,
+      "chars": 6919,
+      "est_tokens": 1730,
+      "ms": 15.248166999999967,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 3,
+      "detail": {
+        "tiers": {
+          "term+window": 3,
+          "window": 27
+        },
+        "note": "window 2026-08-16 \"late on\" read as 16:00-02:00 next day UTC; terms pieces(6.197) claimed(5.909) jish(5.504) turned(5.216) pieces->piece[stem](4.338) claimed->claim[stem](4.136); absent from corpus: authorship, machinery",
+        "terms": [
+          "pieces",
+          "claimed",
+          "jish",
+          "turned",
+          "pieces",
+          "claimed",
+          "running",
+          "turned",
+          "running"
+        ],
+        "window": "2026-08-16 \"late on\" read as 16:00-02:00 next day UTC",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "T36",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 30,
+      "chars": 14956,
+      "est_tokens": 3739,
+      "ms": 13.239209000000074,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 4,
+      "detail": {
+        "tiers": {
+          "term+window": 4,
+          "window": 26
+        },
+        "note": "window 2026-08-21 (whole day, 00:00-24:00 UTC); terms told(7.295) pinned(7.295) jish(5.504) wrong(5.098) mean(4.523) pinned->pin[stem](3.651); absent from corpus: 1am, remark",
+        "terms": [
+          "told",
+          "pinned",
+          "jish",
+          "wrong",
+          "mean",
+          "pinned",
+          "agent"
+        ],
+        "window": "2026-08-21 (whole day, 00:00-24:00 UTC)",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "T37",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 30,
+      "chars": 4297,
+      "est_tokens": 1075,
+      "ms": 19.83054100000004,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 4,
+      "detail": {
+        "tiers": {
+          "term+window": 4,
+          "window": 26
+        },
+        "note": "window 2026-08-13 \"night\" read as 19:00-03:00 next day UTC; terms jish(5.504) realised->realis[stem](5.107) loading(5.098) say(5.098) cost(4.897) long(4.351)",
+        "terms": [
+          "jish",
+          "realised",
+          "loading",
+          "say",
+          "cost",
+          "long",
+          "takes",
+          "time",
+          "model",
+          "single",
+          "loading",
+          "every",
+          "every",
+          "takes",
+          "one-off",
+          "one-off"
+        ],
+        "window": "2026-08-13 \"night\" read as 19:00-03:00 next day UTC",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "T38",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 30,
+      "chars": 5526,
+      "est_tokens": 1382,
+      "ms": 17.324041999999963,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 9,
+      "detail": {
+        "tiers": {
+          "term+window": 9,
+          "window": 21
+        },
+        "note": "window 2026-08-14 \"evening\" read as 16:00-23:00 UTC; terms amount(7.295) asked(6.602) quote(6.602) figure(6.197) jish(5.504) layer(5.098)",
+        "terms": [
+          "amount",
+          "asked",
+          "quote",
+          "figure",
+          "jish",
+          "layer",
+          "costing",
+          "asked",
+          "figure",
+          "time",
+          "fixed",
+          "every",
+          "costing",
+          "every",
+          "fixed",
+          "per-layer"
+        ],
+        "window": "2026-08-14 \"evening\" read as 16:00-23:00 UTC",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "T39",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 9,
+      "chars": 1167,
+      "est_tokens": 292,
+      "ms": 26.996917000000167,
+      "temporal": true,
+      "nowin_verdict": "abstained",
+      "nowin_units": 0,
+      "detail": {
+        "tiers": {
+          "window": 9
+        },
+        "note": "window 2026-08-22 \"just after midnight\" read as 00:00-06:00 UTC; terms told(7.295) confirmed(6.602) jish(5.504) confirmed->confirm[stem](4.621) long(4.351) wait(4.3); absent from corpus: elapsed; no term matched — this is all 9 said in that window",
+        "terms": [
+          "told",
+          "confirmed",
+          "jish",
+          "confirmed",
+          "long",
+          "wait",
+          "going"
+        ],
+        "window": "2026-08-22 \"just after midnight\" read as 00:00-06:00 UTC",
+        "answer_tier": "window",
+        "window_only": true
+      }
+    },
+    {
+      "id": "T40",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": true,
+      "missing": [],
+      "units": 30,
+      "chars": 48460,
+      "est_tokens": 12115,
+      "ms": 19.567250000000058,
+      "temporal": false,
+      "nowin_verdict": "wrong",
+      "nowin_units": 30,
+      "detail": {
+        "tiers": {
+          "term": 30
+        },
+        "note": "terms asked(6.602) jish(5.504) say(5.098) asked->ask[stem](4.621) time(4.251) table(4.16); absent from corpus: daily",
+        "terms": [
+          "asked",
+          "jish",
+          "say",
+          "asked",
+          "time",
+          "table",
+          "wanted",
+          "status",
+          "wanted"
+        ],
+        "window": null
+      }
+    }
+  ]
+}

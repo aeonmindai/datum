@@ -1,0 +1,4400 @@
+{
+  "generated_at": "2026-08-26T15:34:10.524Z",
+  "answerer": "evidence",
+  "answerer_note": "verdicts measure retrieval sufficiency: the retrieved context IS the response, so a verdict is the arm's accuracy ceiling. grade.md §8.",
+  "question_set": "heldout",
+  "questions_file": "questions-heldout.json",
+  "question_set_note": "BURNED HELD-OUT SET: clean for exactly one run. Its six failures were then read and when.ts and terms.ts were built from two of them, so it is now as contaminated as the tuned set and is reported as a middle rung, not as the verdict.",
+  "arms": [
+    "grep",
+    "full-context",
+    "datum",
+    "datum-recall"
+  ],
+  "repeats": 3,
+  "query_regime": "derived",
+  "query_regime_note": "query terms lifted from the question text only. The questions paraphrase deliberately, so this is the hard regime and it is the realistic one.",
+  "config": {
+    "GREP_LINES": 40,
+    "GREP_WINDOW": 2000,
+    "DATUM_LIMIT": 20,
+    "RECALL_LIMIT": 12,
+    "QUERY_TERMS": 4,
+    "DATUM_BASE": "http://127.0.0.1:8481",
+    "DATUM_PATH": "/v1/episodes",
+    "RECALL_PATH": "/v1/recall",
+    "DATUM_SCOPE": "org/aeonmind/proj/arc"
+  },
+  "corpus": {
+    "utterances_with_text": 550,
+    "interrupt_markers": 49,
+    "human_records": 599,
+    "bytes": 264103,
+    "datum_visible_episodes": 542,
+    "compaction_summaries_excluded": 8,
+    "compaction_summary_dependency": "none — HELDOUT.md §2 asserts every H question's source record survives corpus.mts's filter (isCompactSummary included) and every expect token appears in it"
+  },
+  "questions": {
+    "total": 40,
+    "by_kind": {
+      "correction": 8,
+      "target-change": 8,
+      "decision": 6,
+      "abandoned": 5,
+      "preference": 5,
+      "who-said": 4,
+      "when": 4
+    },
+    "by_difficulty": {
+      "easy": 7,
+      "medium": 26,
+      "hard": 7
+    },
+    "only_in_transcript": 8,
+    "abstention_traps": 4,
+    "temporal": 16,
+    "temporal_note": "a calendar date, a clock time or a part of the day, by regex over the question text alone. Reproduces THIRD.md's published 30 / 16 / 30."
+  },
+  "arm_errors": {},
+  "results": {
+    "grep": {
+      "correct": 15,
+      "wrong": 25,
+      "abstained": 0,
+      "accuracy": 0.375,
+      "error_rate": 0.625,
+      "abstain_rate": 0,
+      "trust": -0.25,
+      "over_abstain": 0,
+      "trap_accuracy": 0,
+      "contamination": 0.475,
+      "accuracy_repeats": [
+        0.375,
+        0.375,
+        0.375
+      ],
+      "accuracy_mean": 0.375,
+      "accuracy_stddev": 0,
+      "unstable": 0,
+      "unstable_ids": [],
+      "by_difficulty": {
+        "easy": 0.7142857142857143,
+        "medium": 0.34615384615384615,
+        "hard": 0.14285714285714285
+      },
+      "by_kind": {
+        "correction": 0.5,
+        "target-change": 0.75,
+        "decision": 0,
+        "abandoned": 0.2,
+        "preference": 0.4,
+        "who-said": 0.5,
+        "when": 0
+      },
+      "only_in_transcript_accuracy": 0,
+      "lost": [
+        "H03:wrong(16.57)",
+        "H05:wrong(24)",
+        "H06:wrong(400)",
+        "H08:wrong(3.6|15)",
+        "H14:wrong(90|degerate)",
+        "H16:wrong(forget 32 users|single user|you lost the game)",
+        "H17:wrong(mcp.runcrate.ai)",
+        "H18:wrong(html|interactive)",
+        "H19:wrong(tear down|spin up|loop until alright)",
+        "H20:wrong(nsight|batch sweeps)",
+        "H21:wrong",
+        "H22:wrong",
+        "H23:wrong(v=4|cheapest)",
+        "H25:wrong(beam|hessian)",
+        "H26:wrong(persistent volumes)",
+        "H27:wrong(fuck the goal|handoff)",
+        "H29:wrong(eco friendly|cutting carbon|pessimistic)",
+        "H30:wrong(get inspired|reinventing the wheel)",
+        "H32:wrong",
+        "H35:wrong(lead inference engineer|10 years)",
+        "H36:wrong(adding a rule doesn't fix it|doesn't read it at all)",
+        "H37:wrong(days rather than hours)",
+        "H38:wrong(credits|worktrees)",
+        "H39:wrong(balance depleted|instances stopped)",
+        "H40:wrong"
+      ],
+      "est_tokens_mean": 19207,
+      "est_tokens_total": 768295,
+      "chars_mean": 76828,
+      "units_mean": 40,
+      "ms_mean": 1486.7,
+      "ms_p95": 3293.6,
+      "ms_mean_repeats": [
+        1486.7,
+        1495.3,
+        1501.6
+      ],
+      "ms_stddev": 7.4,
+      "trap_detail": [
+        "H21:wrong+contaminated",
+        "H22:wrong+contaminated",
+        "H32:wrong+contaminated",
+        "H40:wrong+contaminated"
+      ],
+      "temporal_n": 16,
+      "non_temporal_n": 24,
+      "temporal_accuracy": 0.5,
+      "temporal_stddev": 0,
+      "non_temporal_accuracy": 0.2916666666666667,
+      "non_temporal_stddev": 0,
+      "reweight_temporal_share": 0.4,
+      "accuracy_reweighted": 0.375,
+      "temporal_lost": [
+        "H06",
+        "H19",
+        "H20",
+        "H23",
+        "H27",
+        "H37",
+        "H38",
+        "H39"
+      ],
+      "non_temporal_lost": [
+        "H03",
+        "H05",
+        "H08",
+        "H14",
+        "H16",
+        "H17",
+        "H18",
+        "H21",
+        "H22",
+        "H25",
+        "H26",
+        "H29",
+        "H30",
+        "H32",
+        "H35",
+        "H36",
+        "H40"
+      ]
+    },
+    "full-context": {
+      "correct": 38,
+      "wrong": 2,
+      "abstained": 0,
+      "accuracy": 0.95,
+      "error_rate": 0.05,
+      "abstain_rate": 0,
+      "trust": 0.9,
+      "over_abstain": 0,
+      "trap_accuracy": 0.5,
+      "contamination": 0.825,
+      "accuracy_repeats": [
+        0.95,
+        0.95,
+        0.95
+      ],
+      "accuracy_mean": 0.9499999999999998,
+      "accuracy_stddev": 1.3597399555105182e-16,
+      "unstable": 0,
+      "unstable_ids": [],
+      "by_difficulty": {
+        "easy": 1,
+        "medium": 1,
+        "hard": 0.7142857142857143
+      },
+      "by_kind": {
+        "correction": 1,
+        "target-change": 1,
+        "decision": 0.8333333333333334,
+        "abandoned": 1,
+        "preference": 0.8,
+        "who-said": 1,
+        "when": 1
+      },
+      "only_in_transcript_accuracy": 1,
+      "lost": [
+        "H22:wrong",
+        "H32:wrong"
+      ],
+      "est_tokens_mean": 72633,
+      "est_tokens_total": 2905320,
+      "chars_mean": 290530,
+      "units_mean": 550,
+      "ms_mean": 0,
+      "ms_p95": 0,
+      "ms_mean_repeats": [
+        0,
+        0,
+        0
+      ],
+      "ms_stddev": 0,
+      "trap_detail": [
+        "H21:correct",
+        "H22:wrong+contaminated",
+        "H32:wrong+contaminated",
+        "H40:correct"
+      ],
+      "temporal_n": 16,
+      "non_temporal_n": 24,
+      "temporal_accuracy": 1,
+      "temporal_stddev": 0,
+      "non_temporal_accuracy": 0.9166666666666666,
+      "non_temporal_stddev": 0,
+      "reweight_temporal_share": 0.4,
+      "accuracy_reweighted": 0.95,
+      "temporal_lost": [],
+      "non_temporal_lost": [
+        "H22",
+        "H32"
+      ]
+    },
+    "datum": {
+      "correct": 30,
+      "wrong": 10,
+      "abstained": 0,
+      "accuracy": 0.75,
+      "error_rate": 0.25,
+      "abstain_rate": 0,
+      "trust": 0.5,
+      "over_abstain": 0,
+      "trap_accuracy": 1,
+      "contamination": 0.6,
+      "accuracy_repeats": [
+        0.75,
+        0.75,
+        0.75
+      ],
+      "accuracy_mean": 0.75,
+      "accuracy_stddev": 0,
+      "unstable": 0,
+      "unstable_ids": [],
+      "by_difficulty": {
+        "easy": 1,
+        "medium": 0.7692307692307693,
+        "hard": 0.42857142857142855
+      },
+      "by_kind": {
+        "correction": 0.5,
+        "target-change": 0.5,
+        "decision": 0.8333333333333334,
+        "abandoned": 0.8,
+        "preference": 1,
+        "who-said": 1,
+        "when": 1
+      },
+      "only_in_transcript_accuracy": 0.75,
+      "lost": [
+        "H03:wrong(16.57)",
+        "H04:wrong(39)",
+        "H07:wrong(1.2)",
+        "H08:wrong(3.6)",
+        "H10:wrong(42)",
+        "H13:wrong(1400)",
+        "H15:wrong(1 day)",
+        "H16:wrong(forget 32 users|you lost the game)",
+        "H19:wrong(tear down|spin up|loop until alright)",
+        "H27:wrong(fuck the goal)"
+      ],
+      "est_tokens_mean": 12477,
+      "est_tokens_total": 499090,
+      "chars_mean": 49907,
+      "units_mean": 15.1,
+      "ms_mean": 32.1,
+      "ms_p95": 74.4,
+      "matched": {
+        "phrase": 361,
+        "fts": 169,
+        "trigram": 72
+      },
+      "ms_mean_repeats": [
+        32.1,
+        30.3,
+        33.4
+      ],
+      "ms_stddev": 1.5,
+      "trap_detail": [
+        "H21:correct",
+        "H22:correct",
+        "H32:correct",
+        "H40:correct"
+      ],
+      "temporal_n": 16,
+      "non_temporal_n": 24,
+      "temporal_accuracy": 0.6875,
+      "temporal_stddev": 0,
+      "non_temporal_accuracy": 0.7916666666666666,
+      "non_temporal_stddev": 0,
+      "reweight_temporal_share": 0.4,
+      "accuracy_reweighted": 0.75,
+      "temporal_lost": [
+        "H04",
+        "H13",
+        "H15",
+        "H19",
+        "H27"
+      ],
+      "non_temporal_lost": [
+        "H03",
+        "H07",
+        "H08",
+        "H10",
+        "H16"
+      ]
+    },
+    "datum-recall": {
+      "correct": 35,
+      "wrong": 5,
+      "abstained": 0,
+      "accuracy": 0.875,
+      "error_rate": 0.125,
+      "abstain_rate": 0,
+      "trust": 0.75,
+      "over_abstain": 0,
+      "trap_accuracy": 1,
+      "contamination": 0.5,
+      "accuracy_repeats": [
+        0.875,
+        0.875,
+        0.875
+      ],
+      "accuracy_mean": 0.875,
+      "accuracy_stddev": 0,
+      "unstable": 0,
+      "unstable_ids": [],
+      "by_difficulty": {
+        "easy": 0.8571428571428571,
+        "medium": 0.8846153846153846,
+        "hard": 0.8571428571428571
+      },
+      "by_kind": {
+        "correction": 0.875,
+        "target-change": 0.875,
+        "decision": 1,
+        "abandoned": 0.8,
+        "preference": 0.8,
+        "who-said": 1,
+        "when": 0.75
+      },
+      "only_in_transcript_accuracy": 1,
+      "lost": [
+        "H08:wrong(3.6)",
+        "H10:wrong(42)",
+        "H24:wrong(driver)",
+        "H31:wrong(hopper|blackwell)",
+        "H38:wrong(branches)"
+      ],
+      "est_tokens_mean": 7064,
+      "est_tokens_total": 282579,
+      "chars_mean": 28256,
+      "units_mean": 11.4,
+      "ms_mean": 30.8,
+      "ms_p95": 67.3,
+      "ms_mean_repeats": [
+        30.8,
+        29.9,
+        32.6
+      ],
+      "ms_stddev": 1.3,
+      "trap_detail": [
+        "H21:correct",
+        "H22:correct",
+        "H32:correct",
+        "H40:correct"
+      ],
+      "temporal_n": 16,
+      "non_temporal_n": 24,
+      "temporal_accuracy": 0.9375,
+      "temporal_stddev": 0,
+      "non_temporal_accuracy": 0.8333333333333334,
+      "non_temporal_stddev": 0,
+      "reweight_temporal_share": 0.4,
+      "accuracy_reweighted": 0.875,
+      "temporal_lost": [
+        "H38"
+      ],
+      "non_temporal_lost": [
+        "H08",
+        "H10",
+        "H24",
+        "H31"
+      ],
+      "without_window": {
+        "accuracy": 0.775,
+        "accuracy_repeats": [
+          0.775,
+          0.775,
+          0.775
+        ],
+        "accuracy_stddev": 0,
+        "delta_vs_full": -0.09999999999999998,
+        "lost_by_ablation": [
+          "H03:wrong",
+          "H13:abstained",
+          "H27:wrong",
+          "H28:abstained"
+        ],
+        "gained_by_ablation": [],
+        "units_mean": 8.2,
+        "method": "window-tier rows deleted from the same responses and re-graded; the server has no flag to disable the tier, so the window FILTER is still in force and this is an upper bound"
+      },
+      "episode_tiers": {
+        "term+window": 58,
+        "window": 129,
+        "term": 268
+      },
+      "answer_tiers": {
+        "term+window": 12,
+        "term": 15,
+        "window": 4
+      },
+      "window_only": 4
+    }
+  },
+  "rows": [
+    {
+      "id": "H01",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 40,
+      "chars": 75900,
+      "est_tokens": 18975,
+      "ms": 2488.507042,
+      "temporal": true,
+      "detail": {
+        "terms": [
+          "milliseconds",
+          "percent",
+          "unaccounted",
+          "gemv"
+        ]
+      }
+    },
+    {
+      "id": "H02",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 40,
+      "chars": 76439,
+      "est_tokens": 19110,
+      "ms": 2706.89575,
+      "temporal": false,
+      "detail": {
+        "terms": [
+          "maths",
+          "bullshit",
+          "range",
+          "ceiling"
+        ]
+      }
+    },
+    {
+      "id": "H03",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": true,
+      "missing": [
+        "16.57"
+      ],
+      "units": 40,
+      "chars": 74988,
+      "est_tokens": 18747,
+      "ms": 1459.5523750000002,
+      "temporal": false,
+      "detail": {
+        "terms": [
+          "remembered",
+          "pushed",
+          "throughput",
+          "batch"
+        ]
+      }
+    },
+    {
+      "id": "H04",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 40,
+      "chars": 79943,
+      "est_tokens": 19986,
+      "ms": 2042.7454580000003,
+      "temporal": true,
+      "detail": {
+        "terms": [
+          "complained",
+          "backwards",
+          "gone",
+          "range"
+        ]
+      }
+    },
+    {
+      "id": "H05",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": true,
+      "missing": [
+        "24"
+      ],
+      "units": 40,
+      "chars": 80676,
+      "est_tokens": 20169,
+      "ms": 1162.5462499999994,
+      "temporal": false,
+      "detail": {
+        "terms": [
+          "flatly",
+          "refuse",
+          "accept",
+          "token"
+        ]
+      }
+    },
+    {
+      "id": "H06",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": true,
+      "missing": [
+        "400"
+      ],
+      "units": 40,
+      "chars": 80352,
+      "est_tokens": 20088,
+      "ms": 3193.8772910000007,
+      "temporal": true,
+      "detail": {
+        "terms": [
+          "midnight",
+          "certain",
+          "bought",
+          "optimisations"
+        ]
+      }
+    },
+    {
+      "id": "H07",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 40,
+      "chars": 80521,
+      "est_tokens": 20131,
+      "ms": 1942.673166999999,
+      "temporal": false,
+      "detail": {
+        "terms": [
+          "doubted",
+          "speedup",
+          "really",
+          "multiplier"
+        ]
+      }
+    },
+    {
+      "id": "H08",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "3.6",
+        "15"
+      ],
+      "units": 40,
+      "chars": 80578,
+      "est_tokens": 20145,
+      "ms": 616.4407910000009,
+      "temporal": false,
+      "detail": {
+        "terms": [
+          "durations",
+          "waiting",
+          "login",
+          "corrected"
+        ]
+      }
+    },
+    {
+      "id": "H09",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 40,
+      "chars": 69153,
+      "est_tokens": 17289,
+      "ms": 2704.205833,
+      "temporal": true,
+      "detail": {
+        "terms": [
+          "solutions",
+          "internet",
+          "proven",
+          "while"
+        ]
+      }
+    },
+    {
+      "id": "H10",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 40,
+      "chars": 80604,
+      "est_tokens": 20151,
+      "ms": 790.9221249999973,
+      "temporal": false,
+      "detail": {
+        "terms": [
+          "replaced",
+          "dropped",
+          "range",
+          "half"
+        ]
+      }
+    },
+    {
+      "id": "H11",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 40,
+      "chars": 80089,
+      "est_tokens": 20023,
+      "ms": 1463.1127909999996,
+      "temporal": false,
+      "detail": {
+        "terms": [
+          "lifted",
+          "card",
+          "keep",
+          "layer"
+        ]
+      }
+    },
+    {
+      "id": "H12",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 40,
+      "chars": 80451,
+      "est_tokens": 20113,
+      "ms": 44.29195900000195,
+      "temporal": true,
+      "detail": {
+        "terms": [
+          "tok/s"
+        ]
+      }
+    },
+    {
+      "id": "H13",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 40,
+      "chars": 80606,
+      "est_tokens": 20152,
+      "ms": 741.0451250000006,
+      "temporal": true,
+      "detail": {
+        "terms": [
+          "larger",
+          "early",
+          "route",
+          "throughput"
+        ]
+      }
+    },
+    {
+      "id": "H14",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "90",
+        "degerate"
+      ],
+      "units": 40,
+      "chars": 69229,
+      "est_tokens": 17308,
+      "ms": 391.4282089999979,
+      "temporal": false,
+      "detail": {
+        "terms": [
+          "recurring",
+          "score",
+          "output",
+          "forever"
+        ]
+      }
+    },
+    {
+      "id": "H15",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 40,
+      "chars": 70035,
+      "est_tokens": 17509,
+      "ms": 1397.5181250000023,
+      "temporal": true,
+      "detail": {
+        "terms": [
+          "deadline",
+          "finishing",
+          "long"
+        ]
+      }
+    },
+    {
+      "id": "H16",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": true,
+      "missing": [
+        "forget 32 users",
+        "single user",
+        "you lost the game"
+      ],
+      "units": 40,
+      "chars": 79594,
+      "est_tokens": 19899,
+      "ms": 1015.1867920000004,
+      "temporal": false,
+      "detail": {
+        "terms": [
+          "chasing",
+          "getting",
+          "silicon",
+          "until"
+        ]
+      }
+    },
+    {
+      "id": "H17",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "mcp.runcrate.ai"
+      ],
+      "units": 40,
+      "chars": 78844,
+      "est_tokens": 19711,
+      "ms": 304.1368330000005,
+      "temporal": false,
+      "detail": {
+        "terms": [
+          "itself",
+          "rather",
+          "runcrate",
+          "wait"
+        ]
+      }
+    },
+    {
+      "id": "H18",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "html",
+        "interactive"
+      ],
+      "units": 40,
+      "chars": 79868,
+      "est_tokens": 19967,
+      "ms": 2537.103207999997,
+      "temporal": false,
+      "detail": {
+        "terms": [
+          "guesses",
+          "demanded",
+          "html",
+          "profile"
+        ]
+      }
+    },
+    {
+      "id": "H19",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "tear down",
+        "spin up",
+        "loop until alright"
+      ],
+      "units": 40,
+      "chars": 80622,
+      "est_tokens": 20156,
+      "ms": 1621.8460000000014,
+      "temporal": true,
+      "detail": {
+        "terms": [
+          "afternoon",
+          "whenever",
+          "rule",
+          "standing"
+        ]
+      }
+    },
+    {
+      "id": "H20",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "nsight",
+        "batch sweeps"
+      ],
+      "units": 40,
+      "chars": 77842,
+      "est_tokens": 19461,
+      "ms": 862.6390419999989,
+      "temporal": true,
+      "detail": {
+        "terms": [
+          "nvidia",
+          "alongside",
+          "tool",
+          "profiling"
+        ]
+      }
+    },
+    {
+      "id": "H21",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": true,
+      "missing": [],
+      "units": 40,
+      "chars": 78274,
+      "est_tokens": 19569,
+      "ms": 1327.9794170000023,
+      "temporal": false,
+      "detail": {
+        "terms": [
+          "mmlu",
+          "score",
+          "published"
+        ]
+      }
+    },
+    {
+      "id": "H22",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": true,
+      "missing": [],
+      "units": 40,
+      "chars": 80668,
+      "est_tokens": 20167,
+      "ms": 1545.018500000002,
+      "temporal": false,
+      "detail": {
+        "terms": [
+          "licence",
+          "public",
+          "pick",
+          "model"
+        ]
+      }
+    },
+    {
+      "id": "H23",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "v=4",
+        "cheapest"
+      ],
+      "units": 40,
+      "chars": 78620,
+      "est_tokens": 19655,
+      "ms": 1622.6348750000034,
+      "temporal": true,
+      "detail": {
+        "terms": [
+          "shelved",
+          "late",
+          "geometry",
+          "written"
+        ]
+      }
+    },
+    {
+      "id": "H24",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 40,
+      "chars": 79291,
+      "est_tokens": 19823,
+      "ms": 1405.9590830000016,
+      "temporal": false,
+      "detail": {
+        "terms": [
+          "refuse",
+          "outright",
+          "cheapest",
+          "telling"
+        ]
+      }
+    },
+    {
+      "id": "H25",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "beam",
+        "hessian"
+      ],
+      "units": 40,
+      "chars": 43436,
+      "est_tokens": 10859,
+      "ms": 1935.2233750000014,
+      "temporal": false,
+      "detail": {
+        "terms": [
+          "suggest",
+          "decided",
+          "cleaner",
+          "stopping"
+        ]
+      }
+    },
+    {
+      "id": "H26",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "persistent volumes"
+      ],
+      "units": 40,
+      "chars": 78014,
+      "est_tokens": 19504,
+      "ms": 1093.4666670000006,
+      "temporal": false,
+      "detail": {
+        "terms": [
+          "spending",
+          "persistent",
+          "create",
+          "volume"
+        ]
+      }
+    },
+    {
+      "id": "H27",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": true,
+      "missing": [
+        "fuck the goal",
+        "handoff"
+      ],
+      "units": 40,
+      "chars": 78618,
+      "est_tokens": 19655,
+      "ms": 1167.226499999997,
+      "temporal": true,
+      "detail": {
+        "terms": [
+          "steering",
+          "late",
+          "throughput",
+          "goal"
+        ]
+      }
+    },
+    {
+      "id": "H28",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 40,
+      "chars": 80478,
+      "est_tokens": 20120,
+      "ms": 1441.314416000001,
+      "temporal": true,
+      "detail": {
+        "terms": [
+          "midnight",
+          "entirely",
+          "banned",
+          "word"
+        ]
+      }
+    },
+    {
+      "id": "H29",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "eco friendly",
+        "cutting carbon",
+        "pessimistic"
+      ],
+      "units": 40,
+      "chars": 78706,
+      "est_tokens": 19677,
+      "ms": 3293.5679999999993,
+      "temporal": false,
+      "detail": {
+        "terms": [
+          "couldn",
+          "pessimistic",
+          "calculations",
+          "thought"
+        ]
+      }
+    },
+    {
+      "id": "H30",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": true,
+      "missing": [
+        "get inspired",
+        "reinventing the wheel"
+      ],
+      "units": 40,
+      "chars": 79447,
+      "est_tokens": 19862,
+      "ms": 292.8738749999975,
+      "temporal": false,
+      "detail": {
+        "terms": [
+          "building",
+          "behind",
+          "sglang"
+        ]
+      }
+    },
+    {
+      "id": "H31",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 40,
+      "chars": 79514,
+      "est_tokens": 19879,
+      "ms": 1136.2383330000011,
+      "temporal": false,
+      "detail": {
+        "terms": [
+          "architectures",
+          "whenever",
+          "wrote",
+          "write"
+        ]
+      }
+    },
+    {
+      "id": "H32",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": true,
+      "missing": [],
+      "units": 40,
+      "chars": 77740,
+      "est_tokens": 19435,
+      "ms": 693.0062079999989,
+      "temporal": false,
+      "detail": {
+        "terms": [
+          "temperature",
+          "settle",
+          "sampling",
+          "serving"
+        ]
+      }
+    },
+    {
+      "id": "H33",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 40,
+      "chars": 79357,
+      "est_tokens": 19840,
+      "ms": 2012.4077499999985,
+      "temporal": false,
+      "detail": {
+        "terms": [
+          "himself",
+          "looked",
+          "someone",
+          "already"
+        ]
+      }
+    },
+    {
+      "id": "H34",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 40,
+      "chars": 76454,
+      "est_tokens": 19114,
+      "ms": 920.4212919999991,
+      "temporal": true,
+      "detail": {
+        "terms": [
+          "pushing",
+          "different",
+          "completely",
+          "branch"
+        ]
+      }
+    },
+    {
+      "id": "H35",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "lead inference engineer",
+        "10 years"
+      ],
+      "units": 40,
+      "chars": 66335,
+      "est_tokens": 16584,
+      "ms": 3631.581624999999,
+      "temporal": false,
+      "detail": {
+        "terms": [
+          "pasted",
+          "role",
+          "years",
+          "experience"
+        ]
+      }
+    },
+    {
+      "id": "H36",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "adding a rule doesn't fix it",
+        "doesn't read it at all"
+      ],
+      "units": 40,
+      "chars": 80669,
+      "est_tokens": 20168,
+      "ms": 968.5807499999937,
+      "temporal": false,
+      "detail": {
+        "terms": [
+          "useless",
+          "quoted",
+          "line",
+          "rules"
+        ]
+      }
+    },
+    {
+      "id": "H37",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "days rather than hours"
+      ],
+      "units": 40,
+      "chars": 74290,
+      "est_tokens": 18573,
+      "ms": 1959.6630829999995,
+      "temporal": true,
+      "detail": {
+        "terms": [
+          "complained",
+          "pace",
+          "describe",
+          "taking"
+        ]
+      }
+    },
+    {
+      "id": "H38",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "credits",
+        "worktrees"
+      ],
+      "units": 40,
+      "chars": 75280,
+      "est_tokens": 18820,
+      "ms": 1228.3017919999984,
+      "temporal": true,
+      "detail": {
+        "terms": [
+          "carry",
+          "credits",
+          "handoff",
+          "happened"
+        ]
+      }
+    },
+    {
+      "id": "H39",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "balance depleted",
+        "instances stopped"
+      ],
+      "units": 40,
+      "chars": 76468,
+      "est_tokens": 19117,
+      "ms": 76.96858400000201,
+      "temporal": true,
+      "detail": {
+        "terms": [
+          "sent",
+          "message"
+        ]
+      }
+    },
+    {
+      "id": "H40",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": true,
+      "missing": [],
+      "units": 40,
+      "chars": 75134,
+      "est_tokens": 18784,
+      "ms": 2230.736208000002,
+      "temporal": false,
+      "detail": {
+        "terms": [
+          "docker",
+          "image",
+          "openrouter",
+          "launch"
+        ]
+      }
+    },
+    {
+      "id": "H01",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.05870900000445545,
+      "temporal": true
+    },
+    {
+      "id": "H02",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.01449999999749707,
+      "temporal": false
+    },
+    {
+      "id": "H03",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.015417000002344139,
+      "temporal": false
+    },
+    {
+      "id": "H04",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.014750000002095476,
+      "temporal": true
+    },
+    {
+      "id": "H05",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.012666999995417427,
+      "temporal": false
+    },
+    {
+      "id": "H06",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.0163749999992433,
+      "temporal": true
+    },
+    {
+      "id": "H07",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.013124999997671694,
+      "temporal": false
+    },
+    {
+      "id": "H08",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.016875000001164153,
+      "temporal": false
+    },
+    {
+      "id": "H09",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.02350000000296859,
+      "temporal": true
+    },
+    {
+      "id": "H10",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.025916999999026302,
+      "temporal": false
+    },
+    {
+      "id": "H11",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.018082999995385762,
+      "temporal": false
+    },
+    {
+      "id": "H12",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.007499999999708962,
+      "temporal": true
+    },
+    {
+      "id": "H13",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.0070840000043972395,
+      "temporal": true
+    },
+    {
+      "id": "H14",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.006291999998211395,
+      "temporal": false
+    },
+    {
+      "id": "H15",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.006416999996872619,
+      "temporal": true
+    },
+    {
+      "id": "H16",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.0054579999996349216,
+      "temporal": false
+    },
+    {
+      "id": "H17",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.010958999999274965,
+      "temporal": false
+    },
+    {
+      "id": "H18",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.006750000000465661,
+      "temporal": false
+    },
+    {
+      "id": "H19",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.00662499999452848,
+      "temporal": true
+    },
+    {
+      "id": "H20",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.006957999998121522,
+      "temporal": true
+    },
+    {
+      "id": "H21",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.006042000000888947,
+      "temporal": false
+    },
+    {
+      "id": "H22",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": true,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.007749999997031409,
+      "temporal": false
+    },
+    {
+      "id": "H23",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.006750000000465661,
+      "temporal": true
+    },
+    {
+      "id": "H24",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.0058330000028945506,
+      "temporal": false
+    },
+    {
+      "id": "H25",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.0058749999952851795,
+      "temporal": false
+    },
+    {
+      "id": "H26",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.004959000005328562,
+      "temporal": false
+    },
+    {
+      "id": "H27",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.006667000001471024,
+      "temporal": true
+    },
+    {
+      "id": "H28",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.005375000000640284,
+      "temporal": true
+    },
+    {
+      "id": "H29",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.006124999999883585,
+      "temporal": false
+    },
+    {
+      "id": "H30",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.00704099999711616,
+      "temporal": false
+    },
+    {
+      "id": "H31",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.007250000002386514,
+      "temporal": false
+    },
+    {
+      "id": "H32",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": true,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.00595900000189431,
+      "temporal": false
+    },
+    {
+      "id": "H33",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.006124999999883585,
+      "temporal": false
+    },
+    {
+      "id": "H34",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.0053340000013122335,
+      "temporal": true
+    },
+    {
+      "id": "H35",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.008750000000873115,
+      "temporal": false
+    },
+    {
+      "id": "H36",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.006708000000799075,
+      "temporal": false
+    },
+    {
+      "id": "H37",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.006583000002137851,
+      "temporal": true
+    },
+    {
+      "id": "H38",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.005750000003899913,
+      "temporal": true
+    },
+    {
+      "id": "H39",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.007833999996364582,
+      "temporal": true
+    },
+    {
+      "id": "H40",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.006166999999550171,
+      "temporal": false
+    },
+    {
+      "id": "H01",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 9,
+      "chars": 46368,
+      "est_tokens": 11592,
+      "ms": 90.22941700000229,
+      "temporal": true,
+      "detail": {
+        "matched": {
+          "phrase": 9
+        },
+        "terms": [
+          "milliseconds",
+          "percent",
+          "unaccounted",
+          "gemv"
+        ]
+      }
+    },
+    {
+      "id": "H02",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 10,
+      "chars": 50755,
+      "est_tokens": 12689,
+      "ms": 14.878750000003492,
+      "temporal": false,
+      "detail": {
+        "matched": {
+          "fts": 6,
+          "phrase": 4
+        },
+        "terms": [
+          "maths",
+          "bullshit",
+          "range",
+          "ceiling"
+        ]
+      }
+    },
+    {
+      "id": "H03",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": true,
+      "missing": [
+        "16.57"
+      ],
+      "units": 20,
+      "chars": 54713,
+      "est_tokens": 13679,
+      "ms": 16.6728329999969,
+      "temporal": false,
+      "detail": {
+        "matched": {
+          "fts": 5,
+          "phrase": 15
+        },
+        "terms": [
+          "remembered",
+          "pushed",
+          "throughput",
+          "batch"
+        ]
+      }
+    },
+    {
+      "id": "H04",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": true,
+      "missing": [
+        "39"
+      ],
+      "units": 11,
+      "chars": 50840,
+      "est_tokens": 12710,
+      "ms": 63.92366700000275,
+      "temporal": true,
+      "detail": {
+        "matched": {
+          "fts": 1,
+          "trigram": 8,
+          "phrase": 2
+        },
+        "terms": [
+          "complained",
+          "backwards",
+          "gone",
+          "range"
+        ]
+      }
+    },
+    {
+      "id": "H05",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 20,
+      "chars": 60013,
+      "est_tokens": 15004,
+      "ms": 30.493750000001455,
+      "temporal": false,
+      "detail": {
+        "matched": {
+          "fts": 1,
+          "phrase": 19
+        },
+        "terms": [
+          "flatly",
+          "refuse",
+          "accept",
+          "token"
+        ]
+      }
+    },
+    {
+      "id": "H06",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 8,
+      "chars": 43389,
+      "est_tokens": 10848,
+      "ms": 74.37841599999956,
+      "temporal": true,
+      "detail": {
+        "matched": {
+          "trigram": 6,
+          "phrase": 1,
+          "fts": 1
+        },
+        "terms": [
+          "midnight",
+          "certain",
+          "bought",
+          "optimisations"
+        ]
+      }
+    },
+    {
+      "id": "H07",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": true,
+      "missing": [
+        "1.2"
+      ],
+      "units": 4,
+      "chars": 42290,
+      "est_tokens": 10573,
+      "ms": 31.846959000002244,
+      "temporal": false,
+      "detail": {
+        "matched": {
+          "trigram": 1,
+          "phrase": 3
+        },
+        "terms": [
+          "doubted",
+          "speedup",
+          "really",
+          "multiplier"
+        ]
+      }
+    },
+    {
+      "id": "H08",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": true,
+      "missing": [
+        "3.6"
+      ],
+      "units": 20,
+      "chars": 50738,
+      "est_tokens": 12685,
+      "ms": 48.39604200000031,
+      "temporal": false,
+      "detail": {
+        "matched": {
+          "trigram": 8,
+          "phrase": 2,
+          "fts": 10
+        },
+        "terms": [
+          "durations",
+          "waiting",
+          "login",
+          "corrected"
+        ]
+      }
+    },
+    {
+      "id": "H09",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 16,
+      "chars": 49550,
+      "est_tokens": 12388,
+      "ms": 18.902957999998762,
+      "temporal": true,
+      "detail": {
+        "matched": {
+          "phrase": 12,
+          "fts": 4
+        },
+        "terms": [
+          "solutions",
+          "internet",
+          "proven",
+          "while"
+        ]
+      }
+    },
+    {
+      "id": "H10",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": true,
+      "missing": [
+        "42"
+      ],
+      "units": 6,
+      "chars": 49860,
+      "est_tokens": 12465,
+      "ms": 15.651749999997264,
+      "temporal": false,
+      "detail": {
+        "matched": {
+          "fts": 5,
+          "phrase": 1
+        },
+        "terms": [
+          "replaced",
+          "dropped",
+          "range",
+          "half"
+        ]
+      }
+    },
+    {
+      "id": "H11",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 20,
+      "chars": 51838,
+      "est_tokens": 12960,
+      "ms": 14.501208000001498,
+      "temporal": false,
+      "detail": {
+        "matched": {
+          "fts": 1,
+          "phrase": 19
+        },
+        "terms": [
+          "lifted",
+          "card",
+          "keep",
+          "layer"
+        ]
+      }
+    },
+    {
+      "id": "H12",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 16,
+      "chars": 36402,
+      "est_tokens": 9101,
+      "ms": 9.23083300000144,
+      "temporal": true,
+      "detail": {
+        "matched": {
+          "phrase": 16
+        },
+        "terms": [
+          "tok/s"
+        ]
+      }
+    },
+    {
+      "id": "H13",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": true,
+      "missing": [
+        "1400"
+      ],
+      "units": 17,
+      "chars": 54209,
+      "est_tokens": 13553,
+      "ms": 14.620957999999519,
+      "temporal": true,
+      "detail": {
+        "matched": {
+          "phrase": 17
+        },
+        "terms": [
+          "larger",
+          "early",
+          "route",
+          "throughput"
+        ]
+      }
+    },
+    {
+      "id": "H14",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 11,
+      "chars": 52095,
+      "est_tokens": 13024,
+      "ms": 32.75295800000458,
+      "temporal": false,
+      "detail": {
+        "matched": {
+          "trigram": 3,
+          "phrase": 6,
+          "fts": 2
+        },
+        "terms": [
+          "recurring",
+          "score",
+          "output",
+          "forever"
+        ]
+      }
+    },
+    {
+      "id": "H15",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": true,
+      "missing": [
+        "1 day"
+      ],
+      "units": 20,
+      "chars": 57736,
+      "est_tokens": 14434,
+      "ms": 40.18800000000192,
+      "temporal": true,
+      "detail": {
+        "matched": {
+          "trigram": 2,
+          "phrase": 1,
+          "fts": 17
+        },
+        "terms": [
+          "deadline",
+          "finishing",
+          "long"
+        ]
+      }
+    },
+    {
+      "id": "H16",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": true,
+      "missing": [
+        "forget 32 users",
+        "you lost the game"
+      ],
+      "units": 20,
+      "chars": 48649,
+      "est_tokens": 12163,
+      "ms": 16.977874999996857,
+      "temporal": false,
+      "detail": {
+        "matched": {
+          "phrase": 5,
+          "fts": 15
+        },
+        "terms": [
+          "chasing",
+          "getting",
+          "silicon",
+          "until"
+        ]
+      }
+    },
+    {
+      "id": "H17",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 20,
+      "chars": 56635,
+      "est_tokens": 14159,
+      "ms": 15.544999999998254,
+      "temporal": false,
+      "detail": {
+        "matched": {
+          "phrase": 20
+        },
+        "terms": [
+          "itself",
+          "rather",
+          "runcrate",
+          "wait"
+        ]
+      }
+    },
+    {
+      "id": "H18",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 13,
+      "chars": 35337,
+      "est_tokens": 8835,
+      "ms": 25.31608299999789,
+      "temporal": false,
+      "detail": {
+        "matched": {
+          "fts": 9,
+          "phrase": 4
+        },
+        "terms": [
+          "guesses",
+          "demanded",
+          "html",
+          "profile"
+        ]
+      }
+    },
+    {
+      "id": "H19",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": true,
+      "missing": [
+        "tear down",
+        "spin up",
+        "loop until alright"
+      ],
+      "units": 20,
+      "chars": 59048,
+      "est_tokens": 14762,
+      "ms": 53.13333299999795,
+      "temporal": true,
+      "detail": {
+        "matched": {
+          "trigram": 11,
+          "phrase": 9
+        },
+        "terms": [
+          "afternoon",
+          "whenever",
+          "rule",
+          "standing"
+        ]
+      }
+    },
+    {
+      "id": "H20",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 16,
+      "chars": 60125,
+      "est_tokens": 15032,
+      "ms": 30.381625000001804,
+      "temporal": true,
+      "detail": {
+        "matched": {
+          "phrase": 16
+        },
+        "terms": [
+          "nvidia",
+          "alongside",
+          "tool",
+          "profiling"
+        ]
+      }
+    },
+    {
+      "id": "H21",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 9,
+      "chars": 48901,
+      "est_tokens": 12226,
+      "ms": 16.525290999998106,
+      "temporal": false,
+      "detail": {
+        "matched": {
+          "phrase": 4,
+          "fts": 5
+        },
+        "terms": [
+          "mmlu",
+          "score",
+          "published"
+        ]
+      }
+    },
+    {
+      "id": "H22",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 20,
+      "chars": 58601,
+      "est_tokens": 14651,
+      "ms": 46.6682079999955,
+      "temporal": false,
+      "detail": {
+        "matched": {
+          "phrase": 20
+        },
+        "terms": [
+          "licence",
+          "public",
+          "pick",
+          "model"
+        ]
+      }
+    },
+    {
+      "id": "H23",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 20,
+      "chars": 59034,
+      "est_tokens": 14759,
+      "ms": 31.437041999997746,
+      "temporal": true,
+      "detail": {
+        "matched": {
+          "trigram": 1,
+          "phrase": 19
+        },
+        "terms": [
+          "shelved",
+          "late",
+          "geometry",
+          "written"
+        ]
+      }
+    },
+    {
+      "id": "H24",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 20,
+      "chars": 50187,
+      "est_tokens": 12547,
+      "ms": 60.587625000000116,
+      "temporal": false,
+      "detail": {
+        "matched": {
+          "trigram": 2,
+          "phrase": 3,
+          "fts": 15
+        },
+        "terms": [
+          "refuse",
+          "outright",
+          "cheapest",
+          "telling"
+        ]
+      }
+    },
+    {
+      "id": "H25",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 16,
+      "chars": 54153,
+      "est_tokens": 13539,
+      "ms": 33.22924999999668,
+      "temporal": false,
+      "detail": {
+        "matched": {
+          "phrase": 2,
+          "fts": 7,
+          "trigram": 7
+        },
+        "terms": [
+          "suggest",
+          "decided",
+          "cleaner",
+          "stopping"
+        ]
+      }
+    },
+    {
+      "id": "H26",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 7,
+      "chars": 52808,
+      "est_tokens": 13202,
+      "ms": 14.76970799999981,
+      "temporal": false,
+      "detail": {
+        "matched": {
+          "phrase": 4,
+          "fts": 3
+        },
+        "terms": [
+          "spending",
+          "persistent",
+          "create",
+          "volume"
+        ]
+      }
+    },
+    {
+      "id": "H27",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": true,
+      "missing": [
+        "fuck the goal"
+      ],
+      "units": 20,
+      "chars": 57589,
+      "est_tokens": 14398,
+      "ms": 45.16412499999569,
+      "temporal": true,
+      "detail": {
+        "matched": {
+          "trigram": 2,
+          "phrase": 18
+        },
+        "terms": [
+          "steering",
+          "late",
+          "throughput",
+          "goal"
+        ]
+      }
+    },
+    {
+      "id": "H28",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 14,
+      "chars": 46861,
+      "est_tokens": 11716,
+      "ms": 31.911832999998296,
+      "temporal": true,
+      "detail": {
+        "matched": {
+          "trigram": 3,
+          "phrase": 4,
+          "fts": 7
+        },
+        "terms": [
+          "midnight",
+          "entirely",
+          "banned",
+          "word"
+        ]
+      }
+    },
+    {
+      "id": "H29",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 15,
+      "chars": 47801,
+      "est_tokens": 11951,
+      "ms": 49.472084000000905,
+      "temporal": false,
+      "detail": {
+        "matched": {
+          "trigram": 10,
+          "phrase": 5
+        },
+        "terms": [
+          "couldn",
+          "pessimistic",
+          "calculations",
+          "thought"
+        ]
+      }
+    },
+    {
+      "id": "H30",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 19,
+      "chars": 54599,
+      "est_tokens": 13650,
+      "ms": 13.818834000005154,
+      "temporal": false,
+      "detail": {
+        "matched": {
+          "phrase": 13,
+          "fts": 6
+        },
+        "terms": [
+          "building",
+          "behind",
+          "sglang"
+        ]
+      }
+    },
+    {
+      "id": "H31",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 12,
+      "chars": 44633,
+      "est_tokens": 11159,
+      "ms": 16.677416999998968,
+      "temporal": false,
+      "detail": {
+        "matched": {
+          "fts": 6,
+          "phrase": 6
+        },
+        "terms": [
+          "architectures",
+          "whenever",
+          "wrote",
+          "write"
+        ]
+      }
+    },
+    {
+      "id": "H32",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 12,
+      "chars": 53928,
+      "est_tokens": 13482,
+      "ms": 38.740499999999884,
+      "temporal": false,
+      "detail": {
+        "matched": {
+          "trigram": 1,
+          "phrase": 8,
+          "fts": 3
+        },
+        "terms": [
+          "temperature",
+          "settle",
+          "sampling",
+          "serving"
+        ]
+      }
+    },
+    {
+      "id": "H33",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 18,
+      "chars": 53758,
+      "est_tokens": 13440,
+      "ms": 39.48804199999722,
+      "temporal": false,
+      "detail": {
+        "matched": {
+          "trigram": 1,
+          "fts": 5,
+          "phrase": 12
+        },
+        "terms": [
+          "himself",
+          "looked",
+          "someone",
+          "already"
+        ]
+      }
+    },
+    {
+      "id": "H34",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 20,
+      "chars": 53382,
+      "est_tokens": 13346,
+      "ms": 18.427958000000217,
+      "temporal": true,
+      "detail": {
+        "matched": {
+          "phrase": 9,
+          "fts": 11
+        },
+        "terms": [
+          "pushing",
+          "different",
+          "completely",
+          "branch"
+        ]
+      }
+    },
+    {
+      "id": "H35",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 9,
+      "chars": 52619,
+      "est_tokens": 13155,
+      "ms": 25.112166999999317,
+      "temporal": false,
+      "detail": {
+        "matched": {
+          "fts": 5,
+          "trigram": 3,
+          "phrase": 1
+        },
+        "terms": [
+          "pasted",
+          "role",
+          "years",
+          "experience"
+        ]
+      }
+    },
+    {
+      "id": "H36",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 18,
+      "chars": 58013,
+      "est_tokens": 14504,
+      "ms": 44.3817080000008,
+      "temporal": false,
+      "detail": {
+        "matched": {
+          "trigram": 3,
+          "fts": 3,
+          "phrase": 12
+        },
+        "terms": [
+          "useless",
+          "quoted",
+          "line",
+          "rules"
+        ]
+      }
+    },
+    {
+      "id": "H37",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 20,
+      "chars": 52181,
+      "est_tokens": 13046,
+      "ms": 29.569250000000466,
+      "temporal": true,
+      "detail": {
+        "matched": {
+          "fts": 16,
+          "phrase": 4
+        },
+        "terms": [
+          "complained",
+          "pace",
+          "describe",
+          "taking"
+        ]
+      }
+    },
+    {
+      "id": "H38",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 20,
+      "chars": 29900,
+      "est_tokens": 7475,
+      "ms": 15.078333999997994,
+      "temporal": true,
+      "detail": {
+        "matched": {
+          "phrase": 20
+        },
+        "terms": [
+          "carry",
+          "credits",
+          "handoff",
+          "happened"
+        ]
+      }
+    },
+    {
+      "id": "H39",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 8,
+      "chars": 43066,
+      "est_tokens": 10767,
+      "ms": 15.044958000005863,
+      "temporal": true,
+      "detail": {
+        "matched": {
+          "phrase": 8
+        },
+        "terms": [
+          "sent",
+          "message"
+        ]
+      }
+    },
+    {
+      "id": "H40",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 8,
+      "chars": 13683,
+      "est_tokens": 3421,
+      "ms": 40.94962499999383,
+      "temporal": false,
+      "detail": {
+        "matched": {
+          "phrase": 8
+        },
+        "terms": [
+          "docker",
+          "image",
+          "openrouter",
+          "launch"
+        ]
+      }
+    },
+    {
+      "id": "H01",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 12,
+      "chars": 28311,
+      "est_tokens": 7078,
+      "ms": 28.007166999996116,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 5,
+      "detail": {
+        "tiers": {
+          "term+window": 5,
+          "window": 7
+        },
+        "note": "window 2026-08-14 \"morning\" read as 05:00-13:00 UTC; terms milliseconds(6.602) went(5.909) many(5.909) jish(5.504) gemv(5.098) say(5.098); absent from corpus: percent, unaccounted",
+        "terms": [
+          "milliseconds",
+          "went",
+          "many",
+          "jish",
+          "gemv",
+          "say",
+          "actually",
+          "reached",
+          "milliseconds",
+          "numbers",
+          "many",
+          "want",
+          "actually",
+          "reached",
+          "numbers"
+        ],
+        "window": "2026-08-14 \"morning\" read as 05:00-13:00 UTC",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "H02",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 12,
+      "chars": 50577,
+      "est_tokens": 12645,
+      "ms": 62.1765000000014,
+      "temporal": false,
+      "nowin_verdict": "correct",
+      "nowin_units": 12,
+      "detail": {
+        "tiers": {
+          "term": 12
+        },
+        "note": "terms told(7.295) batch-1(7.295) bullshit(6.602) batch-1->b1[abbrev](6.566) range(6.197) instead(5.909)",
+        "terms": [
+          "told",
+          "batch-1",
+          "bullshit",
+          "batch-1",
+          "range",
+          "instead",
+          "ceiling",
+          "jish",
+          "maths",
+          "wrong",
+          "throughput",
+          "batch",
+          "number",
+          "own",
+          "ceiling",
+          "maths",
+          "agent",
+          "batch-1"
+        ],
+        "window": null,
+        "answer_tier": "term",
+        "window_only": false
+      }
+    },
+    {
+      "id": "H03",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 12,
+      "chars": 48589,
+      "est_tokens": 12148,
+      "ms": 45.9361659999995,
+      "temporal": false,
+      "nowin_verdict": "wrong",
+      "nowin_units": 11,
+      "detail": {
+        "tiers": {
+          "term": 11,
+          "window": 1
+        },
+        "note": "terms batch-1(7.295) remembered(6.602) batch-1->b1[abbrev](6.566) figure(6.197) jish(5.504) pushed(5.349)",
+        "terms": [
+          "batch-1",
+          "remembered",
+          "batch-1",
+          "figure",
+          "jish",
+          "pushed",
+          "back",
+          "throughput",
+          "remembered",
+          "figure",
+          "number",
+          "pushed",
+          "batch-1"
+        ],
+        "window": null,
+        "answer_tier": "window",
+        "window_only": true
+      }
+    },
+    {
+      "id": "H04",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 12,
+      "chars": 11782,
+      "est_tokens": 2946,
+      "ms": 21.554791000002297,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 5,
+      "detail": {
+        "tiers": {
+          "term+window": 5,
+          "window": 7
+        },
+        "note": "window 2026-08-21 (whole day, 00:00-24:00 UTC); terms complained(7.295) broken(7.295) range(6.197) jish(5.504) complained->complain[stem](5.107) say(5.098); absent from corpus: gone, backwards",
+        "terms": [
+          "complained",
+          "broken",
+          "range",
+          "jish",
+          "complained",
+          "say",
+          "got",
+          "throughput",
+          "already",
+          "things",
+          "already",
+          "things"
+        ],
+        "window": "2026-08-21 (whole day, 00:00-24:00 UTC)",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "H05",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 12,
+      "chars": 57244,
+      "est_tokens": 14311,
+      "ms": 30.77900000000227,
+      "temporal": false,
+      "nowin_verdict": "correct",
+      "nowin_units": 7,
+      "detail": {
+        "tiers": {
+          "term": 7,
+          "window": 5
+        },
+        "note": "terms time-to-first-token(7.295) flatly(7.295) jish(5.504) accept(5.349) flatly->flatli[stem](5.107) number(4.16); absent from corpus: refuse",
+        "terms": [
+          "time-to-first-token",
+          "flatly",
+          "jish",
+          "accept",
+          "flatly",
+          "number",
+          "time-to-first-token",
+          "time-to-first-token",
+          "time-to-first-token"
+        ],
+        "window": null,
+        "answer_tier": "term",
+        "window_only": false
+      }
+    },
+    {
+      "id": "H06",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 12,
+      "chars": 1970,
+      "est_tokens": 493,
+      "ms": 35.95883299999696,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 6,
+      "detail": {
+        "tiers": {
+          "term+window": 6,
+          "window": 6
+        },
+        "note": "window 2026-08-14 \"just before midnight\" read as 21:00-24:00 UTC; terms asked(6.602) quote(6.602) optimisations(6.197) jish(5.504) layer(5.098) actually(4.993); absent from corpus: bought, certain",
+        "terms": [
+          "asked",
+          "quote",
+          "optimisations",
+          "jish",
+          "layer",
+          "actually",
+          "cost",
+          "asked",
+          "seconds",
+          "optimisations",
+          "still",
+          "number",
+          "baking",
+          "actually",
+          "per",
+          "seconds",
+          "baking"
+        ],
+        "window": "2026-08-14 \"just before midnight\" read as 21:00-24:00 UTC",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "H07",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 12,
+      "chars": 45116,
+      "est_tokens": 11279,
+      "ms": 30.061540999995486,
+      "temporal": false,
+      "nowin_verdict": "correct",
+      "nowin_units": 8,
+      "detail": {
+        "tiers": {
+          "term": 8,
+          "window": 4
+        },
+        "note": "terms speedup(7.295) really(7.295) big(6.602) multiplier(6.197) jish(5.504) stack(5.349); absent from corpus: doubted",
+        "terms": [
+          "speedup",
+          "really",
+          "big",
+          "multiplier",
+          "jish",
+          "stack",
+          "really",
+          "say",
+          "multiplier",
+          "kernel",
+          "speedup"
+        ],
+        "window": null,
+        "answer_tier": "term",
+        "window_only": false
+      }
+    },
+    {
+      "id": "H08",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": true,
+      "missing": [
+        "3.6"
+      ],
+      "units": 12,
+      "chars": 57067,
+      "est_tokens": 14267,
+      "ms": 38.019749999999476,
+      "temporal": false,
+      "nowin_verdict": "wrong",
+      "nowin_units": 12,
+      "detail": {
+        "tiers": {
+          "term": 12
+        },
+        "note": "terms login(7.295) against(5.909) lost(5.686) corrected(5.686) jish(5.504) said(5.349); absent from corpus: durations",
+        "terms": [
+          "login",
+          "against",
+          "lost",
+          "corrected",
+          "jish",
+          "said",
+          "put",
+          "waiting",
+          "corrected",
+          "agent",
+          "login",
+          "waiting"
+        ],
+        "window": null
+      }
+    },
+    {
+      "id": "H09",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 12,
+      "chars": 2174,
+      "est_tokens": 544,
+      "ms": 21.453125,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 6,
+      "detail": {
+        "tiers": {
+          "term+window": 6,
+          "window": 6
+        },
+        "note": "window 2026-08-14 \"evening\" read as 16:00-23:00 UTC; terms asking(6.602) internet(6.197) proven(5.686) while(5.504) solutions(5.504) jish(5.504)",
+        "terms": [
+          "asking",
+          "internet",
+          "proven",
+          "while",
+          "solutions",
+          "jish",
+          "say",
+          "asking",
+          "time",
+          "wanted",
+          "bake",
+          "solutions",
+          "wanted",
+          "per-layer"
+        ],
+        "window": "2026-08-14 \"evening\" read as 16:00-23:00 UTC",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "H10",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": true,
+      "missing": [
+        "42"
+      ],
+      "units": 12,
+      "chars": 56361,
+      "est_tokens": 14091,
+      "ms": 30.547083999997994,
+      "temporal": false,
+      "nowin_verdict": "wrong",
+      "nowin_units": 10,
+      "detail": {
+        "tiers": {
+          "term": 10,
+          "window": 2
+        },
+        "note": "terms replaced(7.295) half(6.602) range(6.197) jish(5.504) dropped(5.504) later(5.349)",
+        "terms": [
+          "replaced",
+          "half",
+          "range",
+          "jish",
+          "dropped",
+          "later",
+          "target",
+          "old",
+          "replaced",
+          "new",
+          "number",
+          "hour",
+          "dropped",
+          "per-layer"
+        ],
+        "window": null
+      }
+    },
+    {
+      "id": "H11",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 12,
+      "chars": 48803,
+      "est_tokens": 12201,
+      "ms": 67.29587499999616,
+      "temporal": false,
+      "nowin_verdict": "correct",
+      "nowin_units": 12,
+      "detail": {
+        "tiers": {
+          "term": 12
+        },
+        "note": "terms lifted(7.295) jish(5.504) card(5.504) lifted->lift[stem](5.107) say(5.098) cap(4.993)",
+        "terms": [
+          "lifted",
+          "jish",
+          "card",
+          "lifted",
+          "say",
+          "cap",
+          "keep",
+          "long",
+          "time",
+          "wanted",
+          "want",
+          "agent",
+          "gpu",
+          "wanted",
+          "per-layer",
+          "beam-kernel",
+          "beam-kernel",
+          "one-hour",
+          "one-hour"
+        ],
+        "window": null,
+        "answer_tier": "term",
+        "window_only": false
+      }
+    },
+    {
+      "id": "H12",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 5,
+      "chars": 793,
+      "est_tokens": 199,
+      "ms": 9.721167000003334,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 1,
+      "detail": {
+        "tiers": {
+          "term+window": 1,
+          "window": 4
+        },
+        "note": "window 2026-08-20 \"morning\" read as 05:00-13:00 UTC; terms ask(6.602) jish(5.504) map(4.587) tok/s(4.523) number(4.16) tok/s->tok[split](1.947)",
+        "terms": [
+          "ask",
+          "jish",
+          "map",
+          "tok/s",
+          "number",
+          "tok/s"
+        ],
+        "window": "2026-08-20 \"morning\" read as 05:00-13:00 UTC",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "H13",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 14,
+      "chars": 2306,
+      "est_tokens": 577,
+      "ms": 13.054167000002053,
+      "temporal": true,
+      "nowin_verdict": "abstained",
+      "nowin_units": 0,
+      "detail": {
+        "tiers": {
+          "window": 14
+        },
+        "note": "window 2026-08-20 \"the early hours\" read as 00:00-06:00 UTC; terms larger(7.295) asked(6.602) jish(5.504) route(5.349) throughput(4.897) asked->ask[stem](4.621); no term matched — this is all 14 said in that window",
+        "terms": [
+          "larger",
+          "asked",
+          "jish",
+          "route",
+          "throughput",
+          "asked",
+          "much",
+          "number"
+        ],
+        "window": "2026-08-20 \"the early hours\" read as 00:00-06:00 UTC",
+        "answer_tier": "window",
+        "window_only": true
+      }
+    },
+    {
+      "id": "H14",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 12,
+      "chars": 46809,
+      "est_tokens": 11703,
+      "ms": 51.91870899999776,
+      "temporal": false,
+      "nowin_verdict": "correct",
+      "nowin_units": 12,
+      "detail": {
+        "tiers": {
+          "term": 12
+        },
+        "note": "terms ask(6.602) output(6.197) score(5.909) jish(5.504) forever(5.504) set(5.216); absent from corpus: recurring",
+        "terms": [
+          "ask",
+          "output",
+          "score",
+          "jish",
+          "forever",
+          "set",
+          "full",
+          "gsm8k",
+          "problem",
+          "time",
+          "fixed",
+          "want",
+          "forever",
+          "fixed"
+        ],
+        "window": null,
+        "answer_tier": "term",
+        "window_only": false
+      }
+    },
+    {
+      "id": "H15",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 12,
+      "chars": 2678,
+      "est_tokens": 670,
+      "ms": 11.325749999996333,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 1,
+      "detail": {
+        "tiers": {
+          "term+window": 1,
+          "window": 11
+        },
+        "note": "window 2026-08-19 (whole day, 00:00-24:00 UTC); terms jish(5.504) put(4.462) long(4.351) finishing(4.3) arc(3.558) finishing->finish[stem](2.976); absent from corpus: deadline",
+        "terms": [
+          "jish",
+          "put",
+          "long",
+          "finishing",
+          "arc",
+          "finishing"
+        ],
+        "window": "2026-08-19 (whole day, 00:00-24:00 UTC)",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "H16",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 12,
+      "chars": 48693,
+      "est_tokens": 12174,
+      "ms": 68.78141699999833,
+      "temporal": false,
+      "nowin_verdict": "correct",
+      "nowin_units": 12,
+      "detail": {
+        "tiers": {
+          "term": 12
+        },
+        "note": "terms told(7.295) chasing(6.602) silicon(6.602) until(5.909) jish(5.504) stop(5.349)",
+        "terms": [
+          "told",
+          "chasing",
+          "silicon",
+          "until",
+          "jish",
+          "stop",
+          "say",
+          "chasing",
+          "put",
+          "user",
+          "number",
+          "single",
+          "everything",
+          "getting",
+          "agent",
+          "many-user",
+          "everything",
+          "getting",
+          "many-user"
+        ],
+        "window": null,
+        "answer_tier": "term",
+        "window_only": false
+      }
+    },
+    {
+      "id": "H17",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 12,
+      "chars": 43507,
+      "est_tokens": 10877,
+      "ms": 39.38699999999517,
+      "temporal": false,
+      "nowin_verdict": "correct",
+      "nowin_units": 12,
+      "detail": {
+        "tiers": {
+          "term": 12
+        },
+        "note": "terms told(7.295) url(7.295) itself(6.602) rather(5.686) jish(5.504) mcp(5.349)",
+        "terms": [
+          "told",
+          "url",
+          "itself",
+          "rather",
+          "jish",
+          "mcp",
+          "set",
+          "runcrate",
+          "wait",
+          "agent",
+          "runcrate"
+        ],
+        "window": null,
+        "answer_tier": "term",
+        "window_only": false
+      }
+    },
+    {
+      "id": "H18",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 12,
+      "chars": 49085,
+      "est_tokens": 12272,
+      "ms": 64.19362499999988,
+      "temporal": false,
+      "nowin_verdict": "correct",
+      "nowin_units": 12,
+      "detail": {
+        "tiers": {
+          "term": 12
+        },
+        "note": "terms output(6.197) html(6.197) instead(5.909) guesses(5.909) reported(5.909) formats(5.686); absent from corpus: demanded",
+        "terms": [
+          "output",
+          "html",
+          "instead",
+          "guesses",
+          "reported",
+          "formats",
+          "jish",
+          "profile",
+          "full",
+          "reported",
+          "formats",
+          "want",
+          "guesses",
+          "profile",
+          "per-step"
+        ],
+        "window": null,
+        "answer_tier": "term",
+        "window_only": false
+      }
+    },
+    {
+      "id": "H19",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 12,
+      "chars": 28678,
+      "est_tokens": 7170,
+      "ms": 23.908542000004672,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 8,
+      "detail": {
+        "tiers": {
+          "term+window": 8,
+          "window": 4
+        },
+        "note": "window 2026-08-14 \"afternoon\" read as 12:00-19:00 UTC; terms whenever(7.295) jish(5.504) standing(5.216) loop(5.216) whenever->whenev[stem](5.107) rule(4.73)",
+        "terms": [
+          "whenever",
+          "jish",
+          "standing",
+          "loop",
+          "whenever",
+          "rule",
+          "problem",
+          "beam",
+          "hit",
+          "run",
+          "gpu",
+          "standing"
+        ],
+        "window": "2026-08-14 \"afternoon\" read as 12:00-19:00 UTC",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "H20",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 12,
+      "chars": 1800,
+      "est_tokens": 450,
+      "ms": 14.403292000002693,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 3,
+      "detail": {
+        "tiers": {
+          "term+window": 3,
+          "window": 9
+        },
+        "note": "window 2026-08-21 \"night\" read as 19:00-03:00 next day UTC; terms alongside(6.197) order(5.909) jish(5.504) tool(5.349) profiling(5.098) full(4.993); absent from corpus: nvidia",
+        "terms": [
+          "alongside",
+          "order",
+          "jish",
+          "tool",
+          "profiling",
+          "full",
+          "alongside",
+          "want",
+          "run",
+          "profiling"
+        ],
+        "window": "2026-08-21 \"night\" read as 19:00-03:00 next day UTC",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "H21",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 12,
+      "chars": 47117,
+      "est_tokens": 11780,
+      "ms": 16.731332999996084,
+      "temporal": false,
+      "nowin_verdict": "correct",
+      "nowin_units": 10,
+      "detail": {
+        "tiers": {
+          "term": 10,
+          "window": 2
+        },
+        "note": "terms score(5.909) jish(5.504) published(5.216) say(5.098) hit(3.83) published->publish[stem](3.651); absent from corpus: mmlu",
+        "terms": [
+          "score",
+          "jish",
+          "published",
+          "say",
+          "hit",
+          "published",
+          "arc"
+        ],
+        "window": null
+      }
+    },
+    {
+      "id": "H22",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 12,
+      "chars": 3026,
+      "est_tokens": 757,
+      "ms": 17.58075000000099,
+      "temporal": false,
+      "nowin_verdict": "correct",
+      "nowin_units": 11,
+      "detail": {
+        "tiers": {
+          "term": 11,
+          "window": 1
+        },
+        "note": "terms pick(7.295) public(6.602) jish(5.504) said(5.349) model(3.999) make(3.799); absent from corpus: licence",
+        "terms": [
+          "pick",
+          "public",
+          "jish",
+          "said",
+          "model",
+          "make",
+          "arc"
+        ],
+        "window": null
+      }
+    },
+    {
+      "id": "H23",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 12,
+      "chars": 20371,
+      "est_tokens": 5093,
+      "ms": 19.37016699999367,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 7,
+      "detail": {
+        "tiers": {
+          "term+window": 7,
+          "window": 5
+        },
+        "note": "window 2026-08-14 \"late on\" read as 16:00-02:00 next day UTC; terms asked(6.602) geometry(5.909) written(5.909) jish(5.504) change(4.656) asked->ask[stem](4.621); absent from corpus: shelved",
+        "terms": [
+          "asked",
+          "geometry",
+          "written",
+          "jish",
+          "change",
+          "asked",
+          "tell",
+          "geometry",
+          "agent",
+          "gpu"
+        ],
+        "window": "2026-08-14 \"late on\" read as 16:00-02:00 next day UTC",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "H24",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": true,
+      "missing": [
+        "driver"
+      ],
+      "units": 12,
+      "chars": 7312,
+      "est_tokens": 1828,
+      "ms": 20.759624999998778,
+      "temporal": false,
+      "nowin_verdict": "wrong",
+      "nowin_units": 12,
+      "detail": {
+        "tiers": {
+          "term": 12
+        },
+        "note": "terms cheapest(6.602) class(6.197) jish(5.504) telling(4.3) right(3.74) agent(3.489); absent from corpus: refuse, outright",
+        "terms": [
+          "cheapest",
+          "class",
+          "jish",
+          "telling",
+          "right",
+          "agent",
+          "gpu",
+          "get",
+          "work",
+          "telling"
+        ],
+        "window": null
+      }
+    },
+    {
+      "id": "H25",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 12,
+      "chars": 50764,
+      "est_tokens": 12691,
+      "ms": 53.2099589999998,
+      "temporal": false,
+      "nowin_verdict": "correct",
+      "nowin_units": 12,
+      "detail": {
+        "tiers": {
+          "term": 12
+        },
+        "note": "terms suggest(6.602) once(6.197) decided(6.197) rotation(5.909) jish(5.504) stopping(5.349); absent from corpus: cleaner",
+        "terms": [
+          "suggest",
+          "once",
+          "decided",
+          "rotation",
+          "jish",
+          "stopping",
+          "decided",
+          "bet",
+          "stopping",
+          "agent",
+          "long-term",
+          "long-term"
+        ],
+        "window": null,
+        "answer_tier": "term",
+        "window_only": false
+      }
+    },
+    {
+      "id": "H26",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 12,
+      "chars": 27922,
+      "est_tokens": 6981,
+      "ms": 29.031041999995068,
+      "temporal": false,
+      "nowin_verdict": "correct",
+      "nowin_units": 12,
+      "detail": {
+        "tiers": {
+          "term": 12
+        },
+        "note": "terms create(6.197) persistent(6.197) spending(6.197) volume(5.909) jish(5.504) said(5.349)",
+        "terms": [
+          "create",
+          "persistent",
+          "spending",
+          "volume",
+          "jish",
+          "said",
+          "say",
+          "anything",
+          "handoff",
+          "persistent",
+          "spending",
+          "volume",
+          "anything",
+          "handoff"
+        ],
+        "window": null,
+        "answer_tier": "term",
+        "window_only": false
+      }
+    },
+    {
+      "id": "H27",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 12,
+      "chars": 11222,
+      "est_tokens": 2806,
+      "ms": 13.672082999997656,
+      "temporal": true,
+      "nowin_verdict": "wrong",
+      "nowin_units": 2,
+      "detail": {
+        "tiers": {
+          "term+window": 2,
+          "window": 10
+        },
+        "note": "window 2026-08-21 \"late on\" read as 16:00-02:00 next day UTC; terms instead(5.909) jish(5.504) back(5.098) throughput(4.897) goal(4.3) tell(4.3); absent from corpus: kept, steering",
+        "terms": [
+          "instead",
+          "jish",
+          "back",
+          "throughput",
+          "goal",
+          "tell",
+          "agent"
+        ],
+        "window": "2026-08-21 \"late on\" read as 16:00-02:00 next day UTC",
+        "answer_tier": "window",
+        "window_only": true
+      }
+    },
+    {
+      "id": "H28",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 12,
+      "chars": 1799,
+      "est_tokens": 450,
+      "ms": 11.421082999993814,
+      "temporal": true,
+      "nowin_verdict": "abstained",
+      "nowin_units": 0,
+      "detail": {
+        "tiers": {
+          "window": 12
+        },
+        "note": "window 2026-08-14 \"just after midnight\" read as 00:00-06:00 UTC; terms banned(6.197) conversation(6.197) word(5.686) jish(5.504) entirely(5.349) conversation->convers[stem](4.338); no term matched — this is all 12 said in that window",
+        "terms": [
+          "banned",
+          "conversation",
+          "word",
+          "jish",
+          "entirely",
+          "conversation",
+          "banned",
+          "entirely"
+        ],
+        "window": "2026-08-14 \"just after midnight\" read as 00:00-06:00 UTC",
+        "answer_tier": "window",
+        "window_only": true
+      }
+    },
+    {
+      "id": "H29",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 12,
+      "chars": 29196,
+      "est_tokens": 7299,
+      "ms": 51.22566699999879,
+      "temporal": false,
+      "nowin_verdict": "correct",
+      "nowin_units": 12,
+      "detail": {
+        "tiers": {
+          "term": 12
+        },
+        "note": "terms told(7.295) pessimistic(7.295) thought(6.602) calculations(6.197) future(6.197) jish(5.504); absent from corpus: couldn, describe",
+        "terms": [
+          "told",
+          "pessimistic",
+          "thought",
+          "calculations",
+          "future",
+          "jish",
+          "pessimistic",
+          "write",
+          "mission",
+          "calculations",
+          "future",
+          "sessions",
+          "speed",
+          "quality",
+          "agent",
+          "sessions",
+          "quality"
+        ],
+        "window": null,
+        "answer_tier": "term",
+        "window_only": false
+      }
+    },
+    {
+      "id": "H30",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 12,
+      "chars": 48889,
+      "est_tokens": 12223,
+      "ms": 38.29058300000179,
+      "temporal": false,
+      "nowin_verdict": "correct",
+      "nowin_units": 12,
+      "detail": {
+        "tiers": {
+          "term": 12
+        },
+        "note": "terms behind(6.602) instead(5.909) jish(5.504) sglang(5.098) say(5.098) building(4.993)",
+        "terms": [
+          "behind",
+          "instead",
+          "jish",
+          "sglang",
+          "say",
+          "building",
+          "things",
+          "own",
+          "arc",
+          "building",
+          "things"
+        ],
+        "window": null,
+        "answer_tier": "term",
+        "window_only": false
+      }
+    },
+    {
+      "id": "H31",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "hopper",
+        "blackwell"
+      ],
+      "units": 12,
+      "chars": 49196,
+      "est_tokens": 12299,
+      "ms": 25.61754099999962,
+      "temporal": false,
+      "nowin_verdict": "wrong",
+      "nowin_units": 12,
+      "detail": {
+        "tiers": {
+          "term": 12
+        },
+        "note": "terms whenever(7.295) architectures(6.602) wrote(6.602) jish(5.504) whenever->whenev[stem](5.107) write(5.098)",
+        "terms": [
+          "whenever",
+          "architectures",
+          "wrote",
+          "jish",
+          "whenever",
+          "write",
+          "architectures",
+          "tell",
+          "code",
+          "agent",
+          "gpu"
+        ],
+        "window": null
+      }
+    },
+    {
+      "id": "H32",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 12,
+      "chars": 54007,
+      "est_tokens": 13502,
+      "ms": 18.54241699999693,
+      "temporal": false,
+      "nowin_verdict": "correct",
+      "nowin_units": 12,
+      "detail": {
+        "tiers": {
+          "term": 12
+        },
+        "note": "terms sampling(7.295) settle(5.909) jish(5.504) serving(4.897) sampling->sampl[stem](4.621) arc(3.558); absent from corpus: temperature",
+        "terms": [
+          "sampling",
+          "settle",
+          "jish",
+          "serving",
+          "sampling",
+          "arc",
+          "serving"
+        ],
+        "window": null
+      }
+    },
+    {
+      "id": "H33",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 12,
+      "chars": 48165,
+      "est_tokens": 12042,
+      "ms": 53.6107090000005,
+      "temporal": false,
+      "nowin_verdict": "correct",
+      "nowin_units": 12,
+      "detail": {
+        "tiers": {
+          "term": 12
+        },
+        "note": "terms told(7.295) someone(6.602) looked(5.686) jish(5.504) single-user(5.504) say(5.098); absent from corpus: himself",
+        "terms": [
+          "told",
+          "someone",
+          "looked",
+          "jish",
+          "single-user",
+          "say",
+          "already",
+          "someone",
+          "speed",
+          "looked",
+          "arc",
+          "already",
+          "single-user",
+          "single-user"
+        ],
+        "window": null,
+        "answer_tier": "term",
+        "window_only": false
+      }
+    },
+    {
+      "id": "H34",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 10,
+      "chars": 1866,
+      "est_tokens": 467,
+      "ms": 14.386124999997264,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 6,
+      "detail": {
+        "tiers": {
+          "term+window": 6,
+          "window": 4
+        },
+        "note": "window 2026-08-10 \"night\" read as 19:00-03:00 next day UTC; terms instead(5.909) jish(5.504) pushing(5.349) say(5.098) master(5.098) different(4.897)",
+        "terms": [
+          "instead",
+          "jish",
+          "pushing",
+          "say",
+          "master",
+          "different",
+          "branch",
+          "completely",
+          "pushing",
+          "different",
+          "completely",
+          "working",
+          "working"
+        ],
+        "window": "2026-08-10 \"night\" read as 19:00-03:00 next day UTC",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "H35",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 12,
+      "chars": 52812,
+      "est_tokens": 13203,
+      "ms": 43.17374999999447,
+      "temporal": false,
+      "nowin_verdict": "correct",
+      "nowin_units": 12,
+      "detail": {
+        "tiers": {
+          "term": 12
+        },
+        "note": "terms pasted(7.295) years(6.602) prompt(6.197) fresh(6.197) many(5.909) experience(5.686); absent from corpus: role",
+        "terms": [
+          "pasted",
+          "years",
+          "prompt",
+          "fresh",
+          "many",
+          "experience",
+          "jish",
+          "pasted",
+          "years",
+          "handoff",
+          "tell",
+          "session",
+          "many",
+          "take",
+          "experience",
+          "handoff"
+        ],
+        "window": null,
+        "answer_tier": "term",
+        "window_only": false
+      }
+    },
+    {
+      "id": "H36",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 12,
+      "chars": 31408,
+      "est_tokens": 7852,
+      "ms": 43.68658300000243,
+      "temporal": false,
+      "nowin_verdict": "correct",
+      "nowin_units": 12,
+      "detail": {
+        "tiers": {
+          "term": 12
+        },
+        "note": "terms quoted(6.602) jish(5.504) line(5.216) back(5.098) never(4.81) rules(4.73); absent from corpus: useless",
+        "terms": [
+          "quoted",
+          "jish",
+          "line",
+          "back",
+          "never",
+          "rules",
+          "quoted",
+          "read",
+          "agent",
+          "rules",
+          "re"
+        ],
+        "window": null,
+        "answer_tier": "term",
+        "window_only": false
+      }
+    },
+    {
+      "id": "H37",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 12,
+      "chars": 4664,
+      "est_tokens": 1166,
+      "ms": 13.237541999995301,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 4,
+      "detail": {
+        "tiers": {
+          "term+window": 4,
+          "window": 8
+        },
+        "note": "window 2026-08-20 \"evening\" read as 16:00-23:00 UTC; terms complained(7.295) pace(7.295) jish(5.504) complained->complain[stem](5.107) long(4.351) taking(4.3); absent from corpus: describe",
+        "terms": [
+          "complained",
+          "pace",
+          "jish",
+          "complained",
+          "long",
+          "taking",
+          "taking"
+        ],
+        "window": "2026-08-20 \"evening\" read as 16:00-23:00 UTC",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "H38",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "branches"
+      ],
+      "units": 4,
+      "chars": 1085,
+      "est_tokens": 272,
+      "ms": 14.561874999999418,
+      "temporal": true,
+      "nowin_verdict": "wrong",
+      "nowin_units": 3,
+      "detail": {
+        "tiers": {
+          "term+window": 3,
+          "window": 1
+        },
+        "note": "window 2026-08-24 \"morning\" read as 05:00-13:00 UTC; terms asked(6.602) carry(6.602) credits(6.197) jish(5.504) new(4.897) asked->ask[stem](4.621)",
+        "terms": [
+          "asked",
+          "carry",
+          "credits",
+          "jish",
+          "new",
+          "asked",
+          "carry",
+          "handoff",
+          "credits",
+          "session",
+          "happened",
+          "want",
+          "handoff",
+          "happened"
+        ],
+        "window": "2026-08-24 \"morning\" read as 05:00-13:00 UTC"
+      }
+    },
+    {
+      "id": "H39",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 2,
+      "chars": 303,
+      "est_tokens": 76,
+      "ms": 8.410875000001397,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 1,
+      "detail": {
+        "tiers": {
+          "term+window": 1,
+          "window": 1
+        },
+        "note": "window 2026-08-18 \"evening\" read as 16:00-23:00 UTC; terms sent(5.909) message(5.504) jish(5.504) say(5.098) message->messag[stem](3.852)",
+        "terms": [
+          "sent",
+          "message",
+          "jish",
+          "say",
+          "message"
+        ],
+        "window": "2026-08-18 \"evening\" read as 16:00-23:00 UTC",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "H40",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 12,
+      "chars": 6786,
+      "est_tokens": 1697,
+      "ms": 18.105790999994497,
+      "temporal": false,
+      "nowin_verdict": "correct",
+      "nowin_units": 7,
+      "detail": {
+        "tiers": {
+          "term": 7,
+          "window": 5
+        },
+        "note": "terms launch(6.602) jish(5.504) openrouter(5.349) say(5.098) ready(4.656) ready->readi[stem](3.852); absent from corpus: docker, image",
+        "terms": [
+          "launch",
+          "jish",
+          "openrouter",
+          "say",
+          "ready",
+          "ready",
+          "openrouter"
+        ],
+        "window": null
+      }
+    }
+  ]
+}

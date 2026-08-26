@@ -1,0 +1,4509 @@
+{
+  "generated_at": "2026-08-26T15:30:51.949Z",
+  "answerer": "evidence",
+  "answerer_note": "verdicts measure retrieval sufficiency: the retrieved context IS the response, so a verdict is the arm's accuracy ceiling. grade.md §8.",
+  "question_set": "tuned",
+  "questions_file": "questions.json",
+  "question_set_note": "TUNED SET: the retrieval code, including /v1/recall, was designed after reading which of these 40 it failed. Any improvement here is contaminated and must be labelled as such.",
+  "arms": [
+    "grep",
+    "full-context",
+    "datum",
+    "datum-recall"
+  ],
+  "repeats": 3,
+  "query_regime": "derived",
+  "query_regime_note": "query terms lifted from the question text only. The questions paraphrase deliberately, so this is the hard regime and it is the realistic one.",
+  "config": {
+    "GREP_LINES": 40,
+    "GREP_WINDOW": 2000,
+    "DATUM_LIMIT": 20,
+    "RECALL_LIMIT": 12,
+    "QUERY_TERMS": 4,
+    "DATUM_BASE": "http://127.0.0.1:8481",
+    "DATUM_PATH": "/v1/episodes",
+    "RECALL_PATH": "/v1/recall",
+    "DATUM_SCOPE": "org/aeonmind/proj/arc"
+  },
+  "corpus": {
+    "utterances_with_text": 550,
+    "interrupt_markers": 49,
+    "human_records": 599,
+    "bytes": 264103,
+    "datum_visible_episodes": 542,
+    "compaction_summaries_excluded": 8,
+    "compaction_summary_dependency": "none — verify.mts asserts every expect entry of all 40 E questions matches inside the 542-episode datum-visible set, so the isCompactSummary exclusion costs datum no question"
+  },
+  "questions": {
+    "total": 40,
+    "by_kind": {
+      "correction": 8,
+      "target-change": 8,
+      "abandoned": 5,
+      "decision": 6,
+      "preference": 5,
+      "who-said": 4,
+      "when": 4
+    },
+    "by_difficulty": {
+      "easy": 7,
+      "medium": 26,
+      "hard": 7
+    },
+    "only_in_transcript": 8,
+    "abstention_traps": 4,
+    "temporal": 30,
+    "temporal_note": "a calendar date, a clock time or a part of the day, by regex over the question text alone. Reproduces THIRD.md's published 30 / 16 / 30."
+  },
+  "arm_errors": {},
+  "results": {
+    "grep": {
+      "correct": 9,
+      "wrong": 31,
+      "abstained": 0,
+      "accuracy": 0.225,
+      "error_rate": 0.775,
+      "abstain_rate": 0,
+      "trust": -0.55,
+      "over_abstain": 0,
+      "trap_accuracy": 0.5,
+      "contamination": 0.1,
+      "accuracy_repeats": [
+        0.225,
+        0.225,
+        0.225
+      ],
+      "accuracy_mean": 0.225,
+      "accuracy_stddev": 0,
+      "unstable": 0,
+      "unstable_ids": [],
+      "by_difficulty": {
+        "easy": 0.2857142857142857,
+        "medium": 0.19230769230769232,
+        "hard": 0.2857142857142857
+      },
+      "by_kind": {
+        "correction": 0.25,
+        "target-change": 0.375,
+        "abandoned": 0.2,
+        "decision": 0.16666666666666666,
+        "preference": 0.2,
+        "who-said": 0.25,
+        "when": 0
+      },
+      "only_in_transcript_accuracy": 0,
+      "lost": [
+        "E01:wrong(600)",
+        "E02:wrong(84)",
+        "E04:wrong(1006|14.58)",
+        "E06:wrong(13.26|hundred|thousand)",
+        "E07:wrong(16600|1477)",
+        "E10:wrong(1 second)",
+        "E11:wrong(250|budget)",
+        "E12:wrong(14000 aggregate|1400)",
+        "E13:wrong(permute at load)",
+        "E14:wrong(greedy|forever)",
+        "E15:wrong(v=4)",
+        "E16:wrong(own prefix cache|radixattention)",
+        "E17:wrong(money)",
+        "E19:wrong(experiments)",
+        "E20:wrong(long term)",
+        "E22:wrong(openrouter one|agents)",
+        "E23:wrong(capacity per node|faster engine|better quality)",
+        "E24:wrong(2.25 bits)",
+        "E25:wrong(an orchestrator|compaction)",
+        "E26:wrong(5 minute)",
+        "E27:wrong(sorry my mistake sir)",
+        "E28:wrong(60 minute)",
+        "E29:wrong(asmit)",
+        "E31:wrong(9000 gpu instructions|30)",
+        "E32:wrong(15 minute|3.6 hour)",
+        "E33:wrong(agents died)",
+        "E34:wrong(25 minute|2 hour)",
+        "E35:wrong(2000 word essay)",
+        "E36:wrong(worktrees)",
+        "E37:wrong",
+        "E38:wrong"
+      ],
+      "est_tokens_mean": 19263,
+      "est_tokens_total": 770519,
+      "chars_mean": 77050,
+      "units_mean": 40,
+      "ms_mean": 1686.4,
+      "ms_p95": 3753.6,
+      "ms_mean_repeats": [
+        1686.4,
+        1689.3,
+        1690.9
+      ],
+      "ms_stddev": 2.3,
+      "trap_detail": [
+        "E37:wrong+contaminated",
+        "E38:wrong+contaminated",
+        "E39:correct",
+        "E40:correct"
+      ],
+      "temporal_n": 30,
+      "non_temporal_n": 10,
+      "temporal_accuracy": 0.13333333333333333,
+      "temporal_stddev": 0,
+      "non_temporal_accuracy": 0.5,
+      "non_temporal_stddev": 0,
+      "reweight_temporal_share": 0.4,
+      "accuracy_reweighted": 0.35333333333333333,
+      "temporal_lost": [
+        "E01",
+        "E02",
+        "E04",
+        "E06",
+        "E07",
+        "E11",
+        "E12",
+        "E13",
+        "E14",
+        "E15",
+        "E16",
+        "E17",
+        "E19",
+        "E20",
+        "E22",
+        "E23",
+        "E24",
+        "E25",
+        "E27",
+        "E29",
+        "E31",
+        "E32",
+        "E33",
+        "E34",
+        "E35",
+        "E36"
+      ],
+      "non_temporal_lost": [
+        "E10",
+        "E26",
+        "E28",
+        "E37",
+        "E38"
+      ]
+    },
+    "full-context": {
+      "correct": 39,
+      "wrong": 1,
+      "abstained": 0,
+      "accuracy": 0.975,
+      "error_rate": 0.025,
+      "abstain_rate": 0,
+      "trust": 0.95,
+      "over_abstain": 0,
+      "trap_accuracy": 0.75,
+      "contamination": 0.1,
+      "accuracy_repeats": [
+        0.975,
+        0.975,
+        0.975
+      ],
+      "accuracy_mean": 0.975,
+      "accuracy_stddev": 0,
+      "unstable": 0,
+      "unstable_ids": [],
+      "by_difficulty": {
+        "easy": 1,
+        "medium": 0.9615384615384616,
+        "hard": 1
+      },
+      "by_kind": {
+        "correction": 1,
+        "target-change": 0.875,
+        "abandoned": 1,
+        "decision": 1,
+        "preference": 1,
+        "who-said": 1,
+        "when": 1
+      },
+      "only_in_transcript_accuracy": 1,
+      "lost": [
+        "E40:wrong"
+      ],
+      "est_tokens_mean": 72633,
+      "est_tokens_total": 2905320,
+      "chars_mean": 290530,
+      "units_mean": 550,
+      "ms_mean": 0,
+      "ms_p95": 0,
+      "ms_mean_repeats": [
+        0,
+        0,
+        0
+      ],
+      "ms_stddev": 0,
+      "trap_detail": [
+        "E37:correct",
+        "E38:correct",
+        "E39:correct",
+        "E40:wrong+contaminated"
+      ],
+      "temporal_n": 30,
+      "non_temporal_n": 10,
+      "temporal_accuracy": 1,
+      "temporal_stddev": 0,
+      "non_temporal_accuracy": 0.9,
+      "non_temporal_stddev": 0,
+      "reweight_temporal_share": 0.4,
+      "accuracy_reweighted": 0.9400000000000001,
+      "temporal_lost": [],
+      "non_temporal_lost": [
+        "E40"
+      ]
+    },
+    "datum": {
+      "correct": 25,
+      "wrong": 15,
+      "abstained": 0,
+      "accuracy": 0.625,
+      "error_rate": 0.375,
+      "abstain_rate": 0,
+      "trust": 0.25,
+      "over_abstain": 0,
+      "trap_accuracy": 1,
+      "contamination": 0.05,
+      "accuracy_repeats": [
+        0.625,
+        0.625,
+        0.625
+      ],
+      "accuracy_mean": 0.625,
+      "accuracy_stddev": 0,
+      "unstable": 0,
+      "unstable_ids": [],
+      "by_difficulty": {
+        "easy": 0.7142857142857143,
+        "medium": 0.6153846153846154,
+        "hard": 0.5714285714285714
+      },
+      "by_kind": {
+        "correction": 0.5,
+        "target-change": 0.875,
+        "abandoned": 0.6,
+        "decision": 0.3333333333333333,
+        "preference": 0.8,
+        "who-said": 0.75,
+        "when": 0.5
+      },
+      "only_in_transcript_accuracy": 0.375,
+      "lost": [
+        "E01:wrong(600)",
+        "E05:wrong(15|50)",
+        "E06:wrong(13.26)",
+        "E08:wrong(fits)",
+        "E16:wrong(own prefix cache|radixattention)",
+        "E18:wrong(paged attention)",
+        "E19:wrong(experiments)",
+        "E20:wrong(fa4|mla|long term)",
+        "E21:wrong(fa2|fa4|ampere|hopper|blackwell)",
+        "E22:wrong(openrouter one)",
+        "E24:wrong(2.25 bits)",
+        "E25:wrong(an orchestrator)",
+        "E32:wrong(15 minute|3.6 hour)",
+        "E33:wrong(agents died)",
+        "E35:wrong(200)"
+      ],
+      "est_tokens_mean": 11939,
+      "est_tokens_total": 477549,
+      "chars_mean": 47753,
+      "units_mean": 13.7,
+      "ms_mean": 43.4,
+      "ms_p95": 85.4,
+      "matched": {
+        "trigram": 135,
+        "phrase": 243,
+        "fts": 171
+      },
+      "ms_mean_repeats": [
+        43.4,
+        43.8,
+        42.4
+      ],
+      "ms_stddev": 0.7,
+      "trap_detail": [
+        "E37:correct",
+        "E38:correct",
+        "E39:correct",
+        "E40:correct"
+      ],
+      "temporal_n": 30,
+      "non_temporal_n": 10,
+      "temporal_accuracy": 0.5333333333333333,
+      "temporal_stddev": 0,
+      "non_temporal_accuracy": 0.9,
+      "non_temporal_stddev": 0,
+      "reweight_temporal_share": 0.4,
+      "accuracy_reweighted": 0.7533333333333334,
+      "temporal_lost": [
+        "E01",
+        "E05",
+        "E06",
+        "E08",
+        "E16",
+        "E19",
+        "E20",
+        "E21",
+        "E22",
+        "E24",
+        "E25",
+        "E32",
+        "E33",
+        "E35"
+      ],
+      "non_temporal_lost": [
+        "E18"
+      ]
+    },
+    "datum-recall": {
+      "correct": 38,
+      "wrong": 2,
+      "abstained": 0,
+      "accuracy": 0.95,
+      "error_rate": 0.05,
+      "abstain_rate": 0,
+      "trust": 0.9,
+      "over_abstain": 0,
+      "trap_accuracy": 1,
+      "contamination": 0.05,
+      "accuracy_repeats": [
+        0.95,
+        0.95,
+        0.95
+      ],
+      "accuracy_mean": 0.9499999999999998,
+      "accuracy_stddev": 1.3597399555105182e-16,
+      "unstable": 0,
+      "unstable_ids": [],
+      "by_difficulty": {
+        "easy": 1,
+        "medium": 1,
+        "hard": 0.7142857142857143
+      },
+      "by_kind": {
+        "correction": 1,
+        "target-change": 0.875,
+        "abandoned": 0.8,
+        "decision": 1,
+        "preference": 1,
+        "who-said": 1,
+        "when": 1
+      },
+      "only_in_transcript_accuracy": 1,
+      "lost": [
+        "E13:wrong(permute at load)",
+        "E18:wrong(paged attention)"
+      ],
+      "est_tokens_mean": 4070,
+      "est_tokens_total": 162789,
+      "chars_mean": 16277,
+      "units_mean": 13.3,
+      "ms_mean": 25.7,
+      "ms_p95": 54.2,
+      "ms_mean_repeats": [
+        25.7,
+        26,
+        26.5
+      ],
+      "ms_stddev": 0.4,
+      "trap_detail": [
+        "E37:correct",
+        "E38:correct",
+        "E39:correct",
+        "E40:correct"
+      ],
+      "temporal_n": 30,
+      "non_temporal_n": 10,
+      "temporal_accuracy": 0.9666666666666667,
+      "temporal_stddev": 0,
+      "non_temporal_accuracy": 0.9,
+      "non_temporal_stddev": 0,
+      "reweight_temporal_share": 0.4,
+      "accuracy_reweighted": 0.9266666666666667,
+      "temporal_lost": [
+        "E13"
+      ],
+      "non_temporal_lost": [
+        "E18"
+      ],
+      "without_window": {
+        "accuracy": 0.8000000000000002,
+        "accuracy_repeats": [
+          0.8,
+          0.8,
+          0.8
+        ],
+        "accuracy_stddev": 1.3597399555105182e-16,
+        "delta_vs_full": -0.1499999999999997,
+        "lost_by_ablation": [
+          "E19:abstained",
+          "E20:abstained",
+          "E23:wrong",
+          "E24:abstained",
+          "E32:abstained",
+          "E35:wrong"
+        ],
+        "gained_by_ablation": [],
+        "units_mean": 5.3,
+        "method": "window-tier rows deleted from the same responses and re-graded; the server has no flag to disable the tier, so the window FILTER is still in force and this is an upper bound"
+      },
+      "episode_tiers": {
+        "term+window": 93,
+        "window": 320,
+        "term": 117
+      },
+      "answer_tiers": {
+        "term+window": 23,
+        "term": 5,
+        "window": 5,
+        "combined": 1
+      },
+      "window_only": 6
+    }
+  },
+  "rows": [
+    {
+      "id": "E01",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "600"
+      ],
+      "units": 40,
+      "chars": 76463,
+      "est_tokens": 19116,
+      "ms": 2328.581959,
+      "temporal": true,
+      "detail": {
+        "terms": [
+          "accused",
+          "walking",
+          "side",
+          "claim"
+        ]
+      }
+    },
+    {
+      "id": "E02",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": true,
+      "missing": [
+        "84"
+      ],
+      "units": 40,
+      "chars": 78623,
+      "est_tokens": 19656,
+      "ms": 2034.1955840000005,
+      "temporal": true,
+      "detail": {
+        "terms": [
+          "calling",
+          "promised",
+          "essentially",
+          "settled"
+        ]
+      }
+    },
+    {
+      "id": "E03",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 40,
+      "chars": 80637,
+      "est_tokens": 20160,
+      "ms": 534.8793749999995,
+      "temporal": false,
+      "detail": {
+        "terms": [
+          "assumption",
+          "corrected",
+          "card",
+          "memory"
+        ]
+      }
+    },
+    {
+      "id": "E04",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "1006",
+        "14.58"
+      ],
+      "units": 40,
+      "chars": 79174,
+      "est_tokens": 19794,
+      "ms": 920.5255419999994,
+      "temporal": true,
+      "detail": {
+        "terms": [
+          "competing",
+          "rejected",
+          "cite",
+          "engine"
+        ]
+      }
+    },
+    {
+      "id": "E05",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 40,
+      "chars": 78235,
+      "est_tokens": 19559,
+      "ms": 2913.1647080000002,
+      "temporal": true,
+      "detail": {
+        "terms": [
+          "percentages",
+          "efficiency",
+          "rejected",
+          "nonsense"
+        ]
+      }
+    },
+    {
+      "id": "E06",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "13.26",
+        "hundred",
+        "thousand"
+      ],
+      "units": 40,
+      "chars": 79291,
+      "est_tokens": 19823,
+      "ms": 1192.5336659999994,
+      "temporal": true,
+      "detail": {
+        "terms": [
+          "refuse",
+          "breath",
+          "accept",
+          "floors"
+        ]
+      }
+    },
+    {
+      "id": "E07",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "16600",
+        "1477"
+      ],
+      "units": 40,
+      "chars": 79182,
+      "est_tokens": 19796,
+      "ms": 3336.338042000001,
+      "temporal": true,
+      "detail": {
+        "terms": [
+          "unacceptable",
+          "competing",
+          "midnight",
+          "demand"
+        ]
+      }
+    },
+    {
+      "id": "E08",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 40,
+      "chars": 80588,
+      "est_tokens": 20147,
+      "ms": 2275.597167,
+      "temporal": true,
+      "detail": {
+        "terms": [
+          "restated",
+          "conditions",
+          "shortcut",
+          "refused"
+        ]
+      }
+    },
+    {
+      "id": "E09",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 40,
+      "chars": 75328,
+      "est_tokens": 18832,
+      "ms": 650.7702910000007,
+      "temporal": true,
+      "detail": {
+        "terms": [
+          "optimisation",
+          "floor",
+          "size",
+          "landed"
+        ]
+      }
+    },
+    {
+      "id": "E10",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "1 second"
+      ],
+      "units": 40,
+      "chars": 79308,
+      "est_tokens": 19827,
+      "ms": 1092.0716670000002,
+      "temporal": false,
+      "detail": {
+        "terms": [
+          "halving",
+          "upper",
+          "progress",
+          "looking"
+        ]
+      }
+    },
+    {
+      "id": "E11",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "250",
+        "budget"
+      ],
+      "units": 40,
+      "chars": 80604,
+      "est_tokens": 20151,
+      "ms": 837.245167000001,
+      "temporal": true,
+      "detail": {
+        "terms": [
+          "replaced",
+          "interim",
+          "lower",
+          "late"
+        ]
+      }
+    },
+    {
+      "id": "E12",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "14000 aggregate",
+        "1400"
+      ],
+      "units": 40,
+      "chars": 80662,
+      "est_tokens": 20166,
+      "ms": 1284.1396249999998,
+      "temporal": true,
+      "detail": {
+        "terms": [
+          "rejecting",
+          "needed",
+          "meaningless",
+          "world"
+        ]
+      }
+    },
+    {
+      "id": "E13",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "permute at load"
+      ],
+      "units": 40,
+      "chars": 80678,
+      "est_tokens": 20170,
+      "ms": 3455.5164159999986,
+      "temporal": true,
+      "detail": {
+        "terms": [
+          "overruled",
+          "nineteen",
+          "permutation",
+          "tensor"
+        ]
+      }
+    },
+    {
+      "id": "E14",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "greedy",
+        "forever"
+      ],
+      "units": 40,
+      "chars": 37072,
+      "est_tokens": 9268,
+      "ms": 846.9613330000029,
+      "temporal": true,
+      "detail": {
+        "terms": [
+          "attach",
+          "outright",
+          "algorithm",
+          "word"
+        ]
+      }
+    },
+    {
+      "id": "E15",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "v=4"
+      ],
+      "units": 40,
+      "chars": 79825,
+      "est_tokens": 19957,
+      "ms": 1531.593166999999,
+      "temporal": true,
+      "detail": {
+        "terms": [
+          "forgotten",
+          "late",
+          "deferred",
+          "geometry"
+        ]
+      }
+    },
+    {
+      "id": "E16",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "own prefix cache",
+        "radixattention"
+      ],
+      "units": 40,
+      "chars": 78561,
+      "est_tokens": 19641,
+      "ms": 3117.8905830000003,
+      "temporal": true,
+      "detail": {
+        "terms": [
+          "midnight",
+          "throw",
+          "thrown",
+          "copied"
+        ]
+      }
+    },
+    {
+      "id": "E17",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "money"
+      ],
+      "units": 40,
+      "chars": 79984,
+      "est_tokens": 19996,
+      "ms": 1923.7567500000005,
+      "temporal": true,
+      "detail": {
+        "terms": [
+          "midday",
+          "ordered",
+          "reasons",
+          "around"
+        ]
+      }
+    },
+    {
+      "id": "E18",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 40,
+      "chars": 79467,
+      "est_tokens": 19867,
+      "ms": 2987.8838749999995,
+      "temporal": false,
+      "detail": {
+        "terms": [
+          "reversed",
+          "course",
+          "implementation",
+          "ordering"
+        ]
+      }
+    },
+    {
+      "id": "E19",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "experiments"
+      ],
+      "units": 40,
+      "chars": 80629,
+      "est_tokens": 20158,
+      "ms": 1690.8581249999988,
+      "temporal": true,
+      "detail": {
+        "terms": [
+          "impose",
+          "ordering",
+          "stage"
+        ]
+      }
+    },
+    {
+      "id": "E20",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "long term"
+      ],
+      "units": 40,
+      "chars": 79537,
+      "est_tokens": 19885,
+      "ms": 2636.4284160000025,
+      "temporal": true,
+      "detail": {
+        "terms": [
+          "justification",
+          "horizon",
+          "choice",
+          "chose"
+        ]
+      }
+    },
+    {
+      "id": "E21",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 40,
+      "chars": 79514,
+      "est_tokens": 19879,
+      "ms": 4371.958375000002,
+      "temporal": true,
+      "detail": {
+        "terms": [
+          "architectures",
+          "ultimatum",
+          "numbered",
+          "mandate"
+        ]
+      }
+    },
+    {
+      "id": "E22",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "openrouter one",
+        "agents"
+      ],
+      "units": 40,
+      "chars": 79134,
+      "est_tokens": 19784,
+      "ms": 1650.6215420000008,
+      "temporal": true,
+      "detail": {
+        "terms": [
+          "afternoon",
+          "allowed",
+          "instructions",
+          "create"
+        ]
+      }
+    },
+    {
+      "id": "E23",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "capacity per node",
+        "faster engine",
+        "better quality"
+      ],
+      "units": 40,
+      "chars": 79948,
+      "est_tokens": 19987,
+      "ms": 1270.1508329999997,
+      "temporal": true,
+      "detail": {
+        "terms": [
+          "define",
+          "parts",
+          "briefed",
+          "product"
+        ]
+      }
+    },
+    {
+      "id": "E24",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "2.25 bits"
+      ],
+      "units": 40,
+      "chars": 75403,
+      "est_tokens": 18851,
+      "ms": 1515.9530830000003,
+      "temporal": true,
+      "detail": {
+        "terms": [
+          "challenged",
+          "width",
+          "compression",
+          "landed"
+        ]
+      }
+    },
+    {
+      "id": "E25",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "an orchestrator",
+        "compaction"
+      ],
+      "units": 40,
+      "chars": 69229,
+      "est_tokens": 17308,
+      "ms": 630.1697500000009,
+      "temporal": true,
+      "detail": {
+        "terms": [
+          "recurring",
+          "role",
+          "forcing",
+          "level"
+        ]
+      }
+    },
+    {
+      "id": "E26",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "5 minute"
+      ],
+      "units": 40,
+      "chars": 65797,
+      "est_tokens": 16450,
+      "ms": 2532.6504580000037,
+      "temporal": false,
+      "detail": {
+        "terms": [
+          "continuing",
+          "tearing",
+          "threshold",
+          "duration"
+        ]
+      }
+    },
+    {
+      "id": "E27",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "sorry my mistake sir"
+      ],
+      "units": 40,
+      "chars": 79767,
+      "est_tokens": 19942,
+      "ms": 1915.1803340000042,
+      "temporal": true,
+      "detail": {
+        "terms": [
+          "phrase",
+          "forbid",
+          "carry",
+          "sessions"
+        ]
+      }
+    },
+    {
+      "id": "E28",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "60 minute"
+      ],
+      "units": 40,
+      "chars": 79854,
+      "est_tokens": 19964,
+      "ms": 273.77108299999963,
+      "temporal": false,
+      "detail": {
+        "terms": [
+          "unit",
+          "hardware",
+          "ceiling",
+          "long"
+        ]
+      }
+    },
+    {
+      "id": "E29",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "asmit"
+      ],
+      "units": 40,
+      "chars": 67379,
+      "est_tokens": 16845,
+      "ms": 511.77995799999917,
+      "temporal": true,
+      "detail": {
+        "terms": [
+          "project",
+          "main",
+          "different",
+          "completely"
+        ]
+      }
+    },
+    {
+      "id": "E30",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 40,
+      "chars": 80620,
+      "est_tokens": 20155,
+      "ms": 342.4597090000025,
+      "temporal": false,
+      "detail": {
+        "terms": [
+          "range",
+          "hand",
+          "hardware",
+          "throughput"
+        ]
+      }
+    },
+    {
+      "id": "E31",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "9000 gpu instructions",
+        "30"
+      ],
+      "units": 40,
+      "chars": 73188,
+      "est_tokens": 18297,
+      "ms": 2529.363084000004,
+      "temporal": true,
+      "detail": {
+        "terms": [
+          "instructions",
+          "competition",
+          "quoted",
+          "issued"
+        ]
+      }
+    },
+    {
+      "id": "E32",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "15 minute",
+        "3.6 hour"
+      ],
+      "units": 40,
+      "chars": 79647,
+      "est_tokens": 19912,
+      "ms": 1106.4285410000011,
+      "temporal": true,
+      "detail": {
+        "terms": [
+          "stretch",
+          "correcting",
+          "duration",
+          "idle"
+        ]
+      }
+    },
+    {
+      "id": "E33",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "agents died"
+      ],
+      "units": 40,
+      "chars": 76109,
+      "est_tokens": 19028,
+      "ms": 368.47733300000255,
+      "temporal": true,
+      "detail": {
+        "terms": [
+          "dead",
+          "happened"
+        ]
+      }
+    },
+    {
+      "id": "E34",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "25 minute",
+        "2 hour"
+      ],
+      "units": 40,
+      "chars": 80578,
+      "est_tokens": 20145,
+      "ms": 1968.903499999993,
+      "temporal": true,
+      "detail": {
+        "terms": [
+          "durations",
+          "midday",
+          "around",
+          "believe"
+        ]
+      }
+    },
+    {
+      "id": "E35",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "2000 word essay"
+      ],
+      "units": 40,
+      "chars": 80296,
+      "est_tokens": 20074,
+      "ms": 1987.7858750000014,
+      "temporal": true,
+      "detail": {
+        "terms": [
+          "scenario",
+          "extended",
+          "posed",
+          "batching"
+        ]
+      }
+    },
+    {
+      "id": "E36",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "worktrees"
+      ],
+      "units": 40,
+      "chars": 79071,
+      "est_tokens": 19768,
+      "ms": 649.6729579999956,
+      "temporal": true,
+      "detail": {
+        "terms": [
+          "prepare",
+          "credits",
+          "pick",
+          "next"
+        ]
+      }
+    },
+    {
+      "id": "E37",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": true,
+      "missing": [],
+      "units": 40,
+      "chars": 80657,
+      "est_tokens": 20165,
+      "ms": 3753.6064170000027,
+      "temporal": false,
+      "detail": {
+        "terms": [
+          "million",
+          "price",
+          "selling",
+          "openrouter"
+        ]
+      }
+    },
+    {
+      "id": "E38",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": true,
+      "missing": [],
+      "units": 40,
+      "chars": 78362,
+      "est_tokens": 19591,
+      "ms": 78.17795800000022,
+      "temporal": false,
+      "detail": {
+        "terms": [
+          "acceptance",
+          "rate"
+        ]
+      }
+    },
+    {
+      "id": "E39",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 40,
+      "chars": 80391,
+      "est_tokens": 20098,
+      "ms": 1345.5320829999982,
+      "temporal": false,
+      "detail": {
+        "terms": [
+          "rented",
+          "cloud",
+          "require",
+          "region"
+        ]
+      }
+    },
+    {
+      "id": "E40",
+      "arm": "grep",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 40,
+      "chars": 73227,
+      "est_tokens": 18307,
+      "ms": 1063.1788329999981,
+      "temporal": false,
+      "detail": {
+        "terms": [
+          "b300",
+          "b200",
+          "commit",
+          "hardware"
+        ]
+      }
+    },
+    {
+      "id": "E01",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.05316700000548735,
+      "temporal": true
+    },
+    {
+      "id": "E02",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.015083999998751096,
+      "temporal": true
+    },
+    {
+      "id": "E03",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.016250000000582077,
+      "temporal": false
+    },
+    {
+      "id": "E04",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.017791000005672686,
+      "temporal": true
+    },
+    {
+      "id": "E05",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.017290999996475875,
+      "temporal": true
+    },
+    {
+      "id": "E06",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.016874999986612238,
+      "temporal": true
+    },
+    {
+      "id": "E07",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.015249999996740371,
+      "temporal": true
+    },
+    {
+      "id": "E08",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.013750000012805685,
+      "temporal": true
+    },
+    {
+      "id": "E09",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.025125000000116415,
+      "temporal": true
+    },
+    {
+      "id": "E10",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.024000000004889444,
+      "temporal": false
+    },
+    {
+      "id": "E11",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.017040999999153428,
+      "temporal": true
+    },
+    {
+      "id": "E12",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.0052500000019790605,
+      "temporal": true
+    },
+    {
+      "id": "E13",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.011207999996258877,
+      "temporal": true
+    },
+    {
+      "id": "E14",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.006750000000465661,
+      "temporal": true
+    },
+    {
+      "id": "E15",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.007167000003391877,
+      "temporal": true
+    },
+    {
+      "id": "E16",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.005667000004905276,
+      "temporal": true
+    },
+    {
+      "id": "E17",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.006541000009747222,
+      "temporal": true
+    },
+    {
+      "id": "E18",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.007375000001047738,
+      "temporal": false
+    },
+    {
+      "id": "E19",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.006750000000465661,
+      "temporal": true
+    },
+    {
+      "id": "E20",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.006166999999550171,
+      "temporal": true
+    },
+    {
+      "id": "E21",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.009125000011408702,
+      "temporal": true
+    },
+    {
+      "id": "E22",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.007707999990088865,
+      "temporal": true
+    },
+    {
+      "id": "E23",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.00662499999452848,
+      "temporal": true
+    },
+    {
+      "id": "E24",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.005916999987675808,
+      "temporal": true
+    },
+    {
+      "id": "E25",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.012499999997089617,
+      "temporal": true
+    },
+    {
+      "id": "E26",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.00712500000372529,
+      "temporal": false
+    },
+    {
+      "id": "E27",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.005541999998968095,
+      "temporal": true
+    },
+    {
+      "id": "E28",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.006500000003143214,
+      "temporal": false
+    },
+    {
+      "id": "E29",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.00533299999369774,
+      "temporal": true
+    },
+    {
+      "id": "E30",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.0065420000028098,
+      "temporal": false
+    },
+    {
+      "id": "E31",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.007499999992433004,
+      "temporal": true
+    },
+    {
+      "id": "E32",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.0052500000019790605,
+      "temporal": true
+    },
+    {
+      "id": "E33",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.009083999990252778,
+      "temporal": true
+    },
+    {
+      "id": "E34",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.005292000001645647,
+      "temporal": true
+    },
+    {
+      "id": "E35",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.006625000009080395,
+      "temporal": true
+    },
+    {
+      "id": "E36",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.005791999996290542,
+      "temporal": true
+    },
+    {
+      "id": "E37",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.006207999991602264,
+      "temporal": false
+    },
+    {
+      "id": "E38",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.00474999999278225,
+      "temporal": false
+    },
+    {
+      "id": "E39",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.004542000009678304,
+      "temporal": false
+    },
+    {
+      "id": "E40",
+      "arm": "full-context",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": true,
+      "missing": [],
+      "units": 550,
+      "chars": 290530,
+      "est_tokens": 72633,
+      "ms": 0.004584000009344891,
+      "temporal": false
+    },
+    {
+      "id": "E01",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": true,
+      "missing": [
+        "600"
+      ],
+      "units": 12,
+      "chars": 57153,
+      "est_tokens": 14289,
+      "ms": 85.42075000000477,
+      "temporal": true,
+      "detail": {
+        "matched": {
+          "trigram": 4,
+          "phrase": 8
+        },
+        "terms": [
+          "accused",
+          "walking",
+          "side",
+          "claim"
+        ]
+      }
+    },
+    {
+      "id": "E02",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 12,
+      "chars": 56469,
+      "est_tokens": 14118,
+      "ms": 20.057874999998603,
+      "temporal": true,
+      "detail": {
+        "matched": {
+          "fts": 10,
+          "phrase": 2
+        },
+        "terms": [
+          "calling",
+          "promised",
+          "essentially",
+          "settled"
+        ]
+      }
+    },
+    {
+      "id": "E03",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 13,
+      "chars": 58989,
+      "est_tokens": 14748,
+      "ms": 35.31491699999606,
+      "temporal": false,
+      "detail": {
+        "matched": {
+          "phrase": 10,
+          "fts": 3
+        },
+        "terms": [
+          "assumption",
+          "corrected",
+          "card",
+          "memory"
+        ]
+      }
+    },
+    {
+      "id": "E04",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 18,
+      "chars": 56458,
+      "est_tokens": 14115,
+      "ms": 50.65787499998987,
+      "temporal": true,
+      "detail": {
+        "matched": {
+          "trigram": 8,
+          "phrase": 10
+        },
+        "terms": [
+          "competing",
+          "rejected",
+          "cite",
+          "engine"
+        ]
+      }
+    },
+    {
+      "id": "E05",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "15",
+        "50"
+      ],
+      "units": 7,
+      "chars": 1975,
+      "est_tokens": 494,
+      "ms": 59.30658299999777,
+      "temporal": true,
+      "detail": {
+        "matched": {
+          "fts": 5,
+          "trigram": 1,
+          "phrase": 1
+        },
+        "terms": [
+          "percentages",
+          "efficiency",
+          "rejected",
+          "nonsense"
+        ]
+      }
+    },
+    {
+      "id": "E06",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "13.26"
+      ],
+      "units": 10,
+      "chars": 54460,
+      "est_tokens": 13615,
+      "ms": 40.363083000003826,
+      "temporal": true,
+      "detail": {
+        "matched": {
+          "trigram": 1,
+          "phrase": 8,
+          "fts": 1
+        },
+        "terms": [
+          "refuse",
+          "breath",
+          "accept",
+          "floors"
+        ]
+      }
+    },
+    {
+      "id": "E07",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 12,
+      "chars": 50353,
+      "est_tokens": 12589,
+      "ms": 93.00741700000071,
+      "temporal": true,
+      "detail": {
+        "matched": {
+          "trigram": 12
+        },
+        "terms": [
+          "unacceptable",
+          "competing",
+          "midnight",
+          "demand"
+        ]
+      }
+    },
+    {
+      "id": "E08",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "fits"
+      ],
+      "units": 10,
+      "chars": 39306,
+      "est_tokens": 9827,
+      "ms": 59.966874999998254,
+      "temporal": true,
+      "detail": {
+        "matched": {
+          "trigram": 7,
+          "fts": 2,
+          "phrase": 1
+        },
+        "terms": [
+          "restated",
+          "conditions",
+          "shortcut",
+          "refused"
+        ]
+      }
+    },
+    {
+      "id": "E09",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 20,
+      "chars": 55216,
+      "est_tokens": 13804,
+      "ms": 15.042708000008133,
+      "temporal": true,
+      "detail": {
+        "matched": {
+          "phrase": 13,
+          "fts": 7
+        },
+        "terms": [
+          "optimisation",
+          "floor",
+          "size",
+          "landed"
+        ]
+      }
+    },
+    {
+      "id": "E10",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 10,
+      "chars": 45592,
+      "est_tokens": 11398,
+      "ms": 13.043832999988808,
+      "temporal": false,
+      "detail": {
+        "matched": {
+          "fts": 1,
+          "phrase": 9
+        },
+        "terms": [
+          "halving",
+          "upper",
+          "progress",
+          "looking"
+        ]
+      }
+    },
+    {
+      "id": "E11",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 20,
+      "chars": 59422,
+      "est_tokens": 14856,
+      "ms": 51.62649999999849,
+      "temporal": true,
+      "detail": {
+        "matched": {
+          "fts": 1,
+          "trigram": 9,
+          "phrase": 10
+        },
+        "terms": [
+          "replaced",
+          "interim",
+          "lower",
+          "late"
+        ]
+      }
+    },
+    {
+      "id": "E12",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 20,
+      "chars": 52847,
+      "est_tokens": 13212,
+      "ms": 35.649665999997524,
+      "temporal": true,
+      "detail": {
+        "matched": {
+          "trigram": 1,
+          "phrase": 1,
+          "fts": 18
+        },
+        "terms": [
+          "rejecting",
+          "needed",
+          "meaningless",
+          "world"
+        ]
+      }
+    },
+    {
+      "id": "E13",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 4,
+      "chars": 644,
+      "est_tokens": 161,
+      "ms": 61.59062499999709,
+      "temporal": true,
+      "detail": {
+        "matched": {
+          "phrase": 3,
+          "fts": 1
+        },
+        "terms": [
+          "overruled",
+          "nineteen",
+          "permutation",
+          "tensor"
+        ]
+      }
+    },
+    {
+      "id": "E14",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 7,
+      "chars": 45730,
+      "est_tokens": 11433,
+      "ms": 50.937292000002344,
+      "temporal": true,
+      "detail": {
+        "matched": {
+          "trigram": 3,
+          "phrase": 4
+        },
+        "terms": [
+          "attach",
+          "outright",
+          "algorithm",
+          "word"
+        ]
+      }
+    },
+    {
+      "id": "E15",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 20,
+      "chars": 59033,
+      "est_tokens": 14759,
+      "ms": 31.190499999996973,
+      "temporal": true,
+      "detail": {
+        "matched": {
+          "phrase": 20
+        },
+        "terms": [
+          "forgotten",
+          "late",
+          "deferred",
+          "geometry"
+        ]
+      }
+    },
+    {
+      "id": "E16",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "own prefix cache",
+        "radixattention"
+      ],
+      "units": 20,
+      "chars": 59977,
+      "est_tokens": 14995,
+      "ms": 66.25029100000393,
+      "temporal": true,
+      "detail": {
+        "matched": {
+          "trigram": 20
+        },
+        "terms": [
+          "midnight",
+          "throw",
+          "thrown",
+          "copied"
+        ]
+      }
+    },
+    {
+      "id": "E17",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 6,
+      "chars": 52835,
+      "est_tokens": 13209,
+      "ms": 54.349125000007916,
+      "temporal": true,
+      "detail": {
+        "matched": {
+          "fts": 3,
+          "phrase": 1,
+          "trigram": 2
+        },
+        "terms": [
+          "midday",
+          "ordered",
+          "reasons",
+          "around"
+        ]
+      }
+    },
+    {
+      "id": "E18",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "paged attention"
+      ],
+      "units": 8,
+      "chars": 29204,
+      "est_tokens": 7301,
+      "ms": 43.57741699999315,
+      "temporal": false,
+      "detail": {
+        "matched": {
+          "trigram": 2,
+          "fts": 6
+        },
+        "terms": [
+          "reversed",
+          "course",
+          "implementation",
+          "ordering"
+        ]
+      }
+    },
+    {
+      "id": "E19",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "experiments"
+      ],
+      "units": 5,
+      "chars": 26984,
+      "est_tokens": 6746,
+      "ms": 41.427874999993946,
+      "temporal": true,
+      "detail": {
+        "matched": {
+          "trigram": 3,
+          "fts": 2
+        },
+        "terms": [
+          "impose",
+          "ordering",
+          "stage"
+        ]
+      }
+    },
+    {
+      "id": "E20",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "fa4",
+        "mla",
+        "long term"
+      ],
+      "units": 9,
+      "chars": 50738,
+      "est_tokens": 12685,
+      "ms": 81.77995900000678,
+      "temporal": true,
+      "detail": {
+        "matched": {
+          "trigram": 9
+        },
+        "terms": [
+          "justification",
+          "horizon",
+          "choice",
+          "chose"
+        ]
+      }
+    },
+    {
+      "id": "E21",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "fa2",
+        "fa4",
+        "ampere",
+        "hopper",
+        "blackwell"
+      ],
+      "units": 20,
+      "chars": 59259,
+      "est_tokens": 14815,
+      "ms": 47.05929200000537,
+      "temporal": true,
+      "detail": {
+        "matched": {
+          "fts": 19,
+          "trigram": 1
+        },
+        "terms": [
+          "architectures",
+          "ultimatum",
+          "numbered",
+          "mandate"
+        ]
+      }
+    },
+    {
+      "id": "E22",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "openrouter one"
+      ],
+      "units": 16,
+      "chars": 58925,
+      "est_tokens": 14732,
+      "ms": 66.96941700000025,
+      "temporal": true,
+      "detail": {
+        "matched": {
+          "trigram": 12,
+          "phrase": 3,
+          "fts": 1
+        },
+        "terms": [
+          "afternoon",
+          "allowed",
+          "instructions",
+          "create"
+        ]
+      }
+    },
+    {
+      "id": "E23",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 10,
+      "chars": 55654,
+      "est_tokens": 13914,
+      "ms": 31.182832999998936,
+      "temporal": true,
+      "detail": {
+        "matched": {
+          "trigram": 2,
+          "fts": 5,
+          "phrase": 3
+        },
+        "terms": [
+          "define",
+          "parts",
+          "briefed",
+          "product"
+        ]
+      }
+    },
+    {
+      "id": "E24",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "2.25 bits"
+      ],
+      "units": 20,
+      "chars": 51763,
+      "est_tokens": 12941,
+      "ms": 50.12300000000687,
+      "temporal": true,
+      "detail": {
+        "matched": {
+          "trigram": 4,
+          "phrase": 8,
+          "fts": 8
+        },
+        "terms": [
+          "challenged",
+          "width",
+          "compression",
+          "landed"
+        ]
+      }
+    },
+    {
+      "id": "E25",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "an orchestrator"
+      ],
+      "units": 8,
+      "chars": 50789,
+      "est_tokens": 12698,
+      "ms": 38.80620799999451,
+      "temporal": true,
+      "detail": {
+        "matched": {
+          "trigram": 6,
+          "phrase": 2
+        },
+        "terms": [
+          "recurring",
+          "role",
+          "forcing",
+          "level"
+        ]
+      }
+    },
+    {
+      "id": "E26",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 20,
+      "chars": 32590,
+      "est_tokens": 8148,
+      "ms": 60.06287500000326,
+      "temporal": false,
+      "detail": {
+        "matched": {
+          "fts": 19,
+          "trigram": 1
+        },
+        "terms": [
+          "continuing",
+          "tearing",
+          "threshold",
+          "duration"
+        ]
+      }
+    },
+    {
+      "id": "E27",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 20,
+      "chars": 61077,
+      "est_tokens": 15270,
+      "ms": 43.26637499999197,
+      "temporal": true,
+      "detail": {
+        "matched": {
+          "trigram": 2,
+          "phrase": 3,
+          "fts": 15
+        },
+        "terms": [
+          "phrase",
+          "forbid",
+          "carry",
+          "sessions"
+        ]
+      }
+    },
+    {
+      "id": "E28",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 20,
+      "chars": 54508,
+      "est_tokens": 13627,
+      "ms": 41.39100000000326,
+      "temporal": false,
+      "detail": {
+        "matched": {
+          "trigram": 1,
+          "phrase": 19
+        },
+        "terms": [
+          "unit",
+          "hardware",
+          "ceiling",
+          "long"
+        ]
+      }
+    },
+    {
+      "id": "E29",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 20,
+      "chars": 59263,
+      "est_tokens": 14816,
+      "ms": 14.959624999988591,
+      "temporal": true,
+      "detail": {
+        "matched": {
+          "phrase": 16,
+          "fts": 4
+        },
+        "terms": [
+          "project",
+          "main",
+          "different",
+          "completely"
+        ]
+      }
+    },
+    {
+      "id": "E30",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 20,
+      "chars": 54590,
+      "est_tokens": 13648,
+      "ms": 14.22966599999927,
+      "temporal": false,
+      "detail": {
+        "matched": {
+          "phrase": 20
+        },
+        "terms": [
+          "range",
+          "hand",
+          "hardware",
+          "throughput"
+        ]
+      }
+    },
+    {
+      "id": "E31",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 4,
+      "chars": 9940,
+      "est_tokens": 2485,
+      "ms": 14.452583000005689,
+      "temporal": true,
+      "detail": {
+        "matched": {
+          "phrase": 1,
+          "fts": 3
+        },
+        "terms": [
+          "instructions",
+          "competition",
+          "quoted",
+          "issued"
+        ]
+      }
+    },
+    {
+      "id": "E32",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "15 minute",
+        "3.6 hour"
+      ],
+      "units": 12,
+      "chars": 57352,
+      "est_tokens": 14338,
+      "ms": 62.5956659999938,
+      "temporal": true,
+      "detail": {
+        "matched": {
+          "phrase": 2,
+          "fts": 5,
+          "trigram": 5
+        },
+        "terms": [
+          "stretch",
+          "correcting",
+          "duration",
+          "idle"
+        ]
+      }
+    },
+    {
+      "id": "E33",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "agents died"
+      ],
+      "units": 20,
+      "chars": 49884,
+      "est_tokens": 12471,
+      "ms": 10.239125000007334,
+      "temporal": true,
+      "detail": {
+        "matched": {
+          "phrase": 11,
+          "fts": 9
+        },
+        "terms": [
+          "dead",
+          "happened"
+        ]
+      }
+    },
+    {
+      "id": "E34",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 11,
+      "chars": 49954,
+      "est_tokens": 12489,
+      "ms": 79.78912499999569,
+      "temporal": true,
+      "detail": {
+        "matched": {
+          "trigram": 10,
+          "phrase": 1
+        },
+        "terms": [
+          "durations",
+          "midday",
+          "around",
+          "believe"
+        ]
+      }
+    },
+    {
+      "id": "E35",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "200"
+      ],
+      "units": 15,
+      "chars": 46504,
+      "est_tokens": 11626,
+      "ms": 39.82337500000722,
+      "temporal": true,
+      "detail": {
+        "matched": {
+          "fts": 12,
+          "phrase": 3
+        },
+        "terms": [
+          "scenario",
+          "extended",
+          "posed",
+          "batching"
+        ]
+      }
+    },
+    {
+      "id": "E36",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 12,
+      "chars": 45782,
+      "est_tokens": 11446,
+      "ms": 30.27066600001126,
+      "temporal": true,
+      "detail": {
+        "matched": {
+          "phrase": 12
+        },
+        "terms": [
+          "prepare",
+          "credits",
+          "pick",
+          "next"
+        ]
+      }
+    },
+    {
+      "id": "E37",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 11,
+      "chars": 51077,
+      "est_tokens": 12770,
+      "ms": 17.133167000007234,
+      "temporal": false,
+      "detail": {
+        "matched": {
+          "phrase": 10,
+          "fts": 1
+        },
+        "terms": [
+          "million",
+          "price",
+          "selling",
+          "openrouter"
+        ]
+      }
+    },
+    {
+      "id": "E38",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 20,
+      "chars": 35377,
+      "est_tokens": 8845,
+      "ms": 9.783041999995476,
+      "temporal": false,
+      "detail": {
+        "matched": {
+          "phrase": 16,
+          "fts": 4
+        },
+        "terms": [
+          "acceptance",
+          "rate"
+        ]
+      }
+    },
+    {
+      "id": "E39",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 16,
+      "chars": 59490,
+      "est_tokens": 14873,
+      "ms": 57.47708299999067,
+      "temporal": false,
+      "detail": {
+        "matched": {
+          "fts": 6,
+          "trigram": 9,
+          "phrase": 1
+        },
+        "terms": [
+          "rented",
+          "cloud",
+          "require",
+          "region"
+        ]
+      }
+    },
+    {
+      "id": "E40",
+      "arm": "datum",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 11,
+      "chars": 52972,
+      "est_tokens": 13243,
+      "ms": 14.380499999999302,
+      "temporal": false,
+      "detail": {
+        "matched": {
+          "phrase": 11
+        },
+        "terms": [
+          "b300",
+          "b200",
+          "commit",
+          "hardware"
+        ]
+      }
+    },
+    {
+      "id": "E01",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 12,
+      "chars": 1641,
+      "est_tokens": 411,
+      "ms": 18.691665999998804,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 3,
+      "detail": {
+        "tiers": {
+          "term+window": 3,
+          "window": 9
+        },
+        "note": "window 2026-08-13 \"evening\" read as 16:00-23:00 UTC; terms walking(7.295) figures(6.197) claim(5.909) jish(5.504) side(5.504) walking->walk[stem](5.107); absent from corpus: accused",
+        "terms": [
+          "walking",
+          "figures",
+          "claim",
+          "jish",
+          "side",
+          "walking",
+          "back",
+          "throughput",
+          "tok/s",
+          "put",
+          "figures",
+          "agent",
+          "tok/s"
+        ],
+        "window": "2026-08-13 \"evening\" read as 16:00-23:00 UTC",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "E02",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 12,
+      "chars": 1534,
+      "est_tokens": 384,
+      "ms": 17.26966700000048,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 1,
+      "detail": {
+        "tiers": {
+          "term+window": 1,
+          "window": 11
+        },
+        "note": "window 2026-08-13 \"night\" read as 19:00-03:00 next day UTC; terms promised(6.602) figure(6.197) essentially(6.197) settled(5.909) jish(5.504) pushed(5.349)",
+        "terms": [
+          "promised",
+          "figure",
+          "essentially",
+          "settled",
+          "jish",
+          "pushed",
+          "back",
+          "calling",
+          "gsm8k",
+          "promised",
+          "figure",
+          "essentially",
+          "settled",
+          "pushed",
+          "agent",
+          "calling"
+        ],
+        "window": "2026-08-13 \"night\" read as 19:00-03:00 next day UTC",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "E03",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": true,
+      "missing": [],
+      "units": 12,
+      "chars": 57281,
+      "est_tokens": 14321,
+      "ms": 32.898082999992766,
+      "temporal": false,
+      "nowin_verdict": "correct",
+      "nowin_units": 9,
+      "detail": {
+        "tiers": {
+          "term": 9,
+          "window": 3
+        },
+        "note": "terms assumption(7.295) figure(6.197) corrected(5.686) jish(5.504) card(5.504) memory(5.098)",
+        "terms": [
+          "assumption",
+          "figure",
+          "corrected",
+          "jish",
+          "card",
+          "memory",
+          "much",
+          "figure",
+          "corrected",
+          "memory",
+          "agent"
+        ],
+        "window": null,
+        "answer_tier": "term",
+        "window_only": false
+      }
+    },
+    {
+      "id": "E04",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 12,
+      "chars": 28389,
+      "est_tokens": 7098,
+      "ms": 33.77845800000068,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 5,
+      "detail": {
+        "tiers": {
+          "term+window": 5,
+          "window": 7
+        },
+        "note": "window 2026-08-14 \"morning\" read as 05:00-13:00 UTC; terms cite(6.602) figure(6.197) jish(5.504) single-user(5.504) competing->compet[stem](5.107) real(4.993); absent from corpus: rejected",
+        "terms": [
+          "cite",
+          "figure",
+          "jish",
+          "single-user",
+          "competing",
+          "real",
+          "engine",
+          "aggregate",
+          "figure",
+          "numbers",
+          "off",
+          "speed",
+          "far",
+          "engine",
+          "aggregate",
+          "numbers",
+          "single-user",
+          "single-user"
+        ],
+        "window": "2026-08-14 \"morning\" read as 05:00-13:00 UTC",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "E05",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 12,
+      "chars": 3272,
+      "est_tokens": 818,
+      "ms": 18.961499999990338,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 4,
+      "detail": {
+        "tiers": {
+          "term+window": 4,
+          "window": 8
+        },
+        "note": "window 2026-08-15 \"evening\" read as 16:00-23:00 UTC; terms nonsense(7.295) figure(6.197) efficiency(5.686) jish(5.504) said(5.349) nonsense->nonsens[stem](5.107); absent from corpus: rejected, percentages",
+        "terms": [
+          "nonsense",
+          "figure",
+          "efficiency",
+          "jish",
+          "said",
+          "nonsense",
+          "gemv",
+          "projects",
+          "reach",
+          "figure",
+          "kernel",
+          "efficiency",
+          "projects"
+        ],
+        "window": "2026-08-15 \"evening\" read as 16:00-23:00 UTC",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "E06",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 12,
+      "chars": 1900,
+      "est_tokens": 475,
+      "ms": 14.231083000006038,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 1,
+      "detail": {
+        "tiers": {
+          "term+window": 1,
+          "window": 11
+        },
+        "note": "window 2026-08-18 \"morning\" read as 05:00-13:00 UTC; terms figure(6.197) floors(6.197) jish(5.504) accept(5.349) set(5.216) aggregate(4.656); absent from corpus: refuse, breath",
+        "terms": [
+          "figure",
+          "floors",
+          "jish",
+          "accept",
+          "set",
+          "aggregate",
+          "figure",
+          "floors",
+          "aggregate"
+        ],
+        "window": "2026-08-18 \"morning\" read as 05:00-13:00 UTC",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "E07",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 5,
+      "chars": 1395,
+      "est_tokens": 349,
+      "ms": 35.837750000006054,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 3,
+      "detail": {
+        "tiers": {
+          "term+window": 3,
+          "window": 2
+        },
+        "note": "window 2026-08-19 \"just after midnight\" read as 00:00-06:00 UTC; terms compared(5.909) jish(5.504) codebase(5.216) competing->compet[stem](5.107) touched(4.993) completely(4.73); absent from corpus: pair, unacceptable, demand",
+        "terms": [
+          "compared",
+          "jish",
+          "codebase",
+          "competing",
+          "touched",
+          "completely",
+          "numbers",
+          "compared",
+          "codebase",
+          "touched",
+          "gpu",
+          "completely",
+          "numbers"
+        ],
+        "window": "2026-08-19 \"just after midnight\" read as 00:00-06:00 UTC",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "E08",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 12,
+      "chars": 1812,
+      "est_tokens": 453,
+      "ms": 22.299792000005255,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 4,
+      "detail": {
+        "tiers": {
+          "term+window": 4,
+          "window": 8
+        },
+        "note": "window 2026-08-13 \"night\" read as 19:00-03:00 next day UTC; terms shortcut(7.295) conditions(6.602) condition(6.602) third(6.197) settle(5.909) bar(5.909); absent from corpus: refused, restated",
+        "terms": [
+          "shortcut",
+          "conditions",
+          "condition",
+          "third",
+          "settle",
+          "bar",
+          "jish",
+          "greedy",
+          "throughput",
+          "conditions",
+          "numbers",
+          "greedy",
+          "quality",
+          "numbers",
+          "quality"
+        ],
+        "window": "2026-08-13 \"night\" read as 19:00-03:00 next day UTC",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "E09",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 12,
+      "chars": 3258,
+      "est_tokens": 815,
+      "ms": 16.676207999989856,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 1,
+      "detail": {
+        "tiers": {
+          "term+window": 1,
+          "window": 11
+        },
+        "note": "window 2026-08-15 \"evening\" read as 16:00-23:00 UTC; terms floor(6.197) optimisation(6.197) hold(5.909) jish(5.504) single-user(5.504) size(5.504)",
+        "terms": [
+          "floor",
+          "optimisation",
+          "hold",
+          "jish",
+          "single-user",
+          "size",
+          "set",
+          "batch",
+          "landed",
+          "even",
+          "optimisation",
+          "landed",
+          "single-user",
+          "single-user"
+        ],
+        "window": "2026-08-15 \"evening\" read as 16:00-23:00 UTC",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "E10",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 12,
+      "chars": 47707,
+      "est_tokens": 11927,
+      "ms": 54.24379100000078,
+      "temporal": false,
+      "nowin_verdict": "correct",
+      "nowin_units": 12,
+      "detail": {
+        "tiers": {
+          "term": 12
+        },
+        "note": "terms halving(7.295) time-to-first-token(7.295) upper(6.602) instead(5.909) progress(5.686) looking(5.686)",
+        "terms": [
+          "halving",
+          "time-to-first-token",
+          "upper",
+          "instead",
+          "progress",
+          "looking",
+          "jish",
+          "bound",
+          "said",
+          "set",
+          "halving",
+          "seconds",
+          "looking",
+          "seconds",
+          "time-to-first-token",
+          "time-to-first-token",
+          "time-to-first-token"
+        ],
+        "window": null,
+        "answer_tier": "term",
+        "window_only": false
+      }
+    },
+    {
+      "id": "E11",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 12,
+      "chars": 5380,
+      "est_tokens": 1345,
+      "ms": 27.41912500000035,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 10,
+      "detail": {
+        "tiers": {
+          "term+window": 10,
+          "window": 2
+        },
+        "note": "window 2026-08-20 \"late on\" read as 16:00-02:00 next day UTC; terms replaced(7.295) asked(6.602) ask(6.602) lower(6.197) spent(6.197) alongside(6.197); absent from corpus: interim",
+        "terms": [
+          "replaced",
+          "asked",
+          "ask",
+          "lower",
+          "spent",
+          "alongside",
+          "jish",
+          "single-user",
+          "money",
+          "target",
+          "standing",
+          "replaced",
+          "more",
+          "asked",
+          "alongside",
+          "number",
+          "hit",
+          "gpu",
+          "standing",
+          "single-user",
+          "single-user"
+        ],
+        "window": "2026-08-20 \"late on\" read as 16:00-02:00 next day UTC",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "E12",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 12,
+      "chars": 5137,
+      "est_tokens": 1285,
+      "ms": 16.93637499999022,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 8,
+      "detail": {
+        "tiers": {
+          "term+window": 8,
+          "window": 4
+        },
+        "note": "window 2026-08-20 \"night\" read as 19:00-03:00 next day UTC; terms meaningless(6.602) figure(6.197) jish(5.504) world(5.504) say(5.098) real(4.993); absent from corpus: rejecting",
+        "terms": [
+          "meaningless",
+          "figure",
+          "jish",
+          "world",
+          "say",
+          "real",
+          "throughput",
+          "aggregate",
+          "figure",
+          "needed",
+          "aggregate",
+          "needed"
+        ],
+        "window": "2026-08-20 \"night\" read as 19:00-03:00 next day UTC",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "E13",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "permute at load"
+      ],
+      "units": 12,
+      "chars": 1985,
+      "est_tokens": 497,
+      "ms": 20.124125000002095,
+      "temporal": true,
+      "nowin_verdict": "wrong",
+      "nowin_units": 2,
+      "detail": {
+        "tiers": {
+          "term+window": 2,
+          "window": 10
+        },
+        "note": "window 2026-08-20 \"small hours\" read as 00:00-06:00 UTC; terms asked(6.602) tensor-core(6.602) permutation(6.602) instead(5.909) jish(5.504) later(5.349); absent from corpus: nineteen, overruled",
+        "terms": [
+          "asked",
+          "tensor-core",
+          "permutation",
+          "instead",
+          "jish",
+          "later",
+          "file",
+          "artifact",
+          "say",
+          "asked",
+          "permutation",
+          "baking",
+          "tensor-core",
+          "tensor-core",
+          "baking"
+        ],
+        "window": "2026-08-20 \"small hours\" read as 00:00-06:00 UTC"
+      }
+    },
+    {
+      "id": "E14",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 12,
+      "chars": 27935,
+      "est_tokens": 6984,
+      "ms": 30.554666999989422,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 2,
+      "detail": {
+        "tiers": {
+          "window": 10,
+          "term+window": 2
+        },
+        "note": "window 2026-08-14 (whole day, 00:00-24:00 UTC); terms algorithm(7.295) ban(5.686) word(5.686) jish(5.504) bake(3.894); absent from corpus: outright, attach",
+        "terms": [
+          "algorithm",
+          "ban",
+          "word",
+          "jish",
+          "bake"
+        ],
+        "window": "2026-08-14 (whole day, 00:00-24:00 UTC)",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "E15",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 12,
+      "chars": 20531,
+      "est_tokens": 5133,
+      "ms": 23.808832999988226,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 5,
+      "detail": {
+        "tiers": {
+          "term+window": 5,
+          "window": 7
+        },
+        "note": "window 2026-08-14 \"late on\" read as 16:00-02:00 next day UTC; terms forgotten(7.295) deferred(6.602) ask(6.602) geometry(5.909) instead(5.909) jish(5.504)",
+        "terms": [
+          "forgotten",
+          "deferred",
+          "ask",
+          "geometry",
+          "instead",
+          "jish",
+          "doing",
+          "change",
+          "deferred",
+          "geometry",
+          "want",
+          "work"
+        ],
+        "window": "2026-08-14 \"late on\" read as 16:00-02:00 next day UTC",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "E16",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 12,
+      "chars": 3018,
+      "est_tokens": 755,
+      "ms": 23.174875000011525,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 2,
+      "detail": {
+        "tiers": {
+          "term+window": 2,
+          "window": 10
+        },
+        "note": "window 2026-08-17 \"just after midnight\" read as 00:00-06:00 UTC; terms told(7.295) components(7.295) copied(6.197) copy(5.909) instead(5.909) jish(5.504); absent from corpus: throw, thrown",
+        "terms": [
+          "told",
+          "components",
+          "copied",
+          "copy",
+          "instead",
+          "jish",
+          "away",
+          "components",
+          "project",
+          "something",
+          "copy",
+          "copied",
+          "own",
+          "arc",
+          "agent",
+          "something"
+        ],
+        "window": "2026-08-17 \"just after midnight\" read as 00:00-06:00 UTC",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "E17",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 12,
+      "chars": 28355,
+      "est_tokens": 7089,
+      "ms": 21.52520899999945,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 3,
+      "detail": {
+        "tiers": {
+          "term+window": 3,
+          "window": 9
+        },
+        "note": "window 2026-08-14 \"midday\" read as 11:00-15:00 UTC; terms algorithm(7.295) reasons(6.602) ordered(6.197) jish(5.504) killed(5.504) box(4.73); absent from corpus: around",
+        "terms": [
+          "algorithm",
+          "reasons",
+          "ordered",
+          "jish",
+          "killed",
+          "box",
+          "reasons",
+          "ordered",
+          "running",
+          "bake",
+          "killed",
+          "running"
+        ],
+        "window": "2026-08-14 \"midday\" read as 11:00-15:00 UTC",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "E18",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "wrong",
+      "contaminated": false,
+      "missing": [
+        "paged attention"
+      ],
+      "units": 12,
+      "chars": 49716,
+      "est_tokens": 12429,
+      "ms": 31.92775000000256,
+      "temporal": false,
+      "nowin_verdict": "wrong",
+      "nowin_units": 12,
+      "detail": {
+        "tiers": {
+          "term": 12
+        },
+        "note": "terms half(6.602) ordering(6.197) implementation(5.686) jish(5.504) drop(5.504) project(4.993); absent from corpus: reversed, course",
+        "terms": [
+          "half",
+          "ordering",
+          "implementation",
+          "jish",
+          "drop",
+          "project",
+          "tell",
+          "ordering",
+          "hour",
+          "attention",
+          "implementation",
+          "agent",
+          "copy-in"
+        ],
+        "window": null
+      }
+    },
+    {
+      "id": "E19",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 48,
+      "chars": 8089,
+      "est_tokens": 2023,
+      "ms": 14.964583000008133,
+      "temporal": true,
+      "nowin_verdict": "abstained",
+      "nowin_units": 0,
+      "detail": {
+        "tiers": {
+          "window": 48
+        },
+        "note": "window 2026-08-14 \"evening\" read as 16:00-23:00 UTC; terms ordering(6.197) jish(5.504) ordering->order[stem](4.136) three-stage->stage[split](3.648) three-stage->three[split](2.675); absent from corpus: impose; no term matched — this is all 48 said in that window",
+        "terms": [
+          "ordering",
+          "jish",
+          "ordering",
+          "three-stage",
+          "three-stage"
+        ],
+        "window": "2026-08-14 \"evening\" read as 16:00-23:00 UTC",
+        "answer_tier": "window",
+        "window_only": true
+      }
+    },
+    {
+      "id": "E20",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 39,
+      "chars": 7342,
+      "est_tokens": 1836,
+      "ms": 27.120959000007133,
+      "temporal": true,
+      "nowin_verdict": "abstained",
+      "nowin_units": 0,
+      "detail": {
+        "tiers": {
+          "window": 39
+        },
+        "note": "window 2026-08-17 \"morning\" read as 05:00-13:00 UTC; terms pick(7.295) jish(5.504) paths(4.993) between(4.81) path(4.81) time(4.251); absent from corpus: chose, justified, choice, horizon, justification; no term matched — this is all 39 said in that window",
+        "terms": [
+          "pick",
+          "jish",
+          "paths",
+          "between",
+          "path",
+          "time",
+          "attention",
+          "paths"
+        ],
+        "window": "2026-08-17 \"morning\" read as 05:00-13:00 UTC",
+        "answer_tier": "window",
+        "window_only": true
+      }
+    },
+    {
+      "id": "E21",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 12,
+      "chars": 3383,
+      "est_tokens": 846,
+      "ms": 31.1677500000078,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 4,
+      "detail": {
+        "tiers": {
+          "term+window": 4,
+          "window": 8
+        },
+        "note": "window 2026-08-17 \"evening\" read as 16:00-23:00 UTC; terms specialised(7.295) tolerate(6.602) architectures(6.602) jish(5.504) system(5.216) specialised->specialis[stem](5.107); absent from corpus: ultimatum, refuse, mandate",
+        "terms": [
+          "specialised",
+          "tolerate",
+          "architectures",
+          "jish",
+          "system",
+          "specialised",
+          "default",
+          "tolerate",
+          "architectures",
+          "numbered",
+          "attention",
+          "want",
+          "gpu",
+          "numbered"
+        ],
+        "window": "2026-08-17 \"evening\" read as 16:00-23:00 UTC",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "E22",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 12,
+      "chars": 11447,
+      "est_tokens": 2862,
+      "ms": 22.258249999998952,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 12,
+      "detail": {
+        "tiers": {
+          "term+window": 12
+        },
+        "note": "window 2026-08-21 \"afternoon\" read as 12:00-19:00 UTC; terms instructions(7.295) create(6.197) many(5.909) jish(5.504) instructions->instruction[stem](5.107) left(4.897); absent from corpus: allowed",
+        "terms": [
+          "instructions",
+          "create",
+          "many",
+          "jish",
+          "instructions",
+          "left",
+          "branches",
+          "prs",
+          "open",
+          "handoff",
+          "many",
+          "want",
+          "branches",
+          "pr",
+          "handoff"
+        ],
+        "window": "2026-08-21 \"afternoon\" read as 12:00-19:00 UTC",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "E23",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 12,
+      "chars": 11614,
+      "est_tokens": 2904,
+      "ms": 15.886624999999185,
+      "temporal": true,
+      "nowin_verdict": "wrong",
+      "nowin_units": 4,
+      "detail": {
+        "tiers": {
+          "term+window": 4,
+          "window": 8
+        },
+        "note": "window 2026-08-21 (whole day, 00:00-24:00 UTC); terms briefed(6.602) fresh(6.197) parts(5.686) jish(5.504) product(5.504) briefed->brief[stem](4.621)",
+        "terms": [
+          "briefed",
+          "fresh",
+          "parts",
+          "jish",
+          "product",
+          "briefed",
+          "session",
+          "parts",
+          "define"
+        ],
+        "window": "2026-08-21 (whole day, 00:00-24:00 UTC)",
+        "answer_tier": "window",
+        "window_only": true
+      }
+    },
+    {
+      "id": "E24",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 12,
+      "chars": 1864,
+      "est_tokens": 466,
+      "ms": 12.031124999994063,
+      "temporal": true,
+      "nowin_verdict": "abstained",
+      "nowin_units": 0,
+      "detail": {
+        "tiers": {
+          "window": 12
+        },
+        "note": "window 2026-08-19 \"evening\" read as 16:00-23:00 UTC; terms width(6.602) compression(5.909) value(5.686) jish(5.504) bit(5.504) landed(4.587); absent from corpus: challenged; no term matched — this is all 12 said in that window",
+        "terms": [
+          "width",
+          "compression",
+          "value",
+          "jish",
+          "bit",
+          "landed",
+          "landed"
+        ],
+        "window": "2026-08-19 \"evening\" read as 16:00-23:00 UTC",
+        "answer_tier": "window",
+        "window_only": true
+      }
+    },
+    {
+      "id": "E25",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 4,
+      "chars": 753,
+      "est_tokens": 189,
+      "ms": 44.26591699999699,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 1,
+      "detail": {
+        "tiers": {
+          "term+window": 1,
+          "window": 3
+        },
+        "note": "window 2026-08-21 \"morning\" read as 05:00-13:00 UTC; terms told(7.295) event(7.295) supposed(6.602) itself(6.602) forcing(6.602) repeat(6.197); absent from corpus: role, recurring, kept, him",
+        "terms": [
+          "told",
+          "event",
+          "supposed",
+          "itself",
+          "forcing",
+          "repeat",
+          "hold",
+          "rather",
+          "jish",
+          "say",
+          "doing",
+          "supposed",
+          "forcing",
+          "session",
+          "top-level",
+          "work",
+          "top-level"
+        ],
+        "window": "2026-08-21 \"morning\" read as 05:00-13:00 UTC",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "E26",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 12,
+      "chars": 1879,
+      "est_tokens": 470,
+      "ms": 24.280750000005355,
+      "temporal": false,
+      "nowin_verdict": "correct",
+      "nowin_units": 12,
+      "detail": {
+        "tiers": {
+          "term": 12
+        },
+        "note": "terms tearing(5.909) hold(5.909) rather(5.686) jish(5.504) set(5.216) box(4.73); absent from corpus: duration, threshold",
+        "terms": [
+          "tearing",
+          "hold",
+          "rather",
+          "jish",
+          "set",
+          "box",
+          "continuing",
+          "tearing",
+          "gpu",
+          "continuing"
+        ],
+        "window": null,
+        "answer_tier": "term",
+        "window_only": false
+      }
+    },
+    {
+      "id": "E27",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 12,
+      "chars": 3577,
+      "est_tokens": 895,
+      "ms": 17.595999999990454,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 4,
+      "detail": {
+        "tiers": {
+          "term+window": 4,
+          "window": 8
+        },
+        "note": "window 2026-08-17 \"evening\" read as 16:00-23:00 UTC; terms carry(6.602) across(6.602) instead(5.909) jish(5.504) say(5.098) carry->carri[stem](4.621); absent from corpus: phrase, forbid",
+        "terms": [
+          "carry",
+          "across",
+          "instead",
+          "jish",
+          "say",
+          "carry",
+          "exact",
+          "using",
+          "sessions",
+          "again",
+          "agent",
+          "sessions"
+        ],
+        "window": "2026-08-17 \"evening\" read as 16:00-23:00 UTC",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "E28",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 12,
+      "chars": 48237,
+      "est_tokens": 12060,
+      "ms": 31.46916599999531,
+      "temporal": false,
+      "nowin_verdict": "correct",
+      "nowin_units": 12,
+      "detail": {
+        "tiers": {
+          "term": 12
+        },
+        "note": "terms hold(5.909) ceiling(5.686) hardware(5.686) jish(5.504) say(5.098) put(4.462); absent from corpus: unit",
+        "terms": [
+          "hold",
+          "ceiling",
+          "hardware",
+          "jish",
+          "say",
+          "put",
+          "long",
+          "take",
+          "ceiling",
+          "hardware",
+          "bake"
+        ],
+        "window": null,
+        "answer_tier": "term",
+        "window_only": false
+      }
+    },
+    {
+      "id": "E29",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 6,
+      "chars": 1119,
+      "est_tokens": 280,
+      "ms": 31.078083000000333,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 4,
+      "detail": {
+        "tiers": {
+          "term+window": 4,
+          "window": 2
+        },
+        "note": "window 2026-08-10 (whole day, 00:00-24:00 UTC); terms came(6.197) jish(5.504) main(5.349) back(5.098) say(5.098) project(4.993)",
+        "terms": [
+          "came",
+          "jish",
+          "main",
+          "back",
+          "say",
+          "project",
+          "different",
+          "branch",
+          "completely",
+          "different",
+          "completely",
+          "working",
+          "working"
+        ],
+        "window": "2026-08-10 (whole day, 00:00-24:00 UTC)",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "E30",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 12,
+      "chars": 55863,
+      "est_tokens": 13966,
+      "ms": 59.91912500000035,
+      "temporal": false,
+      "nowin_verdict": "correct",
+      "nowin_units": 12,
+      "detail": {
+        "tiers": {
+          "term": 12
+        },
+        "note": "terms told(7.295) range(6.197) hardware(5.686) single-user(5.504) jish(5.504) start(5.098)",
+        "terms": [
+          "told",
+          "range",
+          "hardware",
+          "single-user",
+          "jish",
+          "start",
+          "throughput",
+          "model",
+          "hardware",
+          "very",
+          "very",
+          "work",
+          "second-hand",
+          "single-user",
+          "second-hand",
+          "single-user"
+        ],
+        "window": null,
+        "answer_tier": "term",
+        "window_only": false
+      }
+    },
+    {
+      "id": "E31",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 12,
+      "chars": 1879,
+      "est_tokens": 470,
+      "ms": 30.559290999997756,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 2,
+      "detail": {
+        "tiers": {
+          "term+window": 2,
+          "window": 10
+        },
+        "note": "window 2026-08-19 \"evening\" read as 16:00-23:00 UTC; terms sentence(7.295) instructions(7.295) competition(7.295) quoted(6.602) issued(6.602) issues(6.602)",
+        "terms": [
+          "sentence",
+          "instructions",
+          "competition",
+          "quoted",
+          "issued",
+          "issues",
+          "many",
+          "jish",
+          "sentence",
+          "instructions",
+          "competition",
+          "back",
+          "say",
+          "quoted",
+          "issued",
+          "issues",
+          "token",
+          "many",
+          "own",
+          "agent",
+          "per",
+          "gpu"
+        ],
+        "window": "2026-08-19 \"evening\" read as 16:00-23:00 UTC",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "E32",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 28,
+      "chars": 4441,
+      "est_tokens": 1111,
+      "ms": 15.865000000005239,
+      "temporal": true,
+      "nowin_verdict": "abstained",
+      "nowin_units": 0,
+      "detail": {
+        "tiers": {
+          "window": 28
+        },
+        "note": "window 2026-08-19 \"night\" read as 19:00-03:00 next day UTC; terms reported(5.909) idle(5.686) correcting(5.686) jish(5.504) say(5.098) actually(4.993); absent from corpus: stretch, duration; no term matched — this is all 28 said in that window",
+        "terms": [
+          "reported",
+          "idle",
+          "correcting",
+          "jish",
+          "say",
+          "actually",
+          "long",
+          "reported",
+          "correcting",
+          "actually",
+          "agent"
+        ],
+        "window": "2026-08-19 \"night\" read as 19:00-03:00 next day UTC",
+        "answer_tier": "window",
+        "window_only": true
+      }
+    },
+    {
+      "id": "E33",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 12,
+      "chars": 1800,
+      "est_tokens": 450,
+      "ms": 10.746834000005038,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 2,
+      "detail": {
+        "tiers": {
+          "term+window": 2,
+          "window": 10
+        },
+        "note": "window 2026-08-19 \"night\" read as 19:00-03:00 next day UTC; terms dead(7.295) many(5.909) report(5.909) jish(5.504) many->mani[stem](4.136) happened(4.076)",
+        "terms": [
+          "dead",
+          "many",
+          "report",
+          "jish",
+          "many",
+          "happened",
+          "agents",
+          "happened",
+          "agents"
+        ],
+        "window": "2026-08-19 \"night\" read as 19:00-03:00 next day UTC",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "E34",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 12,
+      "chars": 28484,
+      "est_tokens": 7121,
+      "ms": 23.18850000000384,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 3,
+      "detail": {
+        "tiers": {
+          "term+window": 3,
+          "window": 9
+        },
+        "note": "window 2026-08-14 \"midday\" read as 11:00-15:00 UTC; terms believe(7.295) compared(5.909) jish(5.504) said(5.349) believe->believ[stem](5.107) cause(4.897); absent from corpus: around, durations",
+        "terms": [
+          "believe",
+          "compared",
+          "jish",
+          "said",
+          "believe",
+          "cause",
+          "box",
+          "compared",
+          "model-load",
+          "model-load"
+        ],
+        "window": "2026-08-14 \"midday\" read as 11:00-15:00 UTC",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "E35",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 12,
+      "chars": 2185,
+      "est_tokens": 547,
+      "ms": 40.06333400000585,
+      "temporal": true,
+      "nowin_verdict": "wrong",
+      "nowin_units": 1,
+      "detail": {
+        "tiers": {
+          "term+window": 1,
+          "window": 11
+        },
+        "note": "window 2026-08-21 \"small hours\" read as 00:00-06:00 UTC; terms extended(7.295) length(7.295) concrete(6.602) posed(6.197) minutes(6.197) output(6.197); absent from corpus: scenario, many, users, add",
+        "terms": [
+          "extended",
+          "length",
+          "concrete",
+          "posed",
+          "minutes",
+          "output",
+          "story",
+          "jish",
+          "size",
+          "later",
+          "extended",
+          "serving",
+          "batching",
+          "batch",
+          "concrete",
+          "minutes",
+          "story",
+          "specify",
+          "test",
+          "serving",
+          "batching",
+          "posed"
+        ],
+        "window": "2026-08-21 \"small hours\" read as 00:00-06:00 UTC",
+        "answer_tier": "combined",
+        "window_only": true
+      }
+    },
+    {
+      "id": "E36",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 4,
+      "chars": 1077,
+      "est_tokens": 270,
+      "ms": 15.244959000003291,
+      "temporal": true,
+      "nowin_verdict": "correct",
+      "nowin_units": 2,
+      "detail": {
+        "tiers": {
+          "term+window": 2,
+          "window": 2
+        },
+        "note": "window 2026-08-24 (whole day, 00:00-24:00 UTC); terms pick(7.295) ask(6.602) credits(6.197) prepare(5.909) jish(5.504) state(5.349)",
+        "terms": [
+          "pick",
+          "ask",
+          "credits",
+          "prepare",
+          "jish",
+          "state",
+          "next",
+          "ran",
+          "credits",
+          "session",
+          "prepare",
+          "want",
+          "agent",
+          "agents",
+          "agents"
+        ],
+        "window": "2026-08-24 (whole day, 00:00-24:00 UTC)",
+        "answer_tier": "term+window",
+        "window_only": false
+      }
+    },
+    {
+      "id": "E37",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 12,
+      "chars": 51237,
+      "est_tokens": 12810,
+      "ms": 23.830207999999402,
+      "temporal": false,
+      "nowin_verdict": "correct",
+      "nowin_units": 12,
+      "detail": {
+        "tiers": {
+          "term": 12
+        },
+        "note": "terms million(7.295) price(6.197) output(6.197) selling(5.909) jish(5.504) openrouter(5.349)",
+        "terms": [
+          "million",
+          "price",
+          "output",
+          "selling",
+          "jish",
+          "openrouter",
+          "set",
+          "tokens",
+          "selling",
+          "openrouter",
+          "arc",
+          "per",
+          "tokens"
+        ],
+        "window": null
+      }
+    },
+    {
+      "id": "E38",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 12,
+      "chars": 33421,
+      "est_tokens": 8356,
+      "ms": 17.50220800000534,
+      "temporal": false,
+      "nowin_verdict": "correct",
+      "nowin_units": 12,
+      "detail": {
+        "tiers": {
+          "term": 12
+        },
+        "note": "terms mtp(5.686) jish(5.504) acceptance(5.349) say(5.098) reach(4.523) rate(3.999)",
+        "terms": [
+          "mtp",
+          "jish",
+          "acceptance",
+          "say",
+          "reach",
+          "rate",
+          "acceptance",
+          "arc"
+        ],
+        "window": null
+      }
+    },
+    {
+      "id": "E39",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 12,
+      "chars": 32635,
+      "est_tokens": 8159,
+      "ms": 33.861999999993714,
+      "temporal": false,
+      "nowin_verdict": "correct",
+      "nowin_units": 12,
+      "detail": {
+        "tiers": {
+          "term": 12
+        },
+        "note": "terms require(6.602) jish(5.504) rented(5.504) boxes(4.73) require->requir[stem](4.621) run(3.632); absent from corpus: cloud, region",
+        "terms": [
+          "require",
+          "jish",
+          "rented",
+          "boxes",
+          "require",
+          "run",
+          "gpu",
+          "boxes",
+          "rented"
+        ],
+        "window": null
+      }
+    },
+    {
+      "id": "E40",
+      "arm": "datum-recall",
+      "repeat": 0,
+      "verdict": "correct",
+      "contaminated": false,
+      "missing": [],
+      "units": 12,
+      "chars": 48520,
+      "est_tokens": 12130,
+      "ms": 26.562707999997656,
+      "temporal": false,
+      "nowin_verdict": "correct",
+      "nowin_units": 12,
+      "detail": {
+        "tiers": {
+          "term": 12
+        },
+        "note": "terms b300(7.295) b200(6.602) figure(6.197) commit(5.686) hardware(5.686) jish(5.504)",
+        "terms": [
+          "b300",
+          "b200",
+          "figure",
+          "commit",
+          "hardware",
+          "jish",
+          "aggregate",
+          "tok/s",
+          "figure",
+          "hardware",
+          "arc",
+          "aggregate",
+          "tok/s"
+        ],
+        "window": null
+      }
+    }
+  ]
+}
