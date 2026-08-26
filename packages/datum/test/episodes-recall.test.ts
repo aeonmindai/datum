@@ -4,6 +4,7 @@ import type { Db } from "../src/db/pool.js";
 import { recordEpisode } from "../src/episodes/types.js";
 import { recallEpisodes } from "../src/episodes/recall.js";
 import { contentTerms, parseWhen, weighTerms } from "../src/episodes/query.js";
+import { expandTerm } from "../src/episodes/terms.js";
 
 /**
  * Turning a question into a query.
@@ -65,6 +66,8 @@ beforeAll(async () => {
     `${"the ordering of publish and test and experiments and efficiency and throughput matters. ".repeat(24)}`,
     "agent:claude",
   );
+  // A compound the corpus spells differently, for the fold's end-to-end case.
+  await say("2026-08-13T09:00:00Z", "the bake has to fit 83.7s per layer on one card");
   // Somewhere else entirely, sharing one common word with the question.
   await say("2026-08-22T09:00:00Z", "I said we would actually look at it later");
 }, 300_000);
@@ -119,11 +122,21 @@ describe("choosing which words to send", () => {
     expect(t).toContain("gemv");
   });
 
-  it("splits a compound so its parts can match", () => {
-    // "three-stage" as one token matches nothing in any corpus. "stage" might.
+  it("keeps a compound whole, and lets the fold produce its parts", () => {
+    // Splitting moved into `terms.ts` when the fold was built: `contentTerms` decides WHICH words
+    // are worth sending, `expandTerm` decides how each is spelled. Asserting the split here would
+    // pin it to the wrong layer, so this asserts the division of labour instead.
     const t = contentTerms("what three-stage ordering did he impose");
     expect(t).toContain("three-stage");
-    expect(t).toContain("stage");
+    expect(t).not.toContain("stage");
+    expect(expandTerm("three-stage").map((v) => v.form)).toContain("stage");
+  });
+
+  it("sends the folded parts to the index, whatever layer produced them", async () => {
+    // The behaviour that actually matters, asserted end to end: a compound the corpus never spells
+    // that way still reaches the right episode.
+    const { terms } = await weighTerms(db, [SCOPE], contentTerms("what did he say about per-layer"));
+    expect(terms.some((t) => t.term === "per-layer" && t.probe === "layer")).toBe(true);
   });
 
   it("keeps identifiers intact", () => {
@@ -161,7 +174,8 @@ describe("recall", () => {
     expect(blob).toContain("15% peak");
     expect(blob).toContain("50%");
     // And it says what it did, including that two of the caller's words exist nowhere here.
-    expect(r.note).toContain("window 2026-08-15 evening");
+    expect(r.note).toContain("window 2026-08-15");
+    expect(r.note).toContain("evening");
     expect(r.note).toMatch(/absent from corpus:.*(nonsense|percentages)/);
   });
 

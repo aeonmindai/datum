@@ -1,4 +1,6 @@
 import type { Db, DbRole } from "../db/pool.js";
+import { readWhen, TIME_PHRASES, type TimeWindow } from "./when.js";
+import { expandTerms, type Variant } from "./terms.js";
 
 /**
  * Turning a question into a query.
@@ -26,12 +28,7 @@ import type { Db, DbRole } from "../db/pool.js";
  * words is the same sin as an answer that silently drops its own caveat.
  */
 
-export interface TimeWindow {
-  since: Date;
-  until: Date;
-  /** How it was read, in words, so a caller can see the interpretation and disagree with it. */
-  read_as: string;
-}
+export type { TimeWindow };
 
 export interface PlannedTerm {
   term: string;
@@ -39,6 +36,9 @@ export interface PlannedTerm {
   df: number;
   /** log(N / df). Higher is rarer and more discriminating. */
   idf: number;
+  /** The form actually sent to the index, and how it was derived from `term`. */
+  probe: string;
+  via: Variant["kind"];
 }
 
 export interface QueryPlan {
@@ -63,128 +63,35 @@ const STOP = new Set([
   "just", "also", "both", "each", "any", "all", "some", "one", "if", "so", "such",
 ]);
 
-const MONTHS: Record<string, number> = {
-  jan: 0, january: 0, feb: 1, february: 1, mar: 2, march: 2, apr: 3, april: 3,
-  may: 4, jun: 5, june: 5, jul: 6, july: 6, aug: 7, august: 7, sep: 8, sept: 8,
-  september: 8, oct: 9, october: 9, nov: 10, november: 10, dec: 11, december: 11,
-};
+const MONTH_WORDS = new Set([
+  "jan","january","feb","february","mar","march","apr","april","may","jun","june",
+  "jul","july","aug","august","sep","sept","september","oct","october","nov","november",
+  "dec","december",
+]);
 
 /**
- * Time of day, as an hour range in the speaker's own clock.
- *
- * Loose on purpose and overlapping where English is: "night of the 19th" in practice means the
- * late hours of the 19th, and people say "morning" for anything before lunch. A window that is
- * too tight silently excludes the answer, which is the failure mode worth avoiding; too wide only
- * costs a few extra rows out of 542.
- */
-const TIME_OF_DAY: Record<string, [number, number]> = {
-  midnight: [22, 27], // spans into the next day, resolved below
-  "early hours": [0, 6],
-  "small hours": [0, 5],
-  dawn: [4, 8],
-  morning: [5, 13],
-  midday: [11, 15],
-  noon: [11, 15],
-  afternoon: [12, 19],
-  evening: [16, 23],
-  night: [19, 27],
-  overnight: [21, 30],
-};
-
-const DAY_MS = 86_400_000;
-
-/**
- * Read a date out of a question.
- *
- * The year is not guessed: it comes from the corpus the caller is querying, because a question
- * says "13 Aug" and a store that spans one fortnight has exactly one 13 Aug in it. If the corpus
- * genuinely straddles the same date in two years, that is reported by widening rather than by
- * silently picking one.
+ * Reading a date out of a question now lives in `when.ts`, which resolves phrases this file used to
+ * flatten. "Late on 14 Aug" was read here as the whole of 14 Aug - four times wider than asked -
+ * and the answer then lost to 22 unrelated rows in the same day.
  */
 export function parseWhen(text: string, corpus: { first: Date; last: Date }): TimeWindow | null {
-  const t = text.toLowerCase();
-
-  const monthNames = Object.keys(MONTHS).join("|");
-  // "13 Aug", "Aug 13", "13th of August", "on 21 aug"
-  const dayMonth =
-    t.match(new RegExp(`\\b(\\d{1,2})(?:st|nd|rd|th)?\\s+(?:of\\s+)?(${monthNames})\\b`)) ??
-    t.match(new RegExp(`\\b(${monthNames})\\s+(\\d{1,2})(?:st|nd|rd|th)?\\b`));
-  if (!dayMonth) return null;
-
-  const [dayStr, monStr] = /^\d/.test(dayMonth[1] as string)
-    ? [dayMonth[1] as string, dayMonth[2] as string]
-    : [dayMonth[2] as string, dayMonth[1] as string];
-  const day = Number.parseInt(dayStr, 10);
-  const month = MONTHS[monStr];
-  if (month === undefined || day < 1 || day > 31) return null;
-
-  // Which year? Whichever candidate falls inside the corpus. Nothing is hardcoded and no
-  // assumption survives a corpus that moves.
-  const years = new Set([corpus.first.getUTCFullYear(), corpus.last.getUTCFullYear()]);
-  let base: Date | null = null;
-  for (const y of [...years].sort()) {
-    const cand = new Date(Date.UTC(y, month, day));
-    if (cand.getTime() >= corpus.first.getTime() - DAY_MS && cand.getTime() <= corpus.last.getTime() + DAY_MS) {
-      base = cand;
-      break;
-    }
-  }
-  if (base === null) return null;
-
-  // Time of day, if named. Longest phrase first so "small hours" beats "hours".
-  let hours: [number, number] | null = null;
-  let label = "";
-  for (const phrase of Object.keys(TIME_OF_DAY).sort((a, b) => b.length - a.length)) {
-    if (t.includes(phrase)) {
-      hours = TIME_OF_DAY[phrase] as [number, number];
-      label = phrase;
-      break;
-    }
-  }
-
-  if (hours === null) {
-    return {
-      since: base,
-      until: new Date(base.getTime() + DAY_MS),
-      read_as: `${base.toISOString().slice(0, 10)} (whole day)`,
-    };
-  }
-
-  // "just after midnight on 17 Aug" means the early hours OF the 17th, not the night before.
-  const [lo, hi] = t.includes("just after midnight") || t.includes("small hours") || t.includes("early hours")
-    ? [0, 6]
-    : hours;
-  const since = new Date(base.getTime() + lo * 3_600_000);
-  const until = new Date(base.getTime() + hi * 3_600_000);
-  return {
-    since,
-    until,
-    read_as: `${base.toISOString().slice(0, 10)} ${label} (${lo}:00-${hi % 24}:00${hi > 24 ? " next day" : ""})`,
-  };
+  return readWhen(text, corpus);
 }
 
 /** Words worth sending to an index: not stopwords, not the date we already parsed. */
 export function contentTerms(text: string): string[] {
-  const monthNames = new Set(Object.keys(MONTHS));
+  const timeWords = new Set(TIME_PHRASES.flatMap((p) => p.phrase.split(" ")));
   const seen = new Set<string>();
   const out: string[] = [];
   for (const raw of text.toLowerCase().split(/[^a-z0-9_.$/+-]+/)) {
     const w = raw.replace(/^[.\-+]+|[.\-+]+$/g, "");
     if (w.length < 2) continue;
-    if (STOP.has(w) || monthNames.has(w)) continue;
+    if (STOP.has(w) || MONTH_WORDS.has(w)) continue;
     if (/^\d{1,2}(st|nd|rd|th)?$/.test(w)) continue; // day-of-month leftovers
-    if (Object.keys(TIME_OF_DAY).some((p) => p.split(" ").includes(w))) continue;
+    if (timeWords.has(w)) continue;
     if (seen.has(w)) continue;
     seen.add(w);
     out.push(w);
-    // A compound carries its parts. "three-stage" as one token matches nothing; "stage" might.
-    if (/[-_/.]/.test(w)) {
-      for (const part of w.split(/[-_/.]+/)) {
-        if (part.length < 3 || STOP.has(part) || seen.has(part)) continue;
-        seen.add(part);
-        out.push(part);
-      }
-    }
   }
   return out;
 }
@@ -203,30 +110,78 @@ export async function weighTerms(
   role: DbRole = "app",
 ): Promise<{ terms: PlannedTerm[]; useless: string[]; corpusSize: number }> {
   if (terms.length === 0) return { terms: [], useless: [], corpusSize: 0 };
-  const { rows } = await db.query<{ term: string; df: string; n: string }>(
+
+  // Every viable spelling of a term is sent, not just the best one. Measured on this corpus:
+  // `login` has df 1 and idf 7.295 and points at the WRONG document, while its stem `log` has
+  // df 19 and idf 4.351 and its 19 include the right one. Picking the rarest variant would pick
+  // the confident mistake, so both go, and the ranker decides.
+  //
+  // Kind is a discount rather than a filter, because breadth is exactly what a fold buys and the
+  // discount is what stops it drowning an exact hit. `split` carries the heaviest discount: it
+  // produced every off-target match in the fold's own precision test.
+  const DISCOUNT: Record<Variant["kind"], number> = {
+    exact: 1,
+    abbrev: 0.9,
+    numeric: 0.9,
+    stem: 0.7,
+    split: 0.5,
+  };
+
+  const expanded = expandTerms(terms);
+  const probes: Array<{ term: string; probe: string; via: Variant["kind"] }> = [];
+  const seen = new Set<string>();
+  for (const [term, variants] of expanded) {
+    for (const v of variants) {
+      // A bare number matches a timestamp, a version, a list index and nothing meaningful. The
+      // fold's precision test attributed all of its off-target hits to exactly this shape.
+      if (v.kind === "split" && /^\d+$/.test(v.form)) continue;
+      // Length floor applies to the folds that BROADEN a term, not to the ones that respell it.
+      // `b1` is two characters and is the whole point of the abbreviation fold - dropping it here
+      // silently undid the fix it was built for, and the only reason it surfaced is that the
+      // question it was built from was still failing afterwards.
+      const floor = v.kind === "abbrev" || v.kind === "numeric" ? 2 : 3;
+      if (v.kind !== "exact" && v.form.length < floor) continue;
+      const key = `${term}\u0000${v.form}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      probes.push({ term, probe: v.form, via: v.kind });
+    }
+  }
+  // Bounded so one pathological question cannot turn into a hundred index probes.
+  const capped = probes.slice(0, 24);
+
+  const { rows } = await db.query<{ probe: string; df: string; n: string }>(
     role,
     `WITH corpus AS (
        SELECT id, text, episode_fts FROM datum.episodes WHERE scope = ANY($1::text[])
      ), total AS (SELECT count(*)::text AS n FROM corpus)
-     SELECT q.term,
+     SELECT q.probe,
             (SELECT count(*) FROM corpus c
-              WHERE c.episode_fts @@ plainto_tsquery('english', q.term)
-                 OR c.text ILIKE '%' || q.term || '%')::text AS df,
+              WHERE c.episode_fts @@ plainto_tsquery('english', q.probe)
+                 OR c.text ILIKE '%' || q.probe || '%')::text AS df,
             (SELECT n FROM total) AS n
-       FROM unnest($2::text[]) AS q(term)`,
-    [scopes, terms],
+       FROM unnest($2::text[]) AS q(probe)`,
+    [scopes, capped.map((p) => p.probe)],
   );
   const n = Number(rows[0]?.n ?? 0) || 1;
+  const dfOf = new Map(rows.map((r) => [r.probe, Number(r.df)]));
+
   const planned: PlannedTerm[] = [];
-  const useless: string[] = [];
-  for (const r of rows) {
-    const df = Number(r.df);
-    if (df === 0) {
-      useless.push(r.term);
-      continue;
-    }
-    planned.push({ term: r.term, df, idf: Number((Math.log(n / df) + 1).toFixed(3)) });
+  const reached = new Set<string>();
+  for (const p of capped) {
+    const df = dfOf.get(p.probe) ?? 0;
+    if (df === 0) continue;
+    reached.add(p.term);
+    planned.push({
+      term: p.term,
+      probe: p.probe,
+      via: p.via,
+      df,
+      idf: Number(((Math.log(n / df) + 1) * DISCOUNT[p.via]).toFixed(3)),
+    });
   }
+  // "Useless" is now a stronger claim: not one spelling of this word occurs in the corpus.
+  const useless = terms.filter((t) => !reached.has(t));
   planned.sort((a, b) => b.idf - a.idf);
   return { terms: planned, useless, corpusSize: n };
 }

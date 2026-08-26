@@ -1,0 +1,712 @@
+{
+  "generated_at": "2026-08-26T14:56:46.896Z",
+  "roots": {
+    "claude": "/Users/jish/.claude/projects",
+    "omp": "/Users/jish/.omp/agent/sessions"
+  },
+  "arc_asymmetry": {
+    "utterances": 550,
+    "compaction_summaries": 8,
+    "datum_visible": 542,
+    "text_chars_all": 253912,
+    "text_chars_compaction": 151752,
+    "text_chars_visible": 102160,
+    "full_context_payload_chars": 290530,
+    "full_context_payload_tokens": 72633,
+    "datum_visible_payload_chars": 138239,
+    "datum_visible_payload_tokens": 34560
+  },
+  "arc_full_context_scored": {
+    "all_550": [
+      {
+        "set": "tuned",
+        "accuracy": 0.975,
+        "answerable_correct": 36,
+        "answerable_total": 36,
+        "trap_correct": 3,
+        "trap_total": 4,
+        "contamination": 0.1
+      },
+      {
+        "set": "heldout",
+        "accuracy": 0.95,
+        "answerable_correct": 36,
+        "answerable_total": 36,
+        "trap_correct": 2,
+        "trap_total": 4,
+        "contamination": 0.825
+      }
+    ],
+    "datum_visible_542": [
+      {
+        "set": "tuned",
+        "accuracy": 1,
+        "answerable_correct": 36,
+        "answerable_total": 36,
+        "trap_correct": 4,
+        "trap_total": 4,
+        "contamination": 0.075
+      },
+      {
+        "set": "heldout",
+        "accuracy": 0.975,
+        "answerable_correct": 36,
+        "answerable_total": 36,
+        "trap_correct": 3,
+        "trap_total": 4,
+        "contamination": 0.7
+      }
+    ]
+  },
+  "answerability": [
+    {
+      "set": "tuned",
+      "answerable": 36,
+      "traps": 4,
+      "expect_entries": 83,
+      "full_only": [],
+      "datum_only": [],
+      "both": 36,
+      "neither": [],
+      "trap_contam_full_only": [
+        "E40"
+      ],
+      "trap_contam_datum_only": [],
+      "record_full_only": [
+        "E35"
+      ],
+      "record_datum_only": [],
+      "entries_only_in_compaction": []
+    },
+    {
+      "set": "heldout",
+      "answerable": 36,
+      "traps": 4,
+      "expect_entries": 69,
+      "full_only": [],
+      "datum_only": [],
+      "both": 36,
+      "neither": [],
+      "trap_contam_full_only": [
+        "H22"
+      ],
+      "trap_contam_datum_only": [],
+      "record_full_only": [],
+      "record_datum_only": [],
+      "entries_only_in_compaction": []
+    }
+  ],
+  "projects": [
+    {
+      "root": "claude",
+      "project": "-Users-jish-Documents-GitHub-arc",
+      "flat_files": 6,
+      "flat_bytes": 89260717,
+      "nested_files": 519,
+      "nested_bytes": 557689364,
+      "utterances": 550,
+      "interrupts": 49,
+      "text_chars": 253912,
+      "payload_chars": 290530,
+      "payload_tokens": 72633,
+      "first": "2026-08-10",
+      "last": "2026-08-24"
+    },
+    {
+      "root": "claude",
+      "project": "-Users-jish-Documents-GitHub-wambo",
+      "flat_files": 3,
+      "flat_bytes": 269785371,
+      "nested_files": 209,
+      "nested_bytes": 95168925,
+      "utterances": 402,
+      "interrupts": 78,
+      "text_chars": 173165,
+      "payload_chars": 196673,
+      "payload_tokens": 49169,
+      "first": "2026-07-24",
+      "last": "2026-08-12"
+    },
+    {
+      "root": "claude",
+      "project": "-Users-jish",
+      "flat_files": 8,
+      "flat_bytes": 56311436,
+      "nested_files": 48,
+      "nested_bytes": 51050493,
+      "utterances": 318,
+      "interrupts": 78,
+      "text_chars": 301502,
+      "payload_chars": 318918,
+      "payload_tokens": 79730,
+      "first": "2026-07-21",
+      "last": "2026-08-26"
+    },
+    {
+      "root": "claude",
+      "project": "-Users-jish-Documents-GitHub-echos-backend--claude-worktrees-bridge-cse-015ZeoB8bozHGKaf96q5ahze",
+      "flat_files": 1,
+      "flat_bytes": 288181384,
+      "nested_files": 45,
+      "nested_bytes": 16622519,
+      "utterances": 291,
+      "interrupts": 57,
+      "text_chars": 151633,
+      "payload_chars": 173333,
+      "payload_tokens": 43334,
+      "first": "2026-07-11",
+      "last": "2026-08-13"
+    },
+    {
+      "root": "claude",
+      "project": "-Users-jish-Documents-GitHub-echos-backend",
+      "flat_files": 1,
+      "flat_bytes": 29821750,
+      "nested_files": 100,
+      "nested_bytes": 293014713,
+      "utterances": 156,
+      "interrupts": 20,
+      "text_chars": 102986,
+      "payload_chars": 115448,
+      "payload_tokens": 28862,
+      "first": "2026-06-25",
+      "last": "2026-08-14"
+    },
+    {
+      "root": "claude",
+      "project": "-Users-jish-Documents-GitHub-aeonmind",
+      "flat_files": 1,
+      "flat_bytes": 26189633,
+      "nested_files": 31,
+      "nested_bytes": 9911555,
+      "utterances": 137,
+      "interrupts": 31,
+      "text_chars": 73375,
+      "payload_chars": 80902,
+      "payload_tokens": 20226,
+      "first": "2026-05-14",
+      "last": "2026-05-21"
+    },
+    {
+      "root": "omp",
+      "project": "-Documents-GitHub-datum",
+      "flat_files": 2,
+      "flat_bytes": 11670691,
+      "nested_files": 25,
+      "nested_bytes": 26214282,
+      "utterances": 58,
+      "interrupts": 0,
+      "text_chars": 14454,
+      "payload_chars": 16820,
+      "payload_tokens": 4205,
+      "first": "2026-08-24",
+      "last": "2026-08-26"
+    },
+    {
+      "root": "omp",
+      "project": "-Documents-GitHub-aeonmind",
+      "flat_files": 2,
+      "flat_bytes": 7576062,
+      "nested_files": 89,
+      "nested_bytes": 93309336,
+      "utterances": 51,
+      "interrupts": 0,
+      "text_chars": 6441,
+      "payload_chars": 8512,
+      "payload_tokens": 2128,
+      "first": "2026-08-23",
+      "last": "2026-08-26"
+    },
+    {
+      "root": "omp",
+      "project": "-Documents-GitHub-arc",
+      "flat_files": 2,
+      "flat_bytes": 2930644,
+      "nested_files": 14,
+      "nested_bytes": 13211707,
+      "utterances": 39,
+      "interrupts": 0,
+      "text_chars": 19941,
+      "payload_chars": 21523,
+      "payload_tokens": 5381,
+      "first": "2026-08-22",
+      "last": "2026-08-24"
+    },
+    {
+      "root": "omp",
+      "project": "--private-tmp--",
+      "flat_files": 5,
+      "flat_bytes": 2281688,
+      "nested_files": 10,
+      "nested_bytes": 3539369,
+      "utterances": 24,
+      "interrupts": 0,
+      "text_chars": 23465,
+      "payload_chars": 24427,
+      "payload_tokens": 6107,
+      "first": "2026-08-22",
+      "last": "2026-08-23"
+    },
+    {
+      "root": "claude",
+      "project": "-Users-jish--superconductor-worktrees-echos-backend-sc-coupled-yttrium-9590",
+      "flat_files": 3,
+      "flat_bytes": 241232,
+      "nested_files": 0,
+      "nested_bytes": 0,
+      "utterances": 4,
+      "interrupts": 1,
+      "text_chars": 189,
+      "payload_chars": 486,
+      "payload_tokens": 122,
+      "first": "2026-08-12",
+      "last": "2026-08-12"
+    },
+    {
+      "root": "claude",
+      "project": "-Users-jish-Documents-GitHub-hoodwatch",
+      "flat_files": 1,
+      "flat_bytes": 11801,
+      "nested_files": 0,
+      "nested_bytes": 0,
+      "utterances": 0,
+      "interrupts": 0,
+      "text_chars": 0,
+      "payload_chars": 0,
+      "payload_tokens": 0,
+      "first": "-",
+      "last": "-"
+    },
+    {
+      "root": "claude",
+      "project": "-private-tmp-claude-501--Users-jish-Documents-GitHub-arc-73267a1b-5ed8-40e4-a8c3-4a17005bf0fd-scratchpad-arc-run161",
+      "flat_files": 1,
+      "flat_bytes": 9866,
+      "nested_files": 0,
+      "nested_bytes": 0,
+      "utterances": 0,
+      "interrupts": 0,
+      "text_chars": 0,
+      "payload_chars": 0,
+      "payload_tokens": 0,
+      "first": "-",
+      "last": "-"
+    },
+    {
+      "root": "claude",
+      "project": "-Users-jish--hermes-neo-claude-ops",
+      "flat_files": 0,
+      "flat_bytes": 0,
+      "nested_files": 0,
+      "nested_bytes": 0,
+      "utterances": 0,
+      "interrupts": 0,
+      "text_chars": 0,
+      "payload_chars": 0,
+      "payload_tokens": 0,
+      "first": "-",
+      "last": "-"
+    },
+    {
+      "root": "claude",
+      "project": "-Users-jish-Documents-GitHub-brave-core",
+      "flat_files": 0,
+      "flat_bytes": 0,
+      "nested_files": 0,
+      "nested_bytes": 0,
+      "utterances": 0,
+      "interrupts": 0,
+      "text_chars": 0,
+      "payload_chars": 0,
+      "payload_tokens": 0,
+      "first": "-",
+      "last": "-"
+    },
+    {
+      "root": "claude",
+      "project": "-Users-jish-Documents-GitHub-brave-tester",
+      "flat_files": 0,
+      "flat_bytes": 0,
+      "nested_files": 0,
+      "nested_bytes": 0,
+      "utterances": 0,
+      "interrupts": 0,
+      "text_chars": 0,
+      "payload_chars": 0,
+      "payload_tokens": 0,
+      "first": "-",
+      "last": "-"
+    },
+    {
+      "root": "claude",
+      "project": "-Users-jish-Documents-GitHub-core",
+      "flat_files": 0,
+      "flat_bytes": 0,
+      "nested_files": 0,
+      "nested_bytes": 0,
+      "utterances": 0,
+      "interrupts": 0,
+      "text_chars": 0,
+      "payload_chars": 0,
+      "payload_tokens": 0,
+      "first": "-",
+      "last": "-"
+    },
+    {
+      "root": "claude",
+      "project": "-Users-jish-Documents-GitHub-roverfox",
+      "flat_files": 0,
+      "flat_bytes": 0,
+      "nested_files": 0,
+      "nested_bytes": 0,
+      "utterances": 0,
+      "interrupts": 0,
+      "text_chars": 0,
+      "payload_chars": 0,
+      "payload_tokens": 0,
+      "first": "-",
+      "last": "-"
+    },
+    {
+      "root": "claude",
+      "project": "-Users-jish-Documents-GitHub-runcrate-app",
+      "flat_files": 0,
+      "flat_bytes": 0,
+      "nested_files": 0,
+      "nested_bytes": 0,
+      "utterances": 0,
+      "interrupts": 0,
+      "text_chars": 0,
+      "payload_chars": 0,
+      "payload_tokens": 0,
+      "first": "-",
+      "last": "-"
+    },
+    {
+      "root": "claude",
+      "project": "-Users-jish-Documents-GitHub-utopia-app",
+      "flat_files": 0,
+      "flat_bytes": 0,
+      "nested_files": 0,
+      "nested_bytes": 0,
+      "utterances": 0,
+      "interrupts": 0,
+      "text_chars": 0,
+      "payload_chars": 0,
+      "payload_tokens": 0,
+      "first": "-",
+      "last": "-"
+    },
+    {
+      "root": "claude",
+      "project": "-Users-jish-Documents-GitHub-wambo-contracts",
+      "flat_files": 0,
+      "flat_bytes": 0,
+      "nested_files": 0,
+      "nested_bytes": 0,
+      "utterances": 0,
+      "interrupts": 0,
+      "text_chars": 0,
+      "payload_chars": 0,
+      "payload_tokens": 0,
+      "first": "-",
+      "last": "-"
+    },
+    {
+      "root": "claude",
+      "project": "-Users-jish-brave-build-src-brave",
+      "flat_files": 0,
+      "flat_bytes": 0,
+      "nested_files": 0,
+      "nested_bytes": 0,
+      "utterances": 0,
+      "interrupts": 0,
+      "text_chars": 0,
+      "payload_chars": 0,
+      "payload_tokens": 0,
+      "first": "-",
+      "last": "-"
+    },
+    {
+      "root": "omp",
+      "project": "-",
+      "flat_files": 0,
+      "flat_bytes": 0,
+      "nested_files": 0,
+      "nested_bytes": 0,
+      "utterances": 0,
+      "interrupts": 0,
+      "text_chars": 0,
+      "payload_chars": 0,
+      "payload_tokens": 0,
+      "first": "-",
+      "last": "-"
+    }
+  ],
+  "totals": {
+    "projects": 23,
+    "projects_with_speech": 11,
+    "flat_files": 36,
+    "flat_bytes": 784272275,
+    "nested_files": 1090,
+    "nested_bytes": 1159732263,
+    "utterances": 2030,
+    "interrupts": 314,
+    "text_chars": 1121063
+  },
+  "omp_native_utterances": {
+    "-": 0,
+    "--private-tmp--": 0,
+    "-Documents-GitHub-aeonmind": 0,
+    "-Documents-GitHub-arc": 0,
+    "-Documents-GitHub-datum": 0
+  },
+  "scales": [
+    {
+      "label": "1 project (Arc — the benchmark's corpus)",
+      "projects": 1,
+      "utterances": 550,
+      "payload_chars": 290530,
+      "tokens_per_question": 72633,
+      "fits_200k": true,
+      "fits_1m": true,
+      "usd_per_1k_questions": 217.899,
+      "scores": [
+        {
+          "set": "tuned",
+          "accuracy": 0.975,
+          "answerable_correct": 36,
+          "answerable_total": 36,
+          "trap_correct": 3,
+          "trap_total": 4,
+          "contamination": 0.1
+        },
+        {
+          "set": "heldout",
+          "accuracy": 0.95,
+          "answerable_correct": 36,
+          "answerable_total": 36,
+          "trap_correct": 2,
+          "trap_total": 4,
+          "contamination": 0.825
+        }
+      ],
+      "budget_matched": {
+        "utterances": 67,
+        "tokens_per_question": 4752,
+        "usd_per_1k_questions": 14.256,
+        "scores": [
+          {
+            "set": "tuned",
+            "accuracy": 0.25,
+            "answerable_correct": 6,
+            "answerable_total": 36,
+            "trap_correct": 4,
+            "trap_total": 4,
+            "contamination": 0.025
+          },
+          {
+            "set": "heldout",
+            "accuracy": 0.35,
+            "answerable_correct": 10,
+            "answerable_total": 36,
+            "trap_correct": 4,
+            "trap_total": 4,
+            "contamination": 0.425
+          }
+        ]
+      }
+    },
+    {
+      "label": "10 projects (the ten largest by human utterances)",
+      "projects": 10,
+      "utterances": 2026,
+      "payload_chars": 1247104,
+      "tokens_per_question": 311776,
+      "fits_200k": false,
+      "fits_1m": true,
+      "usd_per_1k_questions": 935.328,
+      "scores": [
+        {
+          "set": "tuned",
+          "accuracy": 0.975,
+          "answerable_correct": 36,
+          "answerable_total": 36,
+          "trap_correct": 3,
+          "trap_total": 4,
+          "contamination": 0.1
+        },
+        {
+          "set": "heldout",
+          "accuracy": 0.925,
+          "answerable_correct": 36,
+          "answerable_total": 36,
+          "trap_correct": 1,
+          "trap_total": 4,
+          "contamination": 0.875
+        }
+      ],
+      "budget_matched": {
+        "utterances": 73,
+        "tokens_per_question": 2974,
+        "usd_per_1k_questions": 8.922,
+        "scores": [
+          {
+            "set": "tuned",
+            "accuracy": 0.125,
+            "answerable_correct": 1,
+            "answerable_total": 36,
+            "trap_correct": 4,
+            "trap_total": 4,
+            "contamination": 0.05
+          },
+          {
+            "set": "heldout",
+            "accuracy": 0.175,
+            "answerable_correct": 3,
+            "answerable_total": 36,
+            "trap_correct": 4,
+            "trap_total": 4,
+            "contamination": 0.2
+          }
+        ]
+      }
+    },
+    {
+      "label": "everything (every project, both roots)",
+      "projects": 11,
+      "utterances": 2030,
+      "payload_chars": 1247592,
+      "tokens_per_question": 311898,
+      "fits_200k": false,
+      "fits_1m": true,
+      "usd_per_1k_questions": 935.694,
+      "scores": [
+        {
+          "set": "tuned",
+          "accuracy": 0.975,
+          "answerable_correct": 36,
+          "answerable_total": 36,
+          "trap_correct": 3,
+          "trap_total": 4,
+          "contamination": 0.1
+        },
+        {
+          "set": "heldout",
+          "accuracy": 0.925,
+          "answerable_correct": 36,
+          "answerable_total": 36,
+          "trap_correct": 1,
+          "trap_total": 4,
+          "contamination": 0.875
+        }
+      ],
+      "budget_matched": {
+        "utterances": 73,
+        "tokens_per_question": 2974,
+        "usd_per_1k_questions": 8.922,
+        "scores": [
+          {
+            "set": "tuned",
+            "accuracy": 0.125,
+            "answerable_correct": 1,
+            "answerable_total": 36,
+            "trap_correct": 4,
+            "trap_total": 4,
+            "contamination": 0.05
+          },
+          {
+            "set": "heldout",
+            "accuracy": 0.175,
+            "answerable_correct": 3,
+            "answerable_total": 36,
+            "trap_correct": 4,
+            "trap_total": 4,
+            "contamination": 0.2
+          }
+        ]
+      }
+    }
+  ],
+  "frontier": {
+    "corpus_first_day": "2026-05-14",
+    "corpus_last_day": "2026-08-26",
+    "span_days": 104,
+    "total_tokens": 311898,
+    "tokens_per_day": 2999.019230769231,
+    "mean_tokens_per_speaking_project": 28354.363636363636,
+    "projects_to_exceed_200k": 3,
+    "projects_to_exceed_1m": null,
+    "days_from_first_utterance_to_exceed_1m": 334,
+    "cumulative": [
+      {
+        "projects": 1,
+        "tokens": 79730
+      },
+      {
+        "projects": 2,
+        "tokens": 152363
+      },
+      {
+        "projects": 3,
+        "tokens": 201532
+      },
+      {
+        "projects": 4,
+        "tokens": 244865
+      },
+      {
+        "projects": 5,
+        "tokens": 273728
+      },
+      {
+        "projects": 6,
+        "tokens": 293954
+      },
+      {
+        "projects": 7,
+        "tokens": 300061
+      },
+      {
+        "projects": 8,
+        "tokens": 305442
+      },
+      {
+        "projects": 9,
+        "tokens": 309648
+      },
+      {
+        "projects": 10,
+        "tokens": 311776
+      },
+      {
+        "projects": 11,
+        "tokens": 311898
+      }
+    ]
+  },
+  "datum_recall_tokens_per_question": 7817,
+  "derived": {
+    "arc_payload_ratio_all_over_visible": 2.101650040871245,
+    "arc_span_days": 14,
+    "arc_jsonl_bytes": 646950081,
+    "arc_nested_share_of_bytes": 0.8620284321442105,
+    "human_share_of_bytes_opened": 0.0014294308695280602,
+    "human_share_of_all_bytes": 0.0005766771517690767,
+    "whole_machine_over_arc_tokens": 4.294163809838503,
+    "full_context_over_datum_tokens_arc": 9.291671996929768,
+    "full_context_over_datum_tokens_everything": 39.899961622105664,
+    "datum_recall_over_budget_matched_heldout_arc": 0.5,
+    "datum_recall_over_grep_heldout": 0.475
+  },
+  "gate": {
+    "datum_recall": 0.85,
+    "full_context": 0.95,
+    "grep": 0.375,
+    "bar_vs_full_context": 1.05,
+    "bar_vs_grep": 0.475,
+    "margin_vs_full_context": -0.20000000000000007,
+    "margin_vs_grep": 0.375,
+    "full_context_score_that_makes_the_gate_unreachable": 0.9
+  }
+}

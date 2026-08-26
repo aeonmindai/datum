@@ -101,7 +101,9 @@ export async function recallEpisodes(
   const { chain } = await resolveChain(db, opts.scope, role);
   const plan = await planQuery(db, chain, opts.question, role);
 
-  const terms = plan.terms.map((t) => t.term);
+  // The probe is the folded form that was actually measured; the term is what the caller said.
+  // Sending the term here would discard the whole fold.
+  const terms = plan.terms.map((t) => t.probe);
   const idf = plan.terms.map((t) => t.idf);
   const since = plan.window?.since ?? null;
   const until = plan.window?.until ?? null;
@@ -179,7 +181,12 @@ export async function recallEpisodes(
   if (plan.window) parts.push(`window ${plan.window.read_as}`);
   if (fellBack) parts.push("that window was empty, so this is a search of the whole scope");
   if (plan.terms.length > 0) {
-    parts.push(`terms ${plan.terms.slice(0, 6).map((t) => `${t.term}(${t.idf})`).join(" ")}`);
+    parts.push(
+      `terms ${plan.terms
+        .slice(0, 6)
+        .map((t) => (t.probe === t.term ? `${t.term}(${t.idf})` : `${t.term}->${t.probe}[${t.via}](${t.idf})`))
+        .join(" ")}`,
+    );
   }
   if (plan.useless.length > 0) {
     // Named, not swallowed. "Nothing in this corpus ever used that word" is a useful answer.
